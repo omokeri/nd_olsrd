@@ -130,8 +130,10 @@ DOCDIR_OLSRD ?= $(DOCDIR)/$(EXENAME)
 CPPFLAGS  = -I$(TOPDIR)/src -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
 
 ifeq ($(OS),linux)
-CPPFLAGS+= -DLINUX_NL80211
-LIBS += -lnl -lnl-genl -lnl-route
+CPPFLAGS+= -DLINUX_NL80211 $(shell pkg-config --cflags libnl-3.0)
+LIBS += $(shell pkg-config --libs libnl-3.0)
+LIBS += $(shell pkg-config --libs libnl-genl-3.0)
+LIBS += $(shell pkg-config --libs libnl-route-3.0)
 endif
 
 # include OS specific compiler settings
