@@ -209,8 +209,8 @@ static int parse_nl80211_message(struct nl_msg *msg, void *arg) {
 	struct nlattr *station_info[NL80211_STA_INFO_MAX + 1];
 	struct nlattr *rate_info[NL80211_RATE_INFO_MAX + 1];
 	struct lq_nl80211_data *lq_data = NULL;
-	uint8_t signal;
-	uint16_t bandwidth;
+	uint8_t signal = 0;
+	uint16_t bandwidth = 0;
 
 	static struct nla_policy station_attr_policy[NL80211_STA_INFO_MAX + 1] = {
 		[NL80211_STA_INFO_INACTIVE_TIME] = { .type = NLA_U32 }, // Last activity from remote station (msec)
