@@ -52,28 +52,24 @@
 #include "olsr_types.h"
 #include "lq_plugin.h"
 
-#ifdef LINUX_NL80211
 #include <net/ethernet.h>
 #include "nl80211_link_info.h"
-#endif
 
 #define LQ_ALGORITHM_ETX_FFETH_NL80211_NAME "etx_ffeth_nl80211"
 
 #define LQ_FFETH_WINDOW 32
 #define LQ_FFETH_QUICKSTART_INIT 4
 
-struct lq_ffeth {
+struct lq_ffeth_nl80211 {
   uint8_t valueLq;
   uint8_t valueNlq;
-#ifdef LINUX_NL80211
   uint8_t valueBandwidth;
   uint8_t valueRSSI;
-#endif
 };
 
 struct lq_ffeth_hello {
-  struct lq_ffeth smoothed_lq;
-  struct lq_ffeth lq;
+  struct lq_ffeth_nl80211 smoothed_lq;
+  struct lq_ffeth_nl80211 lq;
   uint8_t windowSize, activePtr;
   uint16_t last_seq_nr;
   uint16_t missed_hellos;

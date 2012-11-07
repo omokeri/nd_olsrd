@@ -675,6 +675,18 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
     yylval = NULL;
     return TOK_AUTODETCHG;
 }
+"Nl80211ReferenceBandwidth" {
+    yylval = NULL;
+    return TOK_NL80211_REFERENCE_BANDWIDTH;
+}
+"Nl80211BandwidthVsRSSI" {
+    yylval = NULL;
+    return TOK_NL80211_BANDWIDTH_VS_RSSI;
+}
+"Nl80211SignalPenaltyTable" {
+    yylval = NULL;
+    return TOK_NL80211_TABLE_SIGNAL_PENALTY;
+}
 
 
 \n|\r\n {

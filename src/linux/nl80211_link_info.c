@@ -69,10 +69,83 @@
 #include "fpm.h"
 #include "defs.h"
 
+/** README:
+ *
+ *  The behaviour of this file can be configured by the following
+ *  configuration parameters:
+ *
+
+    Nl80211ReferenceBandwidth <integer>
+
+      The value of <integer> is the amount of Mbit per second that is
+      used as reference bandwidth. If unset, it is assumed to be 54.
+
+    Nl80211BandwidthVsRSSI <floatingpoint>
+
+      The value of <floatingpoint> must be anywhere from 0.0 until 1.0,
+      and denotes the way in which bandwidth and RSSI are balanced in
+      the calculation of the link quality cost. A value of 0.0 means
+      that RSSI is the sole deciding factor, a value of 1.0 means that
+      bandwidth is. A value of 0.5 means that the one weighs as heavily
+      as the other.
+
+    Nl80211SignalPenaltyTable { <table> }
+
+      Where <table> is composed of (a series of) paired integer values
+      between curly braces. The first value of an integer pair denotes
+      the signal strength and must lie between -128 and 127. The second
+      value denotes the penalty in case the signal strength is smaller
+      than that, and must lie between 0 and 255.
+
+      Example:
+
+      Nl80211SignalPenaltyTable {
+        { -75 30 }
+        { -80 60 }
+        { -85 120 }
+        { -90 160 }
+        { -95 200 }
+        { -100 255 }
+      }
+
+ */
 
 // Static values for testing
-#define REFERENCE_BANDWIDTH_MBIT_SEC 54
+/* CONFIGURABLE */
+unsigned lq_plugin_ffeth_nl80211_reference_bandwidth = 54;
+float lq_plugin_ffeth_nl80211_bandwidth = 0.5;
 
+struct signal_penalty {
+    int8_t signal;
+    uint8_t penalty; // 255=1.0
+};
+
+struct signal_penalty* signal_penalty_table = 0;
+unsigned signal_penalty_table_size = 0;
+
+void lq_plugin_ffeth_nl80211_push_signal_penalty
+  (int n1, int n2)
+{
+  struct signal_penalty penalty = { n1, n2 };
+  unsigned i;
+  for (i=0; i < signal_penalty_table_size; i++) {
+    if (penalty.signal < signal_penalty_table[i].signal) {
+      signal_penalty_table = (struct signal_penalty*)realloc(
+        signal_penalty_table,
+        sizeof(struct signal_penalty) * (signal_penalty_table_size + 1)
+      );
+      memmove(
+        &(signal_penalty_table[ i + 1]),
+        &(signal_penalty_table[ i ]),
+        sizeof(struct signal_penalty) * (signal_penalty_table_size - i)
+      );
+      signal_penalty_table[ i ] = penalty;
+      return;
+    }
+  }
+}
+
+/*
 #if !defined(CONFIG_LIBNL20) && !defined(CONFIG_LIBNL30)
 #define nl_sock nl_handle
 static INLINE struct nl_handle *nl_socket_alloc(void)
@@ -85,6 +158,7 @@ static INLINE void nl_socket_free(struct nl_sock *sock)
 	nl_handle_destroy(sock);
 }
 #endif
+*/
 
 #define ASSERT_NOT_NULL(PARAM) do { \
 		if ((PARAM) == NULL) { \
@@ -319,11 +393,15 @@ static bool mac_of_neighbor(struct link_entry *link, unsigned char *mac) {
 		goto cleanup;
 	}
 
+/*
 #if !defined(CONFIG_LIBNL20) && !defined(CONFIG_LIBNL30)
 	if ((cache = rtnl_neigh_alloc_cache(rt_netlink_socket)) == NULL) {
 #else
+*/
 	if (rtnl_neigh_alloc_cache(rt_netlink_socket, &cache) != 0) {
+/*
 #endif
+*/
 		olsr_syslog(OLSR_LOG_ERR, "Failed to allocate netlink neighbor cache");
 		goto cleanup;
 	}
@@ -408,7 +486,7 @@ static uint8_t bandwidth_to_quality(uint16_t bandwidth) {
 	fp_bandwidth = itofpm(bandwidth);
 	fp_bandwidth = fpmidiv(fp_bandwidth, 10); // 100Kbit/sec to Mbit/sec
 
-	ratio = fpmidiv(fp_bandwidth, REFERENCE_BANDWIDTH_MBIT_SEC);
+	ratio = fpmidiv(fp_bandwidth, lq_plugin_ffeth_nl80211_reference_bandwidth);
 	penalty = fpmsub(itofpm(1), ratio);
 
 	// Convert to 255 based number
@@ -419,21 +497,27 @@ static uint8_t bandwidth_to_quality(uint16_t bandwidth) {
 
 static uint8_t signal_to_quality(int8_t signal) {
 	// Map dBm levels to quality penalties
+/*
 	struct signal_penalty {
 		int8_t signal;
 		uint8_t penalty; // 255=1.0
 	};
+*/
 	// Must be ordered
-	static struct signal_penalty signal_quality_table[] = {
-		{ -75, 30 }, { -80, 60}, { -85, 120 }, { -90, 160 }, { -95, 200 }, { -100, 255 }
+        /* CONFIGURABLE */
+/*
+	static struct signal_penalty signal_penalty_table[] = {
+	    { -75, 30 }, { -80, 60}, { -85, 120 }, { -90, 160 }, { -95, 200 }, { -100, 255 }
 	};
-	static size_t TABLE_SIZE = sizeof(signal_quality_table) / sizeof(struct signal_penalty);
+	static size_t TABLE_SIZE = sizeof(signal_penalty_table) / sizeof(struct signal_penalty);
+*/
 
 	unsigned int i = 0;
 	uint8_t penalty = 0;
-	for (i = 0; i < TABLE_SIZE; i++) {
-		if (signal <= signal_quality_table[i].signal) {
-			penalty = signal_quality_table[i].penalty;
+	//for (i = 0; i < TABLE_SIZE; i++) {
+	for (i = 0; i < signal_penalty_table_size; i++) {
+		if (signal <= signal_penalty_table[i].signal) {
+			penalty = signal_penalty_table[i].penalty;
 		} else {
 			break;
 		}

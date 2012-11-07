@@ -60,11 +60,7 @@
 #include "scheduler.h"
 #include "log.h"
 
-#ifdef LINUX_NL80211
 #include "nl80211_link_info.h"
-#define WEIGHT_ETX			50
-#define WEIGHT_BANDWIDTH	50
-#endif
 
 #define LQ_PLUGIN_LC_MULTIPLIER 1024
 #define LQ_PLUGIN_RELEVANT_COSTCHANGE_FF 16
@@ -113,7 +109,7 @@ struct lq_handler lq_etx_ffeth_nl80211_handler = {
   &lq_print_cost_ffeth_nl80211,
 
   sizeof(struct lq_ffeth_hello),
-  sizeof(struct lq_ffeth),
+  sizeof(struct lq_ffeth_nl80211),
   4,
   4
 };
@@ -158,7 +154,7 @@ lq_ffeth_nl80211_handle_lqchange(void) {
     }
 
     if (relevant) {
-      memcpy(&lq->smoothed_lq, &lq->lq, sizeof(struct lq_ffeth));
+      memcpy(&lq->smoothed_lq, &lq->lq, sizeof(struct lq_ffeth_nl80211));
       link->linkcost = lq_calc_cost_ffeth_nl80211(&lq->smoothed_lq);
       triggered = true;
     }
@@ -179,7 +175,7 @@ lq_ffeth_nl80211_handle_lqchange(void) {
       continue;
     }
 
-    memcpy(&lq->smoothed_lq, &lq->lq, sizeof(struct lq_ffeth));
+    memcpy(&lq->smoothed_lq, &lq->lq, sizeof(struct lq_ffeth_nl80211));
     link->linkcost = lq_calc_cost_ffeth_nl80211(&lq->smoothed_lq);
   } OLSR_FOR_ALL_LINK_ENTRIES_END(link)
 
@@ -236,9 +232,7 @@ lq_ffeth_nl80211_timer(void __attribute__ ((unused)) * context)
 {
   struct link_entry *link;
 
-#ifdef LINUX_NL80211
-	nl80211_link_info_get();
-#endif
+  nl80211_link_info_get();
 
   OLSR_FOR_ALL_LINK_ENTRIES(link) {
     struct lq_ffeth_hello *tlq = (struct lq_ffeth_hello *)link->linkquality;
@@ -307,27 +301,28 @@ lq_ffeth_nl80211_timer(void __attribute__ ((unused)) * context)
 static void
 lq_initialize_ffeth_nl80211(void)
 {
+  fprintf(stderr, "WARNING: You are using an experimental lq plugin.\n");
   if (olsr_cnf->lq_nat_thresh < 1.0f) {
     fprintf(stderr, "Warning, nat_treshold < 1.0 is more likely to produce loops with etx_ffeth\n");
   }
   olsr_packetparser_add_function(&lq_parser_ffeth_nl80211);
   olsr_start_timer(1000, 0, OLSR_TIMER_PERIODIC, &lq_ffeth_nl80211_timer, NULL, 0);
 
-#ifdef LINUX_NL80211
   nl80211_link_info_init();
-#endif
 }
 
 static olsr_linkcost
 lq_calc_cost_ffeth_nl80211(const void *ptr)
 {
-  const struct lq_ffeth *lq = ptr;
+  const struct lq_ffeth_nl80211 *lq = ptr;
   olsr_linkcost cost;
   bool ether;
   int lq_int, nlq_int;
-#ifdef LINUX_NL80211
-  fpm nl80211 = itofpm((int) lq->valueBandwidth + lq->valueRSSI);
-#endif
+  /* CONFIGURABLE */
+  fpm nl80211 = itofpm(
+    (int)(lq->valueBandwidth * lq_plugin_ffeth_nl80211_bandwidth) +
+    (int)(lq->valueRSSI * (1 - lq_plugin_ffeth_nl80211_bandwidth))
+  );
 
   // MINIMAL_USEFUL_LQ is a float, multiplying by 255 converts it to uint8_t
   if (lq->valueLq < (unsigned int)(255 * MINIMAL_USEFUL_LQ) || lq->valueNlq < (unsigned int)(255 * MINIMAL_USEFUL_LQ)) {
@@ -346,13 +341,9 @@ lq_calc_cost_ffeth_nl80211(const void *ptr)
     nlq_int++;
   }
 
-#ifdef LINUX_NL80211
   nl80211 = fpmidiv(nl80211, 255);
   cost = fpmidiv(itofpm(255 * 255), lq_int * nlq_int); // 1 / (LQ * NLQ)
   cost = fpmadd(cost, nl80211);
-#else
-  cost = fpmidiv(itofpm(255 * 255), lq_int * nlq_int); // 1 / (LQ * NLQ)
-#endif
   if (ether) {
     /* ethernet boost */
     cost /= 10;
@@ -368,15 +359,10 @@ lq_calc_cost_ffeth_nl80211(const void *ptr)
 static int
 lq_serialize_hello_lq_pair_ffeth_nl80211(unsigned char *buff, void *ptr)
 {
-  struct lq_ffeth *lq = ptr;
+  struct lq_ffeth_nl80211 *lq = ptr;
 
-#ifdef LINUX_NL80211
   buff[0] = lq->valueBandwidth;
   buff[1] = lq->valueRSSI;
-#else
-  buff[0] = (unsigned char)(0);
-  buff[1] = (unsigned char)(0);
-#endif
   buff[2] = (unsigned char)lq->valueLq;
   buff[3] = (unsigned char)lq->valueNlq;
 
@@ -386,14 +372,10 @@ lq_serialize_hello_lq_pair_ffeth_nl80211(unsigned char *buff, void *ptr)
 static void
 lq_deserialize_hello_lq_pair_ffeth_nl80211(const uint8_t ** curr, void *ptr)
 {
-  struct lq_ffeth *lq = ptr;
+  struct lq_ffeth_nl80211 *lq = ptr;
 
-#ifdef LINUX_NL80211
   pkt_get_u8(curr, &lq->valueBandwidth);
   pkt_get_u8(curr, &lq->valueRSSI);
-#else
-  pkt_ignore_u16(curr);
-#endif
   pkt_get_u8(curr, &lq->valueLq);
   pkt_get_u8(curr, &lq->valueNlq);
 }
@@ -401,15 +383,10 @@ lq_deserialize_hello_lq_pair_ffeth_nl80211(const uint8_t ** curr, void *ptr)
 static int
 lq_serialize_tc_lq_pair_ffeth_nl80211(unsigned char *buff, void *ptr)
 {
-  struct lq_ffeth *lq = ptr;
+  struct lq_ffeth_nl80211 *lq = ptr;
 
-#ifdef LINUX_NL80211
   buff[0] = lq->valueBandwidth;
   buff[1] = lq->valueRSSI;
-#else
-  buff[0] = (unsigned char)(0);
-  buff[1] = (unsigned char)(0);
-#endif
   buff[2] = (unsigned char)lq->valueLq;
   buff[3] = (unsigned char)lq->valueNlq;
 
@@ -419,14 +396,10 @@ lq_serialize_tc_lq_pair_ffeth_nl80211(unsigned char *buff, void *ptr)
 static void
 lq_deserialize_tc_lq_pair_ffeth_nl80211(const uint8_t ** curr, void *ptr)
 {
-  struct lq_ffeth *lq = ptr;
+  struct lq_ffeth_nl80211 *lq = ptr;
 
-#ifdef LINUX_NL80211
   pkt_get_u8(curr, &lq->valueBandwidth);
   pkt_get_u8(curr, &lq->valueRSSI);
-#else
-  pkt_ignore_u16(curr);
-#endif
   pkt_get_u8(curr, &lq->valueLq);
   pkt_get_u8(curr, &lq->valueNlq);
 }
@@ -447,7 +420,7 @@ static void
 lq_memorize_foreign_hello_ffeth_nl80211(void *ptrLocal, void *ptrForeign)
 {
   struct lq_ffeth_hello *local = ptrLocal;
-  struct lq_ffeth *foreign = ptrForeign;
+  struct lq_ffeth_nl80211 *foreign = ptrForeign;
 
   if (foreign) {
     local->lq.valueNlq = foreign->valueLq;
@@ -459,7 +432,7 @@ lq_memorize_foreign_hello_ffeth_nl80211(void *ptrLocal, void *ptrForeign)
 static void
 lq_copy_link2neigh_ffeth_nl80211(void *t, void *s)
 {
-  struct lq_ffeth *target = t;
+  struct lq_ffeth_nl80211 *target = t;
   struct lq_ffeth_hello *source = s;
   *target = source->smoothed_lq;
 }
@@ -467,7 +440,7 @@ lq_copy_link2neigh_ffeth_nl80211(void *t, void *s)
 static void
 lq_copy_link2tc_ffeth_nl80211(void *t, void *s)
 {
-  struct lq_ffeth *target = t;
+  struct lq_ffeth_nl80211 *target = t;
   struct lq_ffeth_hello *source = s;
   *target = source->smoothed_lq;
 }
@@ -475,7 +448,7 @@ lq_copy_link2tc_ffeth_nl80211(void *t, void *s)
 static void
 lq_clear_ffeth_nl80211(void *target)
 {
-  memset(target, 0, sizeof(struct lq_ffeth));
+  memset(target, 0, sizeof(struct lq_ffeth_nl80211));
 }
 
 static void
@@ -495,7 +468,7 @@ lq_clear_ffeth_nl80211_hello(void *target)
 static const char *
 lq_print_ffeth_nl80211(void *ptr, char separator, struct lqtextbuffer *buffer)
 {
-  struct lq_ffeth *lq = ptr;
+  struct lq_ffeth_nl80211 *lq = ptr;
   int lq_int, nlq_int;
 
   lq_int = (int)lq->valueLq;

@@ -129,6 +129,11 @@ DOCDIR_OLSRD ?= $(DOCDIR)/$(EXENAME)
 
 CPPFLAGS  = -I$(TOPDIR)/src -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
 
+ifeq ($(OS),linux)
+CPPFLAGS+= -DLINUX_NL80211
+LIBS += -lnl -lnl-genl -lnl-route
+endif
+
 # include OS specific compiler settings
 -include $(TOPDIR)/make/Makefile.$(OS).compiler
 

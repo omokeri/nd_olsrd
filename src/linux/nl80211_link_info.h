@@ -63,6 +63,11 @@ void nl80211_link_info_init(void);
 void nl80211_link_info_cleanup(void);
 void nl80211_link_info_get(void);
 
+extern unsigned lq_plugin_ffeth_nl80211_reference_bandwidth;
+extern float lq_plugin_ffeth_nl80211_bandwidth;
+extern void lq_plugin_ffeth_nl80211_push_signal_penalty
+  (int n1, int n2);
+
 #endif // OLSR_LINUX_NL80211_LINK_INFO_H_INCLUDED
 
 #endif /* LINUX_NL80211 */

@@ -168,6 +168,12 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
   return 0;
 }
 
+#ifdef LINUX_NL80211
+extern unsigned lq_plugin_ffeth_nl80211_reference_bandwidth;
+extern float lq_plugin_ffeth_nl80211_bandwidth;
+extern void lq_plugin_ffeth_nl80211_push_signal_penalty(int n1, int n2);
+#endif
+
 %}
 
 %token TOK_SLASH
@@ -279,6 +285,10 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
 %token TOK_AUTO
 %token TOK_NONE
 
+%token TOK_NL80211_REFERENCE_BANDWIDTH
+%token TOK_NL80211_BANDWIDTH_VS_RSSI
+%token TOK_NL80211_TABLE_SIGNAL_PENALTY
+
 %token TOK_COMMENT
 
 %%
@@ -349,6 +359,9 @@ stmt:       idebug
           | amain_ip
           | bset_ipforward
           | ssgw_egress_ifs
+          | inl80211_reference_bandwidth
+          | fnl80211_bandwidth_vs_rssi
+          | table_signal_penalty
 ;
 
 block:      TOK_HNA4 hna4body
@@ -1766,6 +1779,79 @@ plparam: TOK_PLPARAM TOK_STRING TOK_STRING
   pp->next = olsr_cnf->plugins->params;
   olsr_cnf->plugins->params = pp;
 
+  free($2);
+  free($3);
+}
+;
+
+/*
+ * The Nl80211ReferenceBandwidth configuration item describes
+ */
+inl80211_reference_bandwidth: TOK_NL80211_REFERENCE_BANDWIDTH TOK_INTEGER
+{
+#ifdef LINUX_NL80211
+  lq_plugin_ffeth_nl80211_reference_bandwidth = $2->integer;
+  PARSER_DEBUG_PRINTF(
+    "lq_plugin_ffeth_nl80211; reference bandwidth is set to: %u\n",
+    lq_plugin_ffeth_nl80211_reference_bandwidth
+  );
+#else
+  PARSER_DEBUG_PRINTF(
+    "WARNING: lq_plugin_ffeth_nl80211; "
+    "reference bandwidth set but module is useless\n"
+  );
+#endif
+  free($2);
+}
+;
+
+fnl80211_bandwidth_vs_rssi: TOK_NL80211_BANDWIDTH_VS_RSSI TOK_FLOAT
+{
+#ifdef LINUX_NL80211
+  if (lq_plugin_ffeth_nl80211_bandwidth >= 0 ||
+      lq_plugin_ffeth_nl80211_bandwidth >= 1) {
+    lq_plugin_ffeth_nl80211_bandwidth = $2->floating;
+  } else {
+    PARSER_DEBUG_PRINTF(
+      "WARNING: lq_plugin_ffeth_nl80211; "
+      "bandwidth vs rssi must be >= 0.0 and <= 1.0 Keeping 0.5\n"
+    );
+    lq_plugin_ffeth_nl80211_bandwidth = 0.5;
+  }
+#else
+  PARSER_DEBUG_PRINTF(
+    "WARNING: lq_plugin_ffeth_nl80211; "
+    "bandwidth vs rssi set but module is useless\n"
+  );
+#endif
+  free($2);
+}
+;
+
+table_signal_penalty: TOK_NL80211_TABLE_SIGNAL_PENALTY TOK_OPEN table_signal_penalty_elts TOK_CLOSE
+{
+#ifndef LINUX_NL80211
+  PARSER_DEBUG_PRINTF(
+    "WARNING: lq_plugin_ffeth_nl80211; "
+    "signal penality table defined but module is useless\n"
+  );
+#endif
+}
+;
+
+table_signal_penalty_elts: table_signal_penalty_elt table_signal_penalty_elts
+{
+} |
+table_signal_penalty_elt
+{
+}
+;
+
+table_signal_penalty_elt: TOK_OPEN TOK_INTEGER TOK_INTEGER TOK_CLOSE
+{
+  int n1 = $2->integer;
+  int n2 = $3->integer;
+  lq_plugin_ffeth_nl80211_push_signal_penalty(n1, n2);
   free($2);
   free($3);
 }
