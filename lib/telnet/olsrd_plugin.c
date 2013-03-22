@@ -119,7 +119,7 @@ olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *
 int
 olsrd_plugin_init(void)
 {
-  olsr_telnet_create(&server, telnet_listen_ip, telnet_port);
+  olsr_telnet_prepare(&server, telnet_listen_ip, telnet_port);
   return olsr_telnet_init(&server);
 }
 
