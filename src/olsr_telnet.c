@@ -147,7 +147,7 @@ close_server_socket:
 
 /**
  * Closes all client connections and cleans up buffers. Also closes the server
- * socket. The struct may be reused by passing it to olsr_telnet_init()
+ * socket. The struct may be reused by passing it to olsr_telnet_init() again.
  *
  * @param s a telnet_server struct pointing to the server instance
  *
@@ -293,12 +293,21 @@ telnet_client_add(struct telnet_server* s, int fd)
 static void
 telnet_client_remove(struct telnet_client* c)
 {
-      // TODO: remove from c->server->clients
+  struct telnet_server* s = c->server;
+  struct telnet_client* ptr;
+
+  if(c == s->clients) {
+    s->clients = c->next;
+  } else {
+    for(ptr = s->clients; ptr->next; ptr = ptr->next)
+      if(ptr->next == c)
+        ptr->next = c->next;
+  }
   remove_olsr_socket(c->fd, &telnet_client_action, NULL);
   close(c->fd);
-  c->fd = -1;
   abuf_free(&(c->out));
   abuf_free(&(c->in));
+  free(c);
 }
 
 static void
