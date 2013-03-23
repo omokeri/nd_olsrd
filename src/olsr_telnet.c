@@ -30,6 +30,7 @@
 #endif /* _WIN32 */
 
 
+/* forward declarations for internal functions  */
 static void telnet_action(int, void *, unsigned int);
 static void telnet_client_cleanup(struct telnet_server*);
 static struct telnet_client* telnet_client_add(struct telnet_server*, int);
@@ -42,7 +43,9 @@ static int get_port(struct telnet_server* s);
 
 #define BUF_SIZE 1024
 
-/* external Interface */
+/***********************************************************************/
+/*   External API                                                      */
+/***********************************************************************/
 
 /**
  * Completes the telnet server struct and prepares all values for a call to
@@ -93,7 +96,7 @@ olsr_telnet_prepare(struct telnet_server* s, union olsr_ip_addr listen_ip, int p
  *
  * @param s a telnet_server struct which got initialized by olsr_telnet_prepare()
  *
- * @return On success 0 is returned, any other value means error.
+ * @return On success 0 is returned, any other value means error
  */
 int
 olsr_telnet_init(struct telnet_server* s)
@@ -173,20 +176,26 @@ olsr_telnet_exit(struct telnet_server* s)
  * Closes the connection to the specified client and cleans up all buffers.
  *
  * @param c a telnet_client struct pointing to the client instance
+ * @param now if true client gets removed immediatly, if false the client
+ *            gets removed as soon as all output buffers are flushed
  *
  * @return Nothing
  */
 void
-olsr_telnet_client_quit(struct telnet_client* c)
+olsr_telnet_client_quit(struct telnet_client* c, bool now)
 {
   if(!c)
     return;
 
-  telnet_client_remove(c);
+  if(now)
+    c->state = destroy;
+  else
+    c->state = pending;
 }
 
 /**
- * Adds a formatted string to the client out buffer.
+ * Adds a formatted string to the client out buffer. In addition to this
+ * all abuf functions may be used on c->out.
  *
  * @param c a telnet_client struct pointing to the client instance
  * @param fmt a printf-style format string
@@ -196,26 +205,20 @@ olsr_telnet_client_quit(struct telnet_client* c)
 void
 olsr_telnet_client_printf(struct telnet_client* c, const char* fmt, ...)
 {
-  int ret, old_len;
   va_list arg_ptr;
 
   if(!c)
     return;
 
-  old_len = c->out.len;
   va_start(arg_ptr, fmt);
-  ret = abuf_vappendf(&(c->out), fmt, arg_ptr);
+  abuf_vappendf(&(c->out), fmt, arg_ptr);
   va_end(arg_ptr);
-
-  if(ret < 0)
-    return;
-
-  if(!old_len)
-    enable_olsr_socket(c->fd, &telnet_client_action, NULL, SP_PR_WRITE);
 }
-/* End of external Interface */
 
-
+/***********************************************************************/
+/*   End of External API                                               */
+/***********************************************************************/
+/* Dear plugin developer's: Please don't use the functions below       */
 
 static int
 get_port(struct telnet_server* s)
@@ -281,9 +284,11 @@ telnet_client_add(struct telnet_server* s, int fd)
   abuf_init(&(c->out), s->default_client_buf_size);
   abuf_init(&(c->in), s->default_client_buf_size);
 
-  c->server = s;
   c->fd = fd;
+  c->state = active;
+  c->server = s;
   c->next = s->clients;
+
   s->clients = c;
   add_olsr_socket(fd, &telnet_client_action, NULL, (void*)c, SP_PR_READ);
   
@@ -296,12 +301,18 @@ telnet_client_remove(struct telnet_client* c)
   struct telnet_server* s = c->server;
   struct telnet_client* ptr;
 
+  if(!s->clients || !c)
+    return;
+
   if(c == s->clients) {
     s->clients = c->next;
   } else {
-    for(ptr = s->clients; ptr->next; ptr = ptr->next)
-      if(ptr->next == c)
+    for(ptr = s->clients; ptr->next; ptr = ptr->next) {
+      if(ptr->next == c) {
         ptr->next = c->next;
+        break;
+      }
+    }
   }
   remove_olsr_socket(c->fd, &telnet_client_action, NULL);
   close(c->fd);
@@ -315,6 +326,10 @@ telnet_client_handle_cmd(struct telnet_client* c, char* cmd)
 {
       // simple echo server
   olsr_telnet_client_printf(c, "%s\n", cmd);
+
+
+  if(c->state != destroy && c->out.len)
+    enable_olsr_socket(c->fd, &telnet_client_action, NULL, SP_PR_WRITE);
 }
 
 static void
@@ -328,8 +343,8 @@ telnet_client_fetch_lines(struct telnet_client* c, ssize_t offset)
         c->in.buf[i-1] = 0;
 
       telnet_client_handle_cmd(c, c->in.buf);
-      if(c->fd < 0)
-        break; // client connection was terminated
+      if(c->state != active)
+        break;
 
       if(i >= c->in.len) {
         abuf_pull(&(c->in), c->in.len);
@@ -345,17 +360,22 @@ telnet_client_fetch_lines(struct telnet_client* c, ssize_t offset)
 static void
 telnet_client_action(int fd, void *data, unsigned int flags)
 {
-  if(!data) {
+  struct telnet_client* c = (struct telnet_client*)data;
+
+  if(!c) {
     remove_olsr_socket(fd, &telnet_client_action, NULL);
     close(fd);
     return;
   }
 
   if(flags & SP_PR_WRITE)
-    telnet_client_write((struct telnet_client*)data);
+    telnet_client_write(c);
 
   if(flags & SP_PR_READ)
-    telnet_client_read((struct telnet_client*)data);
+    telnet_client_read(c);
+
+  if(c->state == destroy)
+    telnet_client_remove(c);    
 }
 
 static void
@@ -363,6 +383,9 @@ telnet_client_read(struct telnet_client* c)
 {
   char buf[BUF_SIZE];
   ssize_t result = recv(c->fd, (void *)buf, sizeof(buf), 0);
+  if(c->state != active)
+    return; // just consume any bytes received and silently drop them
+
   if (result > 0) {
     ssize_t offset = c->in.len;
     abuf_memcpy(&(c->in), buf, result);
@@ -371,13 +394,13 @@ telnet_client_read(struct telnet_client* c)
   else {
     if(result == 0) {
       OLSR_PRINTF(2, "(TELNET) client %i: disconnected\n", c->fd);
-      telnet_client_remove(c);
+      c->state = destroy;
     } else {
       if(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
         return;
 
       OLSR_PRINTF(1, "(TELNET) client %i recv(): %s\n", c->fd, strerror(errno));
-      telnet_client_remove(c);
+      c->state = destroy;
     }
   }
 }
@@ -388,14 +411,17 @@ telnet_client_write(struct telnet_client* c)
   ssize_t result = send(c->fd, (void *)(c->out.buf), c->out.len, 0);
   if (result > 0) {
     abuf_pull(&(c->out), result);
-    if(c->out.len == 0)
+    if(c->out.len == 0) {
       disable_olsr_socket(c->fd, &telnet_client_action, NULL, SP_PR_WRITE);
+      if(c->state == pending)
+        c->state = destroy;
+    }
   }
   else if(result < 0) {
     if(errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)
       return;
 
     OLSR_PRINTF(1, "(TELNET) client %i write(): %s\n", c->fd, strerror(errno));
-    telnet_client_remove(c);
+    c->state = destroy;
   }
 }
