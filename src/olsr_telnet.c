@@ -35,8 +35,10 @@ static void telnet_action(int, void *, unsigned int);
 static void telnet_client_cleanup(struct telnet_server*);
 static struct telnet_client* telnet_client_add(struct telnet_server*, int);
 static void telnet_client_remove(struct telnet_client*);
+static void telnet_client_free(struct telnet_client*);
 static void telnet_client_action(int, void *, unsigned int);
 static void telnet_client_handle_cmd(struct telnet_client*, char*);
+static void telnet_client_fetch_lines(struct telnet_client*, ssize_t);
 static void telnet_client_read(struct telnet_client*);
 static void telnet_client_write(struct telnet_client*);
 static int get_port(struct telnet_server* s);
@@ -260,15 +262,7 @@ telnet_client_cleanup(struct telnet_server* s)
   for(c = s->clients; c;) {
     struct telnet_client* deletee = c;
     c = c->next;
-  
-    if(deletee->fd != -1) {
-      remove_olsr_socket(deletee->fd, &telnet_client_action, NULL);
-      close(deletee->fd);
-    }
-    abuf_free(&(deletee->out));
-    abuf_free(&(deletee->in));
-    
-    free(deletee);
+    telnet_client_free(deletee);
   }
 }
 
@@ -291,7 +285,7 @@ telnet_client_add(struct telnet_server* s, int fd)
 
   s->clients = c;
   add_olsr_socket(fd, &telnet_client_action, NULL, (void*)c, SP_PR_READ);
-  
+
   return c;
 }
 
@@ -314,8 +308,16 @@ telnet_client_remove(struct telnet_client* c)
       }
     }
   }
-  remove_olsr_socket(c->fd, &telnet_client_action, NULL);
-  close(c->fd);
+  telnet_client_free(c);
+}
+
+static void
+telnet_client_free(struct telnet_client* c)
+{
+  if(c->fd != -1) {
+    remove_olsr_socket(c->fd, &telnet_client_action, NULL);
+    close(c->fd);
+  }
   abuf_free(&(c->out));
   abuf_free(&(c->in));
   free(c);
@@ -375,7 +377,7 @@ telnet_client_action(int fd, void *data, unsigned int flags)
     telnet_client_read(c);
 
   if(c->state == destroy)
-    telnet_client_remove(c);    
+    telnet_client_remove(c);
 }
 
 static void
