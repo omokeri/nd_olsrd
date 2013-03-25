@@ -28,10 +28,11 @@ void olsr_telnet_exit(struct telnet_server*);
 
 struct telnet_client {
   int fd;
-  enum { active, pending, destroy } state;
+  enum { active, pending, linger, destroy } state;
   struct autobuf out;
   struct autobuf in;
   struct telnet_server* server;
+  struct timer_entry * linger_timer;
   struct telnet_client* next;
 };
 

@@ -27,6 +27,9 @@
 
 #ifdef _WIN32
 #define close(x) closesocket(x)
+#define SHUT_RD  SD_RECEIVE
+#define SHUT_WR  SD_SEND
+#define SHUT_RDWR  SD_BOTH
 #endif /* _WIN32 */
 
 
@@ -41,9 +44,11 @@ static void telnet_client_handle_cmd(struct telnet_client*, char*);
 static void telnet_client_fetch_lines(struct telnet_client*, ssize_t);
 static void telnet_client_read(struct telnet_client*);
 static void telnet_client_write(struct telnet_client*);
+static void telnet_client_linger_timeout(void*);
 static int get_port(struct telnet_server* s);
 
 #define BUF_SIZE 1024
+#define TELNET_LINGER_TIMEOUT 42000
 
 /***********************************************************************/
 /*   External API                                                      */
@@ -281,6 +286,7 @@ telnet_client_add(struct telnet_server* s, int fd)
   c->fd = fd;
   c->state = active;
   c->server = s;
+  c->linger_timer = NULL;
   c->next = s->clients;
 
   s->clients = c;
@@ -320,6 +326,9 @@ telnet_client_free(struct telnet_client* c)
   }
   abuf_free(&(c->out));
   abuf_free(&(c->in));
+  if(c->linger_timer)
+    olsr_stop_timer(c->linger_timer);
+
   free(c);
 }
 
@@ -328,7 +337,7 @@ telnet_client_handle_cmd(struct telnet_client* c, char* cmd)
 {
       // simple echo server
   olsr_telnet_client_printf(c, "%s\n", cmd);
-
+  olsr_telnet_client_quit(c, 0);
 
   if(c->state != destroy && c->out.len)
     enable_olsr_socket(c->fd, &telnet_client_action, NULL, SP_PR_WRITE);
@@ -376,7 +385,11 @@ telnet_client_action(int fd, void *data, unsigned int flags)
   if(flags & SP_PR_READ)
     telnet_client_read(c);
 
-  if(c->state == destroy)
+  if(c->state == linger && c->linger_timer == NULL) {
+    shutdown(c->fd, SHUT_WR);
+    c->linger_timer = olsr_start_timer(TELNET_LINGER_TIMEOUT, 0, OLSR_TIMER_ONESHOT, &telnet_client_linger_timeout, (void*)c, 0);
+  }
+  else if(c->state == destroy)
     telnet_client_remove(c);
 }
 
@@ -385,11 +398,12 @@ telnet_client_read(struct telnet_client* c)
 {
   char buf[BUF_SIZE];
   ssize_t result = recv(c->fd, (void *)buf, sizeof(buf), 0);
-  if(c->state != active)
-    return; // just consume any bytes received and silently drop them
-
   if (result > 0) {
     ssize_t offset = c->in.len;
+
+    if(c->state != active)
+      return;
+
     abuf_memcpy(&(c->in), buf, result);
     telnet_client_fetch_lines(c, offset);
   }
@@ -416,7 +430,7 @@ telnet_client_write(struct telnet_client* c)
     if(c->out.len == 0) {
       disable_olsr_socket(c->fd, &telnet_client_action, NULL, SP_PR_WRITE);
       if(c->state == pending)
-        c->state = destroy;
+        c->state = linger;
     }
   }
   else if(result < 0) {
@@ -426,4 +440,13 @@ telnet_client_write(struct telnet_client* c)
     OLSR_PRINTF(1, "(TELNET) client %i write(): %s\n", c->fd, strerror(errno));
     c->state = destroy;
   }
+}
+
+static void
+telnet_client_linger_timeout(void* data)
+{
+  struct telnet_client* c = (struct telnet_client*)data;
+  OLSR_PRINTF(2, "(TELNET) client %i: disconnected after timeout\n", c->fd);
+  c->linger_timer = NULL;
+  telnet_client_remove(c);
 }
