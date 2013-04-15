@@ -105,29 +105,37 @@ static char copyright_string[] __attribute__ ((unused)) =
         (strlen(req) && !strcmp(&req[1], filename))
 
 static const char httpinfo_css[] =
-  "#A {text-decoration: none}\n" "TH{text-align: left}\n" "H1, H3, TD, TH {font-family: Helvetica; font-size: 80%}\n"
+  "#A {text-decoration: none}\n"
+  "TH {text-align: left}\n"
+  "H1, H3, TD, TH {font-family: Helvetica; font-size: 80%}\n"
   "h2\n {\nfont-family: Helvetica;\n font-size: 14px;text-align: center;\n"
-  "line-height: 16px;\ntext-decoration: none;\nborder: 1px solid #ccc;\n" "margin: 5px;\nbackground: #ececec;\n}\n"
+  "line-height: 16px;\ntext-decoration: none;\nborder: 1px solid #ccc;\n"
+  "margin: 5px;\nbackground: #ececec;\n}\n"
   "hr\n{\nborder: none;\npadding: 1px;\nbackground: url(grayline.gif) repeat-x bottom;\n}\n"
   "#maintable\n{\nmargin: 0px;\npadding: 5px;\nborder-left: 1px solid #ccc;\n"
   "border-right: 1px solid #ccc;\nborder-bottom: 1px solid #ccc;\n}\n"
   "#footer\n{\nfont-size: 10px;\nline-height: 14px;\ntext-decoration: none;\ncolor: #666;\n}\n"
-  "#hdr\n{\nfont-size: 14px;\ntext-align: center;\nline-height: 16px;\n" "text-decoration: none;\nborder: 1px solid #ccc;\n"
+  "#hdr\n{\nfont-size: 14px;\ntext-align: center;\nline-height: 16px;\n"
+  "text-decoration: none;\nborder: 1px solid #ccc;\n"
   "margin: 5px;\nbackground: #ececec;\n}\n"
   "#container\n{\nwidth: 1000px;\npadding: 30px;\nborder: 1px solid #ccc;\nbackground: #fff;\n}\n"
-  "#tabnav\n{\nheight: 20px;\nmargin: 0;\npadding-left: 10px;\n" "background: url(grayline.gif) repeat-x bottom;\n}\n"
+  "#tabnav\n{\nheight: 20px;\nmargin: 0;\npadding-left: 10px;\n"
+  "background: url(grayline.gif) repeat-x bottom;\n}\n"
   "#tabnav li\n{\nmargin: 0;\npadding: 0;\ndisplay: inline;\nlist-style-type: none;\n}\n"
   "#tabnav a:link, #tabnav a:visited\n{\nfloat: left;\nbackground: #ececec;\n"
   "font-size: 12px;\nline-height: 14px;\nfont-weight: bold;\npadding: 2px 10px 2px 10px;\n"
   "margin-right: 4px;\nborder: 1px solid #ccc;\ntext-decoration: none;\ncolor: #777;\n}\n"
-  "#tabnav a:link.active, #tabnav a:visited.active\n{\nborder-bottom: 1px solid #fff;\n" "background: #ffffff;\ncolor: #000;\n}\n"
+  "#tabnav a:link.active, #tabnav a:visited.active\n{\nborder-bottom: 1px solid #fff;\n"
+  "background: #ffffff;\ncolor: #000;\n}\n"
   "#tabnav a:hover\n{\nbackground: #777777;\ncolor: #ffffff;\n}\n"
   ".input_text\n{\nbackground: #E5E5E5;\nmargin-left: 5px; margin-top: 0px;\n"
   "text-align: left;\n\nwidth: 100px;\npadding: 0px;\ncolor: #000000;\n"
-  "text-decoration: none;\nfont-family: verdana;\nfont-size: 12px;\n" "border: 1px solid #ccc;\n}\n"
+  "text-decoration: none;\nfont-family: verdana;\nfont-size: 12px;\n"
+  "border: 1px solid #ccc;\n}\n"
   ".input_button\n{\nbackground: #B5D1EE;\nmargin-left: 5px;\nmargin-top: 0px;\n"
   "text-align: center;\nwidth: 120px;\npadding: 0px;\ncolor: #000000;\n"
-  "text-decoration: none;\nfont-family: verdana;\nfont-size: 12px;\n" "border: 1px solid #000;\n}\n";
+  "text-decoration: none;\nfont-family: verdana;\nfont-size: 12px;\n"
+  "border: 1px solid #000;\n}\n";
 
 typedef void (*build_body_callback) (struct autobuf *);
 
@@ -476,19 +484,26 @@ parse_http_request(int fd, void *data __attribute__ ((unused)), unsigned int fla
       netsprintf_error = 0;
       netsprintf_direct = 1;
 #endif
-      abuf_appendf(&body_abuf,
-                 "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n" "<head>\n"
-                 "<meta http-equiv=\"Content-type\" content=\"text/html; charset=ISO-8859-1\">\n"
-                 "<title>olsr.org httpinfo plugin</title>\n" "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\">\n"
-                 "<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\">\n"
-                 "<link rel=\"stylesheet\" type=\"text/css\" href=\"httpinfo.css\">\n" "</head>\n"
-                 "<body bgcolor=\"#ffffff\" text=\"#000000\">\n"
-                 "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"%d\">\n"
-                 "<tbody><tr bgcolor=\"#ffffff\">\n" "<td align=\"left\" height=\"69\" valign=\"middle\" width=\"80%%\">\n"
-                 "<font color=\"black\" face=\"timesroman\" size=\"6\">&nbsp;&nbsp;&nbsp;<a href=\"http://www.olsr.org/\">olsr.org OLSR daemon</a></font></td>\n"
-                 "<td height=\"69\" valign=\"middle\" width=\"20%%\">\n"
-                 "<a href=\"http://www.olsr.org/\"><img border=\"0\" src=\"/logo.gif\" alt=\"olsrd logo\"></a></td>\n" "</tr>\n"
-                 "</tbody>\n" "</table>\n", FRAMEWIDTH);
+      abuf_appendf(
+        &body_abuf,
+        "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n"
+        "<head>\n"
+        "<meta http-equiv=\"Content-type\" content=\"text/html; charset=ISO-8859-1\">\n"
+        "<title>olsr.org httpinfo plugin</title>\n"
+        "<link rel=\"icon\" href=\"favicon.ico\" type=\"image/x-icon\">\n"
+        "<link rel=\"shortcut icon\" href=\"favicon.ico\" type=\"image/x-icon\">\n"
+        "<link rel=\"stylesheet\" type=\"text/css\" href=\"httpinfo.css\">\n"
+        "</head>\n"
+        "<body bgcolor=\"#ffffff\" text=\"#000000\">\n"
+        "<table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"%d\">\n"
+        "<tbody><tr bgcolor=\"#ffffff\">\n"
+        "<td align=\"left\" height=\"69\" valign=\"middle\" width=\"80%%\">\n"
+        "<font color=\"black\" face=\"timesroman\" size=\"6\">&nbsp;&nbsp;&nbsp;<a href=\"http://www.olsr.org/\">olsr.org OLSR daemon</a></font></td>\n"
+        "<td align=\"right\" height=\"69\" valign=\"middle\" width=\"20%%\">\n"
+        "<a href=\"http://www.olsr.org/\"><img border=\"0\" src=\"/logo.gif\" alt=\"olsrd logo\"></a></td>\n" "</tr>\n"
+        "</tbody>\n"
+        "</table>\n",
+        FRAMEWIDTH);
 
       build_tabs(&body_abuf, i);
       build_frame(&body_abuf, "Current Routes", "routes", FRAMEWIDTH, tab_entries[i].build_body_cb);
@@ -520,7 +535,7 @@ parse_http_request(int fd, void *data __attribute__ ((unused)), unsigned int fla
 
 send_http_data:
   if (header_length + body_abuf.len > 0) {
-    outbuffer[outbuffer_count] = olsr_malloc(header_length + body_abuf.len, "http output buffer");
+    outbuffer[outbuffer_count] = olsr_calloc(header_length + body_abuf.len, "http output buffer");
     outbuffer_size[outbuffer_count] = header_length + body_abuf.len;
     outbuffer_written[outbuffer_count] = 0;
     outbuffer_socket[outbuffer_count] = client_socket;
@@ -689,7 +704,7 @@ static void
 section_title(struct autobuf *abuf, const char *title)
 {
   abuf_appendf(abuf,
-                  "<h2>%s</h2>\n" "<table width=\"100%%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\">\n",
+                  "<h2>%s</h2>\n" "<table width=\"95%%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" align=\"center\">\n",
                   title);
 }
 
@@ -776,22 +791,40 @@ build_route(struct autobuf *abuf, const struct rt_entry *rt)
   build_ipaddr_with_link(abuf, &rt->rt_dst.prefix, rt->rt_dst.prefix_len);
   build_ipaddr_with_link(abuf, &rt->rt_best->rtp_nexthop.gateway, -1);
 
-  abuf_appendf(abuf, "<td>%d</td>", rt->rt_best->rtp_metric.hops);
-  abuf_appendf(abuf, "<td>%s</td>",
-             get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer));
-  abuf_appendf(abuf, "<td>%s</td></tr>\n",
-             if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+  abuf_appendf(abuf, "<td align=\"center\">%d</td>", rt->rt_best->rtp_metric.hops);
+  if (olsr_cnf->lq_level > 0) {
+    abuf_appendf(
+      abuf,
+      "<td align=\"right\">%s</td>",
+      get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer));
+  }
+  abuf_appendf(
+    abuf,
+    "<td align=\"center\">%s</td></tr>\n",
+    if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
 }
 
 static void
 build_routes_body(struct autobuf *abuf)
 {
+  struct lqtextbuffer lqbuffer;
   struct rt_entry *rt;
   const char *colspan = resolve_ip_addresses ? " colspan=\"2\"" : "";
   section_title(abuf, "OLSR Routes in Kernel");
-  abuf_appendf(abuf,
-             "<tr><th%s>Destination</th><th%s>Gateway</th><th>Metric</th><th>ETX</th><th>Interface</th></tr>\n",
-             colspan, colspan);
+
+  /* It is not possible to override the CSS-defined left-aligned TH style simply by using
+   * <th align="center">. The TH style must be 'overridden by proximity', by using
+   * <th style="text-align: center"> . */
+  abuf_appendf(
+    abuf,
+    "<tr><th%s>Destination</th>"
+    "<th%s>Gateway</th>"
+    "<th style=\"text-align: center\">Metric</th>"
+    "<th style=\"text-align: right\">Cost (%s)</th>"
+    "<th style=\"text-align: center\">Interface</th></tr>\n",
+    colspan,
+    colspan,
+    get_linkcost_headertext(&lqbuffer));
 
   /* Walk the route table */
   OLSR_FOR_ALL_RT_ENTRIES(rt) {
@@ -809,14 +842,14 @@ build_config_body(struct autobuf *abuf)
   const struct plugin_param *pparam;
   struct ipaddr_str mainaddrbuf;
 
-  abuf_appendf(abuf, "Version: %s (built on %s on %s)\n<br>", olsrd_version, build_date, build_host);
-  abuf_appendf(abuf, "OS: %s\n<br>", OS);
+  abuf_appendf(abuf, "<table width=\"95%%\" cellSpacing=\"0\" cellPadding=\"0\" border=\"0\" align=\"center\">\n<tbody>");
+  abuf_appendf(abuf, "<tr><td>Version: %s (built on %s on %s)\n</td></tr>", olsrd_version, build_date, build_host);
+  abuf_appendf(abuf, "<tr><td>OS: %s\n</td></tr>", OS);
 
   {
     const time_t currtime = time(NULL);
 
-    abuf_strftime(abuf, "System time: <em>%a, %d %b %Y %H:%M:%S</em><br>",
-                            localtime(&currtime));
+    abuf_strftime(abuf, "<tr><td>System time: <em>%a, %d %b %Y %H:%M:%S</em></td></tr>", localtime(&currtime));
   }
 
   {
@@ -832,70 +865,93 @@ build_config_body(struct autobuf *abuf)
     mins = uptime.tv_sec / 60;
     uptime.tv_sec %= 60;
 
-    abuf_puts(abuf, "Olsrd uptime: <em>");
+    abuf_puts(abuf, "<tr><td>Olsrd uptime: <em>");
     if (days) {
       abuf_appendf(abuf, "%d day(s) ", days);
     }
-    abuf_appendf(abuf, "%02d hours %02d minutes %02d seconds</em><br/>\n", hours, mins, (int)uptime.tv_sec);
+    abuf_appendf(abuf, "%02d hours %02d minutes %02d seconds</em></td></tr>\n", hours, mins, (int)uptime.tv_sec);
   }
 
-  abuf_appendf(abuf, "HTTP stats(ok/dyn/error/illegal): <em>%d/%d/%d/%d</em><br>\n", stats.ok_hits,
+  abuf_appendf(abuf, "<tr><td>HTTP stats(ok/dyn/error/illegal): <em>%d/%d/%d/%d</em></td></tr>\n", stats.ok_hits,
              stats.dyn_hits, stats.err_hits, stats.ill_hits);
 
   abuf_puts(abuf,
-             "Click <a href=\"/cfgfile\">here</a> to <em>generate a configuration file for this node</em>.\n");
+             "<tr><td>Click <a href=\"/cfgfile\">here</a> to <em>generate a configuration file for this node</em>.</td></tr></tbody></table>\n");
 
   abuf_puts(abuf, "<h2>Variables</h2>\n");
 
-  abuf_puts(abuf, "<table width=\"100%%\" border=\"0\">\n<tr>");
+  abuf_puts(abuf, "<table width=\"95%%\" border=\"0\" align=\"center\">\n<tr>");
 
-  abuf_appendf(abuf, "<td>Main address: <strong>%s</strong></td>\n",
-             olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
+  abuf_appendf(
+    abuf,
+    "<td>Main address: <strong>%s</strong></td>\n",
+    olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
   abuf_appendf(abuf, "<td>IP version: %d</td>\n", olsr_cnf->ip_version == AF_INET ? 4 : 6);
   abuf_appendf(abuf, "<td>Debug level: %d</td>\n", olsr_cnf->debug_level);
   abuf_appendf(abuf, "<td>FIB Metrics: %s</td>\n", FIB_METRIC_TXT[olsr_cnf->fib_metric]);
+  abuf_puts(abuf, "</tr>\n");
 
-  abuf_puts(abuf, "</tr>\n<tr>\n");
-
-  abuf_appendf(abuf, "<td>Pollrate: %0.2f</td>\n", olsr_cnf->pollrate);
+  abuf_appendf(abuf, "<tr><td>Pollrate: %0.2f</td>\n", olsr_cnf->pollrate);
   abuf_appendf(abuf, "<td>TC redundancy: %d</td>\n", olsr_cnf->tc_redundancy);
   abuf_appendf(abuf, "<td>MPR coverage: %d</td>\n", olsr_cnf->mpr_coverage);
   abuf_appendf(abuf, "<td>NAT threshold: %f</td>\n", olsr_cnf->lq_nat_thresh);
+  abuf_puts(abuf, "</tr>\n");
 
-  abuf_puts(abuf, "</tr>\n<tr>\n");
+  abuf_appendf(abuf, "<tr><td>TOS: 0x%04x</td>\n", olsr_cnf->tos);
+  abuf_appendf(
+    abuf,
+    "<td>Willingness: %d %s</td>\n",
+    olsr_cnf->willingness,
+    olsr_cnf->willingness_auto ? "(auto)" : "");
+  abuf_puts(abuf, "</tr>\n");
 
-  abuf_appendf(abuf, "<td>Fisheye: %s</td>\n", olsr_cnf->lq_fish ? "Enabled" : "Disabled");
-  abuf_appendf(abuf, "<td>TOS: 0x%04x</td>\n", olsr_cnf->tos);
-  abuf_appendf(abuf, "<td>RtTable: 0x%04x/%d</td>\n", olsr_cnf->rt_table, olsr_cnf->rt_table);
-  abuf_appendf(abuf, "<td>RtTableDefault: 0x%04x/%d</td>\n", olsr_cnf->rt_table_default,
-             olsr_cnf->rt_table_default);
-  abuf_appendf(abuf, "<td>RtTableTunnel: 0x%04x/%d</td>\n", olsr_cnf->rt_table_tunnel,
-             olsr_cnf->rt_table_tunnel);
-  abuf_appendf(abuf, "<td>Willingness: %d %s</td>\n", olsr_cnf->willingness,
-             olsr_cnf->willingness_auto ? "(auto)" : "");
+  abuf_appendf(abuf, "<tr><td>RtTable: 0x%04x/%d</td>\n", olsr_cnf->rt_table, olsr_cnf->rt_table);
+  abuf_appendf(
+    abuf,
+    "<td>RtTableDefault: 0x%04x/%d</td>\n",
+    olsr_cnf->rt_table_default,
+    olsr_cnf->rt_table_default);
+  abuf_appendf(abuf,
+    "<td>RtTableTunnel: 0x%04x/%d</td>\n",
+    olsr_cnf->rt_table_tunnel,
+    olsr_cnf->rt_table_tunnel);
+  abuf_appendf(abuf, "</tr>\n");
 
   if (olsr_cnf->lq_level == 0) {
-    abuf_appendf(abuf, "</tr>\n<tr>\n" "<td>Hysteresis: %s</td>\n",
-               olsr_cnf->use_hysteresis ? "Enabled" : "Disabled");
+    abuf_appendf(
+      abuf,
+      "<tr><td>Link hysteresis: %s</td>\n",
+      olsr_cnf->use_hysteresis ? "Enabled" : "Disabled");
     if (olsr_cnf->use_hysteresis) {
-      abuf_appendf(abuf, "<td>Hyst scaling: %0.2f</td>\n", olsr_cnf->hysteresis_param.scaling);
-      abuf_appendf(abuf, "<td>Hyst lower/upper: %0.2f/%0.2f</td>\n", olsr_cnf->hysteresis_param.thr_low,
-                 olsr_cnf->hysteresis_param.thr_high);
+      abuf_appendf(abuf, "<td>Hyst. scaling: %0.2f</td>\n", olsr_cnf->hysteresis_param.scaling);
+      abuf_appendf(
+        abuf,
+        "<td>Hyst. lower/upper: %0.2f/%0.2f</td>\n",
+        olsr_cnf->hysteresis_param.thr_low,
+        olsr_cnf->hysteresis_param.thr_high);
     }
   }
+  abuf_appendf(abuf, "</tr>\n");
 
-  abuf_appendf(abuf, "</tr>\n<tr>\n" "<td>LQ extension: %s</td>\n",
-             olsr_cnf->lq_level ? "Enabled" : "Disabled");
-  if (olsr_cnf->lq_level) {
-    abuf_appendf(abuf, "<td>LQ level: %d</td>\n" "<td>LQ aging: %f</td>\n", olsr_cnf->lq_level,
-               olsr_cnf->lq_aging);
+  abuf_appendf(
+    abuf,
+    "<tr><td>LQ extension: %s</td>\n",
+    olsr_cnf->lq_level > 0 ? "Enabled" : "Disabled");
+  if (olsr_cnf->lq_level > 0) {
+    abuf_appendf(
+      abuf,
+      "<td>LQ level: %d</td>\n" "<td>LQ aging: %f</td>\n",
+      olsr_cnf->lq_level,
+      olsr_cnf->lq_aging);
+    abuf_appendf(abuf, "<td>Fisheye: %s</td>\n", olsr_cnf->lq_fish ? "Enabled" : "Disabled");
+
   }
   abuf_puts(abuf, "</tr></table>\n");
 
   abuf_puts(abuf, "<h2>Interfaces</h2>\n");
-  abuf_puts(abuf, "<table width=\"100%%\" border=\"0\">\n");
+  abuf_puts(abuf, "<table width=\"95%%\" border=\"0\" align=\"center\">\n");
   for (ifs = olsr_cnf->interfaces; ifs != NULL; ifs = ifs->next) {
-    const struct interface *const rifs = ifs->interf;
+    const struct network_interface *const rifs = ifs->interf;
     abuf_appendf(abuf, "<tr><th colspan=\"3\">%s</th>\n", ifs->name);
     if (!rifs) {
       abuf_puts(abuf, "<tr><td colspan=\"3\">Status: DOWN</td></tr>\n");
@@ -914,14 +970,23 @@ build_config_body(struct autobuf *abuf)
     }
     abuf_appendf(abuf, "<tr>\n" "<td>MTU: %d</td>\n" "<td>WLAN: %s</td>\n" "<td>STATUS: UP</td>\n" "</tr>\n",
                rifs->int_mtu, rifs->is_wireless ? "Yes" : "No");
+    if (olsr_cnf->lq_level) {
+      abuf_appendf(abuf, "<tr><td>Medium Type: %s</td>\n",
+                      ifs->cnf->cost.medium_type == 0 ? "Wired Optic" :
+                      ifs->cnf->cost.medium_type == 1 ? "Wired Electric" :
+                      ifs->cnf->cost.medium_type == 2 ? "Wireless" :
+                      "Unknown");
+      abuf_appendf(abuf, "<td>Initial Estimation for Medium Speed: %5.1f Mbit/s</td></tr>\n",
+                      ifs->cnf->cost.medium_speed);
+    }
   }
+  abuf_appendf(abuf, "<tr><td colspan=\"3\"><em>Olsrd is configured to %s if no interfaces are available</em></td></tr>\n",
+                     olsr_cnf->allow_no_interfaces ? "run even" : "halt");
+
   abuf_puts(abuf, "</table>\n");
 
-  abuf_appendf(abuf, "<em>Olsrd is configured to %s if no interfaces are available</em><br>\n",
-             olsr_cnf->allow_no_interfaces ? "run even" : "halt");
-
   abuf_puts(abuf, "<h2>Plugins</h2>\n");
-  abuf_puts(abuf, "<table width=\"100%%\" border=\"0\"><tr><th>Name</th><th>Parameters</th></tr>\n");
+  abuf_puts(abuf, "<table width=\"95%%\" border=\"0\" align=\"center\"><tr><th>Name</th><th>Parameters</th></tr>\n");
   for (pentry = olsr_cnf->plugins; pentry; pentry = pentry->next) {
     abuf_appendf(abuf, "<tr><td>%s</td>\n" "<td><select>\n" "<option>KEY, VALUE</option>\n", pentry->name);
 
@@ -954,14 +1019,21 @@ build_neigh_body(struct autobuf *abuf)
   struct neighbor_entry *neigh;
   struct link_entry *the_link = NULL;
   const char *colspan = resolve_ip_addresses ? " colspan=\"2\"" : "";
+  struct lqtextbuffer lqbuffer;
 
   section_title(abuf, "Links");
 
-  abuf_appendf(abuf,
-             "<tr><th%s>Local IP</th><th%s>Remote IP</th><th>Hysteresis</th>",
-             colspan, colspan);
-  if (olsr_cnf->lq_level > 0) {
-    abuf_puts(abuf, "<th>LinkCost</th>");
+  abuf_appendf(
+    abuf,
+    "<tr><th%s>Local IP</th><th%s>Remote IP</th>",
+    colspan,
+    colspan);
+  if (olsr_cnf->lq_level == 0) {
+    abuf_appendf(
+      abuf,
+      "<th style=\"text-align: right\">L_link_quality</th>");
+  } else {
+    abuf_appendf(abuf, "<th style=\"text-align: right\">Cost (%s)</th>", get_linkcost_headertext(&lqbuffer));
   }
   abuf_puts(abuf, "</tr>\n");
 
@@ -970,11 +1042,15 @@ build_neigh_body(struct autobuf *abuf)
     abuf_puts(abuf, "<tr>");
     build_ipaddr_with_link(abuf, &the_link->local_iface_addr, -1);
     build_ipaddr_with_link(abuf, &the_link->neighbor_iface_addr, -1);
-    abuf_appendf(abuf, "<td>%0.2f</td>", the_link->L_link_quality);
-    if (olsr_cnf->lq_level > 0) {
+    if (olsr_cnf->lq_level == 0) {
+      abuf_appendf(abuf, "<td align=\"right\">%0.2f</td>", the_link->L_link_quality);
+    } else {
       struct lqtextbuffer lqbuffer1, lqbuffer2;
-      abuf_appendf(abuf, "<td>(%s) %s</td>", get_link_entry_text(the_link, '/', &lqbuffer1),
-                 get_linkcost_text(the_link->linkcost, false, &lqbuffer2));
+      abuf_appendf(
+        abuf,
+        "<td align=\"right\">(%s) %s</td>",
+        get_link_entry_text(the_link, '/', &lqbuffer1),
+        get_linkcost_text(the_link->link_cost, false, &lqbuffer2));
     }
     abuf_puts(abuf, "</tr>\n");
   } OLSR_FOR_ALL_LINK_ENTRIES_END(the_link);
@@ -982,22 +1058,35 @@ build_neigh_body(struct autobuf *abuf)
   abuf_puts(abuf, "</table>\n");
 
   section_title(abuf, "Neighbors");
-  abuf_appendf(abuf,
-             "<tr><th%s>IP Address</th><th>SYM</th><th>MPR</th><th>MPRS</th><th>Willingness</th><th>2 Hop Neighbors</th></tr>\n",
-             colspan);
+  abuf_appendf(
+    abuf,
+    "<tr><th%s>IP Address</th>"
+    "<th style=\"text-align: center\">SYM</th>"
+    "<th style=\"text-align: center\">MPR</th>"
+    "<th style=\"text-align: center\">MPRS</th>"
+    "<th style=\"text-align: center\">Willingness</th>"
+    "<th style=\"text-align: center\">2 Hop Neighbors</th></tr>\n",
+    colspan);
+
   /* Neighbors */
   OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
 
     struct neighbor_2_list_entry *list_2;
     int thop_cnt;
     abuf_puts(abuf, "<tr>");
-    build_ipaddr_with_link(abuf, &neigh->neighbor_main_addr, -1);
-    abuf_appendf(abuf,
-               "<td>%s</td>" "<td>%s</td>" "<td>%s</td>"
-               "<td>%d</td>", (neigh->status == SYM) ? "YES" : "NO", neigh->is_mpr ? "YES" : "NO",
-               olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO", neigh->willingness);
+    build_ipaddr_with_link(abuf, &neigh->N_neighbor_main_addr, -1);
+    abuf_appendf(
+      abuf,
+      "<td align=\"center\">%s</td>"
+      "<td align=\"center\">%s</td>"
+      "<td align=\"center\">%s</td>"
+      "<td align=\"center\">%d</td>",
+      (neigh->N_status == SYM) ? "YES" : "NO",
+      neigh->is_mpr ? "YES" : "NO",
+      olsr_lookup_mprs_set(&neigh->N_neighbor_main_addr) ? "YES" : "NO",
+      neigh->N_willingness);
 
-    abuf_puts(abuf, "<td><select>\n" "<option>IP ADDRESS</option>\n");
+    abuf_puts(abuf, "<td align=\"center\"><select>\n" "<option>IP ADDRESS</option>\n");
 
     for (list_2 = neigh->neighbor_2_list.next, thop_cnt = 0; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next, thop_cnt++) {
       struct ipaddr_str strbuf;
@@ -1015,12 +1104,13 @@ build_topo_body(struct autobuf *abuf)
 {
   struct tc_entry *tc;
   const char *colspan = resolve_ip_addresses ? " colspan=\"2\"" : "";
+  struct lqtextbuffer lqbuffer;
 
   section_title(abuf, "Topology Entries");
   abuf_appendf(abuf, "<tr><th%s>Destination IP</th><th%s>Last Hop IP</th>",
              colspan, colspan);
   if (olsr_cnf->lq_level > 0) {
-    abuf_puts(abuf, "<th>Linkcost</th>");
+    abuf_appendf(abuf, "<th style=\"text-align: right\">Cost (%s)</th>", get_linkcost_headertext(&lqbuffer));
   }
   abuf_puts(abuf, "</tr>\n");
 
@@ -1032,9 +1122,10 @@ build_topo_body(struct autobuf *abuf)
         build_ipaddr_with_link(abuf, &tc_edge->T_dest_addr, -1);
         build_ipaddr_with_link(abuf, &tc->addr, -1);
         if (olsr_cnf->lq_level > 0) {
-          struct lqtextbuffer lqbuffer1, lqbuffer2;
-          abuf_appendf(abuf, "<td>(%s) %s</td>\n",
-                     get_tc_edge_entry_text(tc_edge, '/', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
+          abuf_appendf(
+            abuf,
+            "<td align=\"right\">%s</td>\n",
+            get_linkcost_text(tc_edge->link_cost, false, &lqbuffer));
         }
         abuf_puts(abuf, "</tr>\n");
       }

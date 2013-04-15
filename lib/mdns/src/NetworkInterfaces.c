@@ -59,7 +59,7 @@
 #endif
 #include <netinet/ip.h>         /* struct ip */
 #include <netinet/udp.h>        /* SOL_UDP */
-#include <stdlib.h>             /* atoi, malloc */
+#include <stdlib.h>             /* atoi(), malloc() */
 
 /* OLSRD includes */
 #include "olsr.h"               /* OLSR_PRINTF() */
@@ -184,7 +184,7 @@ CreateCaptureSocket(const char *ifName)
 //FOR MDNS IS ALWAYS CALLED WITH NULL AS SECOND ARG
 
 static int
-CreateInterface(const char *ifName, struct interface *olsrIntf)
+CreateInterface(const char *ifName, struct network_interface *olsrIntf)
 {
   int capturingSkfd = -1;
   int encapsulatingSkfd = -1;
@@ -192,7 +192,7 @@ CreateInterface(const char *ifName, struct interface *olsrIntf)
   int ioctlSkfd;
   struct ifreq ifr;
   int nOpened = 0;
-  struct TBmfInterface *newIf = olsr_malloc(sizeof(struct TBmfInterface), "TBMFInterface (mdns)");
+  struct TBmfInterface *newIf = olsr_calloc(sizeof(struct TBmfInterface), "TBMFInterface (mdns)");
 
   assert(ifName != NULL);
 
@@ -320,7 +320,7 @@ CreateInterface(const char *ifName, struct interface *olsrIntf)
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 int
-CreateBmfNetworkInterfaces(struct interface *skipThisIntf)
+CreateBmfNetworkInterfaces(struct network_interface *skipThisIntf)
 {
   int skfd;
   struct ifconf ifc;
@@ -365,7 +365,7 @@ CreateBmfNetworkInterfaces(struct interface *skipThisIntf)
   /* For each item in the interface configuration list... */
   ifr = ifc.ifc_req;
   for (n = ifc.ifc_len / sizeof(struct ifreq); --n >= 0; ifr++) {
-    struct interface *olsrIntf;
+    struct network_interface *olsrIntf;
     union olsr_ip_addr ipAddr;
 
     /* Skip the BMF network interface itself */
@@ -418,7 +418,7 @@ CreateBmfNetworkInterfaces(struct interface *skipThisIntf)
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 void
-AddInterface(struct interface *newIntf)
+AddInterface(struct network_interface *newIntf)
 {
   int nOpened;
 

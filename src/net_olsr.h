@@ -39,15 +39,17 @@
  *
  */
 
-#ifndef _NET_OLSR
-#define _NET_OLSR
+#ifndef _NET_OLSR_H
+#define _NET_OLSR_H
 
-#include "olsr_types.h"
-#include "interfaces.h"
-#include "process_routes.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, olsr_ip_addr */
 
-#include <arpa/inet.h>
-#include <net/if.h>
+//#include <arpa/inet.h>
+//#include <net/if.h>
+
+/* Forward declarations */
+struct network_interface;
+struct rt_entry;
 
 typedef int (*packet_transform_function) (uint8_t *, int *);
 
@@ -55,21 +57,21 @@ void net_set_disp_pack_out(bool);
 
 void init_net(void);
 
-int net_add_buffer(struct interface *);
+int net_add_buffer(struct network_interface *);
 
-int net_remove_buffer(struct interface *);
+int net_remove_buffer(struct network_interface *);
 
-int net_outbuffer_bytes_left(const struct interface *);
+int net_outbuffer_bytes_left(const struct network_interface *);
 
-uint16_t net_output_pending(const struct interface *);
+uint16_t net_output_pending(const struct network_interface *);
 
-int net_reserve_bufspace(struct interface *, int);
+int net_reserve_bufspace(struct network_interface *, int);
 
-int net_outbuffer_push(struct interface *, const void *, const uint16_t);
+int net_outbuffer_push(struct network_interface *, const void *, const uint16_t);
 
-int net_outbuffer_push_reserved(struct interface *, const void *, const uint16_t);
+int net_outbuffer_push_reserved(struct network_interface *, const void *, const uint16_t);
 
-int net_output(struct interface *);
+int net_output(struct network_interface *);
 
 int net_sendroute(struct rt_entry *, struct sockaddr *);
 
@@ -81,7 +83,7 @@ bool olsr_validate_address(const union olsr_ip_addr *);
 
 void olsr_add_invalid_address(const union olsr_ip_addr *);
 
-#endif
+#endif /* _NET_OLSR_H */
 
 /*
  * Local Variables:

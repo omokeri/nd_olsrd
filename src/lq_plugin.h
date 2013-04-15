@@ -39,15 +39,11 @@
  *
  */
 
-#ifndef LQPLUGIN_H_
-#define LQPLUGIN_H_
+#ifndef _LQ_PLUGIN_H
+#define _LQ_PLUGIN_H
 
-#include "tc_set.h"
-#include "link_set.h"
-#include "olsr_spf.h"
-#include "lq_packet.h"
-#include "packet.h"
-#include "common/avl.h"
+#include "olsr_types.h" /* uint8_t, olsr_linkcost */
+#include "common/avl.h" /* AVLNODE2STRUCT */
 
 #define LINK_COST_BROKEN (1<<22)
 #define ROUTE_COST_BROKEN (0xffffffff)
@@ -59,37 +55,61 @@
 #define LQ_QUICKSTART_STEPS 12
 #define LQ_QUICKSTART_AGING 0.25
 
+#define LQ_TEXT_BUF_SIZE 64
 struct lqtextbuffer {
-  char buf[16];
+  char buf[LQ_TEXT_BUF_SIZE];
 };
 
+/* Forward declarations */
+struct link_entry;
+struct tc_edge_entry;
+struct lq_hello_neighbor;
+struct network_interface;
+struct link_entry;
+struct tc_edge_entry;
+
 struct lq_handler {
+
+  /* Each LQ hander *must* always implement the following functions (--> pure virtual) */
+
+  olsr_linkcost (*calc_hello_cost) (const void *hello_lq);
+  olsr_linkcost (*calc_tc_cost) (const void *tc_lq);
+  olsr_linkcost (*calc_link_cost) (const struct link_entry *link, const struct network_interface* in_if);
+
+  const char *(*print_cost_header) (struct lqtextbuffer *buffer);
+  const char *(*print_link_lq) (const struct link_entry *link, char separator, struct lqtextbuffer *buffer);
+  const char *(*print_cost) (olsr_linkcost cost, struct lqtextbuffer *buffer);
+
+  /* Each LQ hander *may* implement the following functions, or fill these pointers with NULL if
+   * not applicable (--> virtual) */
+
   void (*initialize) (void);
 
-  olsr_linkcost (*calc_hello_cost) (const void *lq);
-  olsr_linkcost (*calc_tc_cost) (const void *lq);
+  void (*packet_loss_worker) (struct link_entry *link, bool lost, const struct network_interface* in_if);
+  void (*memorize_foreign_hello_lq) (void* ptr_local_link_lq, void *ptr_foreign_hello_lq);
 
-  void (*packet_loss_handler) (struct link_entry * entry, void *lq, bool lost);
+  int (*serialize_hello_lq) (unsigned char *buff, const void *hello_lq);
+  int (*serialize_tc_lq) (unsigned char *buff, const void *tc_lq);
+  void (*deserialize_hello_lq) (const uint8_t ** curr, void *hello_lq);
+  void (*deserialize_tc_lq) (const uint8_t ** curr, void *tc_lq);
 
-  void (*memorize_foreign_hello) (void *local, void *foreign);
-  void (*copy_link_lq_into_neigh) (void *target, void *source);
-  void (*copy_link_lq_into_tc) (void *target, void *source);
-  void (*clear_hello) (void *target);
-  void (*clear_tc) (void *target);
+  void (*copy_link_lq_into_hello_lq) (void *ptr_target_hello_lq, struct link_entry *source_link);
+  void (*copy_link_lq_into_tc_lq) (void *ptr_target_tc_lq, struct link_entry *source_link);
+  void (*copy_link_lq_into_tc_edge) (struct tc_edge_entry *target_entry, struct link_entry *source_link);
 
-  int (*serialize_hello_lq) (unsigned char *buff, void *lq);
-  int (*serialize_tc_lq) (unsigned char *buff, void *lq);
-  void (*deserialize_hello_lq) (const uint8_t ** curr, void *lq);
-  void (*deserialize_tc_lq) (const uint8_t ** curr, void *lq);
+  void (*init_linkquality_in_link_entry) (void *ptr_link_lq, const struct network_interface *);
 
-  const char *(*print_hello_lq) (void *ptr, char separator, struct lqtextbuffer * buffer);
-  const char *(*print_tc_lq) (void *ptr, char separator, struct lqtextbuffer * buffer);
-  const char *(*print_cost) (olsr_linkcost cost, struct lqtextbuffer * buffer);
+  /* Each LQ hander *must* always supply values for the following fields */
 
-  size_t hello_lq_size;
-  size_t tc_lq_size;
-  size_t hello_lqdata_size;
-  size_t tc_lqdata_size;
+  uint8_t lq_hello_message_type;
+  uint8_t lq_tc_message_type;
+
+  size_t sizeof_lqdata_in_lqhello_packet;
+  size_t sizeof_lqdata_in_lqtc_packet;
+
+  size_t sizeof_linkquality_in_lq_hello_neighbor;
+  size_t sizeof_linkquality_in_lq_tc_neighbor;
+  size_t sizeof_linkquality_in_link_entry;
 };
 
 struct lq_handler_node {
@@ -100,54 +120,49 @@ struct lq_handler_node {
 
 AVLNODE2STRUCT(lq_handler_tree2lq_handler_node, struct lq_handler_node, node);
 
-#define OLSR_FOR_ALL_LQ_HANDLERS(lq) \
-{ \
-  struct avl_node *lq_tree_node, *next_lq_tree_node; \
-  for (lq_tree_node = avl_walk_first(&lq_handler_tree); \
-    lq_tree_node; lq_tree_node = next_lq_tree_node) { \
-    next_lq_tree_node = avl_walk_next(lq_tree_node); \
-    lq = lq_handler_tree2lq_handler_node(lq_tree_node);
-#define OLSR_FOR_ALL_LQ_HANDLERS_END(tc) }}
-
-int avl_strcasecmp(const void *str1, const void *str2);
 void init_lq_handler_tree(void);
 
-void register_lq_handler(struct lq_handler *handler, const char *name);
+void register_lq_handler(struct lq_handler *, const char *);
 
-olsr_linkcost olsr_calc_tc_cost(const struct tc_edge_entry *);
+void olsr_update_packet_loss_worker(struct link_entry *, bool, const struct network_interface* in_if);
+void olsr_memorize_foreign_hello_lq(struct link_entry *, struct lq_hello_neighbor *);
 
-int olsr_serialize_hello_lq_pair(unsigned char *buff, struct lq_hello_neighbor *neigh);
-void olsr_deserialize_hello_lq_pair(const uint8_t ** curr, struct hello_neighbor *neigh);
-int olsr_serialize_tc_lq_pair(unsigned char *buff, struct tc_mpr_addr *neigh);
-void olsr_deserialize_tc_lq_pair(const uint8_t ** curr, struct tc_edge_entry *edge);
+/* Functions operating on the link quality data of struct lq_hello_neighbor */
+struct lq_hello_neighbor *olsr_calloc_lq_hello_neighbor(const char *);
+int olsr_serialize_hello_lq_data(unsigned char *, struct lq_hello_neighbor *);
+void olsr_deserialize_hello_lq_data(const uint8_t **, struct lq_hello_neighbor *);
+void olsr_copy_link_lq_into_hello_lq(struct lq_hello_neighbor *, struct link_entry *);
 
-void olsr_update_packet_loss_worker(struct link_entry *entry, bool lost);
-void olsr_memorize_foreign_hello_lq(struct link_entry *local, struct hello_neighbor *foreign);
+/* Functions operating on the link quality data of struct lq_tc_neighbor */
+struct lq_tc_neighbor *olsr_calloc_lq_tc_neighbor(const char *);
+int olsr_serialize_tc_lq_data(unsigned char *, struct lq_tc_neighbor *);
+olsr_linkcost olsr_deserialize_tc_lq_data(const uint8_t ** curr);
+void olsr_copy_link_lq_into_tc_lq(struct lq_tc_neighbor *, struct link_entry *);
 
-const char *get_link_entry_text(struct link_entry *entry, char separator, struct lqtextbuffer *buffer);
-const char *get_tc_edge_entry_text(struct tc_edge_entry *entry, char separator, struct lqtextbuffer *buffer);
-const char *get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer);
+/* Functions operating on the link quality data of struct link_entry */
+struct link_entry *olsr_calloc_link_entry(const char *);
+void olsr_init_linkquality_in_link_entry(struct link_entry *, const struct network_interface *);
+olsr_linkcost olsr_calc_link_cost(const struct link_entry *, const struct network_interface *);
+const char *get_link_entry_text(struct link_entry *, char, struct lqtextbuffer *);
 
-void olsr_clear_hello_lq(struct link_entry */*link*/);
-void olsr_copy_hello_lq(struct lq_hello_neighbor *target, struct link_entry *source);
-void olsr_copylq_link_entry_2_tc_mpr_addr(struct tc_mpr_addr *target, struct link_entry *source);
-void olsr_copylq_link_entry_2_tc_edge_entry(struct tc_edge_entry *target, struct link_entry *source);
-void olsr_clear_tc_lq(struct tc_mpr_addr *target);
+/* Functions operating on the link quality data of struct tc_edge_entry */
+void olsr_copylq_link_entry_into_tc_edge_entry(struct tc_edge_entry *, struct link_entry *);
 
-struct hello_neighbor *olsr_malloc_hello_neighbor(const char *id);
-struct tc_mpr_addr *olsr_malloc_tc_mpr_addr(const char *id);
-struct lq_hello_neighbor *olsr_malloc_lq_hello_neighbor(const char *id);
-struct link_entry *olsr_malloc_link_entry(const char *id);
+const char *get_linkcost_headertext(struct lqtextbuffer *);
+const char *get_linkcost_text(olsr_linkcost, bool, struct lqtextbuffer *);
 
-size_t olsr_sizeof_hello_lqdata(void);
-size_t olsr_sizeof_tc_lqdata(void);
+uint8_t olsr_get_hello_message_type(void);
+uint8_t olsr_get_tc_message_type(void);
+
+size_t olsr_sizeof_lqdata_in_lqhello_packet(void);
+size_t olsr_sizeof_lqdata_in_lqtc_packet(void);
 
 void olsr_relevant_linkcost_change(void);
 
 /* Externals. */
 extern struct lq_handler *active_lq_handler;
 
-#endif /*LQPLUGIN_H_ */
+#endif /* _LQ_PLUGIN_H */
 
 /*
  * Local Variables:

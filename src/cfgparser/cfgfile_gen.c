@@ -195,11 +195,39 @@ static void olsrd_write_if_autobuf(struct autobuf *out, struct if_config_options
     "    # Olsrd will choose links with the lowest value.\n"
     "    # Note:\n"
     "    # Interface weight is used only when LinkQualityLevel is set to 0.\n"
-    "    # For any other value of LinkQualityLevel, the interface ETX\n"
+    "    # For any other value of LinkQualityLevel, the link cost\n"
     "    # value is used instead.\n");
   if_appendf(out, comments, "    %sWeight %d\n",
       !cnfi->weight.fixed ? "# " : "",
       cnfi->weight.value);
+  if (comments) abuf_puts(out,
+    "    \n"
+    "    # Link cost.\n"
+    "    # Calculated as follows:\n"
+    "    #   LinkCost =\n"
+    "    #     LinkQuality * (\n"
+    "    #       MediumType * MediumTypeWeight +\n"
+    "    #       MediumBitTime * MediumTimeWeight) +\n"
+    "    #     UserAddedCost\n"
+    "    # where:\n"
+    "    #   MediumBitTime = 1.0 / MediumSpeed\n"
+    "    # and:\n"
+    "    #   LinkQuality = 1.0/(loss_link_quality * neigh_link_quality) (= ETX)\n\n");
+  if_appendf(out, comments, "    %sMediumType     %d\n",
+      cnfi->cost.medium_type == DEF_MEDIUM_TYPE ? "# " : "",
+      cnfi->cost.medium_type);
+  if_appendf(out, comments, "    %sMediumTypeWeight     %0.2f\n",
+      cnfi->cost.weight_medium_type == DEF_WEIGHT_MTYPE ? "# " : "",
+      cnfi->cost.weight_medium_type);
+  if_appendf(out, comments, "    %sMediumSpeed     %0.2f # Mbits/sec\n",
+      cnfi->cost.medium_speed == DEF_MEDIUM_SPEED ? "# " : "",
+      cnfi->cost.medium_speed);
+  if_appendf(out, comments, "    %sMediumTimeWeight     %0.2f\n",
+      cnfi->cost.weight_medium_time == DEF_WEIGHT_MTIME ? "# " : "",
+      cnfi->cost.weight_medium_time);
+  if_appendf(out, comments, "    %sUserAddedCost     %0.2f\n",
+      cnfi->cost.user_added_cost == DEF_USER_ADDED_COST ? "# " : "",
+      cnfi->cost.user_added_cost);
   if (comments) abuf_puts(out,
     "    \n"
     "    # If a certain route should be preferred\n"

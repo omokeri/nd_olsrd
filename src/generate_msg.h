@@ -39,26 +39,18 @@
  *
  */
 
-#ifndef _OLSR_GEN_MSG
-#define _OLSR_GEN_MSG
-
-#include "interfaces.h"
+#ifndef _GENERATE_MSG_H
+#define _GENERATE_MSG_H
 
 #define STDOUT_PULSE_INT 600    /* msec */
 
 /* Functions */
 
-void generate_hello(void *);
-
 void generate_mid(void *);
-
 void generate_hna(void *);
-
-void generate_tc(void *);
-
 void generate_stdout_pulse(void *);
 
-#endif
+#endif /* _GENERATE_MSG_H */
 
 /*
  * Local Variables:

@@ -39,10 +39,14 @@
  *
  */
 
-#ifndef _OLSR_MPRS_SET
-#define _OLSR_MPRS_SET
+#ifndef _MPR_SELECTOR_SET_H
+#define _MPR_SELECTOR_SET_H
 
-#include "mantissa.h"
+#include "olsr_types.h" /* uint16_t, olsr_ip_addr */
+#include "mantissa.h" /* olsr_reltime */
+
+/* Forward declarations */
+struct timer_entry;
 
 struct mpr_selector {
   union olsr_ip_addr MS_main_addr;
@@ -75,7 +79,7 @@ void olsr_time_out_mprs_set(void);
 void olsr_print_mprs_set(void);
 #endif
 
-#endif
+#endif /* _MPR_SELECTOR_SET_H */
 
 /*
  * Local Variables:

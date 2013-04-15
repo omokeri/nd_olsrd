@@ -38,12 +38,16 @@
  * the copyright holders.
  */
 
-#include "olsr.h"
-#include "defs.h"
-#include "olsr_cookie.h"
-#include "log.h"
+#include <stdlib.h> /* calloc() */
+#include <errno.h> /* errno */
+#include <assert.h> /* assert() */
+#include <string.h> /* strdup() */
 
-#include <assert.h>
+#include "defs.h"
+#include "olsr.h" /* olsr_exit() */
+#include "log.h" /* olsr_syslog() */
+#include "olsr_cookie.h"
+
 
 /* Root directory of the cookies we have in the system */
 static struct olsr_cookie_info *cookies[COOKIE_ID_MAX] = { 0 };

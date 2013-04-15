@@ -46,14 +46,19 @@
  *
  */
 
+/* System includes */
+#include <stdlib.h> /* EXIT_FAILURE  */
+#include <unistd.h> /* sleep(3) */
+
+#include "defs.h"
+#include "olsr.h" /* olsr_exit(), olsr_calloc() */
+#include "log.h" /* olsr_syslog() */
+#include "parser.h" /* olsr_parser_add_function() */
+#include "scheduler.h" /* add_olsr_socket() */
+#include "ipcalc.h" /* ip_in_net(), inet_ntoa() */
+#include "olsr_protocol.h" /* pkt_olsr_message */
+#include "routing_table.h" /* OLSR_FOR_ALL_RT_ENTRIES */
 #include "ipc_frontend.h"
-#include "link_set.h"
-#include "olsr.h"
-#include "log.h"
-#include "parser.h"
-#include "scheduler.h"
-#include "net_olsr.h"
-#include "ipcalc.h"
 
 #ifdef WIN32
 #define close(x) closesocket(x)
@@ -193,7 +198,7 @@ ipc_input(int sock __attribute__ ((unused)))
 {
   union {
     char buf[MAXPACKETSIZE + 1];
-    struct olsr olsr;
+    struct pkt_olsr_packet_v4 olsr;
   } inbuf;
 
   if (recv(sock, dir, sizeof(dir), 0) == -1) {
@@ -212,7 +217,7 @@ ipc_input(int sock __attribute__ ((unused)))
  *@return true for not preventing forwarding
  */
 bool
-frontend_msgparser(union olsr_message * msg, struct interface * in_if __attribute__ ((unused)), union olsr_ip_addr * from_addr
+frontend_msgparser(union pkt_olsr_message * msg, struct network_interface * in_if __attribute__ ((unused)), union olsr_ip_addr * from_addr
                    __attribute__ ((unused)))
 {
   int size;
@@ -221,9 +226,9 @@ frontend_msgparser(union olsr_message * msg, struct interface * in_if __attribut
     return true;
 
   if (olsr_cnf->ip_version == AF_INET)
-    size = ntohs(msg->v4.olsr_msgsize);
+    size = ntohs(msg->v4.msgsize);
   else
-    size = ntohs(msg->v6.olsr_msgsize);
+    size = ntohs(msg->v6.msgsize);
 
   if (send(ipc_conn, (void *)msg, size, MSG_NOSIGNAL) < 0) {
     OLSR_PRINTF(1, "(OUTPUT)IPC connection lost!\n");
@@ -354,7 +359,7 @@ ipc_send_net_info(int fd)
   //int x, i;
   char *msg;
 
-  net_msg = olsr_malloc(sizeof(struct ipc_net_msg), "send net info");
+  net_msg = olsr_calloc(sizeof(struct ipc_net_msg), "send net info");
 
   msg = (char *)net_msg;
 

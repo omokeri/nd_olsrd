@@ -39,9 +39,8 @@
  *
  */
 
-#include "olsr_protocol.h"
-#include "hashing.h"
 #include "defs.h"
+#include "hashing.h" /* HASHMASK */
 
 /*
  * Taken from lookup2.c by Bob Jenkins.  (http://burtleburtle.net/bob/c/lookup2.c).

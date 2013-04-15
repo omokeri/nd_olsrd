@@ -44,25 +44,21 @@
  *data structures used by the olsr.org OLSR daemon.
  */
 
-#ifndef _PROTOCOLS_OLSR_H
-#define	_PROTOCOLS_OLSR_H
+#ifndef _OLSR_PROTOCOL_H
+#define	_OLSR_PROTOCOL_H
 
-struct olsr;
-
-#include "olsr_types.h"
-#include "olsr_cfg.h"
-
-#include <string.h>
+/* OLSRD includes */
+#include "olsr_types.h" /* uint8_t, uint16_t, uint32_t */
 
 #define OLSR_HEADERSIZE (sizeof(uint16_t) + sizeof(uint16_t))
 
+/* TODO: not so nice to have these numbers without underlying calculation */
 #define OLSR_MSGHDRSZ_IPV4 12
 #define OLSR_MSGHDRSZ_IPV6 24
 
 /*
  *Emission Intervals
  */
-
 #define HELLO_INTERVAL        2
 #define REFRESH_INTERVAL      2
 #define TC_INTERVAL           5
@@ -78,7 +74,6 @@ struct olsr;
 /*
  * Default Holding Time (for large scale community networks)
  */
-
 #define NEIGHB_HOLD_TIME      10 * REFRESH_INTERVAL
 #define TOP_HOLD_TIME         60 * TC_INTERVAL
 #define DUP_HOLD_TIME         30
@@ -86,9 +81,8 @@ struct olsr;
 #define HNA_HOLD_TIME         60 * HNA_INTERVAL
 
 /*
- *Message Types
+ *Message Types (RFC 3626 par 18.4.)
  */
-
 #define HELLO_MESSAGE         1
 #define TC_MESSAGE            2
 #define MID_MESSAGE           3
@@ -96,20 +90,19 @@ struct olsr;
 #define MAX_MESSAGE           4
 
 /*
- *Link Types
+ *Link Types (RFC 3626 par 18.5.)
  */
-
 #define UNSPEC_LINK           0
 #define ASYM_LINK             1
 #define SYM_LINK              2
 #define LOST_LINK             3
-#define HIDE_LINK             4
-#define MAX_LINK              4
+#define MAX_LINK              3
+
+#define HIDE_LINK             4 /* Indicates a link that should not be advertised */
 
 /*
- *Neighbor Types
+ *Neighbor Types (RFC 3626 par 18.6.)
  */
-
 #define NOT_NEIGH             0
 #define SYM_NEIGH             1
 #define MPR_NEIGH             2
@@ -118,14 +111,12 @@ struct olsr;
 /*
  *Neighbor status
  */
-
 #define NOT_SYM               0
 #define SYM                   1
 
 /*
  *Link Hysteresis
  */
-
 #define HYST_THRESHOLD_HIGH   0.8
 #define HYST_THRESHOLD_LOW    0.3
 #define HYST_SCALING          0.5
@@ -133,7 +124,6 @@ struct olsr;
 /*
  *Willingness
  */
-
 #define WILL_NEVER            0
 #define WILL_LOW              1
 #define WILL_DEFAULT          3
@@ -173,207 +163,125 @@ struct olsr;
 
 #define CREATE_LINK_CODE(status, link) (link | (status<<2))
 
-#define EXTRACT_STATUS(link_code) ((link_code & 0xC)>>2)
+#define EXTRACT_NEIGHBOR_TYPE(link_code) ((link_code & 0xC)>>2)
 
-#define EXTRACT_LINK(link_code) (link_code & 0x3)
+#define EXTRACT_LINK_TYPE(link_code) (link_code & 0x3)
 
 /***********************************************
  *           OLSR packet definitions           *
  ***********************************************/
 
 /*
- *The HELLO message
+ * Multiple Interface Declaration message
+ * See RFC 3626 par. 5.1.  MID Message Format
  */
 
-/*
- *Hello info
- */
-struct hellinfo {
-  uint8_t link_code;
-  uint8_t reserved;
-  uint16_t size;
-  uint32_t neigh_addr[1];              /* neighbor IP address(es) */
+/* MID message for IPv4 - RFC-compliant */
+struct pkt_mid_msg {
+  uint32_t mid_addresses[1]; /* List of OLSR Interface Addresses */
 } __attribute__ ((packed));
 
-struct hellomsg {
-  uint16_t reserved;
-  uint8_t htime;
-  uint8_t willingness;
-  struct hellinfo hell_info[1];
-} __attribute__ ((packed));
-
-/*
- *IPv6
- */
-
-struct hellinfo6 {
-  uint8_t link_code;
-  uint8_t reserved;
-  uint16_t size;
-  struct in6_addr neigh_addr[1];       /* neighbor IP address(es) */
-} __attribute__ ((packed));
-
-struct hellomsg6 {
-  uint16_t reserved;
-  uint8_t htime;
-  uint8_t willingness;
-  struct hellinfo6 hell_info[1];
-} __attribute__ ((packed));
-
-/*
- * Topology Control packet
- */
-
-struct neigh_info {
-  uint32_t addr;
-} __attribute__ ((packed));
-
-struct olsr_tcmsg {
-  uint16_t ansn;
-  uint16_t reserved;
-  struct neigh_info neigh[1];
-} __attribute__ ((packed));
-
-/*
- *IPv6
- */
-
-struct neigh_info6 {
-  struct in6_addr addr;
-} __attribute__ ((packed));
-
-struct olsr_tcmsg6 {
-  uint16_t ansn;
-  uint16_t reserved;
-  struct neigh_info6 neigh[1];
-} __attribute__ ((packed));
-
-/*
- *Multiple Interface Declaration message
- */
-
-/*
- * Defined as s struct for further expansion
- * For example: do we want to tell what type of interface
- * is associated whit each address?
- */
-struct midaddr {
-  uint32_t addr;
-} __attribute__ ((packed));
-
-struct midmsg {
-  struct midaddr mid_addr[1];
-} __attribute__ ((packed));
-
-/*
- *IPv6
- */
-struct midaddr6 {
-  struct in6_addr addr;
-} __attribute__ ((packed));
-
-struct midmsg6 {
-  struct midaddr6 mid_addr[1];
+/* MID message for IPv6 - not RFC-compliant */
+struct pkt_mid_msg_ipv6 {
+  struct in6_addr mid_addresses[1]; /* List of OLSR Interface Addresses */
 } __attribute__ ((packed));
 
 /*
  * Host and Network Association message
+ * See RFC 3626 par. 12.1.  HNA Message Format
  */
-struct hnapair {
-  uint32_t addr;
+
+/* HNA message for IPv4 - RFC-compliant */
+
+struct pkt_hna_pair {
+  uint32_t addr; /* Network Address */
   uint32_t netmask;
 } __attribute__ ((packed));
 
-struct hnamsg {
-  struct hnapair hna_net[1];
+struct pkt_hna_msg {
+  struct pkt_hna_pair hna_pairs[1]; /* List of HNA pairs */
 } __attribute__ ((packed));
 
-/*
- *IPv6
- */
+/* HNA message for IPv6 - not RFC-compliant */
 
-struct hnapair6 {
-  struct in6_addr addr;
+struct pkt_hna_pair_ipv6 {
+  struct in6_addr addr; /* Network Address */
   struct in6_addr netmask;
 } __attribute__ ((packed));
 
-struct hnamsg6 {
-  struct hnapair6 hna_net[1];
+struct pkt_hna_msg_ipv6 {
+  struct pkt_hna_pair_ipv6 hna_pairs[1]; /* List of HNA pairs */
 } __attribute__ ((packed));
 
 /*
- * OLSR message (several can exist in one OLSR packet)
+ * Generic OLSR message (several can exist in one OLSR packet)
+ * See also RFC 3626 par. 3.3.  Packet Format
  */
 
-struct olsrmsg {
-  uint8_t olsr_msgtype;
-  uint8_t olsr_vtime;
-  uint16_t olsr_msgsize;
-  uint32_t originator;
-  uint8_t ttl;
-  uint8_t hopcnt;
-  uint16_t seqno;
+/* OLSR message for IPv4 - RFC-compliant */
+struct pkt_olsr_message_v4 {
+  uint8_t msgtype; /* Message Type */
+  uint8_t vtime; /* Vtime */
+  uint16_t msgsize; /* Message Size */
+  uint32_t originator; /* Originator Address */
+  uint8_t ttl; /* Time To Live */
+  uint8_t hopcnt; /* Hop Count */
+  uint16_t seqno; /* Message Sequence Number */
 
   union {
-    struct hellomsg hello;
-    struct olsr_tcmsg tc;
-    struct hnamsg hna;
-    struct midmsg mid;
+    struct pkt_hna_msg hna;
+    struct pkt_mid_msg mid;
   } message;
 
 } __attribute__ ((packed));
 
-/*
- *IPv6
- */
-
-struct olsrmsg6 {
-  uint8_t olsr_msgtype;
-  uint8_t olsr_vtime;
-  uint16_t olsr_msgsize;
-  struct in6_addr originator;
-  uint8_t ttl;
-  uint8_t hopcnt;
-  uint16_t seqno;
+/* OLSR message for IPv6 - not RFC-compliant */
+struct pkt_olsr_message_v6 {
+  uint8_t msgtype; /* Message Type */
+  uint8_t vtime; /* Vtime */
+  uint16_t msgsize; /* Message Size */
+  struct in6_addr originator; /* Originator Address */
+  uint8_t ttl; /* Time To Live */
+  uint8_t hopcnt; /* Hop Count */
+  uint16_t seqno; /* Message Sequence Number */
 
   union {
-    struct hellomsg6 hello;
-    struct olsr_tcmsg6 tc;
-    struct hnamsg6 hna;
-    struct midmsg6 mid;
+    struct pkt_hna_msg_ipv6 hna;
+    struct pkt_mid_msg_ipv6 mid;
   } message;
 
+} __attribute__ ((packed));
+
+union pkt_olsr_message {
+  struct pkt_olsr_message_v4 v4;
+  struct pkt_olsr_message_v6 v6;
 } __attribute__ ((packed));
 
 /*
  * Generic OLSR packet
+ * See also RFC 3626 par. 3.3.  Packet Format .
  */
 
-struct olsr {
-  uint16_t olsr_packlen;               /* packet length */
-  uint16_t olsr_seqno;
-  struct olsrmsg olsr_msg[1];          /* variable messages */
+/* OLSR packet for IPv4 - RFC-compliant */
+struct pkt_olsr_packet_v4 {
+  uint16_t packlen; /* Packet Length */
+  uint16_t seqno; /* Packet Sequence Number */
+  struct pkt_olsr_message_v4 msg[1]; /* variable messages */
 } __attribute__ ((packed));
 
-struct olsr6 {
-  uint16_t olsr_packlen;               /* packet length */
-  uint16_t olsr_seqno;
-  struct olsrmsg6 olsr_msg[1];         /* variable messages */
+/* OLSR packet for IPv6 - not RFC-compliant */
+struct pkt_olsr_packet_v6 {
+  uint16_t packlen; /* Packet Length */
+  uint16_t seqno; /* Packet Sequence Number */
+  struct pkt_olsr_message_v6 msg[1]; /* variable messages */
 } __attribute__ ((packed));
 
-/* IPv4 <-> IPv6 compability */
-
-union olsr_message {
-  struct olsrmsg v4;
-  struct olsrmsg6 v6;
+union pkt_olsr_packet {
+  struct pkt_olsr_packet_v4 v4;
+  struct pkt_olsr_packet_v6 v6;
 } __attribute__ ((packed));
 
-union olsr_packet {
-  struct olsr v4;
-  struct olsr6 v6;
-} __attribute__ ((packed));
-
-#endif
+#endif /* _OLSR_PROTOCOL_H */
 
 /*
  * Local Variables:

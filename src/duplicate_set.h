@@ -39,18 +39,19 @@
  *
  */
 
-#ifndef DUPLICATE_SET_2_H_
-#define DUPLICATE_SET_2_H_
+#ifndef _DUPLICATE_SET_H
+#define _DUPLICATE_SET_H
 
-#include "defs.h"
-#include "olsr.h"
-#include "mantissa.h"
-#include "common/avl.h"
+#include "olsr_types.h" /* uint16_t, uint32_t, olsr_ip_addr */
+#include "common/avl.h" /* avl_node, AVLNODE2STRUCT */
 
 #define DUPLICATE_CLEANUP_INTERVAL 15000
 #define DUPLICATE_CLEANUP_JITTER 25
 #define DUPLICATE_VTIME 120000
 #define DUP_MAX_TOO_LOW 16
+
+/* Forward declarations */
+union pkt_olsr_message;
 
 struct dup_entry {
   struct avl_node avl;
@@ -67,7 +68,7 @@ void olsr_init_duplicate_set(void);
 void olsr_cleanup_duplicates(union olsr_ip_addr *orig);
 struct dup_entry *olsr_create_duplicate_entry(void *ip, uint16_t seqnr);
 int olsr_seqno_diff(uint16_t seqno1, uint16_t seqno2);
-int olsr_message_is_duplicate(union olsr_message *m);
+int olsr_message_is_duplicate(union pkt_olsr_message *m);
 void olsr_print_duplicate_table(void);
 
 #define OLSR_FOR_ALL_DUP_ENTRIES(dup) \
@@ -79,7 +80,7 @@ void olsr_print_duplicate_table(void);
     dup = duptree2dupentry(dup_tree_node);
 #define OLSR_FOR_ALL_DUP_ENTRIES_END(dup) }}
 
-#endif /*DUPLICATE_SET_2_H_ */
+#endif /* _DUPLICATE_SET_H */
 
 /*
  * Local Variables:

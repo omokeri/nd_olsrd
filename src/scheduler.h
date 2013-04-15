@@ -40,14 +40,17 @@
  */
 
 
-#ifndef _OLSR_SCHEDULER
-#define _OLSR_SCHEDULER
+#ifndef _SCHEDULER_H
+#define _SCHEDULER_H
 
-#include "common/list.h"
+#include "common/list.h" /* list_node, LISTNODE2STRUCT */
 
-#include "olsr_types.h"
+#include "olsr_types.h" /* uint8_t, uint32_t, int32_t */
 
-#include <time.h>
+//#include <time.h>
+
+/* Forward declarations */
+struct olsr_cookie_info;
 
 /* Some defs for juggling with timers */
 #define MSEC_PER_SEC 1000
@@ -172,7 +175,7 @@ void disable_olsr_socket (int fd, socket_handler_func pf_pr, socket_handler_func
  */
 
 
-#endif
+#endif /* _SCHEDULER_H */
 
 /*
  * Local Variables:

@@ -39,28 +39,21 @@
  *
  */
 
-#include "kernel_routes.h"
-#include "ipc_frontend.h"
-#include "log.h"
-#include "net_os.h"
-#include "ifnet.h"
+#include <errno.h> /* errno */
+#include <assert.h> /* assert() */
 
-#include <assert.h>
+//ipip includes
+#include <net/if.h> /* IFNAMSIZ, IFF_UP, if_nametoindex() */
 #include <linux/types.h>
 #include <linux/rtnetlink.h>
 
-//ipip includes
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <net/if.h>
-#include <linux/ip.h>
-#include <linux/if_tunnel.h>
-
-//ifup includes
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <net/if.h>
+#include "defs.h"
+#include "ipcalc.h" /* olsr_ip_to_string() */
+#include "log.h" /* olsr_syslog() */
+#include "ifnet.h" /* chk_if_up() */
+#include "scheduler.h" /* add_olsr_socket() */
+#include "routing_table.h" /* RT_METRIC_DEFAULT */
+#include "kernel_routes.h"
 
 /*
  * This file contains the rtnetlink version of the linux routing code.
@@ -119,7 +112,7 @@ int rtnetlink_register_socket(int rtnl_mgrp)
 static void netlink_process_link(struct nlmsghdr *h)
 {
   struct ifinfomsg *ifi = (struct ifinfomsg *) NLMSG_DATA(h);
-  struct interface *iface;
+  struct network_interface *iface;
   struct olsr_if *oif;
 
   iface = if_ifwithindex(ifi->ifi_index);

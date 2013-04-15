@@ -39,15 +39,18 @@
  *
  */
 
-#include "ipcalc.h"
-#include "defs.h"
-#include "olsr.h"
-#include "scheduler.h"
-#include "net_olsr.h"
-#include "tc_set.h"
-#include "parser.h"
-#include "gateway.h"
-#include "duplicate_handler.h"
+#include "ipcalc.h" /* ipequal() */
+#include "hashing.h" /* HASHSIZE */
+#include "hna_set.h" /* hna_entry */
+#include "olsr_cookie.h" /* olsr_alloc_cookie() */
+#include "gateway.h" /* olsr_delete_gateway_entry() */
+#include "scheduler.h" /* olsr_stop_timer() */
+#include "routing_table.h" /* olsr_delete_routing_table() */
+#include "olsr.h" /* changes_hna */
+#include "lq_packet.h" /* pkt_get_u8(), pkt_get_u16(), pkt_get_reltime(), pkt_get_ipaddress() */
+#include "duplicate_handler.h" /* olsr_handle_hna_collision() */
+#include "olsr_protocol.h" /* HNA_MESSAGE */
+#include "link_set.h" /* check_neighbor_link() */
 
 struct hna_entry hna_set[HASHSIZE];
 struct olsr_cookie_info *hna_net_timer_cookie = NULL;
@@ -365,7 +368,7 @@ olsr_print_hna_set(void)
  */
 
 bool
-olsr_input_hna(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *from_addr)
+olsr_input_hna(union pkt_olsr_message *m, struct network_interface *in_if __attribute__ ((unused)), union olsr_ip_addr *from_addr)
 {
 
   uint8_t olsr_msgtype;
@@ -437,7 +440,7 @@ olsr_input_hna(union olsr_message *m, struct interface *in_if __attribute__ ((un
     union olsr_ip_addr mask;
 
     struct ip_prefix_list *entry;
-    struct interface *ifs;
+    struct network_interface *ifs;
     bool stop = false;
 
     pkt_get_ipaddress(&curr, &prefix.prefix);

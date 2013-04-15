@@ -39,19 +39,24 @@
  *
  */
 
-#ifndef _OLSR_LQ_PACKET_H
-#define _OLSR_LQ_PACKET_H
+#ifndef _LQ_PACKET_H
+#define _LQ_PACKET_H
 
-#include "olsr_types.h"
-#include "packet.h"
-#include "mantissa.h"
-#include "ipcalc.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, uint32_t, olsr_ip_addr, olsr_linkcost */
+#include "mantissa.h" /* olsr_reltime */
+#include "defs.h" /* INLINE */
+#include "ipcalc.h" /* netmask_to_prefix() */
 
-#define LQ_HELLO_MESSAGE      201
-#define LQ_TC_MESSAGE         202
+#define LQ_ETX_HELLO_MESSAGE      201
+#define LQ_ETX_TC_MESSAGE         202
 
-/* deserialized OLSR header */
+#define LQ_ETT_HELLO_MESSAGE      211
+#define LQ_ETT_TC_MESSAGE         212
 
+#define LQ_ETXETH_HELLO_MESSAGE   221
+#define LQ_ETXETH_TC_MESSAGE      222
+
+/* Deserialized OLSR header */
 struct olsr_common {
   uint8_t type;
   olsr_reltime vtime;
@@ -59,12 +64,10 @@ struct olsr_common {
   union olsr_ip_addr orig;
   uint8_t ttl;
   uint8_t hops;
-  uint16_t seqno;
 };
 
-/* serialized IPv4 OLSR header */
-
-struct olsr_header_v4 {
+/* Serialized IPv4 OLSR header. See also RFC 3626 par. 3.3.  Packet Format . */
+struct pkt_olsr_header_v4 {
   uint8_t type;
   uint8_t vtime;
   uint16_t size;
@@ -72,11 +75,10 @@ struct olsr_header_v4 {
   uint8_t ttl;
   uint8_t hops;
   uint16_t seqno;
-};
+} __attribute__ ((packed));
 
-/* serialized IPv6 OLSR header */
-
-struct olsr_header_v6 {
+/* Serialized IPv6 OLSR header. Not RFC-compliant. See also RFC 3626 par. 3.3.  Packet Format . */
+struct pkt_olsr_header_v6 {
   uint8_t type;
   uint8_t vtime;
   uint16_t size;
@@ -84,53 +86,72 @@ struct olsr_header_v6 {
   uint8_t ttl;
   uint8_t hops;
   uint16_t seqno;
-};
+} __attribute__ ((packed));
 
-/* deserialized LQ_HELLO */
+/* Deserialized LQ_HELLO */
 
 struct lq_hello_neighbor {
   uint8_t link_type;
   uint8_t neigh_type;
   union olsr_ip_addr addr;
   struct lq_hello_neighbor *next;
-  uint32_t linkquality[0];
+  olsr_linkcost cost;
+  uint32_t linkquality[0]; /* Pointer to link quality data */
 };
 
 struct lq_hello_message {
   struct olsr_common comm;
+
+  /* As read from the message header; see RFC 3626 par. 3.3.2.  Message Header . */
+  /* TODO: Where is vtime set ?? */
+  olsr_reltime vtime;
+
   olsr_reltime htime;
   uint8_t will;
-  struct lq_hello_neighbor *neigh;
+  struct lq_hello_neighbor *neighbors;
 };
 
-/* serialized LQ_HELLO */
-struct lq_hello_info_header {
-  uint8_t link_code;
-  uint8_t reserved;
-  uint16_t size;
-};
+/* Serialized LQ_HELLO. See also RFC 3626 par. 6.1.  HELLO Message Format . */
 
-struct lq_hello_header {
+struct pkt_lq_hello_header {
   uint16_t reserved;
   uint8_t htime;
   uint8_t will;
+} __attribute__ ((packed));
+
+struct pkt_lq_hello_info_header {
+  uint8_t link_code;
+  uint8_t reserved;
+  uint16_t size;
+} __attribute__ ((packed));
+
+
+/* Deserialized LQ_TC */
+
+struct lq_tc_neighbor {
+  union olsr_ip_addr address;
+  struct lq_tc_neighbor *next;
+  uint32_t linkquality[0]; /* Pointer to link quality data */
 };
 
-/* deserialized LQ_TC */
 struct lq_tc_message {
   struct olsr_common comm;
   union olsr_ip_addr from;
   uint16_t ansn;
-  struct tc_mpr_addr *neigh;
+  struct lq_tc_neighbor *neighbors;
 };
 
-/* serialized LQ_TC */
-
-struct lq_tc_header {
+/* Serialized LQ_TC. See also RFC 3626 par. 9.1.  TC Message Format . */
+struct pkt_lq_tc_header {
   uint16_t ansn;
-  uint8_t lower_border;
-  uint8_t upper_border;
-};
+  union {
+    uint16_t reserved;
+    struct {
+      uint8_t lower_border;
+      uint8_t upper_border;
+    } henning_special;
+  } reserved;
+} __attribute__ ((packed));
 
 static INLINE void
 pkt_get_u8(const uint8_t ** p, uint8_t * var)
@@ -277,15 +298,13 @@ pkt_put_ipaddress(uint8_t ** p, const union olsr_ip_addr *var)
   *p += olsr_cnf->ipsize;
 }
 
-void olsr_output_lq_hello(void *para);
+void olsr_output_lq_hello(void *);
 
-void olsr_output_lq_tc(void *para);
+void olsr_output_lq_tc(void *);
 
-void olsr_input_lq_hello(union olsr_message *ser, struct interface *inif, union olsr_ip_addr *from);
+void destroy_lq_hello(struct lq_hello_message *);
 
-extern bool lq_tc_pending;
-
-#endif
+#endif /* _LQ_PACKET_H */
 
 /*
  * Local Variables:

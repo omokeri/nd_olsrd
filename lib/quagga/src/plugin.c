@@ -17,17 +17,23 @@
  * Description        : functions to set zebra plugin parameters
  * ------------------------------------------------------------------------- */
 
+#include <stdlib.h> /* realloc () */
+#include <errno.h> /* errno */
+#include <stdlib.h> /* EXIT_FAILURE  */
+
 #include "defs.h"
 #include "olsr.h"
 #include "log.h"
 #include "olsrd_plugin.h"
 #include "plugin_util.h"
 #include "net_olsr.h"
+#include "process_routes.h" /* olsr_addroute_function() */
 
 #include "common.h"
 #include "quagga.h"
 #include "packet.h"
 #include "plugin.h"
+
 
 static void *my_realloc(void *, size_t, const char *);
 

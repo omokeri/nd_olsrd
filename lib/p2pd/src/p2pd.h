@@ -65,7 +65,7 @@
 #define IPHDR_FRAGMENT_MASK       0xC000
 
 /* Forward declaration of OLSR interface type */
-struct interface;
+struct network_interface;
 
 struct DupFilterEntry {
   int                            ip_version;
@@ -92,21 +92,21 @@ extern struct DuplicateFilterEntry * FilterList;
 void DoP2pd(int sd, void *x, unsigned int y);
 void P2pdPError(const char *format, ...) __attribute__ ((format(printf, 1, 2)));
 union olsr_ip_addr *MainAddressOf(union olsr_ip_addr *ip);
-int InitP2pd(struct interface *skipThisIntf);
+int InitP2pd(struct network_interface *skipThisIntf);
 void CloseP2pd(void);
 int SetP2pdTtl(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)));
 int AddUdpDestPort(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)));
 bool InUdpDestPortList(int ip_version, union olsr_ip_addr *addr, uint16_t port);
 int SetP2pdTtl(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)));
 int SetP2pdUseHashFilter(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)));
-bool p2pd_message_seen(struct node **head, struct node **tail, union olsr_message *m);
-void p2pd_store_message(struct node **head, struct node **tail, union olsr_message *m);
-bool p2pd_is_duplicate_message(union olsr_message *msg);
+bool p2pd_message_seen(struct node **head, struct node **tail, union pkt_olsr_message *m);
+void p2pd_store_message(struct node **head, struct node **tail, union pkt_olsr_message *m);
+bool p2pd_is_duplicate_message(union pkt_olsr_message *msg);
 
 void olsr_p2pd_gen(unsigned char *packet, int len);
 
 /* Parser function to register with the scheduler */
-bool olsr_parser(union olsr_message *, struct interface *, union olsr_ip_addr *);
+bool olsr_parser(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
 #endif /* _P2PD_H */
 

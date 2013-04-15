@@ -40,11 +40,11 @@
  *
  */
 
-#include "plugin_util.h"
-#include "olsr.h"
-#include "defs.h"
+#include <arpa/inet.h> /* inet_pton(), inet_ntop() */
+#include <stdlib.h> /* strtoul() */
 
-#include <arpa/inet.h>
+#include "defs.h"
+#include "plugin_util.h"
 
 int
 set_plugin_port(const char *value, void *data, set_plugin_parameter_addon addon __attribute__ ((unused)))

@@ -39,14 +39,14 @@
  *
  */
 
-#ifndef _OLSR_MPR
-#define _OLSR_MPR
+#ifndef _MPR_H
+#define _MPR_H
 
 void olsr_calculate_mpr(void);
 
 void olsr_print_mpr_set(void);
 
-#endif
+#endif /* _MPR_H */
 
 /*
  * Local Variables:

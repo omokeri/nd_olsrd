@@ -39,17 +39,18 @@
  *
  */
 
-#ifndef _OLSR_HNA
-#define _OLSR_HNA
+#ifndef _HNA_SET_H
+#define _HNA_SET_H
 
-#include "hashing.h"
-#include "olsr_types.h"
-#include "olsr_protocol.h"
-#include "mantissa.h"
+#include "hashing.h" /* HASHSIZE */
+#include "olsr_types.h" /* olsr_ip_prefix */
+#include "mantissa.h" /* olsr_reltime */
 
-#include <time.h>
-
-/* hna_netmask declared in packet.h */
+/* Forward declarations */
+union pkt_olsr_message;
+struct timer_entry;
+struct hna_entry;
+struct network_interface;
 
 struct hna_net {
   struct olsr_ip_prefix hna_prefix;
@@ -96,9 +97,9 @@ void olsr_update_hna_entry(const union olsr_ip_addr *, const union olsr_ip_addr 
 
 void olsr_print_hna_set(void);
 
-bool olsr_input_hna(union olsr_message *, struct interface *, union olsr_ip_addr *);
+bool olsr_input_hna(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
-#endif
+#endif /* _HNA_SET_H */
 
 /*
  * Local Variables:

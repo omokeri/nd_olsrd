@@ -96,7 +96,7 @@ gethemusocket(struct sockaddr_in *pin)
 }
 
 int
-getsocket(int BuffSize, struct interface *ifp __attribute__ ((unused)))
+getsocket(int BuffSize, struct network_interface *ifp __attribute__ ((unused)))
 {
   struct sockaddr_in Addr;
   int On = 1;
@@ -153,7 +153,7 @@ getsocket(int BuffSize, struct interface *ifp __attribute__ ((unused)))
 }
 
 int
-getsocket6(int BuffSize, struct interface *ifp __attribute__ ((unused)))
+getsocket6(int BuffSize, struct network_interface *ifp __attribute__ ((unused)))
 {
   struct sockaddr_in6 Addr6;
   int On = 1;
@@ -336,7 +336,7 @@ DisableIcmpRedirects(void)
 }
 
 int
-join_mcast(struct interface *Nic, int Sock)
+join_mcast(struct network_interface *Nic, int Sock)
 {
   /* See linux/in6.h */
   struct ipaddr_str buf;

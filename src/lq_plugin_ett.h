@@ -39,28 +39,36 @@
  *
  */
 
-#ifndef LQ_ETX_FPM_
-#define LQ_ETX_FPM_
+#ifndef _LQ_PLUGIN_ETT_H
+#define _LQ_PLUGIN_ETT_H
 
-#include "olsr_types.h"
-#include "lq_plugin.h"
+#include "olsr_types.h" /* uint8_t, uint16_t */
+#include "lq_plugin.h" /* struct lq_handler */
 
-/* use only 1<<16 - 1 to allow the multiplication of two
- * upscaled numbers between 0 and 1 */
-#define LQ_FPM_INTERNAL_MULTIPLIER 65535
-#define LQ_FPM_LINKCOST_MULTIPLIER 65535
+#define LQ_ALGORITHM_ETT_NAME "ett"
 
-#define LQ_ALGORITHM_ETX_FPM_NAME "etx_fpm"
-
-struct default_lq_fpm {
-  uint8_t valueLq;
-  uint8_t valueNlq;
-  uint16_t quickstart;
+/* The ETT link quality extension to HELLO messages */
+struct hello_lq_ett {
+  float lq;
+  float cost;
 };
 
-extern struct lq_handler lq_etx_fpm_handler;
+/* The ETT link quality extension to TC messages */
+struct tc_lq_ett {
+  float cost;
+};
 
-#endif /*LQ_ETX_FPM_ */
+/* The ETT link quality extension to link set entries */
+struct link_lq_ett {
+  float lq;
+  float nlq;
+  float link_speed;
+  void* link_cost_data;
+};
+
+extern struct lq_handler lq_ett_handler;
+
+#endif /* _LQ_PLUGIN_ETT_H */
 
 /*
  * Local Variables:

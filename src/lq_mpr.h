@@ -39,12 +39,12 @@
  *
  */
 
-#ifndef _OLSR_LQ_MPR
-#define _OLSR_LQ_MPR
+#ifndef _LQ_MPR_H
+#define _LQ_MPR_H
 
 void olsr_calculate_lq_mpr(void);
 
-#endif
+#endif /* _LQ_MPR_H */
 
 /*
  * Local Variables:

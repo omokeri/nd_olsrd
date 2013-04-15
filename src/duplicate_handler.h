@@ -5,12 +5,11 @@
  *      Author: henning
  */
 
-#ifndef DUPLICATE_HANDLER_H_
-#define DUPLICATE_HANDLER_H_
+#ifndef _DUPLICATE_HANDLER_H
+#define _DUPLICATE_HANDLER_H
 
-#include "defs.h"
-#include "olsr.h"
-#include "common/list.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, olsr_ip_addr */
+#include "common/list.h" /* list_node */
 
 #ifndef NO_DUPLICATE_DETECTION_HANDLER
 #define MAX_SYSLOG_EACH_HOUR 10
@@ -32,4 +31,4 @@ void olsr_test_originator_collision(uint8_t msgType, uint16_t seqno);
 void olsr_handle_hna_collision(union olsr_ip_addr *hna, union olsr_ip_addr *orig);
 void olsr_handle_mid_collision(union olsr_ip_addr *mid, union olsr_ip_addr *orig);
 #endif
-#endif /* DUPLICATE_HANDLER_H_ */
+#endif /* _DUPLICATE_HANDLER_H */

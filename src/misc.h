@@ -39,12 +39,12 @@
  *
  */
 
-#ifndef _OLSR_MISC_H
-#define _OLSR_MISC_H
+#ifndef _MISC_H
+#define _MISC_H
 
 void clear_console(void);
 
-#endif
+#endif /* _MISC_H */
 
 /*
  * Local Variables:

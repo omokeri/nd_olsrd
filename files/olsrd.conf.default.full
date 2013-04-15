@@ -508,9 +508,37 @@ Interface "<OLSRd-Interface1>" "<OLSRd-Interface2>"
     # Olsrd will choose links with the lowest value.
     # Note:
     # Interface weight is used only when LinkQualityLevel is set to 0.
-    # For any other value of LinkQualityLevel, the interface ETX
+    # For any other value of LinkQualityLevel, the link cost
     # value is used instead.
     # Weight 0
+
+    # Link cost.
+    # Calculated as follows:
+    #   LinkCost =
+    #     LinkQuality * (
+    #       MediumType * MediumTypeWeight +
+    #       MediumBitTime * MediumTimeWeight) +
+    #     UserAddedCost
+    # where:
+    #   MediumBitTime = 1.0 / MediumSpeed
+    # and:
+    #   LinkQuality = 1.0/(loss_link_quality * neigh_link_quality) (= ETX)
+
+    # Medium type (0=wired-optic, 1=wired-electric, 2=wireless, 10=unknown)
+    MediumType        0
+
+    # Weight of medium type (float)
+    MediumTypeWeight  1000.0
+
+    # Initial estimation for medium speed in Mbit/s (float)
+    MediumSpeed       1.0
+
+    # Weight of medium time (float)
+    MediumTimeWeight  100.0
+
+    # User added cost (float)
+    UserAddedCost     0.0
+
 
     # If a certain route should be preferred 
     # or ignored by the mesh, the Link Quality 

@@ -6,14 +6,11 @@
  */
 
 #include "defs.h"
-#include "gateway.h"
-#include "gateway_default_handler.h"
-#include "scheduler.h"
-#include "tc_set.h"
-#include "log.h"
-#include "lq_plugin.h"
+#include "gateway.h" /* gateway_entry */
+#include "gateway_default_handler.h" /* GW_DEFAULT_STABLE_COUNT */
+#include "tc_set.h" /* olsr_lookup_tc_entry() */
+#include "lq_plugin.h" /* ROUTE_COST_BROKEN */
 
-#include "assert.h"
 
 #ifdef LINUX_NETLINK_ROUTING
 static uint32_t gw_def_nodecount, gw_def_stablecount;

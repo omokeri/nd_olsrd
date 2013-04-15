@@ -151,7 +151,7 @@ SUBDIRS := dot_draw httpinfo mini pgraph secure txtinfo
 else
 ifeq ($(OS),android)
 # nameservice: no regex
-SUBDIRS := bmf dot_draw dyn_gw_plain httpinfo mini quagga secure tas txtinfo watchdog
+SUBDIRS := bmf dot_draw dyn_gw_plain httpinfo mini quagga secure tas txtinfo watchdog link_probe
 else
 SUBDIRS := dot_draw dyn_gw dyn_gw_plain httpinfo mini nameservice pgraph secure txtinfo watchdog
 endif
@@ -167,25 +167,20 @@ libs_clean clean_libs:
 libs_install install_libs:
 		set -e;for dir in $(SUBDIRS);do $(MAKECMD) -C lib/$$dir LIBDIR=$(LIBDIR) install;done
 
-httpinfo:
-		$(MAKECMD) -C lib/httpinfo clean
-		$(MAKECMD) -C lib/httpinfo 
-		$(MAKECMD) -C lib/httpinfo DESTDIR=$(DESTDIR) install 
+arprefresh:
+		$(MAKECMD) -C lib/arprefresh clean
+		$(MAKECMD) -C lib/arprefresh
+		$(MAKECMD) -C lib/arprefresh DESTDIR=$(DESTDIR) install
 
-tas:
-		$(MAKECMD) -C lib/tas clean
-		$(MAKECMD) -C lib/tas
-		$(MAKECMD) -C lib/tas DESTDIR=$(DESTDIR) install
+bmf:
+		$(MAKECMD) -C lib/bmf clean
+		$(MAKECMD) -C lib/bmf 
+		$(MAKECMD) -C lib/bmf DESTDIR=$(DESTDIR) install 
 
 dot_draw:
 		$(MAKECMD) -C lib/dot_draw clean
 		$(MAKECMD) -C lib/dot_draw
 		$(MAKECMD) -C lib/dot_draw DESTDIR=$(DESTDIR) install
-
-nameservice:
-		$(MAKECMD) -C lib/nameservice clean
-		$(MAKECMD) -C lib/nameservice
-		$(MAKECMD) -C lib/nameservice DESTDIR=$(DESTDIR) install
 
 dyn_gw:
 		$(MAKECMD) -C lib/dyn_gw clean
@@ -197,39 +192,60 @@ dyn_gw_plain:
 		$(MAKECMD) -C lib/dyn_gw_plain
 		$(MAKECMD) -C lib/dyn_gw_plain DESTDIR=$(DESTDIR) install
 
-secure:
-		$(MAKECMD) -C lib/secure clean
-		$(MAKECMD) -C lib/secure
-		$(MAKECMD) -C lib/secure DESTDIR=$(DESTDIR) install
+httpinfo:
+		$(MAKECMD) -C lib/httpinfo clean
+		$(MAKECMD) -C lib/httpinfo 
+		$(MAKECMD) -C lib/httpinfo DESTDIR=$(DESTDIR) install 
+
+link_probe:
+		$(MAKECMD) -C lib/link_probe clean
+		$(MAKECMD) -C lib/link_probe
+		$(MAKECMD) -C lib/link_probe DESTDIR=$(DESTDIR) install
+
+mdns:
+		$(MAKECMD) -C lib/mdns clean
+		$(MAKECMD) -C lib/mdns 
+		$(MAKECMD) -C lib/mdns DESTDIR=$(DESTDIR) install 
+
+mini:
+		$(MAKECMD) -C lib/mini clean
+		$(MAKECMD) -C lib/mini 
+		$(MAKECMD) -C lib/mini DESTDIR=$(DESTDIR) install 
+
+nameservice:
+		$(MAKECMD) -C lib/nameservice clean
+		$(MAKECMD) -C lib/nameservice
+		$(MAKECMD) -C lib/nameservice DESTDIR=$(DESTDIR) install
+
+p2pd:
+		$(MAKECMD) -C lib/p2pd clean
+		$(MAKECMD) -C lib/p2pd 
+		$(MAKECMD) -C lib/p2pd DESTDIR=$(DESTDIR) install 
 
 pgraph:
 		$(MAKECMD) -C lib/pgraph clean
 		$(MAKECMD) -C lib/pgraph 
 		$(MAKECMD) -C lib/pgraph DESTDIR=$(DESTDIR) install 
 
-bmf:
-		$(MAKECMD) -C lib/bmf clean
-		$(MAKECMD) -C lib/bmf 
-		$(MAKECMD) -C lib/bmf DESTDIR=$(DESTDIR) install 
-
 quagga:
 		$(MAKECMD) -C lib/quagga clean
 		$(MAKECMD) -C lib/quagga 
 		$(MAKECMD) -C lib/quagga DESTDIR=$(DESTDIR) install 
 
-mdns:
-		$(MAKECMD) -C lib/mdns clean
-		$(MAKECMD) -C lib/mdns 
-		$(MAKECMD) -C lib/mdns DESTDIR=$(DESTDIR) install 
+secure:
+		$(MAKECMD) -C lib/secure clean
+		$(MAKECMD) -C lib/secure
+		$(MAKECMD) -C lib/secure DESTDIR=$(DESTDIR) install
+
+tas:
+		$(MAKECMD) -C lib/tas clean
+		$(MAKECMD) -C lib/tas
+		$(MAKECMD) -C lib/tas DESTDIR=$(DESTDIR) install
+
 txtinfo:
 		$(MAKECMD) -C lib/txtinfo clean
 		$(MAKECMD) -C lib/txtinfo 
 		$(MAKECMD) -C lib/txtinfo DESTDIR=$(DESTDIR) install 
-
-arprefresh:
-		$(MAKECMD) -C lib/arprefresh clean
-		$(MAKECMD) -C lib/arprefresh
-		$(MAKECMD) -C lib/arprefresh DESTDIR=$(DESTDIR) install
 
 watchdog:
 		$(MAKECMD) -C lib/watchdog clean

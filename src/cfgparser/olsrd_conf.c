@@ -45,6 +45,7 @@
 #include "defs.h"
 #include "net_olsr.h"
 #include "olsr.h"
+#include "link_set.h" /* LINK_LOSS_MULTIPLIER */
 
 #include <assert.h>
 #include <stdio.h>
@@ -203,11 +204,24 @@ olsrd_print_interface_cnf(struct if_config_options *cnf, struct if_config_option
 
   for (mult = cnf->lq_mult; mult != NULL; mult = mult->next) {
     lq_mult_cnt++;
-    printf("\tLinkQualityMult          : %s %0.2f %s\n", inet_ntop(olsr_cnf->ip_version, &mult->addr, ipv6_buf, sizeof(ipv6_buf)),
-      (float)(mult->value) / 65536.0, ((lq_mult_cnt > cnf->orig_lq_mult_cnt)?" (d)":""));
+    printf(
+      "\tLinkQualityMult          : %s %0.2f%s\n", 
+      inet_ntop(olsr_cnf->ip_version, &mult->addr, ipv6_buf, sizeof(ipv6_buf)),
+      (float)(mult->value) / 65536.0,
+      ((lq_mult_cnt > cnf->orig_lq_mult_cnt)?" (d)":""));
   }
 
   printf("\tAutodetect changes       : %s%s\n", cnf->autodetect_chg ? "yes" : "no",DEFAULT_STR(autodetect_chg));
+
+  printf("\tMedium Type              : %s\n",
+         cnf->cost.medium_type == 2 ? "Wireless" :
+         cnf->cost.medium_type == 1 ? "Wired-electrical" :
+         cnf->cost.medium_type == 0 ? "Wired-optical" :
+         "Unknown");
+  printf("\tMedium Type Weight       : %0.2f%s\n", cnf->cost.weight_medium_type, DEFAULT_STR(cost.weight_medium_type));
+  printf("\tMedium Speed             : %0.2f%s\n", cnf->cost.medium_speed, DEFAULT_STR(cost.medium_speed));
+  printf("\tMedium Time Weight       : %0.2f%s\n", cnf->cost.weight_medium_time, DEFAULT_STR(cost.weight_medium_time));
+  printf("\tUser Added Cost          : %0.2f%s\n", cnf->cost.user_added_cost, DEFAULT_STR(cost.user_added_cost));
 }
 
 #ifdef linux
@@ -403,6 +417,37 @@ int olsrd_sanity_check_interface_cnf(struct if_config_options * io, struct olsrd
       return -1;
     }
   }
+
+  /* Medium Type */
+  if((int)io->cost.medium_type < MIN_MEDIUM_TYPE || io->cost.medium_type > MAX_MEDIUM_TYPE) {
+    fprintf(stderr, "Medium type %d is not allowed\n", io->cost.medium_type);
+    return -1;
+  }
+
+  /* Medium Type Weight */  
+  if(io->cost.weight_medium_type < MIN_WEIGHT_MTYPE || io->cost.weight_medium_type > MAX_WEIGHT_MTYPE) {
+    fprintf(stderr, "Medium type weight %0.2f is not allowed\n", io->cost.weight_medium_type);
+    return -1;
+  }
+
+  /* Initial Estimation for Medium speed */
+  if(io->cost.medium_speed < MIN_MEDIUM_SPEED || io->cost.medium_speed > MAX_MEDIUM_SPEED) {
+    fprintf(stderr, "Estimation for Medium speed %0.2f is not allowed\n", io->cost.medium_speed);
+    return -1;
+  }
+
+  /* Medium time weight */
+  if(io->cost.weight_medium_time < MIN_WEIGHT_MTIME || io->cost.weight_medium_time > MAX_WEIGHT_MTIME) {
+    fprintf(stderr, "Medium time weight %0.2f is not allowed\n", io->cost.weight_medium_time);
+    return -1;
+  }
+
+  /* User added cost */
+  if(io->cost.user_added_cost < MIN_USER_ADDED_COST || io->cost.user_added_cost > MAX_USER_ADDED_COST) {
+    fprintf(stderr, "User added cost %0.2f is not allowed\n", io->cost.user_added_cost);
+    return -1;
+  }
+
   return 0;
 }
 
@@ -798,6 +843,12 @@ get_default_if_config(void)
   io->hna_params.emission_interval = HNA_INTERVAL;
   io->hna_params.validity_time = HNA_HOLD_TIME;
   io->autodetect_chg = true;
+
+  io->cost.medium_type = DEF_MEDIUM_TYPE;
+  io->cost.weight_medium_type = DEF_WEIGHT_MTYPE;
+  io->cost.medium_speed = DEF_MEDIUM_SPEED;
+  io->cost.weight_medium_time = DEF_WEIGHT_MTIME;
+  io->cost.user_added_cost = DEF_USER_ADDED_COST;
 
   return io;
 

@@ -39,6 +39,7 @@
  * Dynamic linked library for the olsr.org olsr daemon
  */
 
+#include "olsr_protocol.h" /* pkt_olsr_packet_v4 */
 #include "olsrd_secure.h"
 
 #include <stdio.h>
@@ -134,21 +135,21 @@ char aes_key[16];
 #if 0
 static void olsr_event(void);
 #endif
-static int send_challenge(struct interface *olsr_if, const union olsr_ip_addr *);
-static int send_cres(struct interface *olsr_if, union olsr_ip_addr *, union olsr_ip_addr *, uint32_t, struct stamp *);
-static int send_rres(struct interface *olsr_if, union olsr_ip_addr *, union olsr_ip_addr *, uint32_t);
-static int parse_challenge(struct interface *olsr_if, char *);
-static int parse_cres(struct interface *olsr_if, char *);
+static int send_challenge(struct network_interface *olsr_if, const union olsr_ip_addr *);
+static int send_cres(struct network_interface *olsr_if, union olsr_ip_addr *, union olsr_ip_addr *, uint32_t, struct stamp *);
+static int send_rres(struct network_interface *olsr_if, union olsr_ip_addr *, union olsr_ip_addr *, uint32_t);
+static int parse_challenge(struct network_interface *olsr_if, char *);
+static int parse_cres(struct network_interface *olsr_if, char *);
 static int parse_rres(char *);
-static int check_auth(struct interface *olsr_if, char *, int *);
+static int check_auth(struct network_interface *olsr_if, char *, int *);
 #if 0
 static int ipc_send(char *, int);
 #endif
 static int add_signature(uint8_t *, int *);
-static int validate_packet(struct interface *olsr_if, const char *, int *);
-static char *secure_preprocessor(char *packet, struct interface *olsr_if, union olsr_ip_addr *from_addr, int *length);
+static int validate_packet(struct network_interface *olsr_if, const char *, int *);
+static char *secure_preprocessor(char *packet, struct network_interface *olsr_if, union olsr_ip_addr *from_addr, int *length);
 static void timeout_timestamps(void *);
-static int check_timestamp(struct interface *olsr_if, const union olsr_ip_addr *, time_t);
+static int check_timestamp(struct network_interface *olsr_if, const union olsr_ip_addr *, time_t);
 static struct stamp *lookup_timestamp_entry(const union olsr_ip_addr *);
 static int read_key_from_file(const char *);
 
@@ -232,9 +233,9 @@ ipc_send(char *data __attribute__ ((unused)), int size __attribute__ ((unused)))
 #endif
 
 static char *
-secure_preprocessor(char *packet, struct interface *olsr_if, union olsr_ip_addr *from_addr, int *length)
+secure_preprocessor(char *packet, struct network_interface *olsr_if, union olsr_ip_addr *from_addr, int *length)
 {
-  struct olsr *olsr = (struct olsr *)packet;
+  struct pkt_olsr_packet_v4 *olsr = (struct pkt_olsr_packet_v4 *)packet;
   struct ipaddr_str buf;
 
   /*
@@ -254,7 +255,7 @@ secure_preprocessor(char *packet, struct interface *olsr_if, union olsr_ip_addr 
   olsr_printf(1, "[ENC]Packet from %s OK size %d\n", olsr_ip_to_string(&buf, from_addr), *length);
 
   /* Fix OLSR packet header */
-  olsr->olsr_packlen = htons(*length);
+  olsr->packlen = htons(*length);
   return packet;
 }
 
@@ -266,7 +267,7 @@ secure_preprocessor(char *packet, struct interface *olsr_if, union olsr_ip_addr 
  *
  */
 static int
-check_auth(struct interface *olsr_if, char *pck, int *size __attribute__ ((unused)))
+check_auth(struct network_interface *olsr_if, char *pck, int *size __attribute__ ((unused)))
 {
 
   olsr_printf(3, "[ENC]Checking packet for challenge response message...\n");
@@ -314,7 +315,7 @@ add_signature(uint8_t * pck, int *size)
 
   msg = (struct s_olsrmsg *)ARM_NOWARN_ALIGN(&pck[*size]);
   /* Update size */
-  ((struct olsr *)pck)->olsr_packlen = htons(*size + sizeof(struct s_olsrmsg));
+  ((struct pkt_olsr_packet_v4 *)pck)->packlen = htons(*size + sizeof(struct s_olsrmsg));
 
   /* Fill packet header */
   msg->olsr_msgtype = MESSAGE_TYPE;
@@ -372,7 +373,7 @@ add_signature(uint8_t * pck, int *size)
 }
 
 static int
-validate_packet(struct interface *olsr_if, const char *pck, int *size)
+validate_packet(struct network_interface *olsr_if, const char *pck, int *size)
 {
   int packetsize;
   uint8_t sha1_hash[SIGNATURE_SIZE];
@@ -492,7 +493,7 @@ one_checksum_SHA:
 }
 
 int
-check_timestamp(struct interface *olsr_if, const union olsr_ip_addr *originator, time_t tstamp)
+check_timestamp(struct network_interface *olsr_if, const union olsr_ip_addr *originator, time_t tstamp)
 {
   struct stamp *entry;
   int diff;
@@ -542,7 +543,7 @@ check_timestamp(struct interface *olsr_if, const union olsr_ip_addr *originator,
  */
 
 int
-send_challenge(struct interface *olsr_if, const union olsr_ip_addr *new_host)
+send_challenge(struct network_interface *olsr_if, const union olsr_ip_addr *new_host)
 {
   struct challengemsg cmsg;
   struct stamp *entry;
@@ -615,7 +616,7 @@ send_challenge(struct interface *olsr_if, const union olsr_ip_addr *new_host)
 }
 
 int
-parse_cres(struct interface *olsr_if, char *in_msg)
+parse_cres(struct network_interface *olsr_if, char *in_msg)
 {
   struct c_respmsg *msg;
   uint8_t sha1_hash[SIGNATURE_SIZE];
@@ -786,7 +787,7 @@ parse_rres(char *in_msg)
 }
 
 int
-parse_challenge(struct interface *olsr_if, char *in_msg)
+parse_challenge(struct network_interface *olsr_if, char *in_msg)
 {
   struct challengemsg *msg;
   uint8_t sha1_hash[SIGNATURE_SIZE];
@@ -868,7 +869,7 @@ parse_challenge(struct interface *olsr_if, char *in_msg)
  *
  */
 int
-send_cres(struct interface *olsr_if, union olsr_ip_addr *to, union olsr_ip_addr *from, uint32_t chal_in, struct stamp *entry)
+send_cres(struct network_interface *olsr_if, union olsr_ip_addr *to, union olsr_ip_addr *from, uint32_t chal_in, struct stamp *entry)
 {
   struct c_respmsg crmsg;
   uint32_t challenge;
@@ -946,7 +947,7 @@ send_cres(struct interface *olsr_if, union olsr_ip_addr *to, union olsr_ip_addr 
  *
  */
 static int
-send_rres(struct interface *olsr_if, union olsr_ip_addr *to, union olsr_ip_addr *from, uint32_t chal_in)
+send_rres(struct network_interface *olsr_if, union olsr_ip_addr *to, union olsr_ip_addr *from, uint32_t chal_in)
 {
   struct r_respmsg rrmsg;
   struct ipaddr_str buf;

@@ -178,7 +178,7 @@ const char *fpmtoa(float);
 
 #endif /* USE_FPM */
 
-#endif
+#endif /* _FPM_H */
 
 /*
  * Local Variables:

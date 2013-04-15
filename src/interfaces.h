@@ -39,20 +39,20 @@
  *
  */
 
-#ifndef _OLSR_INTERFACE
-#define _OLSR_INTERFACE
+#ifndef _INTERFACES_H
+#define _INTERFACES_H
 
 #include <sys/types.h>
 #ifdef _MSC_VER
 #include <WS2tcpip.h>
 #undef interface
 #else
-#include <sys/socket.h>
+#include <sys/socket.h> /* sockaddr_in, sockaddr_in6 */
 #endif
 #include <time.h>
 
-#include "olsr_types.h"
-#include "mantissa.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, uint32_t */
+#include "mantissa.h" /* olsr_reltime */
 
 #define IPV6_ADDR_ANY		0x0000U
 
@@ -114,9 +114,9 @@ struct olsr_netbuf {
 
 /**
  *A struct containing all necessary information about each
- *interface participating in the OLSRD routing
+ *network interface participating in the OLSRD routing
  */
-struct interface {
+struct network_interface {
   /* IP version 4 */
   struct sockaddr_in int_addr;         /* address */
   struct sockaddr_in int_netmask;      /* netmask */
@@ -133,6 +133,13 @@ struct interface {
   int send_socket;                     /* The send socket for this interface */
 
   int int_metric;                      /* metric of interface */
+
+  int int_lc_medium_time_weight;       /* Weight of medium time (per-bit) in link cost */
+  int int_lc_medium_speed;             /* Initial estimation for medium speed (Mbits/sec) */
+  int int_lc_medium_type_weight;       /* Weight of medium type in link cost */
+  int int_lc_medium_type;              /* Medium type  (0=wired-optic, 1=wired-electric, 2=wireless, 10=unknown) */
+  int int_lc_offset;                   /* link cost offset value */
+
   int int_mtu;                         /* MTU of interface */
   int int_flags;                       /* see below */
   int if_index;                        /* Kernels index of this interface */
@@ -178,7 +185,7 @@ struct interface {
 
   /* backpointer to olsr_if configuration */
   struct olsr_if *olsr_if;
-  struct interface *int_next;
+  struct network_interface *int_next;
 };
 
 #define OLSR_DEFAULT_MTU             1500
@@ -192,28 +199,28 @@ enum olsr_ifchg_flag {
 };
 
 /* The interface linked-list */
-extern struct interface *ifnet;
+extern struct network_interface *ifnet;
 
 int olsr_init_interfacedb(void);
 void olsr_delete_interfaces(void);
 
-void olsr_trigger_ifchange(int if_index, struct interface *, enum olsr_ifchg_flag);
+void olsr_trigger_ifchange(int if_index, struct network_interface *, enum olsr_ifchg_flag);
 
-struct interface *if_ifwithsock(int);
+struct network_interface *if_ifwithsock(int);
 
-struct interface *if_ifwithaddr(const union olsr_ip_addr *);
+struct network_interface *if_ifwithaddr(const union olsr_ip_addr *);
 
-struct interface *if_ifwithname(const char *);
+struct network_interface *if_ifwithname(const char *);
 struct olsr_if *olsrif_ifwithname(const char *if_name);
 
 const char *if_ifwithindex_name(const int if_index);
 
-struct interface *if_ifwithindex(const int if_index);
+struct network_interface *if_ifwithindex(const int if_index);
 
 struct olsr_if *olsr_create_olsrif(const char *name, int hemu);
 
-int olsr_add_ifchange_handler(void (*f) (int if_index, struct interface *, enum olsr_ifchg_flag));
-int olsr_remove_ifchange_handler(void (*f) (int if_index, struct interface *, enum olsr_ifchg_flag));
+int olsr_add_ifchange_handler(void (*f) (int if_index, struct network_interface *, enum olsr_ifchg_flag));
+int olsr_remove_ifchange_handler(void (*f) (int if_index, struct network_interface *, enum olsr_ifchg_flag));
 
 void olsr_remove_interface(struct olsr_if *);
 
@@ -223,7 +230,7 @@ extern struct olsr_cookie_info *tc_gen_timer_cookie;
 extern struct olsr_cookie_info *mid_gen_timer_cookie;
 extern struct olsr_cookie_info *hna_gen_timer_cookie;
 
-#endif
+#endif /* _INTERFACES_H */
 
 /*
  * Local Variables:

@@ -39,13 +39,17 @@
  *
  */
 
+/* System includes */
+#include <stdlib.h> /* free() */
+
+/* OLSRD includes */
+#include "defs.h" /* olsr_cnf */
+#include "scheduler.h" /* olsr_set_timer */
+#include "olsr.h" /* olsr_calloc */
+#include "ipcalc.h" /* ipaddr_str */
+#include "olsr_protocol.h" /* pkt_olsr_message */
+#include "mid_set.h" /* mid_lookup_main_addr */
 #include "duplicate_set.h"
-#include "ipcalc.h"
-#include "common/avl.h"
-#include "olsr.h"
-#include "mid_set.h"
-#include "scheduler.h"
-#include "mantissa.h"
 
 static void olsr_cleanup_duplicate_entry(void *unused);
 
@@ -74,7 +78,7 @@ struct dup_entry *
 olsr_create_duplicate_entry(void *ip, uint16_t seqnr)
 {
   struct dup_entry *entry;
-  entry = olsr_malloc(sizeof(struct dup_entry), "New duplicate entry");
+  entry = olsr_calloc(sizeof(struct dup_entry), "New duplicate entry");
   if (entry != NULL) {
     memcpy(&entry->ip, ip, olsr_cnf->ip_version == AF_INET ? sizeof(entry->ip.v4) : sizeof(entry->ip.v6));
     entry->seqnr = seqnr;
@@ -113,7 +117,7 @@ int olsr_seqno_diff(uint16_t seqno1, uint16_t seqno2) {
 }
 
 int
-olsr_message_is_duplicate(union olsr_message *m)
+olsr_message_is_duplicate(union pkt_olsr_message *m)
 {
   struct dup_entry *entry;
   int diff;

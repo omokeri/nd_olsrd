@@ -40,20 +40,26 @@
  *
  */
 
-#ifndef _OLSR_TOP_SET
-#define _OLSR_TOP_SET
+#ifndef _TC_SET_H
+#define _TC_SET_H
 
-#include "defs.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, uint32_t, olsr_ip_addr, olsr_linkcost */
 #include "packet.h"
-#include "common/avl.h"
-#include "common/list.h"
+#include "common/avl.h" /* avl_node, AVLNODE2STRUCT */
+#include "common/list.h" /* list_node, LISTNODE2STRUCT */
 #include "scheduler.h"
 
+/* Forward declarations */
+struct tc_edge_entry;
+struct tc_entry;
+union pkt_olsr_message;
+struct network_interface;
+
 /*
- * This file holds the definitions for the link state database.
- * The lsdb consists of nodes and edges.
- * During input parsing all nodes and edges are extracted and synthesized.
- * The SPF calculation operates on these datasets.
+ * This file holds the definitions for the link state database (LSDB).
+ * The LSDB consists of nodes and edges.
+ * During the parsing of TC messages, all nodes and edges are extracted and
+ * synthesized. The SPF calculation operates on these datasets.
  */
 
 struct tc_edge_entry {
@@ -61,9 +67,8 @@ struct tc_edge_entry {
   union olsr_ip_addr T_dest_addr;      /* edge_node key */
   struct tc_edge_entry *edge_inv;      /* shortcut, used during SPF calculation */
   struct tc_entry *tc;                 /* backpointer to owning tc entry */
-  olsr_linkcost cost;                  /* metric used for SPF calculation */
+  olsr_linkcost link_cost;             /* metric used for SPF calculation */
   uint16_t ansn;                       /* ansn of this edge, used for multipart msgs */
-  uint32_t linkquality[0];
 };
 
 AVLNODE2STRUCT(edge_tree2tc_edge, struct tc_edge_entry, edge_node);
@@ -71,7 +76,7 @@ AVLNODE2STRUCT(edge_tree2tc_edge, struct tc_edge_entry, edge_node);
 struct tc_entry {
   struct avl_node vertex_node;         /* node keyed by ip address */
   union olsr_ip_addr addr;             /* vertex_node key */
-  struct avl_node cand_tree_node;      /* SPF candidate heap, node keyed by path_etx */
+  struct avl_node cand_tree_node;      /* SPF candidate heap, node keyed by path_cost */
   olsr_linkcost path_cost;             /* SPF calculated distance, cand_tree_node key */
   struct list_node path_list_node;     /* SPF result list */
   struct avl_tree edge_tree;           /* subtree for edges */
@@ -147,8 +152,8 @@ void olsr_change_myself_tc(void);
 void olsr_print_tc_table(void);
 void olsr_time_out_tc_set(void);
 
-/* tc msg input parser */
-bool olsr_input_tc(union olsr_message *, struct interface *, union olsr_ip_addr *from);
+/* TC message input parser */
+bool olsr_input_tc(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *from);
 
 /* tc_entry manipulation */
 struct tc_entry *olsr_lookup_tc_entry(union olsr_ip_addr *);
@@ -160,14 +165,12 @@ void olsr_unlock_tc_entry(struct tc_entry *);
 bool olsr_delete_outdated_tc_edges(struct tc_entry *);
 char *olsr_tc_edge_to_string(struct tc_edge_entry *);
 struct tc_edge_entry *olsr_lookup_tc_edge(struct tc_entry *, union olsr_ip_addr *);
-struct tc_edge_entry *olsr_add_tc_edge_entry(struct tc_entry *, union olsr_ip_addr *, uint16_t);
+struct tc_edge_entry *olsr_add_tc_edge_entry(struct tc_entry *, union olsr_ip_addr *, uint16_t, olsr_linkcost);
 void olsr_delete_tc_entry(struct tc_entry *);
 void olsr_delete_tc_edge_entry(struct tc_edge_entry *);
-bool olsr_calc_tc_edge_entry_etx(struct tc_edge_entry *);
 void olsr_set_tc_edge_timer(struct tc_edge_entry *, unsigned int);
-// static bool olsr_etx_significant_change(float, float);
 
-#endif
+#endif /* _TC_SET_H */
 
 /*
  * Local Variables:

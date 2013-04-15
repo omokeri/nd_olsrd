@@ -162,7 +162,7 @@ ipc_print_neigh_link(struct neighbor_entry *neighbor)
 
   len =
     sprintf(buf, "add link %s %s\n", olsr_ip_to_string(&main_adr, &olsr_cnf->main_addr),
-            olsr_ip_to_string(&adr, &neighbor->neighbor_main_addr));
+            olsr_ip_to_string(&adr, &neighbor->N_neighbor_main_addr));
   ipc_send(buf, len);
 
 //  if (neighbor->status == 0) { // non SYM

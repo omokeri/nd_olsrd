@@ -49,7 +49,7 @@
 #include <stdlib.h> /* free() */
 
 /* OLSRD includes */
-#include "olsr.h" /* olsr_malloc */
+#include "olsr.h" /* olsr_calloc */
 #include "scheduler.h" /* GET_TIMESTAMP, TIMED_OUT */
 
 /* Plugin includes */
@@ -255,7 +255,7 @@ int CheckAndMarkRecentPacket(u_int32_t crc32)
   } /* for */
 
   /* No duplicate entry found: create one */
-  newEntry = olsr_malloc(sizeof(struct TDupEntry), "BMF: TDupEntry");
+  newEntry = olsr_calloc(sizeof(struct TDupEntry), "BMF: TDupEntry");
   if (newEntry != NULL)
   {
     newEntry->crc32 = crc32;

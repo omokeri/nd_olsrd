@@ -5,12 +5,10 @@
  *      Author: henning
  */
 
-#include "common/list.h"
-#include "defs.h"
-#include "ipcalc.h"
-#include "log.h"
-#include "olsr.h"
-#include "scheduler.h"
+#include "ipcalc.h" /* ipaddr_str */
+#include "log.h" /* olsr_syslog() */
+#include "olsr.h" /* olsr_is_bad_duplicate_msg_seqno () */
+#include "scheduler.h" /* olsr_set_timer() */
 #include "duplicate_handler.h"
 
 #ifndef NO_DUPLICATE_DETECTION_HANDLER

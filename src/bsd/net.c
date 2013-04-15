@@ -235,7 +235,7 @@ net_os_set_global_ifoptions(void) {
   }
 }
 
-int net_os_set_ifoptions(const char *if_name __attribute__ ((unused)), struct interface *iface __attribute__ ((unused))) {
+int net_os_set_ifoptions(const char *if_name __attribute__ ((unused)), struct network_interface *iface __attribute__ ((unused))) {
   return -1;
 }
 
@@ -302,7 +302,7 @@ gethemusocket(struct sockaddr_in *pin)
 }
 
 int
-getsocket(int bufspace, struct interface *ifp __attribute__ ((unused)))
+getsocket(int bufspace, struct network_interface *ifp __attribute__ ((unused)))
 {
   struct sockaddr_in sin;
   int on;
@@ -378,7 +378,7 @@ getsocket(int bufspace, struct interface *ifp __attribute__ ((unused)))
 }
 
 int
-getsocket6(int bufspace, struct interface *ifp __attribute__ ((unused)))
+getsocket6(int bufspace, struct network_interface *ifp __attribute__ ((unused)))
 {
   struct sockaddr_in6 sin;
   int on;
@@ -454,7 +454,7 @@ getsocket6(int bufspace, struct interface *ifp __attribute__ ((unused)))
 }
 
 int
-join_mcast(struct interface *ifs, int sock)
+join_mcast(struct network_interface *ifs, int sock)
 {
   /* See netinet6/in6.h */
   struct ipaddr_str addrstr;
@@ -578,7 +578,7 @@ olsr_sendto(int s, const void *buf, size_t len, int flags __attribute__ ((unused
   int status;
   struct sockaddr_in *to_in = (struct sockaddr_in *)to;
   u_int32_t destip;
-  struct interface *iface;
+  struct network_interface *iface;
 
   udp_tag = ip_tag = ether_tag = 0;
   destip = to_in->sin_addr.s_addr;
@@ -673,7 +673,7 @@ olsr_recvfrom(int s, void *buf, size_t len, int flags __attribute__ ((unused)), 
   struct sockaddr_in6 *sin6;
   struct in6_addr *iaddr6;
   struct in6_pktinfo *pkti;
-  struct interface *ifc;
+  struct network_interface *ifc;
   char addrstr[INET6_ADDRSTRLEN];
   char iname[IFNAMSIZ];
   int count;

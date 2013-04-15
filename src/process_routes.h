@@ -39,11 +39,14 @@
  *
  */
 
-#ifndef _OLSR_PROCESS_RT
-#define _OLSR_PROCESS_RT
+#ifndef _PROCESS_ROUTES_H
+#define _PROCESS_ROUTES_H
 
-#include "routing_table.h"
-#include <sys/ioctl.h>
+#include "olsr_types.h" /* uint8_t */
+//#include <sys/ioctl.h>
+
+/* Forward declarations */
+struct rt_entry;
 
 typedef int (*export_route_function) (const struct rt_entry *);
 
@@ -60,7 +63,7 @@ uint8_t olsr_rt_flags(const struct rt_entry *);
 void olsr_delete_interface_routes(int if_index);
 void olsr_force_kernelroutes_refresh(void);
 
-#endif
+#endif /* _PROCESS_ROUTES_H */
 
 /*
  * Local Variables:

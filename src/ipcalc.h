@@ -39,15 +39,16 @@
  *
  */
 
-#ifndef _IPCALC
-#define _IPCALC
+#ifndef _IPCALC_H
+#define _IPCALC_H
 
-#include "olsr_types.h"
-#include "defs.h"
+#include <arpa/inet.h>  /* inet_ntop() */
 
-#include <limits.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#include "olsr_types.h" /* olsr_ip_prefix, olsr_ip_addr */
+#include "defs.h" /* MAX */
+
+//#include <limits.h>
+//#include <netinet/in.h>
 
 extern const struct olsr_ip_prefix ipv4_internet_route;
 extern const struct olsr_ip_prefix ipv6_mappedv4_route;
@@ -207,7 +208,7 @@ ip_prefix_is_v6_inetgw(const struct olsr_ip_prefix *prefix) {
 
 extern bool is_prefix_inetgw(const struct olsr_ip_prefix *prefix);
 
-#endif
+#endif /* _IPCALC_H */
 
 /*
  * Local Variables:

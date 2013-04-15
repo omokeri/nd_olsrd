@@ -65,7 +65,7 @@
 #include <errno.h>
 
 #include "ipcalc.h"
-#include "olsr.h"
+#include "olsr.h" /* olsr_calloc() */
 #include "olsr_types.h"
 #include "neighbor_table.h"
 #include "two_hop_neighbor_table.h"
@@ -78,6 +78,8 @@
 #include "lq_plugin.h"
 #include "common/autobuf.h"
 #include "gateway.h"
+#include "olsr_protocol.h" /* SYM */
+#include "routing_table.h" /* OLSR_FOR_ALL_RT_ENTRIES */
 
 #include "olsrd_txtinfo.h"
 #include "olsrd_plugin.h"
@@ -332,8 +334,8 @@ ipc_print_neigh(struct autobuf *abuf)
 
   /* Neighbors */
   OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
-    abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr), (neigh->status == SYM) ? "YES" : "NO",
-              neigh->is_mpr ? "YES" : "NO", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO", neigh->willingness);
+    abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t", olsr_ip_to_string(&buf1, &neigh->N_neighbor_main_addr), (neigh->N_status == SYM) ? "YES" : "NO",
+              neigh->is_mpr ? "YES" : "NO", olsr_lookup_mprs_set(&neigh->N_neighbor_main_addr) ? "YES" : "NO", neigh->N_willingness);
     thop_cnt = 0;
 
     for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
@@ -369,12 +371,12 @@ ipc_print_link(struct autobuf *abuf)
               olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
               diff/1000, abs(diff%1000),
               get_link_entry_text(my_link, '\t', &lqbuffer1),
-              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+              get_linkcost_text(my_link->link_cost, false, &lqbuffer2));
 #else
     abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
               olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
               get_link_entry_text(my_link, '\t', &lqbuffer1),
-              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+              get_linkcost_text(my_link->link_cost, false, &lqbuffer2));
 #endif
   } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
 
@@ -388,14 +390,19 @@ ipc_print_routes(struct autobuf *abuf)
   struct rt_entry *rt;
   struct lqtextbuffer lqbuffer;
 
-  abuf_puts(abuf, "Table: Routes\nDestination\tGateway IP\tMetric\tETX\tInterface\n");
+  abuf_puts(abuf, "Table: Routes\nDestination\tGateway IP\tMetric\tCost\tInterface\n");
 
   /* Walk the route table */
   OLSR_FOR_ALL_RT_ENTRIES(rt) {
-    abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &rt->rt_dst.prefix), rt->rt_dst.prefix_len,
-              olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway), rt->rt_best->rtp_metric.hops,
-              get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer),
-              if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+    abuf_appendf(
+      abuf,
+      "%s/%d\t%s\t%d\t%s\t%s\t\n",
+      olsr_ip_to_string(&buf1, &rt->rt_dst.prefix),
+      rt->rt_dst.prefix_len,
+      olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway),
+      rt->rt_best->rtp_metric.hops,
+      get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer),
+      if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
   } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
 
   abuf_puts(abuf, "\n");
@@ -419,18 +426,25 @@ ipc_print_topology(struct autobuf *abuf)
     OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
       if (tc_edge->edge_inv) {
         struct ipaddr_str dstbuf, addrbuf;
-        struct lqtextbuffer lqbuffer1, lqbuffer2;
+        struct lqtextbuffer lqbuffer;
 #ifdef ACTIVATE_VTIME_TXTINFO
         uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
         int diff = (int)(vt);
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
-            olsr_ip_to_string(&addrbuf, &tc->addr),
-            get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
-            get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
-            diff/1000, diff%1000);
+        abuf_appendf(
+          abuf,
+          "%s\t%s\t%s\t%s\t%d.%03d\n",
+          olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
+          olsr_ip_to_string(&addrbuf, &tc->addr),
+          get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
+          get_linkcost_text(tc_edge->link_cost, false, &lqbuffer),
+          diff/1000, diff%1000);
 #else
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
-                  get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
+        abuf_appendf(
+          abuf,
+          "%s\t%s\t%s\n",
+          olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
+          olsr_ip_to_string(&addrbuf, &tc->addr),
+          get_linkcost_text(tc_edge->link_cost, false, &lqbuffer));
 #endif
       }
     } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
@@ -702,7 +716,7 @@ send_info(int send_what, int the_socket)
   if (send_what == SIW_CONFIG)
     ipc_print_config(&abuf);
 
-  outbuffer[outbuffer_count] = olsr_malloc(abuf.len, "txt output buffer");
+  outbuffer[outbuffer_count] = olsr_calloc(abuf.len, "txt output buffer");
   outbuffer_size[outbuffer_count] = abuf.len;
   outbuffer_written[outbuffer_count] = 0;
   outbuffer_socket[outbuffer_count] = the_socket;

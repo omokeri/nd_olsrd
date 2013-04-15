@@ -17,6 +17,8 @@
  * Description        : functions to parse received zebra packets
  * ------------------------------------------------------------------------- */
 
+#include <stdlib.h> /* free() */
+
 #include "defs.h"
 #include "olsr.h"
 
@@ -51,7 +53,7 @@ static struct zroute
   memcpy(&length, opt, sizeof length);
   length = ntohs (length);
 
-  r = olsr_malloc(sizeof *r, "QUAGGA: New zebra route");
+  r = olsr_calloc(sizeof *r, "QUAGGA: New zebra route");
   pnt = (zebra.version ? &opt[6] : &opt[3]);
   r->type = *pnt++;
   r->flags = *pnt++;
@@ -70,7 +72,7 @@ static struct zroute
     case 1:
       if (r->message & ZAPI_MESSAGE_NEXTHOP) {
         r->nexthop_num = *pnt++;
-        r->nexthop = olsr_malloc((sizeof *r->nexthop) * r->nexthop_num, "QUAGGA: New zebra route nexthop");
+        r->nexthop = olsr_calloc((sizeof *r->nexthop) * r->nexthop_num, "QUAGGA: New zebra route nexthop");
         for (c = 0; c < r->nexthop_num; c++) {
           if (olsr_cnf->ip_version == AF_INET) {
             memcpy(&r->nexthop[c].v4.s_addr, pnt, sizeof r->nexthop[c].v4.s_addr);
@@ -84,7 +86,7 @@ static struct zroute
 
       if (r->message & ZAPI_MESSAGE_IFINDEX) {
         r->ifindex_num = *pnt++;
-        r->ifindex = olsr_malloc(sizeof(uint32_t) * r->ifindex_num, "QUAGGA: New zebra route ifindex");
+        r->ifindex = olsr_calloc(sizeof(uint32_t) * r->ifindex_num, "QUAGGA: New zebra route ifindex");
         for (c = 0; c < r->ifindex_num; c++) {
           memcpy(&r->ifindex[c], pnt, sizeof r->ifindex[c]);
           r->ifindex[c] = ntohl (r->ifindex[c]);

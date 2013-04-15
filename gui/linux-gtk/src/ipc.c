@@ -420,13 +420,13 @@ process_hello(int size, olsr_u8_t vtime, union olsr_ip_addr *originator, union h
     //printf("\tNEIGH: 0x%x\n", (int)neigh);
     if (ipversion == AF_INET) {
       nsize = ntohs(neigh->size);
-      type = EXTRACT_STATUS(ntohs(neigh->link_code));
-      link = EXTRACT_LINK(ntohs(neigh->link_code));
+      type = EXTRACT_NEIGHBOR_TYPE(ntohs(neigh->link_code));
+      link = EXTRACT_LINK_TYPE(ntohs(neigh->link_code));
       //printf("TYPE: %d\n", neigh->link_code);
     } else {
       nsize = ntohs(neigh6->size);
-      type = EXTRACT_STATUS(ntohs(neigh6->link_code));
-      link = EXTRACT_LINK(ntohs(neigh6->link_code));
+      type = EXTRACT_NEIGHBOR_TYPE(ntohs(neigh6->link_code));
+      link = EXTRACT_LINK_TYPE(ntohs(neigh6->link_code));
     }
 
     size -= nsize;

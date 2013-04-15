@@ -17,6 +17,8 @@
  * Description        : functions to interface zebra with olsrd
  * ------------------------------------------------------------------------- */
 
+#include <stdlib.h> /* EXIT_FAILURE  */
+
 #include "defs.h"
 #include "olsr.h"
 #include "log.h"
@@ -33,7 +35,7 @@ zebra_init(void)
 {
 
   memset(&zebra, 0, sizeof zebra);
-  zebra.sockpath = olsr_malloc(sizeof ZEBRA_SOCKPATH  + 1, "QUAGGA: New socket path");
+  zebra.sockpath = olsr_calloc(sizeof ZEBRA_SOCKPATH  + 1, "QUAGGA: New socket path");
   strscpy(zebra.sockpath, ZEBRA_SOCKPATH, sizeof ZEBRA_SOCKPATH);
 
 }
@@ -81,11 +83,11 @@ zebra_addroute(const struct rt_entry *r)
     return 0;			/* Quagga BUG workaround: don't add routes with destination = gateway
 				   see http://lists.olsr.org/pipermail/olsr-users/2006-June/001726.html */
     route.ifindex_num++;
-    route.ifindex = olsr_malloc(sizeof *route.ifindex, "QUAGGA: New zebra route ifindex");
+    route.ifindex = olsr_calloc(sizeof *route.ifindex, "QUAGGA: New zebra route ifindex");
     *route.ifindex = r->rt_best->rtp_nexthop.iif_index;
   } else {
     route.nexthop_num++;
-    route.nexthop = olsr_malloc(sizeof *route.nexthop, "QUAGGA: New zebra route nexthop");
+    route.nexthop = olsr_calloc(sizeof *route.nexthop, "QUAGGA: New zebra route nexthop");
     if (olsr_cnf->ip_version == AF_INET)
       route.nexthop->v4.s_addr = r->rt_best->rtp_nexthop.gateway.v4.s_addr;
     else
@@ -132,11 +134,11 @@ zebra_delroute(const struct rt_entry *r)
     return 0;			/* Quagga BUG workaround: don't delete routes with destination = gateway
 				   see http://lists.olsr.org/pipermail/olsr-users/2006-June/001726.html */
     route.ifindex_num++;
-    route.ifindex = olsr_malloc(sizeof *route.ifindex, "QUAGGA: New zebra route ifindex");
+    route.ifindex = olsr_calloc(sizeof *route.ifindex, "QUAGGA: New zebra route ifindex");
     *route.ifindex = r->rt_nexthop.iif_index;
   } else {
     route.nexthop_num++;
-    route.nexthop = olsr_malloc(sizeof *route.nexthop, "QUAGGA: New zebra route nexthop");
+    route.nexthop = olsr_calloc(sizeof *route.nexthop, "QUAGGA: New zebra route nexthop");
     if (olsr_cnf->ip_version == AF_INET)
       route.nexthop->v4.s_addr = r->rt_nexthop.gateway.v4.s_addr;
     else

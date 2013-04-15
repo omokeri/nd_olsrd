@@ -101,7 +101,6 @@ int olsrd_plugin_init(void)
   olsr_start_timer(3 * MSEC_PER_SEC, 0, OLSR_TIMER_PERIODIC,
                    &PrunePacketHistory, NULL, 0);
 
-
   return InitBmf(NULL);
 }
 

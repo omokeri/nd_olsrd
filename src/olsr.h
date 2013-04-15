@@ -39,11 +39,15 @@
  *
  */
 
-#ifndef _OLSR_FUNCTIONS
-#define _OLSR_FUNCTIONS
+#ifndef _OLSR_H
+#define _OLSR_H
 
-#include "olsr_protocol.h"
-#include "interfaces.h"
+#include "olsr_types.h" /* uint8_t, uint16_t */
+
+/* Forward declarations */
+union pkt_olsr_message;
+struct network_interface;
+union olsr_ip_addr;
 
 extern bool changes_topology;
 extern bool changes_neighborhood;
@@ -65,9 +69,9 @@ uint16_t get_msg_seqno(void);
 
 bool olsr_is_bad_duplicate_msg_seqno(uint16_t seqno);
 
-int olsr_forward_message(union olsr_message *, struct interface *, union olsr_ip_addr *);
+int olsr_forward_message(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
-void set_buffer_timer(struct interface *);
+void set_buffer_timer(struct network_interface *);
 
 void olsr_init_tables(void);
 
@@ -85,13 +89,13 @@ const char *olsr_status_to_string(uint8_t);
 
 void olsr_exit(const char *, int);
 
-void *olsr_malloc(size_t, const char *);
+void *olsr_calloc(size_t, const char *);
 
 int olsr_printf(int, const char *, ...) __attribute__ ((format(printf, 2, 3)));
 
 void olsr_trigger_forced_update(void *);
 
-#endif
+#endif /* _OLSR_H */
 
 /*
  * Local Variables:

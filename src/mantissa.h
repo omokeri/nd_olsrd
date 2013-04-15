@@ -39,10 +39,10 @@
  *
  */
 
-#ifndef _OLSR_MANTISSA
-#define _OLSR_MANTISSA
+#ifndef _MANTISSA_H
+#define _MANTISSA_H
 
-#include "olsr_types.h"
+#include "olsr_types.h" /* uint8_t, uint32_t */
 
 /* olsr_reltime is a relative timestamp measured in microseconds */
 typedef uint32_t olsr_reltime;
@@ -64,7 +64,7 @@ olsr_reltime me_to_reltime(const uint8_t);
 
 uint8_t reltime_to_me(const olsr_reltime);
 
-#endif
+#endif /* _MANTISSA_H */
 
 /*
  * Local Variables:

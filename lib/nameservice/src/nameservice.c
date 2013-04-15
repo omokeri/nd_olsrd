@@ -48,6 +48,7 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <fcntl.h>
+#include <errno.h> /* errno */
 
 #include "olsr.h"
 #include "ipcalc.h"
@@ -61,6 +62,8 @@
 #include "hna_set.h"
 #include "mid_set.h"
 #include "link_set.h"
+#include "olsr_protocol.h" /* pkt_olsr_message */
+#include "lq_plugin.h" /* lqtextbuffer */
 
 #include "plugin_util.h"
 #include "nameservice.h"
@@ -292,7 +295,7 @@ olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *
 struct name_entry *
 add_name_to_list(struct name_entry *my_list, const char *value, int type, const union olsr_ip_addr *ip)
 {
-  struct name_entry *tmp = olsr_malloc(sizeof(struct name_entry),
+  struct name_entry *tmp = olsr_calloc(sizeof(struct name_entry),
                                        "new name_entry add_name_to_list");
   tmp->name = strndup(value, MAX_NAME);
   tmp->len = strlen(tmp->name);
@@ -349,7 +352,7 @@ static void name_lazy_init(void) {
   nameservice_configured = true;
 
   regex_size = 256 * sizeof(char) + strlen(my_suffix);
-  regex_service = olsr_malloc(regex_size, "new *char from name_init for regex_service");
+  regex_service = olsr_calloc(regex_size, "new *char from name_init for regex_service");
   memset(&ipz, 0, sizeof(ipz));
 
   //compile the regex from the string
@@ -592,8 +595,8 @@ olsr_namesvc_gen(void *foo __attribute__ ((unused)))
 {
   /* send buffer: huge */
   char buffer[10240];
-  union olsr_message *message = (union olsr_message *)buffer;
-  struct interface *ifn;
+  union pkt_olsr_message *message = (union pkt_olsr_message *)buffer;
+  struct network_interface *ifn;
   int namesize;
 
   if (!nameservice_configured) {
@@ -605,30 +608,30 @@ olsr_namesvc_gen(void *foo __attribute__ ((unused)))
   /* fill message */
   if (olsr_cnf->ip_version == AF_INET) {
     /* IPv4 */
-    message->v4.olsr_msgtype = MESSAGE_TYPE;
-    message->v4.olsr_vtime = reltime_to_me(my_timeout * MSEC_PER_SEC);
+    message->v4.msgtype = MESSAGE_TYPE;
+    message->v4.vtime = reltime_to_me(my_timeout * MSEC_PER_SEC);
     memcpy(&message->v4.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     message->v4.ttl = MAX_TTL;
     message->v4.hopcnt = 0;
     message->v4.seqno = htons(get_msg_seqno());
 
     namesize = encap_namemsg((struct namemsg *)ARM_NOWARN_ALIGN(&message->v4.message));
-    namesize = namesize + sizeof(struct olsrmsg);
+    namesize = namesize + sizeof(struct pkt_olsr_message_v4);
 
-    message->v4.olsr_msgsize = htons(namesize);
+    message->v4.msgsize = htons(namesize);
   } else {
     /* IPv6 */
-    message->v6.olsr_msgtype = MESSAGE_TYPE;
-    message->v6.olsr_vtime = reltime_to_me(my_timeout * MSEC_PER_SEC);
+    message->v6.msgtype = MESSAGE_TYPE;
+    message->v6.vtime = reltime_to_me(my_timeout * MSEC_PER_SEC);
     memcpy(&message->v6.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     message->v6.ttl = MAX_TTL;
     message->v6.hopcnt = 0;
     message->v6.seqno = htons(get_msg_seqno());
 
     namesize = encap_namemsg((struct namemsg *)ARM_NOWARN_ALIGN(&message->v6.message));
-    namesize = namesize + sizeof(struct olsrmsg6);
+    namesize = namesize + sizeof(struct pkt_olsr_message_v6);
 
-    message->v6.olsr_msgsize = htons(namesize);
+    message->v6.msgsize = htons(namesize);
   }
 
   /* looping trough interfaces */
@@ -649,7 +652,7 @@ olsr_namesvc_gen(void *foo __attribute__ ((unused)))
  * Parse name olsr message of NAME type
  */
 bool
-olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr)
+olsr_parser(union pkt_olsr_message *m, struct network_interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr)
 {
   struct namemsg *namemessage;
   union olsr_ip_addr originator;
@@ -675,12 +678,12 @@ olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unuse
 
   /* Fetch the message based on IP version */
   if (olsr_cnf->ip_version == AF_INET) {
-    vtime = me_to_reltime(m->v4.olsr_vtime);
-    size = ntohs(m->v4.olsr_msgsize);
+    vtime = me_to_reltime(m->v4.vtime);
+    size = ntohs(m->v4.msgsize);
     namemessage = (struct namemsg *)ARM_NOWARN_ALIGN(&m->v4.message);
   } else {
-    vtime = me_to_reltime(m->v6.olsr_vtime);
-    size = ntohs(m->v6.olsr_msgsize);
+    vtime = me_to_reltime(m->v6.vtime);
+    size = ntohs(m->v6.msgsize);
     namemessage = (struct namemsg *)ARM_NOWARN_ALIGN(&m->v6.message);
   }
 
@@ -839,7 +842,7 @@ decap_namemsg(struct name *from_packet, struct name_entry **to, bool * this_tabl
         OLSR_PRINTF(4, "NAME PLUGIN: updating name %s -> %s (%s)\n", already_saved_name_entries->name, name,
                     olsr_ip_to_string(&strbuf, &already_saved_name_entries->ip));
         free(already_saved_name_entries->name);
-        already_saved_name_entries->name = olsr_malloc(len_of_name + 1, "upd name_entry name");
+        already_saved_name_entries->name = olsr_calloc(len_of_name + 1, "upd name_entry name");
         strscpy(already_saved_name_entries->name, name, len_of_name + 1);
 
         *this_table_changed = true;
@@ -863,10 +866,10 @@ decap_namemsg(struct name *from_packet, struct name_entry **to, bool * this_tabl
   }
 
   //if not yet known entry
-  tmp = olsr_malloc(sizeof(struct name_entry), "new name_entry");
+  tmp = olsr_calloc(sizeof(struct name_entry), "new name_entry");
   tmp->type = ntohs(from_packet->type);
   tmp->len = len_of_name > MAX_NAME ? MAX_NAME : ntohs(from_packet->len);
-  tmp->name = olsr_malloc(tmp->len + 1, "new name_entry name");
+  tmp->name = olsr_calloc(tmp->len + 1, "new name_entry name");
   tmp->ip = from_packet->ip;
   strscpy(tmp->name, name, tmp->len + 1);
 
@@ -979,7 +982,7 @@ insert_new_name_in_list(union olsr_ip_addr *originator, struct list_node *this_l
     OLSR_PRINTF(3, "NAME PLUGIN: create new db entry for ip (%s) in hash table\n", olsr_ip_to_string(&strbuf, originator));
 
     /* insert a new entry */
-    entry = olsr_malloc(sizeof(struct db_entry), "new db_entry");
+    entry = olsr_calloc(sizeof(struct db_entry), "new db_entry");
     memset(entry, 0, sizeof(struct db_entry));
 
     entry->originator = *originator;
@@ -1276,8 +1279,11 @@ select_best_nameserver(struct rt_entry **rt)
       /*
        * first is better, swap the pointers.
        */
-      OLSR_PRINTF(6, "NAME PLUGIN: nameserver %s, cost %s\n", olsr_ip_to_string(&strbuf, &rt1->rt_dst.prefix),
-                  get_linkcost_text(rt1->rt_best->rtp_metric.cost, true, &lqbuffer));
+      OLSR_PRINTF(
+        6,
+        "NAME PLUGIN: nameserver %s, cost %s\n",
+        olsr_ip_to_string(&strbuf, &rt1->rt_dst.prefix),
+        get_linkcost_text(rt1->rt_best->rtp_metric.cost, true, &lqbuffer));
 
       rt[nameserver_idx] = rt2;
       rt[nameserver_idx + 1] = rt1;
@@ -1287,7 +1293,7 @@ select_best_nameserver(struct rt_entry **rt)
 
 /**
  * write the 3 best upstream DNS servers to resolv.conf file
- * best means the 3 with the best etx value in routing table
+ * best means the 3 with the best cost value in routing table
  */
 void
 write_resolv_file(void)
@@ -1321,16 +1327,22 @@ write_resolv_file(void)
 #endif
         route = olsr_lookup_routing_table(&name->ip);
 
-        OLSR_PRINTF(6, "NAME PLUGIN: check route for nameserver %s %s", olsr_ip_to_string(&strbuf, &name->ip),
-                    route ? "suceeded" : "failed");
+        OLSR_PRINTF(
+          6,
+          "NAME PLUGIN: check route for nameserver %s %s",
+          olsr_ip_to_string(&strbuf, &name->ip),
+          route ? "suceeded" : "failed");
 
         if (route == NULL)      // it's possible that route is not present yet
           continue;
 
         /* enqueue it on the head of list */
         *nameserver_routes = route;
-        OLSR_PRINTF(6, "NAME PLUGIN: found nameserver %s, cost %s", olsr_ip_to_string(&strbuf, &name->ip),
-                    get_linkcost_text(route->rt_best->rtp_metric.cost, true, &lqbuffer));
+        OLSR_PRINTF(
+          6,
+          "NAME PLUGIN: found nameserver %s, cost %s",
+          olsr_ip_to_string(&strbuf, &name->ip),
+          get_linkcost_text(route->rt_best->rtp_metric.cost, true, &lqbuffer));
 
         /* find the closet one */
         select_best_nameserver(nameserver_routes);
@@ -1423,7 +1435,7 @@ bool
 allowed_ip(const union olsr_ip_addr *addr)
 {
   struct ip_prefix_list *hna;
-  struct interface *iface;
+  struct network_interface *iface;
   union olsr_ip_addr tmp_ip, tmp_msk;
   struct ipaddr_str strbuf;
 

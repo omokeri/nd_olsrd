@@ -243,6 +243,11 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
 %token TOK_HNAINT
 %token TOK_HNAVAL
 %token TOK_AUTODETCHG
+%token TOK_MEDTYP
+%token TOK_WGHTMTYP
+%token TOK_MEDSPD
+%token TOK_WGHTMTIM
+%token TOK_UAC
 
 %token TOK_IPV4_ADDR
 %token TOK_IPV6_ADDR
@@ -386,6 +391,11 @@ ifstmt:      vcomment
              | isethnaval
              | isetautodetchg
              | isetlqmult
+             | isetmedtyp
+             | isetwghtmtyp
+             | isetmedspd
+             | isetwghtmtim
+             | isetuac
 ;
 
 plbody:     TOK_OPEN plstmts TOK_CLOSE
@@ -765,6 +775,96 @@ isetlqmult: TOK_LQ_MULT TOK_DEFAULT TOK_FLOAT
   if (lq_mult_helper($2, $3) < 0) {
     YYABORT;
   }
+}
+;
+
+isetmedtyp: TOK_MEDTYP TOK_INTEGER
+{
+  int ifcnt = ifs_in_curr_cfg;
+  struct olsr_if *ifs = olsr_cnf->interfaces;
+
+  if(PARSER_DEBUG) printf("\tMediumType: %d\n", $2->integer);
+  while(ifcnt)
+    {
+      ifs->cnf->cost.medium_type = $2->integer;
+      
+      ifs = ifs->next;
+      ifcnt--;
+    }
+
+  free($2);
+}
+;
+
+isetwghtmtyp: TOK_WGHTMTYP TOK_FLOAT
+{
+  int ifcnt = ifs_in_curr_cfg;
+  struct olsr_if *ifs = olsr_cnf->interfaces;
+
+  if(PARSER_DEBUG) printf("\tMediumTypeWeight: %0.2f\n", $2->floating);
+  while(ifcnt)
+    {
+      ifs->cnf->cost.weight_medium_type = $2->floating;
+      
+      ifs = ifs->next;
+      ifcnt--;
+    }
+
+  free($2);
+}
+;
+
+isetmedspd: TOK_MEDSPD TOK_FLOAT
+{
+  int ifcnt = ifs_in_curr_cfg;
+  struct olsr_if *ifs = olsr_cnf->interfaces;
+
+  if(PARSER_DEBUG) printf("\tMediumSpeed: %0.2f\n", $2->floating);
+  while(ifcnt)
+    {
+      ifs->cnf->cost.medium_speed = $2->floating;
+      
+      ifs = ifs->next;
+      ifcnt--;
+    }
+
+  free($2);
+}
+;
+
+isetwghtmtim: TOK_WGHTMTIM TOK_FLOAT
+{
+  int ifcnt = ifs_in_curr_cfg;
+  struct olsr_if *ifs = olsr_cnf->interfaces;
+
+  if(PARSER_DEBUG) printf("\tMediumTimeWeight: %0.2f\n", $2->floating);
+  while(ifcnt)
+    {
+      ifs->cnf->cost.weight_medium_time = $2->floating;
+      
+      ifs = ifs->next;
+      ifcnt--;
+    }
+
+  free($2);
+}
+;
+
+isetuac: TOK_UAC TOK_FLOAT
+{
+  int ifcnt = ifs_in_curr_cfg;
+  struct olsr_if *ifs = olsr_cnf->interfaces;
+
+  if(PARSER_DEBUG) printf("\tUserAddedCost: %0.2f\n", $2->floating);
+  while(ifcnt)
+    {
+      ifs->cnf->cost.user_added_cost = $2->floating;
+      
+      ifs = ifs->next;
+      ifcnt--;
+    }
+
+  free($2);
 }
 ;
 

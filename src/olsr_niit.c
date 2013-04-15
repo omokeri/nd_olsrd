@@ -5,15 +5,17 @@
  *      Author: henning
  */
 
+#include "ipcalc.h" /* ip_prefix_is_mappedv4() */
 #include "defs.h"
 #include "kernel_routes.h"
 #include "net_os.h"
+#include "routing_table.h" /* rt_entry */
 #include "olsr_niit.h"
 
 #include <net/if.h>
 
 #ifdef LINUX_NETLINK_ROUTING
-static void handle_niit_ifchange (int if_index, struct interface *iface, enum olsr_ifchg_flag);
+static void handle_niit_ifchange (int if_index, struct network_interface *iface, enum olsr_ifchg_flag);
 
 static bool niit4to6_active, niit6to4_active;
 
@@ -100,7 +102,7 @@ static void refresh_niit4to6_routes(bool set) {
   } OLSR_FOR_ALL_RT_ENTRIES_END(rt)
 }
 
-static void handle_niit_ifchange (int if_index, struct interface *iface __attribute__ ((unused)),
+static void handle_niit_ifchange (int if_index, struct network_interface *iface __attribute__ ((unused)),
     enum olsr_ifchg_flag flag) {
   bool active;
 

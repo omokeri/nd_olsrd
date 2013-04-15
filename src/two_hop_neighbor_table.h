@@ -39,20 +39,22 @@
  *
  */
 
-#ifndef _OLSR_TWO_HOP_TABLE
-#define _OLSR_TWO_HOP_TABLE
+#ifndef _TWO_HOP_NEIGHBOR_TABLE_H
+#define _TWO_HOP_NEIGHBOR_TABLE_H
 
-#include "defs.h"
-#include "hashing.h"
-#include "lq_plugin.h"
+#include "olsr_types.h" /* uint8_t, int16_t, olsr_linkcost */
+#include "hashing.h" /* HASHSIZE */
+
+/* Forward declarations */
+struct neighbor_entry;
 
 #define	NB2S_COVERED 	0x1     /* node has been covered by a MPR */
 
 struct neighbor_list_entry {
   struct neighbor_entry *neighbor;
-  olsr_linkcost second_hop_linkcost;
-  olsr_linkcost path_linkcost;
-  olsr_linkcost saved_path_linkcost;
+  olsr_linkcost second_hop_link_cost;
+  olsr_linkcost path_link_cost;
+  olsr_linkcost saved_path_link_cost;
   struct neighbor_list_entry *next;
   struct neighbor_list_entry *prev;
 };
@@ -83,7 +85,7 @@ struct neighbor_2_entry *olsr_lookup_two_hop_neighbor_table_mid(const union olsr
 
 void olsr_print_two_hop_neighbor_table(void);
 
-#endif
+#endif /* _TWO_HOP_NEIGHBOR_TABLE_H */
 
 /*
  * Local Variables:

@@ -178,9 +178,9 @@ union olsr_ip_addr {
 
 #define CREATE_LINK_CODE(status, link) (link | (status<<2))
 
-#define EXTRACT_STATUS(link_code) ((link_code & 0xC)>>2)
+#define EXTRACT_NEIGHBOR_TYPE(link_code) ((link_code & 0xC)>>2)
 
-#define EXTRACT_LINK(link_code) (link_code & 0x3)
+#define EXTRACT_LINK_TYPE(link_code) (link_code & 0x3)
 
 /***********************************************
  *           OLSR packet definitions           *
@@ -307,17 +307,19 @@ struct hnamsg6 {
 };
 
 /*
- * OLSR message (several can exist in one OLSR packet)
+ * OLSR message (several can exist in one OLSR packet).
+ * OLSR message for IPv4 - RFC-compliant
+ * See also RFC 3626 par. 3.3.  Packet Format .
  */
 
 struct olsrmsg {
-  olsr_u8_t olsr_msgtype;
-  olsr_u8_t olsr_vtime;
-  olsr_u16_t olsr_msgsize;
-  olsr_u32_t originator;
-  olsr_u8_t ttl;
-  olsr_u8_t hopcnt;
-  olsr_u16_t seqno;
+  olsr_u8_t olsr_msgtype; /* Message Type */
+  olsr_u8_t olsr_vtime; /* Vtime */
+  olsr_u16_t olsr_msgsize; /* Message Size */
+  olsr_u32_t originator; /* Originator Address */
+  olsr_u8_t ttl; /* Time To Live */
+  olsr_u8_t hopcnt; /* Hop Count */
+  olsr_u16_t seqno; /* Message Sequence Number */
 
   union {
     struct hellomsg hello;
@@ -329,17 +331,17 @@ struct olsrmsg {
 };
 
 /*
- *IPv6
+ * OLSR message for IPv6 - not RFC-compliant
  */
 
 struct olsrmsg6 {
-  olsr_u8_t olsr_msgtype;
-  olsr_u8_t olsr_vtime;
-  olsr_u16_t olsr_msgsize;
-  struct in6_addr originator;
-  olsr_u8_t ttl;
-  olsr_u8_t hopcnt;
-  olsr_u16_t seqno;
+  olsr_u8_t olsr_msgtype; /* Message Type */
+  olsr_u8_t olsr_vtime; /* Vtime */
+  olsr_u16_t olsr_msgsize; /* Message Size */
+  struct in6_addr originator; /* Originator Address */
+  olsr_u8_t ttl; /* Time To Live */
+  olsr_u8_t hopcnt; /* Hop Count */
+  olsr_u16_t seqno; /* Message Sequence Number */
 
   union {
     struct hellomsg6 hello;
@@ -352,18 +354,19 @@ struct olsrmsg6 {
 
 /*
  * Generic OLSR packet
+ * See also RFC 3626 par. 3.3.  Packet Format .
  */
 
 struct olsr {
-  olsr_u16_t olsr_packlen;             /* packet length */
-  olsr_u16_t olsr_seqno;
-  struct olsrmsg olsr_msg[1];          /* variable messages */
+  olsr_u16_t olsr_packlen; /* Packet Length */
+  olsr_u16_t olsr_seqno; /* Packet Sequence Number */
+  struct olsrmsg olsr_msg[1]; /* variable messages */
 };
 
 struct olsr6 {
-  olsr_u16_t olsr_packlen;             /* packet length */
-  olsr_u16_t olsr_seqno;
-  struct olsrmsg6 olsr_msg[1];         /* variable messages */
+  olsr_u16_t olsr_packlen; /* Packet Length */
+  olsr_u16_t olsr_seqno; /* Packet Sequence Number */
+  struct olsrmsg6 olsr_msg[1]; /* variable messages */
 };
 
 /* IPv4 <-> IPv6 compability */

@@ -43,16 +43,16 @@
  *
  */
 
-#include "ipcalc.h"
+#include <errno.h> /* errno */
+#include <net/route.h> /* RTF_UP, RTF_HOST, RTF_GATEWAY */
+
 #include "defs.h"
-#include "olsr.h"
-#include "log.h"
-#include "kernel_routes.h"
-#include "common/avl.h"
-#include "net_olsr.h"
-#include "tc_set.h"
-#include "olsr_cookie.h"
-#include "olsr_niit.h"
+#include "ipcalc.h" /* ipequal() */
+#include "log.h" /* olsr_syslog() */
+#include "kernel_routes.h" /* olsr_ioctl_add_route() */
+#include "olsr_niit.h" /* olsr_niit_handle_route() */
+#include "routing_table.h" /* rt_entry */
+#include "process_routes.h" /* olsr_rt_flags() */
 
 #ifdef WIN32
 char *StrError(unsigned int ErrNo);

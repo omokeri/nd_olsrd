@@ -38,8 +38,8 @@
  * the copyright holders.
  */
 
-#include "olsr_types.h"
-#include "common/list.h"
+#include "olsr_types.h" /* olsr_cookie_t */
+#include "common/list.h" /* list_node */
 
 #ifndef _OLSR_COOKIE_H
 #define _OLSR_COOKIE_H

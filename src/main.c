@@ -38,31 +38,41 @@
  *
  */
 
-#include <unistd.h>
-#include <signal.h>
-#include <sys/stat.h>
-#include <assert.h>
-#include <fcntl.h>
+#include <signal.h> /* signal() */
+#include <assert.h> /* assert() */
+#include <unistd.h> /* close() */
+#include <stdlib.h> /* EXIT_FAILURE  */
+#include <stdio.h> /* FILENAME_MAX */
+#include <fcntl.h> /* flock */
+#include <sys/stat.h> /* S_IRWXU */
+#include <string.h> /* strerror(3) */
+#include <errno.h> /* errno */
 
-#include "ipcalc.h"
-#include "defs.h"
-#include "olsr.h"
-#include "log.h"
-#include "scheduler.h"
-#include "parser.h"
-#include "generate_msg.h"
-#include "plugin_loader.h"
-#include "apm.h"
-#include "net_os.h"
-#include "build_msg.h"
-#include "net_olsr.h"
-#include "mid_set.h"
-#include "mpr_selector_set.h"
-#include "gateway.h"
-#include "olsr_niit.h"
+#include "olsr_cfg.h" /* if_config_options */
+#include "ipcalc.h" /* ipaddr_str */
+#include "olsr.h" /* olsr_exit() */
+#include "log.h" /* olsr_openlog() */
+#include "scheduler.h" /* olsr_init_timers() */
+#include "parser.h" /* olsr_init_parser() */
+#include "generate_msg.h" /* STDOUT_PULSE_INT */
+#include "plugin_loader.h" /* olsr_load_plugins() */
+#include "net_os.h" /* net_os_set_global_ifoptions() */
+#include "build_msg.h" /* set_empty_tc_timer() */
+#include "net_olsr.h" /* init_net() */
+#include "mid_set.h" /* olsr_delete_all_mid_entries() */
+#include "mpr_selector_set.h" /* increase_local_ansn() */
+#include "process_routes.h" /* olsr_init_export_route() */
+#include "gateway.h" /* olsr_init_gateways() */
+#include "apm.h" /* apm_init() */
+#include "olsr_protocol.h" /* WILL_DEFAULT */
+#include "link_set.h" /* link_changes */
+#include "tc_set.h" /* olsr_delete_all_tc_entries() */
+#include "olsr_niit.h" /* olsr_init_niit() */
+#include "lq_packet.h" /* olsr_output_lq_tc(), olsr_output_lq_hello() */
 
 #ifdef LINUX_NETLINK_ROUTING
 #include <linux/types.h>
+#include <sys/socket.h> /* Needed for include of linux/rtnetlink.h */
 #include <linux/rtnetlink.h>
 #include "kernel_routes.h"
 
@@ -206,7 +216,7 @@ int main(int argc, char *argv[]) {
   int i;
 
 #ifdef LINUX_NETLINK_ROUTING
-  struct interface *ifn;
+  struct network_interface *ifn;
 #endif
 
 #ifdef WIN32
@@ -433,6 +443,9 @@ int main(int argc, char *argv[]) {
   net_os_set_global_ifoptions();
 #endif
 
+  /* Initialisation of different tables to be used. */
+  olsr_init_tables();
+
   /* Initialize parser */
   olsr_init_parser();
 
@@ -497,8 +510,6 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->ipc_connections > 0) {
     ipc_init();
   }
-  /* Initialisation of different tables to be used. */
-  olsr_init_tables();
 
   /* daemon mode */
 #ifndef WIN32
@@ -582,8 +593,17 @@ int main(int argc, char *argv[]) {
   signal(SIGTERM, olsr_shutdown);
   signal(SIGPIPE, SIG_IGN);
   // Ignoring SIGUSR1 and SIGUSR1 by default to be able to use them in plugins
-  signal(SIGUSR1, SIG_IGN);
-  signal(SIGUSR2, SIG_IGN);
+  // --> No, don't set the signal hander to 'ignore' here. Once set to 'ignored' it
+  // is no longer possible to assign a handler to them. Strange....
+  // See also: http://www.gnu.org/s/libc/manual/html_node/Basic-Signal-Handling.html
+  // which states:
+  //   "If you set the action for a signal to SIG_IGN, or if you set it to SIG_DFL
+  //    and the default action is to ignore that signal, then any pending signals
+  //    of that type are discarded (even if they are blocked). Discarding the pending
+  //    signals means that they will never be delivered, not even if you subsequently
+  //    specify another action and unblock this kind of signal."
+  //signal(SIGUSR1, SIG_IGN);
+  //signal(SIGUSR2, SIG_IGN);
 #endif
 
   link_changes = false;
@@ -632,7 +652,7 @@ void olsr_reconfigure(int signo __attribute__ ((unused))) {
 #endif
 
 static void olsr_shutdown_messages(void) {
-  struct interface *ifn;
+  struct network_interface *ifn;
 
   /* send TC reset */
   for (ifn = ifnet; ifn; ifn = ifn->int_next) {
@@ -640,14 +660,9 @@ static void olsr_shutdown_messages(void) {
     net_output(ifn);
 
     /* send 'I'm gone' messages */
-    if (olsr_cnf->lq_level > 0) {
-      olsr_output_lq_tc(ifn);
-      olsr_output_lq_hello(ifn);
-    }
-    else {
-      generate_tc(ifn);
-      generate_hello(ifn);
-    }
+    olsr_output_lq_tc(ifn);
+    olsr_output_lq_hello(ifn);
+
     net_output(ifn);
   }
 }
@@ -664,7 +679,7 @@ SignalHandler(unsigned long signo)
 static void olsr_shutdown(int signo __attribute__ ((unused)))
 #endif
 {
-  struct interface *ifn;
+  struct network_interface *ifn;
   int exit_value;
 
   OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
@@ -818,7 +833,7 @@ int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf) {
 
   while (ifs) {
     if (ifs->cnf == NULL) {
-      ifs->cnf = olsr_malloc(sizeof(struct if_config_options),
+      ifs->cnf = olsr_calloc(sizeof(struct if_config_options),
           "Set default config");
       *ifs->cnf = *cnf;
       changes++;

@@ -5,8 +5,8 @@
  *      Author: rogge
  */
 
-#ifndef GATEWAY_DEFAULT_HANDLER_H_
-#define GATEWAY_DEFAULT_HANDLER_H_
+#ifndef _GATEWAY_DEFAULT_HANDLER_H
+#define _GATEWAY_DEFAULT_HANDLER_H
 
 #ifndef WIN32
 #include "gateway.h"
@@ -18,4 +18,4 @@ void olsr_gw_default_init(void);
 void olsr_gw_default_lookup_gateway(bool, bool);
 
 #endif /* !WIN32 */
-#endif /* GATEWAY_DEFAULT_HANDLER_H_ */
+#endif /* _GATEWAY_DEFAULT_HANDLER_H */

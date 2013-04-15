@@ -45,8 +45,8 @@
  * reside in <OS>/log.c(e.g. linux/log.c)
  */
 
-#ifndef _OLSR_SYSLOG_H
-#define _OLSR_SYSLOG_H
+#ifndef _LOG_H
+#define _LOG_H
 
 #define OLSR_LOG_INFO            1
 #define OLSR_LOG_ERR             2
@@ -62,7 +62,7 @@ extern unsigned int olsr_syslog_ctr;
 void olsr_syslog(int level, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 #endif
 
-#endif
+#endif /* _LOG_H */
 
 /*
  * Local Variables:

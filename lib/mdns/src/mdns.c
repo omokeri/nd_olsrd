@@ -50,7 +50,6 @@
 #include <assert.h>             /* assert() */
 #include <linux/if_ether.h>     /* ETH_P_IP */
 #include <linux/if_packet.h>    /* struct sockaddr_ll, PACKET_MULTICAST */
-//#include <pthread.h> /* pthread_t, pthread_create() */
 #include <signal.h>             /* sigset_t, sigfillset(), sigdelset(), SIGINT */
 #include <netinet/ip.h>         /* struct ip */
 #include <netinet/udp.h>        /* struct udphdr */
@@ -67,6 +66,8 @@
 #include "mid_set.h"            /* mid_lookup_main_addr() */
 #include "link_set.h"           /* get_best_link_to_neighbor() */
 #include "net_olsr.h"           /* ipequal */
+#include "olsr_protocol.h"      /* pkt_olsr_message */
+#include "scheduler.h"          /* MSEC_PER_SEC */
 
 /* plugin includes */
 #include "NetworkInterfaces.h"  /* TBmfInterface, CreateBmfNetworkInterfaces(), CloseBmfNetworkInterfaces() */
@@ -152,7 +153,7 @@ PacketReceivedFromOLSR(unsigned char *encapsulationUdpData, int len)
 
 
 bool
-olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr)
+olsr_parser(union pkt_olsr_message *m, struct network_interface *in_if __attribute__ ((unused)), union olsr_ip_addr *ipaddr)
 {
   union olsr_ip_addr originator;
   int size;
@@ -161,12 +162,12 @@ olsr_parser(union olsr_message *m, struct interface *in_if __attribute__ ((unuse
   /* Fetch the originator of the messsage */
   if (olsr_cnf->ip_version == AF_INET) {
     memcpy(&originator, &m->v4.originator, olsr_cnf->ipsize);
-    vtime = me_to_reltime(m->v4.olsr_vtime);
-    size = ntohs(m->v4.olsr_msgsize);
+    vtime = me_to_reltime(m->v4.vtime);
+    size = ntohs(m->v4.msgsize);
   } else {
     memcpy(&originator, &m->v6.originator, olsr_cnf->ipsize);
-    vtime = me_to_reltime(m->v6.olsr_vtime);
-    size = ntohs(m->v6.olsr_msgsize);
+    vtime = me_to_reltime(m->v6.vtime);
+    size = ntohs(m->v6.msgsize);
   }
 
   /* Check if message originated from this node.
@@ -198,8 +199,8 @@ olsr_mdns_gen(unsigned char *packet, int len)
   /* send buffer: huge */
   char buffer[10240];
   int aligned_size;
-  union olsr_message *message = (union olsr_message *)buffer;
-  struct interface *ifn;
+  union pkt_olsr_message *message = (union pkt_olsr_message *)buffer;
+  struct network_interface *ifn;
   
   aligned_size=len;
 
@@ -210,8 +211,8 @@ if ((aligned_size % 4) != 0) {
   /* fill message */
   if (olsr_cnf->ip_version == AF_INET) {
     /* IPv4 */
-    message->v4.olsr_msgtype = MESSAGE_TYPE;
-    message->v4.olsr_vtime = reltime_to_me(MDNS_VALID_TIME * MSEC_PER_SEC);
+    message->v4.msgtype = MESSAGE_TYPE;
+    message->v4.vtime = reltime_to_me(MDNS_VALID_TIME * MSEC_PER_SEC);
     memcpy(&message->v4.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     //message->v4.ttl = MAX_TTL;
     if (my_MDNS_TTL) message->v4.ttl = my_MDNS_TTL;
@@ -219,15 +220,15 @@ if ((aligned_size % 4) != 0) {
     message->v4.hopcnt = 0;
     message->v4.seqno = htons(get_msg_seqno());
 
-    message->v4.olsr_msgsize = htons(aligned_size + 12);
+    message->v4.msgsize = htons(aligned_size + 12);
 
     memset(&message->v4.message, 0, aligned_size);
     memcpy(&message->v4.message, packet, len);
     aligned_size = aligned_size + 12;
   } else {
     /* IPv6 */
-    message->v6.olsr_msgtype = MESSAGE_TYPE;
-    message->v6.olsr_vtime = reltime_to_me(MDNS_VALID_TIME * MSEC_PER_SEC);
+    message->v6.msgtype = MESSAGE_TYPE;
+    message->v6.vtime = reltime_to_me(MDNS_VALID_TIME * MSEC_PER_SEC);
     memcpy(&message->v6.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     //message->v6.ttl = MAX_TTL;
     if (my_MDNS_TTL) message->v6.ttl = my_MDNS_TTL;
@@ -235,7 +236,7 @@ if ((aligned_size % 4) != 0) {
     message->v6.hopcnt = 0;
     message->v6.seqno = htons(get_msg_seqno());
 
-    message->v6.olsr_msgsize = htons(aligned_size + 12 + 96);
+    message->v6.msgsize = htons(aligned_size + 12 + 96);
     memset(&message->v6.message, 0, aligned_size);
     memcpy(&message->v6.message, packet, len);
     aligned_size = aligned_size + 12 + 96;
@@ -286,7 +287,8 @@ BmfPError(const char *format, ...)
     vsnprintf(strDesc, MAX_STR_DESC, format, arglist);
     va_end(arglist);
 
-    strDesc[MAX_STR_DESC - 1] = '\0';   /* Ensures null termination */
+    /* Ensure null-termination also with Windows C libraries */
+    strDesc[MAX_STR_DESC - 1] = '\0';
 
     //OLSR_DEBUG(LOG_PLUGINS, "%s: %s\n", strDesc, stringErr);
   }
@@ -465,7 +467,7 @@ DoMDNS(int skfd, void *data __attribute__ ((unused)), unsigned int flags __attri
 }                               /* DoMDNS */
 
 int
-InitMDNS(struct interface *skipThisIntf)
+InitMDNS(struct network_interface *skipThisIntf)
 {
 
 

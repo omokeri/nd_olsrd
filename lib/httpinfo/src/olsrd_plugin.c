@@ -54,6 +54,7 @@
 #include <arpa/nameser.h>
 #endif
 
+#include "ipcalc.h" /* olsr_string_to_prefix() */
 #include "olsrd_httpinfo.h"
 
 int http_port = 0;
@@ -129,7 +130,7 @@ add_plugin_access(const char *value, void *data, set_plugin_parameter_addon addo
     exit(0);
   }
 
-  an = olsr_malloc(sizeof(*an), __func__);
+  an = olsr_calloc(sizeof(*an), __func__);
   if (an == NULL) {
     fprintf(stderr, "(HTTPINFO) register param net out of memory!\n");
     exit(0);

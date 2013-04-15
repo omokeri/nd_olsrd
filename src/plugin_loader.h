@@ -39,12 +39,13 @@
  *
  */
 
-#ifndef _OLSR_PLUGIN_LOADER
-#define _OLSR_PLUGIN_LOADER
+#ifndef _PLUGIN_LOADER_H
+#define _PLUGIN_LOADER_H
 
-#include "olsrd_plugin.h"
-#include "olsr_types.h"
-#include "olsr_cfg.h"
+#include <sys/types.h> /* size_t */
+
+/* Forward declarations */
+struct olsrd_plugin_parameters;
 
 #ifndef OLSR_PLUGIN
 
@@ -88,7 +89,7 @@ void olsr_close_plugins(void);
 int olsr_plugin_io(int, void *, size_t);
 
 #endif
-#endif
+#endif /* _PLUGIN_LOADER_H */
 
 /*
  * Local Variables:

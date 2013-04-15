@@ -65,6 +65,7 @@
 #include "mpr_selector_set.h" /* olsr_lookup_mprs_set() */
 #include "link_set.h" /* get_best_link_to_neighbor() */
 #include "net_olsr.h" /* ipequal */
+#include "scheduler.h" /* MSEC_PER_SEC */
 
 /* BMF includes */
 #include "NetworkInterfaces.h" /* TBmfInterface, CreateBmfNetworkInterfaces(), CloseBmfNetworkInterfaces() */
@@ -109,7 +110,8 @@ void BmfPError(const char* format, ...)
     vsnprintf(strDesc, MAX_STR_DESC, format, arglist);
     va_end(arglist);
 
-    strDesc[MAX_STR_DESC - 1] = '\0'; /* Ensures null termination */
+    /* Ensure null-termination also with Windows C libraries */
+    strDesc[MAX_STR_DESC - 1] = '\0';
 
     olsr_printf(1, "%s: %s\n", strDesc, strErr);
   }
@@ -1142,7 +1144,7 @@ BMF_handle_tuntapFd(int skfd __attribute__ ((unused)),
  * Output     : none
  * Data Used  : none
  * ------------------------------------------------------------------------- */
-void InterfaceChange(int if_index __attribute__((unused)), struct interface* interf,
+void InterfaceChange(int if_index __attribute__((unused)), struct network_interface* interf,
     enum olsr_ifchg_flag action)
 {
   if (interf == NULL) {
@@ -1221,7 +1223,7 @@ int SetFanOutLimit(
  * Return     : fail (0) or success (1)
  * Data Used  : BmfThreadRunning, BmfThread
  * ------------------------------------------------------------------------- */
-int InitBmf(struct interface* skipThisIntf)
+int InitBmf(struct network_interface* skipThisIntf)
 {
   CreateBmfNetworkInterfaces(skipThisIntf);
 

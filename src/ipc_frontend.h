@@ -46,17 +46,22 @@
  *
  */
 
-#ifndef _OLSR_IPC
-#define _OLSR_IPC
+#ifndef _IPC_FRONTEND_H
+#define _IPC_FRONTEND_H
 
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
-#include <signal.h>
+//#include <sys/types.h>
+//#include <netinet/in.h>
+//#include <unistd.h>
+//#include <fcntl.h>
+//#include <arpa/inet.h>
+//#include <signal.h>
 
-#include "defs.h"
+//#include "defs.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, olsr_ip_addr */
+
+/* Forward delcarations */
+struct network_interface;
+union pkt_olsr_message;
 
 #define IPC_PORT 1212
 #define IPC_PACK_SIZE 44        /* Size of the IPC_ROUTE packet */
@@ -98,11 +103,11 @@ bool ipc_check_allowed_ip(const union olsr_ip_addr *);
 
 void ipc_accept(int fd, void *, unsigned int);
 
-bool frontend_msgparser(union olsr_message *, struct interface *, union olsr_ip_addr *);
+bool frontend_msgparser(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
 int ipc_route_send_rtentry(const union olsr_ip_addr *, const union olsr_ip_addr *, int, int, const char *);
 
-#endif
+#endif /* _IPC_FRONTEND_H */
 
 /*
  * Local Variables:

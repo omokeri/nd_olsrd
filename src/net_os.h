@@ -46,11 +46,21 @@
  * <OS>/net.c (e.g. linux/net.c)
  */
 
-#ifndef _OLSR_NET_OS_H
-#define _OLSR_NET_OS_H
+#ifndef _NET_OS_H
+#define _NET_OS_H
 
-#include "olsr_types.h"
-#include "interfaces.h"
+#include <sys/types.h> /* ssize_t */
+#include <sys/socket.h> /* socklen_t */
+
+#include "olsr_types.h" /* bool */
+
+/* Forward declarations */
+struct sockaddr;
+struct sockaddr_in;
+struct sockaddr_in6;
+struct network_interface;
+union olsr_ip_addr;
+struct olsr_ip_prefix;
 
 /* OS dependent functions */
 ssize_t olsr_sendto(int, const void *, size_t, int, const struct sockaddr *, socklen_t);
@@ -64,14 +74,14 @@ int bind_socket_to_device(int, char *);
 int convert_ip_to_mac(union olsr_ip_addr *, struct sockaddr *, char *);
 
 void net_os_set_global_ifoptions(void);
-int net_os_set_ifoptions(const char *if_name, struct interface *iface);
+int net_os_set_ifoptions(const char *if_name, struct network_interface *iface);
 int net_os_restore_ifoptions(void);
 
 int gethemusocket(struct sockaddr_in *);
 
-int getsocket(int, struct interface *);
+int getsocket(int, struct network_interface *);
 
-int getsocket6(int, struct interface *);
+int getsocket6(int, struct network_interface *);
 
 int get_ipv6_address(char *, struct sockaddr_in6 *, struct olsr_ip_prefix *);
 
@@ -81,11 +91,12 @@ int check_wireless_interface(char *);
 
 bool is_if_link_up(char *);
 
-int join_mcast(struct interface *, int);
+int join_mcast(struct network_interface *, int);
 
 bool olsr_if_isup(const char * dev);
 int olsr_if_set_state(const char *dev, bool up);
-#endif
+
+#endif /* _NET_OS_H */
 
 /*
  * Local Variables:

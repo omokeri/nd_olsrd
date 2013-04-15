@@ -81,7 +81,7 @@ void send_ping(union olsr_ip_addr *);
 void
 init_link_layer_notification()
 {
-  struct interface *ifd;
+  struct network_interface *ifd;
 
   OLSR_PRINTF(1, "Initializing link-layer notification...\n");
 
@@ -277,7 +277,7 @@ poll_link_layer(void *foo)
   struct iw_range range;
   int i, j;
   int has_range = 0;
-  struct interface *iflist;
+  struct network_interface *iflist;
 
   //OLSR_PRINTF(1, "Polling link-layer notification...\n");
 

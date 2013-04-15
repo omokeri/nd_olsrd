@@ -80,7 +80,7 @@ int olsrd_plugin_init(void);
 static int ipAddrLen;
 static union olsr_ip_addr *mainAddr;
 
-static struct interface *intTab = NULL;
+static struct network_interface *intTab = NULL;
 static struct neighbor_entry *neighTab = NULL;
 static struct mid_entry *midTab = NULL;
 static struct hna_entry *hnaTab = NULL;
@@ -90,7 +90,7 @@ static int iterIndex;
 #if 0
 
 /* not used */
-static struct interface *iterIntTab = NULL;
+static struct network_interface *iterIntTab = NULL;
 static struct mid_entry *iterMidTab = NULL;
 static struct hna_entry *iterHnaTab = NULL;
 #endif
@@ -117,8 +117,8 @@ iterLinkTabNext(char *buff, int len)
   snprintf(buff, len, "local~%s~remote~%s~main~%s~hysteresis~%f~cost~%s~",
            rawIpAddrToString(&iterLinkTab->local_iface_addr, ipAddrLen), rawIpAddrToString(&iterLinkTab->neighbor_iface_addr,
                                                                                            ipAddrLen),
-           rawIpAddrToString(&iterLinkTab->neighbor->neighbor_main_addr, ipAddrLen), iterLinkTab->L_link_quality,
-           get_linkcost_text(iterLinkTab->linkcost, false, &lqbuffer));
+           rawIpAddrToString(&iterLinkTab->neighbor->N_neighbor_main_addr, ipAddrLen), iterLinkTab->L_link_quality,
+           get_linkcost_text(iterLinkTab->link_cost, false, &lqbuffer));
 
   link_node = iterLinkTab->link_list.next;
   if (link_node != &link_entry_head) {
@@ -155,9 +155,9 @@ iterNeighTabNext(char *buff, int len)
 
   res =
     snprintf(buff, len, "main~%s~symmetric~%s~mpr~%s~mprs~%s~willingness~%d~[~neighbors2~",
-             rawIpAddrToString(&iterNeighTab->neighbor_main_addr, ipAddrLen), iterNeighTab->status == SYM ? "true" : "false",
+             rawIpAddrToString(&iterNeighTab->N_neighbor_main_addr, ipAddrLen), iterNeighTab->N_status == SYM ? "true" : "false",
              iterNeighTab->is_mpr != 0 ? "true" : "false",
-             olsr_lookup_mprs_set(&iterNeighTab->neighbor_main_addr) != NULL ? "true" : "false", iterNeighTab->willingness);
+             olsr_lookup_mprs_set(&iterNeighTab->N_neighbor_main_addr) != NULL ? "true" : "false", iterNeighTab->N_willingness);
 
   i = 0;
 
@@ -285,7 +285,7 @@ iterTcTabNext(char *buff, int len)
 
     res =
       snprintf(buff, len, "[~%d~address~%s~cost~%s~]~", i, rawIpAddrToString(&tc_edge->T_dest_addr, ipAddrLen),
-               get_linkcost_text(tc_edge->cost, false, &lqbuffer));
+               get_linkcost_text(tc_edge->link_cost, false, &lqbuffer));
 
     if (res < len)
       buff += res;
@@ -318,7 +318,7 @@ iterTcTabInit(void)
 }
 
 static bool
-parserFunc(union olsr_message *msg, struct interface *inInt __attribute__ ((unused)), union olsr_ip_addr *neighIntAddr)
+parserFunc(union pkt_olsr_message *msg, struct network_interface *inInt __attribute__ ((unused)), union olsr_ip_addr *neighIntAddr)
 {
   char *mess = (char *)msg;
   union olsr_ip_addr *orig = (union olsr_ip_addr *)ARM_NOWARN_ALIGN(mess + 4);
@@ -376,7 +376,7 @@ sendMessage(const char *service, const char *string)
   unsigned char *mess, *walker;
   int len, pad;
   unsigned short seqNo;
-  struct interface *inter;
+  struct network_interface *inter;
 
   pad = len = ipAddrLen + 8 + strlen(service) + 1 + strlen(string) + 1;
 

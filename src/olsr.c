@@ -43,32 +43,37 @@
  * All these functions are global
  */
 
-#include "defs.h"
-#include "olsr.h"
-#include "link_set.h"
-#include "two_hop_neighbor_table.h"
-#include "tc_set.h"
-#include "duplicate_set.h"
-#include "mpr_selector_set.h"
-#include "mid_set.h"
-#include "mpr.h"
-#include "lq_mpr.h"
-#include "olsr_spf.h"
-#include "scheduler.h"
-#include "apm.h"
-#include "misc.h"
-#include "neighbor_table.h"
-#include "log.h"
-#include "lq_packet.h"
-#include "common/avl.h"
-#include "net_olsr.h"
-#include "lq_plugin.h"
-#include "gateway.h"
-#include "duplicate_handler.h"
+#include <stdlib.h> /* random() */
+#include <errno.h> /* errno */
+#include <unistd.h> /* sleep(3) */
+#include <stdio.h> /* printf() */
+#include <stdarg.h> /* va_list */
+#include <signal.h> /* raise() */
 
-#include <stdarg.h>
-#include <signal.h>
-#include <unistd.h>
+#include "defs.h"
+#include "ipcalc.h"
+#include "link_set.h" /* olsr_print_link_set() */
+#include "two_hop_neighbor_table.h" /* olsr_print_two_hop_neighbor_table() */
+#include "tc_set.h" /* olsr_print_tc_table() */
+#include "duplicate_set.h" /* olsr_print_duplicate_table() */
+#include "mpr_selector_set.h" /* olsr_init_mprs_set() */
+#include "mid_set.h" /* olsr_print_mid_set() */
+#include "mpr.h" /* olsr_calculate_mpr() */
+#include "lq_mpr.h" /* olsr_calculate_lq_mpr() */
+#include "olsr_spf.h" /* olsr_calculate_routing_table() */
+#include "apm.h" /* olsr_apm_info */
+#include "misc.h" /* clear_console() */
+#include "neighbor_table.h" /* olsr_print_neighbor_table() */
+#include "log.h" /* olsr_syslog() */
+#include "lq_packet.h" /* LQ_ETX_HELLO_MESSAGE */
+#include "net_olsr.h" /* net_output_pending() */
+#include "lq_plugin.h" /* init_lq_handler_tree() */
+#include "gateway.h" /* olsr_print_gateway_entries() */
+#include "duplicate_handler.h" /* olsr_duplicate_handler_init() */
+#include "hna_set.h" /* olsr_print_hna_set() */
+#include "routing_table.h" /* avl_comp_ipv4_prefix(), avl_comp_ipv6_prefix() */
+#include "olsr_protocol.h" /* pkt_olsr_message */
+#include "olsr.h"
 
 bool changes_topology;
 bool changes_neighborhood;
@@ -160,7 +165,7 @@ register_pcf(int (*f) (int, int, int))
 
   OLSR_PRINTF(1, "Registering pcf function\n");
 
-  new_pcf = olsr_malloc(sizeof(struct pcf), "New PCF");
+  new_pcf = olsr_calloc(sizeof(struct pcf), "New PCF");
 
   new_pcf->function = f;
   new_pcf->next = pcf_list;
@@ -307,12 +312,12 @@ olsr_init_tables(void)
  *@returns positive if forwarded
  */
 int
-olsr_forward_message(union olsr_message *m, struct interface *in_if, union olsr_ip_addr *from_addr)
+olsr_forward_message(union pkt_olsr_message *m, struct network_interface *in_if, union olsr_ip_addr *from_addr)
 {
   union olsr_ip_addr *src;
   struct neighbor_entry *neighbor;
   int msgsize;
-  struct interface *ifn;
+  struct network_interface *ifn;
   bool is_ttl_1 = false;
 
   /*
@@ -337,7 +342,7 @@ olsr_forward_message(union olsr_message *m, struct interface *in_if, union olsr_
   if (!neighbor)
     return 0;
 
-  if (neighbor->status != SYM)
+  if (neighbor->N_status != SYM)
     return 0;
 
   /* Check MPR */
@@ -367,7 +372,7 @@ olsr_forward_message(union olsr_message *m, struct interface *in_if, union olsr_
   }
 
   /* Update packet data */
-  msgsize = ntohs(m->v4.olsr_msgsize);
+  msgsize = ntohs(m->v4.msgsize);
 
   /* looping trough interfaces */
   for (ifn = ifnet; ifn; ifn = ifn->int_next) {
@@ -406,7 +411,7 @@ olsr_forward_message(union olsr_message *m, struct interface *in_if, union olsr_
 }
 
 void
-set_buffer_timer(struct interface *ifn)
+set_buffer_timer(struct network_interface *ifn)
 {
   /* Set timer */
   ifn->fwdtimer = GET_TIMESTAMP(random() * olsr_cnf->max_jitter * MSEC_PER_SEC / RAND_MAX);
@@ -486,10 +491,18 @@ olsr_msgtype_to_string(uint8_t msgtype)
     return "MID";
   case (HNA_MESSAGE):
     return "HNA";
-  case (LQ_HELLO_MESSAGE):
-    return ("LQ-HELLO");
-  case (LQ_TC_MESSAGE):
-    return ("LQ-TC");
+  case (LQ_ETX_HELLO_MESSAGE):
+    return ("LQ-ETX-HELLO");
+  case (LQ_ETT_HELLO_MESSAGE):
+    return ("LQ-ETT-HELLO");
+  case (LQ_ETXETH_HELLO_MESSAGE):
+    return ("LQ-ETXETH-HELLO");
+  case (LQ_ETX_TC_MESSAGE):
+    return ("LQ-ETX-TC");
+  case (LQ_ETT_TC_MESSAGE):
+    return ("LQ-ETT-TC");
+  case (LQ_ETXETH_TC_MESSAGE):
+    return ("LQ-ETXETH-TC");
   default:
     break;
   }
@@ -570,7 +583,7 @@ olsr_exit(const char *msg, int val)
  * @return a void pointer to the memory allocated
  */
 void *
-olsr_malloc(size_t size, const char *id)
+olsr_calloc(size_t size, const char *id)
 {
   void *ptr;
 

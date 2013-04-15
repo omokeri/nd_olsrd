@@ -46,8 +46,14 @@
 #define MSG_TYPE_OLSR_TC 2
 #define MSG_TYPE_OLSR_MID 3
 #define MSG_TYPE_OLSR_HNA 4
-#define MSG_TYPE_OLSR_LQ_HELLO 201
-#define MSG_TYPE_OLSR_LQ_TC 202
+
+/* The following values are copies from src/lq_packet.h */
+#define MSG_TYPE_OLSR_LQ_ETX_HELLO 201
+#define MSG_TYPE_OLSR_LQ_ETX_TC 202
+#define MSG_TYPE_OLSR_LQ_ETT_HELLO 211
+#define MSG_TYPE_OLSR_LQ_ETT_TC 212
+#define MSG_TYPE_OLSR_LQ_ETXETH_HELLO 221
+#define MSG_TYPE_OLSR_LQ_ETXETH_TC 222
 
 #define MSG_TYPE_IPC_ROUTE 11
 #define MSG_TYPE_IPC_CONFIG 12

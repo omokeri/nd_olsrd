@@ -39,6 +39,8 @@
  *
  */
 
+#include <stdlib.h> /* atoi() */
+
 #include "defs.h"
 #include "ipcalc.h"
 

@@ -39,37 +39,32 @@
  *
  */
 
-#ifndef LQ_ETX_FF_
-#define LQ_ETX_FF_
+#ifndef _LQ_PLUGIN_ETX_H
+#define _LQ_PLUGIN_ETX_H
 
-#include "olsr_types.h"
-#include "lq_plugin.h"
+#include "olsr_types.h" /* uint16_t */
+#include "lq_plugin.h" /* struct lq_handler */
+
+#define LQ_ALGORITHM_ETX_NAME "etx"
 
 #define LQ_PLUGIN_LC_MULTIPLIER 1024
-#define LQ_PLUGIN_RELEVANT_COSTCHANGE_FF 16
 
-#define LQ_ALGORITHM_ETX_FF_NAME "etx_ff"
-
-#define LQ_FF_WINDOW 32
-#define LQ_FF_QUICKSTART_INIT 4
-
-struct default_lq_ff {
-  uint8_t valueLq;
-  uint8_t valueNlq;
+/* The ETX link quality extension to HELLO and TC messages */
+struct lq_etx {
+  float lq;
+  float nlq;
 };
 
-struct default_lq_ff_hello {
-  struct default_lq_ff smoothed_lq;
-  struct default_lq_ff lq;
-  uint8_t windowSize, activePtr;
-  uint16_t last_seq_nr;
-  uint16_t missed_hellos;
-  uint16_t received[LQ_FF_WINDOW], total[LQ_FF_WINDOW];
+/* The ETX link quality extension to link set entries */
+struct link_lq_etx {
+  float lq;
+  float nlq;
+  uint16_t quickstart;
 };
 
-extern struct lq_handler lq_etx_ff_handler;
+extern struct lq_handler lq_etx_handler;
 
-#endif /*LQ_ETX_FF_ */
+#endif /* _LQ_PLUGIN_ETX_H */
 
 /*
  * Local Variables:

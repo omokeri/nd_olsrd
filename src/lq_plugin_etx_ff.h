@@ -1,7 +1,7 @@
 
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
+ * Copyright (c) 2008 Henning Rogge <rogge@fgan.de>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,20 +39,38 @@
  *
  */
 
-#ifndef _OLSR_PROCESS_PACKAGE
-#define _OLSR_PROCESS_PACKAGE
+#ifndef _LQ_PLUGIN_ETX_FF_H
+#define _LQ_PLUGIN_ETX_FF_H
 
-#include "olsr_protocol.h"
-#include "packet.h"
-#include "neighbor_table.h"
+#include "olsr_types.h" /* uint8_t, uint16_t */
+#include "lq_plugin.h" /* struct lq_handler */
 
-bool olsr_input_hello(union olsr_message *, struct interface *, union olsr_ip_addr *);
+#define LQ_ALGORITHM_ETX_FF_NAME "etx_ff"
 
-void olsr_init_package_process(void);
+#define LQ_FF_WINDOW 32
+#define LQ_FF_QUICKSTART_INIT 4
 
-void olsr_hello_tap(struct hello_message *, struct interface *, const union olsr_ip_addr *);
+/* The ETX-FF link quality extension to HELLO and TC messages */
+struct lq_etx_ff {
+  uint8_t valueLq;
+  uint8_t valueNlq;
+};
 
-#endif
+/* The ETX-FF link quality extension to link set entries */
+struct link_lq_etx_ff {
+  struct lq_etx_ff smoothed_lq;
+  struct lq_etx_ff lq;
+  uint8_t windowSize;
+  uint8_t activeIdx;
+  uint16_t last_seq_nr;
+  uint16_t missed_hellos;
+  uint16_t received[LQ_FF_WINDOW];
+  uint16_t total[LQ_FF_WINDOW];
+};
+
+extern struct lq_handler lq_etx_ff_handler;
+
+#endif /* _LQ_PLUGIN_ETX_FF_H */
 
 /*
  * Local Variables:

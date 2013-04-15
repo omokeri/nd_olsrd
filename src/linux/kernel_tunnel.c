@@ -39,6 +39,9 @@
  *
  */
 
+#include <errno.h> /* errno */
+#include <assert.h> /* assert() */
+
 #include "kernel_tunnel.h"
 #include "kernel_routes.h"
 #include "log.h"
@@ -46,8 +49,6 @@
 #include "net_os.h"
 #include "olsr_cookie.h"
 #include "ipcalc.h"
-
-#include <assert.h>
 
 //ipip includes
 #include <arpa/inet.h>

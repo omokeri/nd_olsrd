@@ -39,16 +39,22 @@
  *
  */
 
-#ifndef _OLSR_MSG_PARSER
-#define _OLSR_MSG_PARSER
+#ifndef _PARSER_H
+#define _PARSER_H
 
-#include "olsr_protocol.h"
-#include "packet.h"
+#include "olsr_types.h" /* uint32_t, olsr_ip_addr */
+
+/* Forward declarations */
+struct pkt_olsr_packet_v4;
 
 #define PROMISCUOUS 0xffffffff
 
-/* Function returns false if the message should not be forwarded */
-typedef bool parse_function(union olsr_message *, struct interface *, union olsr_ip_addr *);
+/* Forward declarations */
+union pkt_olsr_message;
+struct network_interface;
+
+/* Functions of this type are required to return false if the message is not to be forwarded */
+typedef bool parse_function(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
 struct parse_function_entry {
   uint32_t type;                       /* If set to PROMISCUOUS all messages will be received */
@@ -56,14 +62,14 @@ struct parse_function_entry {
   struct parse_function_entry *next;
 };
 
-typedef char *preprocessor_function(char *packet, struct interface *, union olsr_ip_addr *, int *length);
+typedef char *preprocessor_function(char *packet, struct network_interface *, union olsr_ip_addr *, int *length);
 
 struct preprocessor_function_entry {
   preprocessor_function *function;
   struct preprocessor_function_entry *next;
 };
 
-typedef void packetparser_function(struct olsr *olsr, struct interface *in_if, union olsr_ip_addr *from_addr);
+typedef void packetparser_function(struct pkt_olsr_packet_v4 *olsr, struct network_interface *in_if, union olsr_ip_addr *from_addr);
 
 struct packetparser_function_entry {
   packetparser_function *function;
@@ -92,6 +98,6 @@ void olsr_packetparser_add_function(packetparser_function * function);
 
 int olsr_packetparser_remove_function(packetparser_function * function);
 
-void parse_packet(struct olsr *, int, struct interface *, union olsr_ip_addr *);
+void parse_packet(struct pkt_olsr_packet_v4 *, int, struct network_interface *, union olsr_ip_addr *);
 
-#endif
+#endif /* _PARSER_H */

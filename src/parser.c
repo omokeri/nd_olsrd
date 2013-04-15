@@ -39,21 +39,21 @@
  *
  */
 
-#include "parser.h"
-#include "ipcalc.h"
+#include <stdlib.h> /* free() */
+#include <errno.h> /* errno */
+
 #include "defs.h"
-#include "process_package.h"
-#include "mantissa.h"
-#include "hysteresis.h"
-#include "duplicate_set.h"
-#include "mid_set.h"
-#include "olsr.h"
-#include "rebuild_packet.h"
-#include "net_os.h"
-#include "log.h"
-#include "print_packet.h"
-#include "net_olsr.h"
-#include "duplicate_handler.h"
+#include "ipcalc.h" /* olsr_ip_to_string() */
+#include "process_packet.h" /* olsr_init_packet_process() */
+#include "hysteresis.h" /* update_hysteresis_incoming() */
+#include "olsr.h" /* olsr_calloc() */
+#include "net_os.h" /* olsr_recvfrom() */
+#include "log.h" /* olsr_syslog() */
+#include "print_packet.h" /* print_olsr_serialized_packet() */
+#include "net_olsr.h" /* olsr_validate_address() */
+#include "duplicate_handler.h" /* olsr_test_originator_collision() */
+#include "olsr_protocol.h" /* pkt_olsr_packet_v4 */
+#include "parser.h"
 
 #ifdef WIN32
 #undef EWOULDBLOCK
@@ -98,8 +98,8 @@ olsr_init_parser(void)
 {
   OLSR_PRINTF(3, "Initializing parser...\n");
 
-  /* Initialize the packet functions */
-  olsr_init_package_process();
+  /* Initialize the packet processing functions */
+  olsr_init_packet_process();
 
 }
 
@@ -130,7 +130,7 @@ olsr_parser_add_function(parse_function * function, uint32_t type)
 
   OLSR_PRINTF(3, "Parser: registering event for type %d\n", type);
 
-  new_entry = olsr_malloc(sizeof(struct parse_function_entry), "Register parse function");
+  new_entry = olsr_calloc(sizeof(struct parse_function_entry), "Register parse function");
 
   new_entry->function = function;
   new_entry->type = type;
@@ -176,7 +176,7 @@ olsr_preprocessor_add_function(preprocessor_function * function)
 
   OLSR_PRINTF(3, "Parser: registering preprocessor\n");
 
-  new_entry = olsr_malloc(sizeof(struct preprocessor_function_entry), "Register preprocessor function");
+  new_entry = olsr_calloc(sizeof(struct preprocessor_function_entry), "Register preprocessor function");
 
   new_entry->function = function;
 
@@ -221,7 +221,7 @@ olsr_packetparser_add_function(packetparser_function * function)
 
   OLSR_PRINTF(3, "Parser: registering packetparser\n");
 
-  new_entry = olsr_malloc(sizeof(struct packetparser_function_entry), "Register packetparser function");
+  new_entry = olsr_calloc(sizeof(struct packetparser_function_entry), "Register packetparser function");
 
   new_entry->function = function;
 
@@ -270,9 +270,9 @@ olsr_packetparser_remove_function(packetparser_function * function)
  */
 
 void
-parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip_addr *from_addr)
+parse_packet(struct pkt_olsr_packet_v4 *olsr, int size, struct network_interface *in_if, union olsr_ip_addr *from_addr)
 {
-  union olsr_message *m = (union olsr_message *)olsr->olsr_msg;
+  union pkt_olsr_message *m = (union pkt_olsr_message *)olsr->msg;
   uint32_t count;
   uint32_t msgsize;
   uint16_t seqno;
@@ -285,15 +285,22 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
   if (count < 4)
     return;
 
-  if (ntohs(olsr->olsr_packlen) !=(uint16_t) size) {
+  if (ntohs(olsr->packlen) !=(uint16_t) size) {
     struct ipaddr_str buf;
-    OLSR_PRINTF(1, "Size error detected in received packet.\nRecieved %d, in packet %d\n", size, ntohs(olsr->olsr_packlen));
+    OLSR_PRINTF(
+      1,
+      "Size error detected in received packet.\nRecieved %d, in packet %d\n",
+      size,
+      ntohs(olsr->packlen));
 
-    olsr_syslog(OLSR_LOG_ERR, " packet length error in  packet received from %s!", olsr_ip_to_string(&buf, from_addr));
+    olsr_syslog(
+      OLSR_LOG_ERR,
+      " packet length error in  packet received from %s!",
+      olsr_ip_to_string(&buf, from_addr));
     return;
   }
   // translate sequence number to host order
-  olsr->olsr_seqno = ntohs(olsr->olsr_seqno);
+  olsr->seqno = ntohs(olsr->seqno);
 
   // call packetparser
   packetparser = packetparser_functions;
@@ -306,7 +313,7 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
 
   /* Display packet */
   if (disp_pack_in)
-    print_olsr_serialized_packet(stdout, (union olsr_packet *)olsr, size, from_addr);
+    print_olsr_serialized_packet(stdout, (union pkt_olsr_packet *)olsr, size, from_addr);
 
   /*
    * Hysteresis update - for every OLSR package
@@ -314,14 +321,14 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
   if (olsr_cnf->use_hysteresis) {
     if (olsr_cnf->ip_version == AF_INET) {
       /* IPv4 */
-      update_hysteresis_incoming(from_addr, in_if, ntohs(olsr->olsr_seqno));
+      update_hysteresis_incoming(from_addr, in_if, ntohs(olsr->seqno));
     } else {
       /* IPv6 */
-      update_hysteresis_incoming(from_addr, in_if, ntohs(olsr->olsr_seqno));
+      update_hysteresis_incoming(from_addr, in_if, ntohs(olsr->seqno));
     }
   }
 
-  for (; count > 0; m = (union olsr_message *)((char *)m + (msgsize))) {
+  for (; count > 0; m = (union pkt_olsr_message *)((char *)m + (msgsize))) {
     bool forward = true;
     bool validated;
 
@@ -330,11 +337,11 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
       break;
 
     if (olsr_cnf->ip_version == AF_INET) {
-      msgsize = ntohs(m->v4.olsr_msgsize);
+      msgsize = ntohs(m->v4.msgsize);
       seqno = ntohs(m->v4.seqno);
     }
     else {
-      msgsize = ntohs(m->v6.olsr_msgsize);
+      msgsize = ntohs(m->v6.msgsize);
       seqno = ntohs(m->v6.seqno);
     }
 
@@ -344,34 +351,35 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
       union olsr_ip_addr *msgorig = (union olsr_ip_addr *) &m->v4.originator;
       OLSR_PRINTF(1, "Error, OLSR message from %s (type %d) is to small (%d bytes)"
           ", ignoring all further content of the packet\n",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize);
+          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize);
       olsr_syslog(OLSR_LOG_ERR, "Error, OLSR message from %s (type %d) is too small (%d bytes)"
           ", ignoring all further content of the packet\n",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize);
+          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize);
       break;
     }
 
-    if ((msgsize % 4) != 0) {
-      struct ipaddr_str buf;
-      union olsr_ip_addr *msgorig = (union olsr_ip_addr *) &m->v4.originator;
-      OLSR_PRINTF(1, "Error, OLSR message from %s (type %d) must be"
-          " longword aligned, but has a length of %d bytes\n",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize);
-      olsr_syslog(OLSR_LOG_ERR, "Error, OLSR message from %s (type %d) must be"
-          " longword aligned, but has a length of %d bytes",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize);
-      break;
-    }
+    /* TODO: Why must an OLSR message length be a multiple of 4? Please add a comment. */
+//    if ((msgsize % 4) != 0) {
+//      struct ipaddr_str buf;
+//      union olsr_ip_addr *msgorig = (union olsr_ip_addr *) &m->v4.originator;
+//      OLSR_PRINTF(1, "Error, OLSR message from %s (type %d) must be"
+//          " longword aligned, but has a length of %d bytes\n",
+//          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize);
+//      olsr_syslog(OLSR_LOG_ERR, "Error, OLSR message from %s (type %d) must be"
+//          " longword aligned, but has a length of %d bytes",
+//          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize);
+//      break;
+//    }
 
     if (msgsize > count) {
       struct ipaddr_str buf;
       union olsr_ip_addr *msgorig = (union olsr_ip_addr *) &m->v4.originator;
       OLSR_PRINTF(1, "Error, OLSR message from %s (type %d) says"
           " length=%d, but only %d bytes left\n",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize, count);
+          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize, count);
       olsr_syslog(OLSR_LOG_ERR, "Error, OLSR message from %s (type %d) says"
           " length=%d, but only %d bytes left",
-          olsr_ip_to_string(&buf, msgorig), m->v4.olsr_msgtype, msgsize, count);
+          olsr_ip_to_string(&buf, msgorig), m->v4.msgtype, msgsize, count);
       break;
     }
 
@@ -395,7 +403,7 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
 #endif
 #ifndef NO_DUPLICATE_DETECTION_HANDLER
       if (validated) {
-        olsr_test_originator_collision(m->v4.olsr_msgtype, seqno);
+        olsr_test_originator_collision(m->v4.msgtype, seqno);
       }
 #endif
       continue;
@@ -406,7 +414,7 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
       /* Should be the same for IPv4 and IPv6 */
 
       /* Promiscuous or exact match */
-      if ((entry->type == PROMISCUOUS) || (entry->type == m->v4.olsr_msgtype)) {
+      if ((entry->type == PROMISCUOUS) || (entry->type == m->v4.msgtype)) {
         if (!entry->function(m, in_if, from_addr))
           forward = false;
       }
@@ -430,7 +438,7 @@ parse_packet(struct olsr *olsr, int size, struct interface *in_if, union olsr_ip
 void
 olsr_input(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused)))
 {
-  struct interface *olsr_in_if;
+  struct network_interface *olsr_in_if;
   union olsr_ip_addr from_addr;
   struct preprocessor_function_entry *entry;
   char *packet;
@@ -507,7 +515,7 @@ olsr_input(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
      * &inbuf.olsr
      * cc - bytes read
      */
-    parse_packet((struct olsr *)packet, cc, olsr_in_if, &from_addr);
+    parse_packet((struct pkt_olsr_packet_v4 *)packet, cc, olsr_in_if, &from_addr);
 
   }
 }
@@ -526,7 +534,7 @@ olsr_input_hostemu(int fd, void *data __attribute__ ((unused)), unsigned int fla
   /* sockaddr_in6 is bigger than sockaddr !!!! */
   struct sockaddr_storage from;
   socklen_t fromlen;
-  struct interface *olsr_in_if;
+  struct network_interface *olsr_in_if;
   union olsr_ip_addr from_addr;
   uint16_t pcklen;
   struct preprocessor_function_entry *entry;
@@ -538,7 +546,7 @@ olsr_input_hostemu(int fd, void *data __attribute__ ((unused)), unsigned int fla
   int cc = recv(fd, (void*)from_addr.v6.s6_addr, olsr_cnf->ipsize, 0);
   if (cc != (int)olsr_cnf->ipsize) {
     fprintf(stderr, "Error receiving host-client IP hook(%d) %s!\n", cc, strerror(errno));
-    memcpy(&from_addr, &((struct olsr *)inbuf)->olsr_msg->originator, olsr_cnf->ipsize);
+    memcpy(&from_addr, &((struct pkt_olsr_packet_v4 *)inbuf)->msg->originator, olsr_cnf->ipsize);
   }
 
   /* are we talking to ourselves? */
@@ -600,7 +608,7 @@ olsr_input_hostemu(int fd, void *data __attribute__ ((unused)), unsigned int fla
    * &inbuf.olsr
    * cc - bytes read
    */
-  parse_packet((struct olsr *)inbuf, cc, olsr_in_if, &from_addr);
+  parse_packet((struct pkt_olsr_packet_v4 *)inbuf, cc, olsr_in_if, &from_addr);
 
 }
 

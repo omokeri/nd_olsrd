@@ -168,17 +168,17 @@ ipc_print_neigh_link(struct autobuf *abuf, const struct neighbor_entry *neighbor
   struct link_entry *the_link;
   struct lqtextbuffer lqbuffer;
 
-  if (neighbor->status == 0) {  /* non SYM */
+  if (neighbor->N_status == 0) {  /* non SYM */
     style = DASHED;
   } else {
-    the_link = get_best_link_to_neighbor(&neighbor->neighbor_main_addr);
+    the_link = get_best_link_to_neighbor(&neighbor->N_neighbor_main_addr);
     if (the_link) {
-      etx = the_link->linkcost;
+      etx = the_link->link_cost;
     }
     style = SOLID;
   }
 
-  abuf_appendf(abuf, "\"%s\" -> \"%s\"[label=\"%s\", style=%s];\n", adr, olsr_ip_to_string(&strbuf, &neighbor->neighbor_main_addr),
+  abuf_appendf(abuf, "\"%s\" -> \"%s\"[label=\"%s\", style=%s];\n", adr, olsr_ip_to_string(&strbuf, &neighbor->N_neighbor_main_addr),
                get_linkcost_text(etx, false, &lqbuffer), style);
 
   if (neighbor->is_mpr) {
@@ -387,8 +387,12 @@ ipc_print_tc_link(struct autobuf *abuf, const struct tc_entry *entry, const stru
   struct ipaddr_str strbuf1, strbuf2;
   struct lqtextbuffer lqbuffer;
 
-  abuf_appendf(abuf, "\"%s\" -> \"%s\"[label=\"%s\"];\n", olsr_ip_to_string(&strbuf1, &entry->addr),
-               olsr_ip_to_string(&strbuf2, &dst_entry->T_dest_addr), get_linkcost_text(dst_entry->cost, false, &lqbuffer));
+  abuf_appendf(
+    abuf,
+    "\"%s\" -> \"%s\"[label=\"%s\"];\n",
+    olsr_ip_to_string(&strbuf1, &entry->addr),
+    olsr_ip_to_string(&strbuf2, &dst_entry->T_dest_addr),
+    get_linkcost_text(dst_entry->link_cost, false, &lqbuffer));
 }
 
 static void

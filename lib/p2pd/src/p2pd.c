@@ -52,11 +52,11 @@
 #include <fcntl.h>
 #include <linux/if_ether.h>     /* ETH_P_IP */
 #include <linux/if_packet.h>    /* struct sockaddr_ll, PACKET_MULTICAST */
-//#include <pthread.h> /* pthread_t, pthread_create() */
 #include <signal.h>             /* sigset_t, sigfillset(), sigdelset(), SIGINT */
 #include <netinet/ip.h>         /* struct ip */
 #include <netinet/udp.h>        /* struct udphdr */
 #include <unistd.h>             /* close() */
+#include <stdlib.h>             /* calloc() */
 
 #include <netinet/in.h>
 #include <netinet/ip6.h>
@@ -72,6 +72,8 @@
 #include "link_set.h"           /* get_best_link_to_neighbor() */
 #include "net_olsr.h"           /* ipequal */
 #include "parser.h"
+#include "olsr_protocol.h"      /* pkt_olsr_message */
+#include "scheduler.h"          /* MSEC_PER_SEC */
 
 /* plugin includes */
 #include "NetworkInterfaces.h"  /* NonOlsrInterface,
@@ -283,7 +285,7 @@ fd_set InputSet;
  * Data Used  : P2pdDuplicateTimeout
  * ------------------------------------------------------------------------- */
 bool
-p2pd_message_seen(struct node **head, struct node **tail, union olsr_message *m)
+p2pd_message_seen(struct node **head, struct node **tail, union pkt_olsr_message *m)
 {
   struct node * curr;
   time_t now;
@@ -312,7 +314,7 @@ p2pd_message_seen(struct node **head, struct node **tail, union olsr_message *m)
 
     if (olsr_cnf->ip_version == AF_INET) {
       if (filter->address.v4.s_addr == m->v4.originator &&
-          filter->msgtype == m->v4.olsr_msgtype &&
+          filter->msgtype == m->v4.msgtype &&
           filter->seqno == m->v4.seqno) {
           return true;
       }
@@ -320,7 +322,7 @@ p2pd_message_seen(struct node **head, struct node **tail, union olsr_message *m)
       if (memcmp(filter->address.v6.s6_addr,
                  m->v6.originator.s6_addr,
                  sizeof(m->v6.originator.s6_addr)) == 0 &&
-          filter->msgtype == m->v6.olsr_msgtype &&
+          filter->msgtype == m->v6.msgtype &&
           filter->seqno == m->v6.seqno) {
           return true;
       }
@@ -341,7 +343,7 @@ p2pd_message_seen(struct node **head, struct node **tail, union olsr_message *m)
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 void
-p2pd_store_message(struct node **head, struct node **tail, union olsr_message *m)
+p2pd_store_message(struct node **head, struct node **tail, union pkt_olsr_message *m)
 {
   time_t now;
 
@@ -357,13 +359,13 @@ p2pd_store_message(struct node **head, struct node **tail, union olsr_message *m
   new_dup->creationtime = now;
   if (olsr_cnf->ip_version == AF_INET) {
     new_dup->address.v4.s_addr = m->v4.originator;
-    new_dup->msgtype           = m->v4.olsr_msgtype;
+    new_dup->msgtype           = m->v4.msgtype;
     new_dup->seqno             = m->v4.seqno;
   } else /* if (olsr_cnf->ip_version == AF_INET6) */ {
     memcpy(new_dup->address.v6.s6_addr,
            m->v6.originator.s6_addr,
            sizeof(m->v6.originator.s6_addr));
-    new_dup->msgtype           = m->v6.olsr_msgtype;
+    new_dup->msgtype           = m->v6.msgtype;
     new_dup->seqno             = m->v6.seqno;
   }
 
@@ -380,7 +382,7 @@ p2pd_store_message(struct node **head, struct node **tail, union olsr_message *m
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 bool
-p2pd_is_duplicate_message(union olsr_message *msg)
+p2pd_is_duplicate_message(union pkt_olsr_message *msg)
 {
   if(p2pd_message_seen(&dupFilterHead, &dupFilterTail, msg)) {
     return true;
@@ -403,8 +405,8 @@ p2pd_is_duplicate_message(union olsr_message *msg)
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 bool
-olsr_parser(union olsr_message *m,
-            struct interface *in_if __attribute__ ((unused)),
+olsr_parser(union pkt_olsr_message *m,
+            struct network_interface *in_if __attribute__ ((unused)),
             union olsr_ip_addr *ipaddr __attribute__ ((unused)))
 {
   union olsr_ip_addr originator;
@@ -416,12 +418,12 @@ olsr_parser(union olsr_message *m,
 	/* Fetch the originator of the messsage */
   if (olsr_cnf->ip_version == AF_INET) {
     memcpy(&originator, &m->v4.originator, olsr_cnf->ipsize);
-    vtime = me_to_reltime(m->v4.olsr_vtime);
-    size = ntohs(m->v4.olsr_msgsize);
+    vtime = me_to_reltime(m->v4.vtime);
+    size = ntohs(m->v4.msgsize);
   } else {
     memcpy(&originator, &m->v6.originator, olsr_cnf->ipsize);
-    vtime = me_to_reltime(m->v6.olsr_vtime);
-    size = ntohs(m->v6.olsr_msgsize);
+    vtime = me_to_reltime(m->v6.vtime);
+    size = ntohs(m->v6.msgsize);
   }
 
   /* Check if message originated from this node.
@@ -457,8 +459,8 @@ olsr_p2pd_gen(unsigned char *packet, int len)
   /* send buffer: huge */
   char buffer[10240];
   int aligned_size;
-  union olsr_message *message = (union olsr_message *)buffer;
-  struct interface *ifn;
+  union pkt_olsr_message *message = (union pkt_olsr_message *)buffer;
+  struct network_interface *ifn;
 
   aligned_size=len;
 
@@ -469,25 +471,25 @@ olsr_p2pd_gen(unsigned char *packet, int len)
   /* fill message */
   if (olsr_cnf->ip_version == AF_INET) {
     /* IPv4 */
-    message->v4.olsr_msgtype  = P2PD_MESSAGE_TYPE;
-    message->v4.olsr_vtime    = reltime_to_me(P2PD_VALID_TIME * MSEC_PER_SEC);
+    message->v4.msgtype       = P2PD_MESSAGE_TYPE;
+    message->v4.vtime         = reltime_to_me(P2PD_VALID_TIME * MSEC_PER_SEC);
     memcpy(&message->v4.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     message->v4.ttl           = P2pdTtl ? P2pdTtl : MAX_TTL;
     message->v4.hopcnt        = 0;
     message->v4.seqno         = htons(get_msg_seqno());
-    message->v4.olsr_msgsize  = htons(aligned_size + 12);
+    message->v4.msgsize       = htons(aligned_size + 12);
     memset(&message->v4.message, 0, aligned_size);
     memcpy(&message->v4.message, packet, len);
     aligned_size = aligned_size + 12;
   } else /* if (olsr_cnf->ip_version == AF_INET6) */ {
     /* IPv6 */
-    message->v6.olsr_msgtype  = P2PD_MESSAGE_TYPE;
-    message->v6.olsr_vtime    = reltime_to_me(P2PD_VALID_TIME * MSEC_PER_SEC);
+    message->v6.msgtype       = P2PD_MESSAGE_TYPE;
+    message->v6.vtime         = reltime_to_me(P2PD_VALID_TIME * MSEC_PER_SEC);
     memcpy(&message->v6.originator, &olsr_cnf->main_addr, olsr_cnf->ipsize);
     message->v6.ttl           = P2pdTtl ? P2pdTtl : MAX_TTL;
     message->v6.hopcnt        = 0;
     message->v6.seqno         = htons(get_msg_seqno());
-    message->v6.olsr_msgsize  = htons(aligned_size + 12 + 96);
+    message->v6.msgsize       = htons(aligned_size + 12 + 96);
     memset(&message->v6.message, 0, aligned_size);
     memcpy(&message->v6.message, packet, len);
     aligned_size = aligned_size + 12 + 96;
@@ -538,7 +540,8 @@ P2pdPError(const char *format, ...)
     vsnprintf(strDesc, MAX_STR_DESC, format, arglist);
     va_end(arglist);
 
-    strDesc[MAX_STR_DESC - 1] = '\0';   /* Ensures null termination */
+    /* Ensure null-termination also with Windows C libraries */
+    strDesc[MAX_STR_DESC - 1] = '\0';
 
 #if !defined REMOVE_LOG_DEBUG
     OLSR_DEBUG(LOG_PLUGINS, "%s: %s\n", strDesc, stringErr);
@@ -794,7 +797,7 @@ DoP2pd(int skfd,
  * Data Used  : none
  * ------------------------------------------------------------------------- */
 int
-InitP2pd(struct interface *skipThisIntf)
+InitP2pd(struct network_interface *skipThisIntf)
 {
   if (P2pdUseHash) {
     // Initialize hash table for hash based duplicate IP packet check

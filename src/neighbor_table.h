@@ -39,11 +39,11 @@
  *
  */
 
-#ifndef _OLSR_NEIGH_TBL
-#define _OLSR_NEIGH_TBL
+#ifndef _NEIGHBOR_TABLE_H
+#define _NEIGHBOR_TABLE_H
 
-#include "olsr_types.h"
-#include "hashing.h"
+#include "olsr_types.h" /* olsr_ip_addr */
+#include "hashing.h" /* HASHSIZE */
 
 struct neighbor_2_list_entry {
   struct neighbor_entry *nbr2_nbr;     /* backpointer to owning nbr entry */
@@ -55,10 +55,11 @@ struct neighbor_2_list_entry {
 
 #define OLSR_NBR2_LIST_JITTER 5 /* percent */
 
+/* "neighbor tuple" acc. RFC 3626 par. 4.3.1.  Neighbor Set */
 struct neighbor_entry {
-  union olsr_ip_addr neighbor_main_addr;
-  uint8_t status;
-  uint8_t willingness;
+  union olsr_ip_addr N_neighbor_main_addr;
+  uint8_t N_status;
+  uint8_t N_willingness;
   bool is_mpr;
   bool was_mpr;                        /* Used to detect changes in MPR */
   bool skip;
@@ -106,7 +107,7 @@ void olsr_print_neighbor_table(void);
 
 int update_neighbor_status(struct neighbor_entry *, int);
 
-#endif
+#endif /* _NEIGHBOR_TABLE_H */
 
 /*
  * Local Variables:

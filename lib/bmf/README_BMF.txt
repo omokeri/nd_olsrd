@@ -309,10 +309,10 @@ packets on "eth1". The BMF process on host A will see the outgoing
 packets on "eth1", encapsulates these packets and sends the
 encapsulated packets on "eth0". Let's assume we are using the link
 quality extensions of OLSR, and the 2-hop path A - B - C is better
-(in terms of ETX) than the 1-hop path A - C. In that case host B is
-an MPR for host A. Host B receives the encapsulated packets of host A
-on its "eth0" interface, and, since it is an MPR, it decides to
-forward them on "eth1".
+(in terms of link cost or ETX) than the 1-hop path A - C. In that case
+host B is an MPR for host A. Host B receives the encapsulated packets
+of host A on its "eth0" interface, and, since it is an MPR, it decides
+to forward them on "eth1".
 
 In most cases, host C will receive the original, unencapsulated
 ping packet on its "eth0" interface before the encapsulated

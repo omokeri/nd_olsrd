@@ -39,35 +39,35 @@
  *
  */
 
-#ifndef LQ_ETX_FFETH_
-#define LQ_ETX_FFETH_
+#ifndef _LQ_PLUGIN_ETX_FPM_H
+#define _LQ_PLUGIN_ETX_FPM_H
 
-#include "olsr_types.h"
-#include "lq_plugin.h"
+#include "olsr_types.h" /* uint8_t, uint8_16 */
+#include "lq_plugin.h" /* struct lq_handler */
 
-#define LQ_ALGORITHM_ETX_FFETH_NAME "etx_ffeth"
+/* use only 1<<16 - 1 to allow the multiplication of two
+ * upscaled numbers between 0 and 1 */
+#define LQ_FPM_INTERNAL_MULTIPLIER 65535
+#define LQ_FPM_LINKCOST_MULTIPLIER 65535
 
-#define LQ_FFETH_WINDOW 32
-#define LQ_FFETH_QUICKSTART_INIT 4
+#define LQ_ALGORITHM_ETX_FPM_NAME "etx_fpm"
 
-struct default_lq_ffeth {
-  uint8_t valueLq;
-  uint8_t valueNlq;
+/* The ETX link quality extension to HELLO and TC messages */
+struct lq_etx_fpm {
+  uint8_t lq;
+  uint8_t nlq;
 };
 
-struct default_lq_ffeth_hello {
-  struct default_lq_ffeth smoothed_lq;
-  struct default_lq_ffeth lq;
-  uint8_t windowSize, activePtr;
-  uint16_t last_seq_nr;
-  uint16_t missed_hellos;
-  bool perfect_eth;
-  uint16_t received[LQ_FFETH_WINDOW], total[LQ_FFETH_WINDOW];
+/* The ETX link quality extension to link set entries */
+struct link_lq_etx_fpm {
+  uint8_t lq;
+  uint8_t nlq;
+  uint16_t quickstart;
 };
 
-extern struct lq_handler lq_etx_ffeth_handler;
+extern struct lq_handler lq_etx_fpm_handler;
 
-#endif /*LQ_ETX_FFETH_ */
+#endif /* _LQ_PLUGIN_ETX_FPM_H */
 
 /*
  * Local Variables:

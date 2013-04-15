@@ -38,21 +38,23 @@
  * the copyright holders.
  *
  */
-#include <assert.h>
 
-#include "ipcalc.h"
-#include "defs.h"
-#include "two_hop_neighbor_table.h"
+#include <stdlib.h> /* free() */
+
+#include "defs.h" /* OLSR_PRINTF */
+#include "ipcalc.h" /* ipaddr_str */
+#include "two_hop_neighbor_table.h" /* olsr_lookup_two_hop_neighbor_table_mid() */
+#include "olsr.h" /* olsr_calloc() */
+#include "rebuild_packet.h" /* mid_chgestruct() */
+#include "scheduler.h" /* olsr_getTimeDue() */
+#include "neighbor_table.h" /* olsr_lookup_neighbor_table_alias() */
+#include "link_set.h" /* replace_neighbor_link_set() */
+#include "packet.h" /* struct mid_alias */
+#include "net_olsr.h" /* olsr_validate_address() */
+#include "duplicate_handler.h" /* olsr_handle_mid_collision() */
+#include "routing_table.h" /* olsr_insert_routing_table */
+#include "olsr_protocol.h" /* SYM_LINK */
 #include "mid_set.h"
-#include "olsr.h"
-#include "rebuild_packet.h"
-#include "scheduler.h"
-#include "neighbor_table.h"
-#include "link_set.h"
-#include "tc_set.h"
-#include "packet.h"             /* struct mid_alias */
-#include "net_olsr.h"
-#include "duplicate_handler.h"
 
 struct mid_entry mid_set[HASHSIZE];
 struct mid_address reverse_mid_set[HASHSIZE];
@@ -187,7 +189,7 @@ insert_mid_tuple(union olsr_ip_addr *m_addr, struct mid_address *alias, olsr_rel
   } else {
 
     /*Create new node */
-    tmp = olsr_malloc(sizeof(struct mid_entry), "MID new alias");
+    tmp = olsr_calloc(sizeof(struct mid_entry), "MID new alias");
 
     tmp->aliases = alias;
     alias->main_entry = tmp;
@@ -269,7 +271,7 @@ insert_mid_alias(union olsr_ip_addr *main_add, const union olsr_ip_addr *alias, 
   OLSR_PRINTF(1, "Inserting alias %s for ", olsr_ip_to_string(&buf1, alias));
   OLSR_PRINTF(1, "%s\n", olsr_ip_to_string(&buf1, main_add));
 
-  adr = olsr_malloc(sizeof(struct mid_address), "Insert MID alias");
+  adr = olsr_calloc(sizeof(struct mid_address), "Insert MID alias");
 
   adr->alias = *alias;
   adr->next_alias = NULL;
@@ -319,8 +321,7 @@ insert_mid_alias(union olsr_ip_addr *main_add, const union olsr_ip_addr *alias, 
  * Lookup the main address for a alias address
  *
  * @param adr the alias address to check
- * @return the main address registered on the alias
- * or NULL if not found
+ * @return the main address registered on the alias or NULL if not found
  */
 union olsr_ip_addr *
 mid_lookup_main_addr(const union olsr_ip_addr *adr)
@@ -560,7 +561,7 @@ olsr_print_mid_set(void)
  */
 
 bool
-olsr_input_mid(union olsr_message *m, struct interface *in_if __attribute__ ((unused)), union olsr_ip_addr *from_addr)
+olsr_input_mid(union pkt_olsr_message *m, struct network_interface *in_if __attribute__ ((unused)), union olsr_ip_addr *from_addr)
 {
   struct ipaddr_str buf;
   struct mid_alias *tmp_adr;
@@ -594,7 +595,7 @@ olsr_input_mid(union olsr_message *m, struct interface *in_if __attribute__ ((un
 
   for (;tmp_adr; tmp_adr = tmp_adr->next) {
 #ifndef NO_DUPLICATE_DETECTION_HANDLER
-    struct interface *ifs;
+    struct network_interface *ifs;
     bool stop = false;
     for (ifs = ifnet; ifs != NULL; ifs = ifs->int_next) {
       if (ipequal(&ifs->ip_addr, &tmp_adr->alias_addr)) {

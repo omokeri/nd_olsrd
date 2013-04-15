@@ -39,17 +39,17 @@
  *
  */
 
-#ifndef _OLSR_HASHING
-#define _OLSR_HASHING
+#ifndef _HASHING_H
+#define _HASHING_H
 
 #define	HASHSIZE	128
 #define	HASHMASK	(HASHSIZE - 1)
 
-#include "olsr_types.h"
+#include "olsr_types.h" /* uint32_t, olsr_ip_addr */
 
 uint32_t olsr_ip_hashing(const union olsr_ip_addr *);
 
-#endif
+#endif /* _HASHING_H */
 
 /*
  * Local Variables:

@@ -39,13 +39,12 @@
  *
  */
 
-#include "rebuild_packet.h"
-#include "ipcalc.h"
 #include "defs.h"
-#include "olsr.h"
-#include "mid_set.h"
-#include "mantissa.h"
-#include "net_olsr.h"
+#include "ipcalc.h" /* olsr_ip_to_string() */
+#include "olsr.h" /* olsr_calloc() */
+#include "olsr_protocol.h" /* pkt_olsr_message */
+#include "packet.h" /* mid_message */
+#include "rebuild_packet.h"
 
 /**
  *Process/rebuild MID message. Converts the OLSR
@@ -57,27 +56,27 @@
  */
 
 void
-mid_chgestruct(struct mid_message *mmsg, const union olsr_message *m)
+mid_chgestruct(struct mid_message *mmsg, const union pkt_olsr_message *m)
 {
   int i;
   struct mid_alias *alias, *alias_tmp;
   int no_aliases;
 
   /* Checking if everything is ok */
-  if ((!m) || (m->v4.olsr_msgtype != MID_MESSAGE))
+  if (m == NULL || m->v4.msgtype != MID_MESSAGE)
     return;
 
   alias = NULL;
 
   if (olsr_cnf->ip_version == AF_INET) {
     /* IPv4 */
-    const struct midaddr *maddr = m->v4.message.mid.mid_addr;
+    const struct pkt_mid_msg *maddr = &m->v4.message.mid;
     /*
      * How many aliases?
      * nextmsg contains size of
      * the addresses + 12 bytes(nextmessage, from address and the header)
      */
-    no_aliases = ((ntohs(m->v4.olsr_msgsize) - 12) / 4);
+    no_aliases = ((ntohs(m->v4.msgsize) - 12) / 4);
 
     /*printf("Aliases: %d\n", no_aliases); */
     mmsg->mid_origaddr.v4.s_addr = m->v4.originator;
@@ -87,16 +86,19 @@ mid_chgestruct(struct mid_message *mmsg, const union olsr_message *m)
     mmsg->mid_addr = NULL;
 
     /* Get vtime */
-    mmsg->vtime = me_to_reltime(m->v4.olsr_vtime);
+    mmsg->vtime = me_to_reltime(m->v4.vtime);
 
     /*printf("Sequencenuber of MID from %s is %d\n", ip_to_string(&mmsg->addr), mmsg->mid_seqno); */
 
     for (i = 0; i < no_aliases; i++) {
-      alias = olsr_malloc(sizeof(struct mid_alias), "MID chgestruct");
+      alias = olsr_calloc(sizeof(struct mid_alias), "MID chgestruct");
 
-      alias->alias_addr.v4.s_addr = maddr->addr;
+      alias->alias_addr.v4.s_addr = *maddr->mid_addresses;
+
+      /* Add to list */
       alias->next = mmsg->mid_addr;
       mmsg->mid_addr = alias;
+
       maddr++;
     }
 
@@ -113,13 +115,13 @@ mid_chgestruct(struct mid_message *mmsg, const union olsr_message *m)
     }
   } else {
     /* IPv6 */
-    const struct midaddr6 *maddr6 = m->v6.message.mid.mid_addr;
+    const struct pkt_mid_msg_ipv6 *maddr6 = &m->v6.message.mid;
     /*
      * How many aliases?
      * nextmsg contains size of
      * the addresses + 12 bytes(nextmessage, from address and the header)
      */
-    no_aliases = ((ntohs(m->v6.olsr_msgsize) - 12) / 16);       /* NB 16 */
+    no_aliases = ((ntohs(m->v6.msgsize) - 12) / 16);       /* NB 16 */
 
     /*printf("Aliases: %d\n", no_aliases); */
     mmsg->mid_origaddr.v6 = m->v6.originator;
@@ -129,15 +131,17 @@ mid_chgestruct(struct mid_message *mmsg, const union olsr_message *m)
     mmsg->mid_addr = NULL;
 
     /* Get vtime */
-    mmsg->vtime = me_to_reltime(m->v6.olsr_vtime);
+    mmsg->vtime = me_to_reltime(m->v6.vtime);
 
     /*printf("Sequencenuber of MID from %s is %d\n", ip_to_string(&mmsg->addr), mmsg->mid_seqno); */
 
     for (i = 0; i < no_aliases; i++) {
-      alias = olsr_malloc(sizeof(struct mid_alias), "MID chgestruct 2");
+      alias = olsr_calloc(sizeof(struct mid_alias), "MID chgestruct 2");
 
       /*printf("Adding alias: %s\n", olsr_ip_to_string(&buf, (union olsr_ip_addr *)&maddr6->addr)); */
-      alias->alias_addr.v6 = maddr6->addr;
+      alias->alias_addr.v6 = *maddr6->mid_addresses;
+
+      /* Add to list */
       alias->next = mmsg->mid_addr;
       mmsg->mid_addr = alias;
 

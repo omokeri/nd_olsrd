@@ -39,24 +39,17 @@
  *
  */
 
-#include "generate_msg.h"
-#include "defs.h"
-#include "olsr.h"
-#include "build_msg.h"
-#include "packet.h"
+/* System includes */
+#include <stdio.h> /* printf() */
 
-/*
- * Infomation repositiries
- */
-#include "hna_set.h"
-#include "mid_set.h"
-#include "tc_set.h"
-#include "mpr_selector_set.h"
-#include "duplicate_set.h"
-#include "neighbor_table.h"
-#include "link_set.h"
-#include "two_hop_neighbor_table.h"
-#include "net_olsr.h"
+/* OLSRD includes */
+#include "olsr_types.h" /* uint8_t */
+#include "interfaces.h" /* struct network_interface */
+#include "build_msg.h" /* queue_mid(), queue_hna() */
+#include "scheduler.h" /* TIMED_OUT */
+#include "olsr.h" /* set_buffer_timer() */
+#include "defs.h" /* olsr_cnf */
+#include "generate_msg.h"
 
 static char pulsedata[] = { '\\', '|', '/', '-' };
 
@@ -64,39 +57,9 @@ static char pulsedata[] = { '\\', '|', '/', '-' };
 static uint8_t pulse_state = 0;
 
 void
-generate_hello(void *p)
-{
-  struct hello_message hellopacket;
-  struct interface *ifn = (struct interface *)p;
-
-  olsr_build_hello_packet(&hellopacket, ifn);
-
-  if (queue_hello(&hellopacket, ifn))
-    net_output(ifn);
-
-  olsr_free_hello_packet(&hellopacket);
-
-}
-
-void
-generate_tc(void *p)
-{
-  struct tc_message tcpacket;
-  struct interface *ifn = (struct interface *)p;
-
-  olsr_build_tc_packet(&tcpacket);
-
-  if (queue_tc(&tcpacket, ifn) && TIMED_OUT(ifn->fwdtimer)) {
-    set_buffer_timer(ifn);
-  }
-
-  olsr_free_tc_packet(&tcpacket);
-}
-
-void
 generate_mid(void *p)
 {
-  struct interface *ifn = (struct interface *)p;
+  struct network_interface *ifn = (struct network_interface *)p;
 
   if (queue_mid(ifn) && TIMED_OUT(ifn->fwdtimer)) {
     set_buffer_timer(ifn);
@@ -107,7 +70,7 @@ generate_mid(void *p)
 void
 generate_hna(void *p)
 {
-  struct interface *ifn = (struct interface *)p;
+  struct network_interface *ifn = (struct network_interface *)p;
 
   if (queue_hna(ifn) && TIMED_OUT(ifn->fwdtimer)) {
     set_buffer_timer(ifn);

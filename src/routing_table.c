@@ -40,20 +40,15 @@
  *
  */
 
-#include "routing_table.h"
-#include "ipcalc.h"
-#include "defs.h"
-#include "two_hop_neighbor_table.h"
-#include "tc_set.h"
-#include "mid_set.h"
-#include "neighbor_table.h"
-#include "olsr.h"
-#include "link_set.h"
-#include "common/avl.h"
-#include "olsr_spf.h"
-#include "net_olsr.h"
-
 #include <assert.h>
+
+#include "defs.h"
+#include "ipcalc.h" /* ipequal() */
+#include "tc_set.h" /* tc_entry */
+#include "olsr.h" /* changes_hna */
+#include "link_set.h" /* link_entry */
+#include "lq_plugin.h" /* ROUTE_COST_BROKEN */
+#include "routing_table.h"
 
 /* Cookies */
 struct olsr_cookie_info *rt_mem_cookie = NULL;
@@ -298,7 +293,7 @@ olsr_insert_rt_path(struct rt_path *rtp, struct tc_entry *tc, struct link_entry 
   /*
    * no unreachable routes please.
    */
-  if (tc->path_cost == ROUTE_COST_BROKEN) {
+  if (tc->path_cost >= ROUTE_COST_BROKEN) {
     return;
   }
 
@@ -435,18 +430,20 @@ olsr_get_nh(const struct rt_entry *rt)
 static bool
 olsr_cmp_rtp(const struct rt_path *rtp1, const struct rt_path *rtp2, const struct rt_path *inetgw)
 {
-  olsr_linkcost etx1 = rtp1->rtp_metric.cost;
-  olsr_linkcost etx2 = rtp2->rtp_metric.cost;
-  if (inetgw == rtp1)
-    etx1 *= olsr_cnf->lq_nat_thresh;
-  if (inetgw == rtp2)
-    etx2 *= olsr_cnf->lq_nat_thresh;
+  olsr_linkcost cost1 = rtp1->rtp_metric.cost;
+  olsr_linkcost cost2 = rtp2->rtp_metric.cost;
+  if (inetgw == rtp1) {
+    cost1 *= olsr_cnf->lq_nat_thresh;
+  }
+  if (inetgw == rtp2) {
+    cost2 *= olsr_cnf->lq_nat_thresh;
+  }
 
   /* etx comes first */
-  if (etx1 < etx2) {
+  if (cost1 < cost2) {
     return true;
   }
-  if (etx1 > etx2) {
+  if (cost1 > cost2) {
     return false;
   }
 
@@ -651,11 +648,17 @@ olsr_rtp_to_string(const struct rt_path *rtp)
   struct rt_entry *rt = rtp->rtp_rt;
   struct lqtextbuffer lqbuffer;
 
-  snprintf(buff, sizeof(buff), "%s/%u from %s via %s, " "cost %s, metric %u, v %u",
-           olsr_ip_to_string(&prefixstr, &rt->rt_dst.prefix), rt->rt_dst.prefix_len, olsr_ip_to_string(&origstr,
-                                                                                                       &rtp->rtp_originator),
-           olsr_ip_to_string(&gwstr, &rtp->rtp_nexthop.gateway), get_linkcost_text(rtp->rtp_metric.cost, true, &lqbuffer),
-           rtp->rtp_metric.hops, rtp->rtp_version);
+  snprintf(
+    buff,
+    sizeof(buff),
+    "%s/%u from %s via %s, cost %s, metric %u, v %u",
+    olsr_ip_to_string(&prefixstr, &rt->rt_dst.prefix),
+    rt->rt_dst.prefix_len,
+    olsr_ip_to_string(&origstr, &rtp->rtp_originator),
+    olsr_ip_to_string(&gwstr, &rtp->rtp_nexthop.gateway),
+    get_linkcost_text(rtp->rtp_metric.cost, true, &lqbuffer),
+    rtp->rtp_metric.hops,
+    rtp->rtp_version);
 
   return buff;
 }
@@ -674,24 +677,41 @@ olsr_print_routing_table(struct avl_tree *tree)
 
   OLSR_PRINTF(6, "ROUTING TABLE\n");
 
-  for (rt_tree_node = avl_walk_first(tree); rt_tree_node != NULL; rt_tree_node = avl_walk_next(rt_tree_node)) {
+  for (
+    rt_tree_node = avl_walk_first(tree);
+    rt_tree_node != NULL;
+    rt_tree_node = avl_walk_next(rt_tree_node))
+  {
     struct avl_node *rtp_tree_node;
     struct ipaddr_str prefixstr, origstr, gwstr;
     struct rt_entry *rt = rt_tree2rt(rt_tree_node);
 
     /* first the route entry */
-    OLSR_PRINTF(6, "%s/%u, via %s, best-originator %s\n", olsr_ip_to_string(&prefixstr, &rt->rt_dst.prefix), rt->rt_dst.prefix_len,
-                olsr_ip_to_string(&origstr, &rt->rt_nexthop.gateway), olsr_ip_to_string(&gwstr, &rt->rt_best->rtp_originator));
+    OLSR_PRINTF(
+      6,
+      "%s/%u, via %s, best-originator %s\n",
+      olsr_ip_to_string(&prefixstr, &rt->rt_dst.prefix),
+      rt->rt_dst.prefix_len,
+      olsr_ip_to_string(&origstr, &rt->rt_nexthop.gateway),
+      olsr_ip_to_string(&gwstr, &rt->rt_best->rtp_originator));
 
     /* walk the per-originator path tree of routes */
-    for (rtp_tree_node = avl_walk_first(&rt->rt_path_tree); rtp_tree_node != NULL; rtp_tree_node = avl_walk_next(rtp_tree_node)) {
+    for (
+      rtp_tree_node = avl_walk_first(&rt->rt_path_tree);
+      rtp_tree_node != NULL;
+      rtp_tree_node = avl_walk_next(rtp_tree_node))
+    {
       struct rt_path *rtp = rtp_tree2rtp(rtp_tree_node);
-      OLSR_PRINTF(6, "\tfrom %s, cost %s, metric %u, via %s, %s, v %u\n", olsr_ip_to_string(&origstr, &rtp->rtp_originator),
-                  get_linkcost_text(rtp->rtp_metric.cost, true, &lqbuffer), rtp->rtp_metric.hops, olsr_ip_to_string(&gwstr,
-                                                                                                                    &rtp->
-                                                                                                                    rtp_nexthop.
-                                                                                                                    gateway),
-                  if_ifwithindex_name(rt->rt_nexthop.iif_index), rtp->rtp_version);
+
+      OLSR_PRINTF(
+        6,
+        "\tfrom %s, cost %s, metric %u, via %s, %s, v %u\n",
+        olsr_ip_to_string(&origstr, &rtp->rtp_originator),
+        get_linkcost_text(rtp->rtp_metric.cost, true, &lqbuffer),
+        rtp->rtp_metric.hops,
+        olsr_ip_to_string(&gwstr, &rtp->rtp_nexthop.gateway),
+        if_ifwithindex_name(rt->rt_nexthop.iif_index),
+        rtp->rtp_version);
     }
   }
 #endif

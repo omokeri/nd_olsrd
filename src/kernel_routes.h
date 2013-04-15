@@ -39,18 +39,17 @@
  *
  */
 
-#ifndef _OLSR_KERNEL_RT
-#define _OLSR_KERNEL_RT
+#ifndef _KERNEL_ROUTES_H
+#define _KERNEL_ROUTES_H
 
-#include "defs.h"
-#include "routing_table.h"
+#include "olsr_types.h" /* uint32_t, olsr_ip_prefix */
+
+/* Forward declarations */
+struct rt_entry;
 
 int olsr_ioctl_add_route(const struct rt_entry *);
-
 int olsr_ioctl_add_route6(const struct rt_entry *);
-
 int olsr_ioctl_del_route(const struct rt_entry *);
-
 int olsr_ioctl_del_route6(const struct rt_entry *);
 
 #ifdef LINUX_NETLINK_ROUTING
@@ -65,7 +64,7 @@ int olsr_os_policy_rule(int family, int rttable, uint32_t priority, const char *
 int olsr_os_localhost_if(union olsr_ip_addr *ip, bool create);
 int olsr_os_ifip(int ifindex, union olsr_ip_addr *ip, bool create);
 
-#endif
+#endif /* _KERNEL_ROUTES_H */
 
 /*
  * Local Variables:

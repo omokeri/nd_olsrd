@@ -39,13 +39,15 @@
  *
  */
 
-#include "two_hop_neighbor_table.h"
-#include "ipcalc.h"
+#include <stdlib.h> /* free() */
+
 #include "defs.h"
-#include "mid_set.h"
-#include "neighbor_table.h"
-#include "net_olsr.h"
-#include "scheduler.h"
+#include "ipcalc.h" /* ipequal() */
+#include "mid_set.h" /* mid_lookup_aliases() */
+#include "neighbor_table.h" /* olsr_delete_neighbor_2_pointer() */
+#include "scheduler.h" /* olsr_wallclock_string() */
+#include "lq_plugin.h" /* lqtextbuffer */
+#include "two_hop_neighbor_table.h"
 
 struct neighbor_2_entry two_hop_neighbortable[HASHSIZE];
 
@@ -215,26 +217,50 @@ olsr_print_two_hop_neighbor_table(void)
   /* The whole function makes no sense without it. */
   int i;
 
-  OLSR_PRINTF(1, "\n--- %s ----------------------- TWO-HOP NEIGHBORS\n\n" "IP addr (2-hop)  IP addr (1-hop)  Total cost\n",
-              olsr_wallclock_string());
+  OLSR_PRINTF(
+    1,
+    "\n--- %s ----------------------- TWO-HOP NEIGHBORS\n\n"
+    "IP addr (2-hop)  IP addr (1-hop)  Total cost\n",
+    olsr_wallclock_string());
 
   for (i = 0; i < HASHSIZE; i++) {
+
     struct neighbor_2_entry *neigh2;
-    for (neigh2 = two_hop_neighbortable[i].next; neigh2 != &two_hop_neighbortable[i]; neigh2 = neigh2->next) {
+
+    for (
+      neigh2 = two_hop_neighbortable[i].next;
+      neigh2 != &two_hop_neighbortable[i];
+      neigh2 = neigh2->next) {
+
       struct neighbor_list_entry *entry;
       bool first = true;
 
-      for (entry = neigh2->neighbor_2_nblist.next; entry != &neigh2->neighbor_2_nblist; entry = entry->next) {
+      for (
+        entry = neigh2->neighbor_2_nblist.next;
+        entry != &neigh2->neighbor_2_nblist;
+        entry = entry->next) {
+
         struct ipaddr_str buf;
         struct lqtextbuffer lqbuffer;
+
         if (first) {
-          OLSR_PRINTF(1, "%-15s  ", olsr_ip_to_string(&buf, &neigh2->neighbor_2_addr));
+
+          OLSR_PRINTF(
+            1,
+            "%-15s  ",
+            olsr_ip_to_string(&buf, &neigh2->neighbor_2_addr));
+
           first = false;
+
         } else {
           OLSR_PRINTF(1, "                 ");
         }
-        OLSR_PRINTF(1, "%-15s  %s\n", olsr_ip_to_string(&buf, &entry->neighbor->neighbor_main_addr),
-                    get_linkcost_text(entry->path_linkcost, false, &lqbuffer));
+
+        OLSR_PRINTF(
+          1,
+          "%-15s  %s\n",
+          olsr_ip_to_string(&buf, &entry->neighbor->N_neighbor_main_addr),
+          get_linkcost_text(entry->path_link_cost, false, &lqbuffer));
       }
     }
   }

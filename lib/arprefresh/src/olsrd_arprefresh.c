@@ -49,7 +49,9 @@
 #include <linux/types.h>
 #include <linux/filter.h>
 #include <unistd.h>
+#include <errno.h> /* errno */
 
+#include "defs.h" /* OLSR_PRINTF */
 #include "olsrd_arprefresh.h"
 #include "kernel_routes.h"
 #include "scheduler.h"

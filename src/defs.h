@@ -39,22 +39,23 @@
  *
  */
 
-#ifndef _OLSR_DEFS
-#define _OLSR_DEFS
+#ifndef _DEFS_H
+#define _DEFS_H
 
 /* Common includes */
-#include <sys/time.h>
-#include <sys/times.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <time.h>
+//#include <sys/time.h>
+//#include <sys/times.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+#include <stdio.h> /* FILE */
+//#include <stdlib.h>
+#include <string.h> /* strncpy() */
+//#include <errno.h>
+//#include <time.h>
 
-#include "olsr_protocol.h"
-#include "olsr_cfg.h"
+#include "olsr_types.h" /* uint32_t */
+#include "olsr_cfg.h" /* olsrd_config */
+#include "olsr_cookie.h" /* olsr_cookie_info */
 
 extern const char olsrd_version[];
 extern const char build_date[];
@@ -96,9 +97,6 @@ extern FILE *debug_handle;
 
 /* Compute the time in milliseconds when a timestamp will expire. */
 #define TIME_DUE(s1)   olsr_getTimeDue(s1)
-
-/* Returns TRUE if a timestamp is expired */
-#define TIMED_OUT(s1)	olsr_isTimedOut(s1)
 
 #define ARRAYSIZE(x)	(sizeof(x)/sizeof(*(x)))
 #ifndef MAX
@@ -201,9 +199,12 @@ int ipc_input(int);
 
 int shutdown_ipc(void);
 
-int ipc_output(struct olsr *);
-
+#if 0
+struct pkt_olsr_packet_v4;
+int ipc_output(struct pkt_olsr_packet_v4 *);
 #endif
+
+#endif /* _DEFS_H */
 
 /*
  * Local Variables:

@@ -39,11 +39,14 @@
  *
  */
 
-#ifndef _OLSRD_CFGPARSER_H
-#define _OLSRD_CFGPARSER_H
+#ifndef _OLSR_CFG_H
+#define _OLSR_CFG_H
 
-#include "olsr_types.h"
-#include "common/autobuf.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, uint32_t */
+//#include "common/autobuf.h"
+
+/* Forward declarations */
+struct autobuf;
 
 /* set to 1 to collect all startup sleep into one sleep
  * (just as long as the longest sleep)
@@ -66,7 +69,8 @@
 #define DEF_USE_HYST         false
 #define DEF_FIB_METRIC       FIBM_FLAT
 #define DEF_LQ_LEVEL         2
-#define DEF_LQ_ALGORITHM     "etx_ff"
+/*#define DEF_LQ_ALGORITHM     "etx_ff"*/
+#define DEF_LQ_ALGORITHM     "ett"
 #define DEF_LQ_FISH          1
 #define DEF_LQ_NAT_THRESH    1.0
 #define DEF_LQ_AGING         0.05
@@ -84,6 +88,12 @@
 #define DEF_UPLINK_SPEED     128
 #define DEF_DOWNLINK_SPEED   1024
 #define DEF_USE_SRCIP_ROUTES false
+
+#define DEF_MEDIUM_TYPE      2 /* 0=wired-optic, 1=wired-electric, 2=wireless, 10=unknown */
+#define DEF_WEIGHT_MTYPE     1000
+#define DEF_MEDIUM_SPEED     1 /* Mbit/sec */
+#define DEF_WEIGHT_MTIME     10000
+#define DEF_USER_ADDED_COST  0
 
 #define DEF_IF_MODE          IF_MODE_MESH
 
@@ -114,6 +124,17 @@
 
 #define MIN_SMARTGW_SPEED    1
 #define MAX_SMARTGW_SPEED    320000000
+
+#define MIN_MEDIUM_TYPE     0
+#define MAX_MEDIUM_TYPE     1000000000
+#define MIN_WEIGHT_MTYPE    0
+#define MAX_WEIGHT_MTYPE    1000000000
+#define MIN_MEDIUM_SPEED    0.001 /* Mbits/sec */
+#define MAX_MEDIUM_SPEED    100000 /* Mbits/sec */
+#define MIN_WEIGHT_MTIME    0
+#define MAX_WEIGHT_MTIME    1000000000
+#define MIN_USER_ADDED_COST 0
+#define MAX_USER_ADDED_COST 1000000000
 
 #ifndef IPV6_ADDR_SITELOCAL
 #define IPV6_ADDR_SITELOCAL    0x0040U
@@ -160,6 +181,36 @@ struct olsr_if_weight {
   bool fixed;
 };
 
+/* The link cost is calculated as follows:
+ *   link_cost =
+ *     link_quality * (
+ *       medium_type * weight_medium_type +
+ *       medium_bit_time * weight_medium_time) +
+ *     user_added_cost
+ *
+ * where:
+ *   medium_bit_time = 1.0 / medium_speed
+ *
+ * and:
+ *   link_quality = 1.0/(loss_link_quality * neigh_link_quality) (= ETX)
+ */
+enum TMediumType
+{
+  MtWiredOptic = 0,
+  MtWiredElectric = 1,
+  MtWired = MtWiredElectric,
+  MtWireless = 2,
+  MtUnknown = 10
+};
+struct olsr_if_cost
+{
+  enum TMediumType         medium_type;
+  float                    weight_medium_type; /* >= 0 */
+  float                    medium_speed; /* in Mbits/sec */
+  float                    weight_medium_time; /* >= 0 */
+  float                    user_added_cost; /* >= 0 */
+};
+
 struct if_config_options {
   union olsr_ip_addr ipv4_multicast;
   union olsr_ip_addr ipv6_multicast;
@@ -177,6 +228,7 @@ struct if_config_options {
   struct olsr_lq_mult *lq_mult;
   int orig_lq_mult_cnt;
   bool autodetect_chg;
+  struct olsr_if_cost cost;
 };
 
 struct olsr_if {
@@ -184,7 +236,7 @@ struct olsr_if {
   bool configured;
   bool host_emul;
   union olsr_ip_addr hemu_ip;
-  struct interface *interf;
+  struct network_interface *interf;
   struct if_config_options *cnf, *cnfi;
   struct olsr_if *next;
 };
@@ -338,7 +390,7 @@ extern "C" {
 #if defined __cplusplus
 }
 #endif
-#endif
+#endif /* _OLSR_CFG_H */
 
 /*
  * Local Variables:

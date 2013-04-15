@@ -54,6 +54,8 @@
 #include <sys/ioctl.h>
 #include <sys/utsname.h>
 
+#include <errno.h> /* errno */
+#include <stdlib.h> /* atoi() */
 #include <fcntl.h>
 #include <string.h>
 #include <stdio.h>
@@ -226,7 +228,7 @@ net_os_set_global_ifoptions(void) {
  *@return 1 on sucess 0 on failiure
  */
 int
-net_os_set_ifoptions(const char *if_name, struct interface *iface)
+net_os_set_ifoptions(const char *if_name, struct network_interface *iface)
 {
   char procfile[FILENAME_MAX];
   if (olsr_cnf->ip_version == AF_INET6)
@@ -261,7 +263,7 @@ net_os_set_ifoptions(const char *if_name, struct interface *iface)
 int
 net_os_restore_ifoptions(void)
 {
-  struct interface *ifs;
+  struct network_interface *ifs;
   char procfile[FILENAME_MAX];
 
   OLSR_PRINTF(1, "Restoring network state\n");
@@ -362,7 +364,7 @@ gethemusocket(struct sockaddr_in *pin)
  *@return the FD of the socket or -1 on error.
  */
 int
-getsocket(int bufspace, struct interface *ifp)
+getsocket(int bufspace, struct network_interface *ifp)
 {
   struct sockaddr_in sin;
   int on;
@@ -446,7 +448,7 @@ getsocket(int bufspace, struct interface *ifp)
  *@return the FD of the socket or -1 on error.
  */
 int
-getsocket6(int bufspace, struct interface *ifp)
+getsocket6(int bufspace, struct network_interface *ifp)
 {
   struct sockaddr_in6 sin;
   int on;
@@ -535,7 +537,7 @@ getsocket6(int bufspace, struct interface *ifp)
 }
 
 int
-join_mcast(struct interface *ifs, int sock)
+join_mcast(struct network_interface *ifs, int sock)
 {
   /* See linux/in6.h */
   struct ipaddr_str buf;

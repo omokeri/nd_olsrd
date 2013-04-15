@@ -5,23 +5,17 @@
  *      Author: henning
  */
 
+#include "interfaces.h" /* olsr_ifchg_flag */
 #include "common/avl.h"
-#include "defs.h"
-#include "ipcalc.h"
-#include "olsr.h"
-#include "olsr_cfg.h"
-#include "olsr_cookie.h"
-#include "scheduler.h"
-#include "kernel_routes.h"
-#include "kernel_tunnel.h"
-#include "net_os.h"
-#include "duplicate_set.h"
-#include "log.h"
-#include "gateway_default_handler.h"
+#include "kernel_tunnel.h" /* olsr_iptunnel_entry */
+#include "kernel_routes.h" /* olsr_os_inetgw_tunnel_route() */
+#include "gateway_default_handler.h" /* olsr_gw_default_init() */
+#include "tc_set.h" /* olsr_lookup_tc_entry() */
+#include "lq_plugin.h" /* ROUTE_COST_BROKEN */
+#include "ipcalc.h" /* ipaddr_str */
+#include "duplicate_set.h" /* olsr_seqno_diff() */
+#include "olsr_cookie.h" /* olsr_alloc_cookie() */
 #include "gateway.h"
-
-#include <assert.h>
-#include <net/if.h>
 
 #ifdef LINUX_NETLINK_ROUTING
 struct avl_tree gateway_tree;
@@ -81,7 +75,7 @@ serialize_gw_speed(uint32_t speed) {
  * @param flag
  */
 static void smartgw_tunnel_monitor (int if_index,
-    struct interface *ifh __attribute__ ((unused)), enum olsr_ifchg_flag flag) {
+    struct network_interface *ifh __attribute__ ((unused)), enum olsr_ifchg_flag flag) {
   if (current_ipv4_gw != NULL && if_index == v4gw_tunnel->if_index && flag == IFCHG_IF_ADD) {
     /* v4 tunnel up again, set route */
     olsr_os_inetgw_tunnel_route(v4gw_tunnel->if_index, true, true);
@@ -197,13 +191,13 @@ void olsr_trigger_gatewayloss_check(void) {
   bool ipv4 = false, ipv6 = false;
   if (current_ipv4_gw) {
     tc = olsr_lookup_tc_entry(&current_ipv4_gw->originator);
-    if (tc == NULL || tc->path_cost == ROUTE_COST_BROKEN) {
+    if (tc == NULL || tc->path_cost >= ROUTE_COST_BROKEN) {
       ipv4 = true;
     }
   }
   if (current_ipv6_gw) {
     tc = olsr_lookup_tc_entry(&current_ipv6_gw->originator);
-    if (tc == NULL || tc->path_cost == ROUTE_COST_BROKEN) {
+    if (tc == NULL || tc->path_cost >= ROUTE_COST_BROKEN) {
       ipv6 = true;
     }
   }

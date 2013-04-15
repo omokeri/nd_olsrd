@@ -44,15 +44,16 @@
  * reside in OS/ifnet.c(e.g. linux/ifnet.c)
  */
 
-#ifndef _OLSR_IFNET
-#define _OLSR_IFNET
+#ifndef _IFNET_H
+#define _IFNET_H
 
 /* To get ifreq */
-#include <arpa/inet.h>
-#include <sys/socket.h>
-#include <net/if.h>
+//#include <arpa/inet.h>
+//#include <sys/socket.h>
+//#include <net/if.h>
 
-#include "olsr_cfg.h"
+/* Forward declarations */
+struct olsr_if;
 
 int set_flag(char *, short);
 
@@ -64,7 +65,7 @@ int chk_if_up(struct olsr_if *, int);
 
 int add_hemu_if(struct olsr_if *);
 
-#endif
+#endif /* _IFNET_H */
 
 /*
  * Local Variables:

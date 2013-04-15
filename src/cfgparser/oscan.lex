@@ -562,6 +562,26 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
     yylval = NULL;
     return TOK_AUTODETCHG;
 }
+"MediumType" {
+  yylval = NULL;
+  return TOK_MEDTYP;
+}
+"MediumTypeWeight" {
+  yylval = NULL;
+  return TOK_WGHTMTYP;
+}
+"MediumSpeed" {
+  yylval = NULL;
+  return TOK_MEDSPD;
+}
+"MediumTimeWeight" {
+  yylval = NULL;
+  return TOK_WGHTMTIM;
+}
+"UserAddedCost" {
+  yylval = NULL;
+  return TOK_UAC;
+}
 
 
 \n|\r\n {

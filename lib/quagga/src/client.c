@@ -22,6 +22,9 @@
 #include <sys/un.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdlib.h> /* EXIT_FAILURE  */
+#include <errno.h> /* errno, EINTR, EAGAIN */
+
 #include "defs.h"
 #include "olsr.h"
 #include "log.h"

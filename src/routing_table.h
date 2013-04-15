@@ -40,19 +40,29 @@
  *
  */
 
-#ifndef _OLSR_ROUTING_TABLE
-#define _OLSR_ROUTING_TABLE
+#ifndef _ROUTING_TABLE_H
+#define _ROUTING_TABLE_H
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <net/route.h>
-#include "hna_set.h"
-#include "link_set.h"
-#include "olsr_cookie.h"
-#include "common/avl.h"
-#include "common/list.h"
+//#include <sys/types.h>
+//#include <sys/time.h>
+//#include <sys/socket.h>
+//#include <net/if.h>
+//#include <net/route.h>
+//#include "hna_set.h"
+//#include "link_set.h"
+//#include "olsr_cookie.h"
+
+/* System includes */
+#include <netinet/in.h> /* sockaddr */
+#include <netinet/in.h> /* in6_addr */
+
+#include "common/avl.h" /* avl_node, AVLNODE2STRUCT */
+#include "common/list.h" /* list_node, LISTNODE2STRUCT */
+#include "olsr_types.h" /* uint8_t, uint32_t, olsr_ip_addr, olsr_linkcost, olsr_ip_prefix */
+
+/* Forward declarations */
+struct olsr_cookie_info;
+struct link_entry;
 
 #define NETMASK_HOST 0xffffffff
 #define NETMASK_DEFAULT 0x0
@@ -225,7 +235,7 @@ void olsr_delete_rt_path(struct rt_path *);
 
 struct rt_entry *olsr_lookup_routing_table(const union olsr_ip_addr *);
 
-#endif
+#endif /* _ROUTING_TABLE_H */
 
 /*
  * Local Variables:

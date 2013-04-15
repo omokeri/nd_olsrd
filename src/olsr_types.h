@@ -121,7 +121,7 @@ struct olsr_ip_prefix {
 
 typedef uint32_t olsr_linkcost;
 
-#endif
+#endif /* _OLSR_TYPES_H */
 
 /*
  * Local Variables:

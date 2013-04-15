@@ -39,17 +39,17 @@
  *
  */
 
-#ifndef _OLSR_REBUILD
-#define _OLSR_REBUILD
+#ifndef _REBUILD_PACKET_H
+#define _REBUILD_PACKET_H
 
-#include "olsr_protocol.h"
-#include "packet.h"
+/* Forward declarations */
+struct mid_message;
+union pkt_olsr_message;
 
-void mid_chgestruct(struct mid_message *, const union olsr_message *);
+void mid_chgestruct(struct mid_message *, const union pkt_olsr_message *);
 
-void hello_chgestruct(struct hello_message *, const union olsr_message *);
 
-#endif
+#endif /* _REBUILD_PACKET_H */
 
 /*
  * Local Variables:

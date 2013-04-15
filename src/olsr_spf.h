@@ -42,9 +42,11 @@
 #ifndef _OLSR_SPF_H
 #define _OLSR_SPF_H
 
+#include "olsr_types.h"  /* bool */
+
 void olsr_calculate_routing_table(bool force);
 
-#endif
+#endif /* _OLSR_SPF_H */
 
 /*
  * Local Variables:

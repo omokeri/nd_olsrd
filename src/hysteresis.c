@@ -39,16 +39,13 @@
  *
  */
 
-#include <time.h>
-#include <stdlib.h>
-
-#include "olsr_protocol.h"
-#include "hysteresis.h"
 #include "defs.h"
-#include "olsr.h"
-#include "net_olsr.h"
-#include "ipcalc.h"
-#include "scheduler.h"
+#include "olsr_protocol.h" /* NEIGHB_HOLD_TIME */
+#include "olsr.h" /* changes_neighborhood */
+#include "ipcalc.h" /* ipaddr_str */
+#include "scheduler.h" /* TIMED_OUT */
+#include "link_set.h" /* link_entry */
+#include "hysteresis.h"
 
 #define hscaling olsr_cnf->hysteresis_param.scaling
 #define hhigh    olsr_cnf->hysteresis_param.thr_high
@@ -144,7 +141,7 @@ olsr_update_hysteresis_hello(struct link_entry *entry, olsr_reltime htime)
 }
 
 void
-update_hysteresis_incoming(union olsr_ip_addr *remote, struct interface *local, uint16_t seqno)
+update_hysteresis_incoming(union olsr_ip_addr *remote, struct network_interface *local, uint16_t seqno)
 {
   struct link_entry *lnk = lookup_link_entry(remote, NULL, local);
 

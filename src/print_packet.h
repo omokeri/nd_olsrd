@@ -39,18 +39,21 @@
  *
  */
 
-#ifndef _PRINT_PACKET
-#define _PRINT_PACKET
+#ifndef _PRINT_PACKET_H
+#define _PRINT_PACKET_H
 
-#include "olsr_types.h"
-#include "olsr_protocol.h"
-#include <stdio.h>
+#include "olsr_types.h" /* int8_t, uint16_t, olsr_ip_addr */
+#include <stdio.h> /* FILE */
 
-int8_t print_olsr_serialized_packet(FILE *, union olsr_packet *, uint16_t, union olsr_ip_addr *);
+/* Forward declarations */
+union pkt_olsr_packet;
+union pkt_olsr_message;
 
-int8_t print_olsr_serialized_message(FILE *, union olsr_message *);
+int8_t print_olsr_serialized_packet(FILE *, union pkt_olsr_packet *, uint16_t, union olsr_ip_addr *);
 
-#endif
+int8_t print_olsr_serialized_message(FILE *, union pkt_olsr_message *);
+
+#endif /* _PRINT_PACKET_H */
 
 /*
  * Local Variables:

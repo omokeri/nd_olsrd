@@ -39,12 +39,14 @@
  *
  */
 
-#include "ipcalc.h"
+#include <stdlib.h> /* free() */
+
 #include "defs.h"
+#include "ipcalc.h"
+#include "link_set.h" /* signal_link_changes() */
+#include "olsr.h" /* olsr_calloc() */
+#include "scheduler.h" /* olsr_set_timer() */
 #include "mpr_selector_set.h"
-#include "olsr.h"
-#include "scheduler.h"
-#include "net_olsr.h"
 
 static uint16_t ansn;
 
@@ -146,7 +148,7 @@ olsr_add_mpr_selector(const union olsr_ip_addr *addr, olsr_reltime vtime)
 
   OLSR_PRINTF(1, "MPRS: adding %s\n", olsr_ip_to_string(&buf, addr));
 
-  new_entry = olsr_malloc(sizeof(struct mpr_selector), "Add MPR selector");
+  new_entry = olsr_calloc(sizeof(struct mpr_selector), "Add MPR selector");
   /* Fill struct */
   new_entry->MS_main_addr = *addr;
   olsr_set_mpr_sel_timer(new_entry, vtime);

@@ -5,8 +5,8 @@
  *      Author: henning
  */
 
-#ifndef KERNEL_TUNNEL_H_
-#define KERNEL_TUNNEL_H_
+#ifndef _KERNEL_TUNNEL_H
+#define _KERNEL_TUNNEL_H
 
 #include <net/if.h>
 #ifdef WIN32
@@ -15,9 +15,8 @@
 #define IF_NAMESIZE MAX_INTERFACE_NAME_LEN
 #endif
 
-#include "defs.h"
-#include "olsr_types.h"
-#include "common/avl.h"
+#include "olsr_types.h" /* olsr_ip_addr */
+#include "common/avl.h" /* avl_node */
 
 #define TUNNEL_ENDPOINT_IF "tunl0"
 #define TUNNEL_ENDPOINT_IF6 "ip6tnl0"
@@ -38,4 +37,4 @@ void olsr_os_cleanup_iptunnel(void);
 struct olsr_iptunnel_entry *olsr_os_add_ipip_tunnel(union olsr_ip_addr *target, bool transportV4);
 void olsr_os_del_ipip_tunnel(struct olsr_iptunnel_entry *);
 
-#endif /* KERNEL_TUNNEL_H_ */
+#endif /* _KERNEL_TUNNEL_H */

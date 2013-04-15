@@ -39,18 +39,19 @@
  *
  */
 
+#include <sys/time.h> /* gettimeofday() */
+#include <assert.h> /* assert() */
+#include <stdlib.h> /* free() */
+#include <errno.h> /* errno, EINTR */
+#include <unistd.h> /* close() */
+
+#include "defs.h" /* OLSR_PRINTF */
+#include "link_set.h" /* link_changes */
+#include "olsr.h" /* olsr_exit() */
+#include "net_os.h" /* olsr_select() */
+#include "mpr_selector_set.h" /* increase_local_ansn() */
 #include "scheduler.h"
-#include "log.h"
-#include "link_set.h"
-#include "olsr.h"
-#include "olsr_cookie.h"
-#include "net_os.h"
-#include "mpr_selector_set.h"
 
-#include <sys/times.h>
-
-#include <unistd.h>
-#include <assert.h>
 
 #ifdef WIN32
 #define close(x) closesocket(x)
@@ -181,7 +182,7 @@ add_olsr_socket(int fd, socket_handler_func pf_pr, socket_handler_func pf_imm, v
   }
   OLSR_PRINTF(3, "Adding OLSR socket entry %d\n", fd);
 
-  new_entry = olsr_malloc(sizeof(*new_entry), "Socket entry");
+  new_entry = olsr_calloc(sizeof(*new_entry), "Socket entry");
 
   new_entry->fd = fd;
   new_entry->process_immediate = pf_imm;

@@ -38,11 +38,15 @@
  * the copyright holders.
  *
  */
-#ifndef _OLSR_HYSTERESIS
-#define _OLSR_HYSTERESIS
+#ifndef _HYSTERESIS_H
+#define _HYSTERESIS_H
 
-#include "link_set.h"
-#include "mantissa.h"
+#include "olsr_types.h" /* uint16_t */
+#include "mantissa.h" /* olsr_reltime */
+
+/* Forward declarations */
+struct link_entry;
+struct network_interface;
 
 float olsr_hyst_calc_stability(float);
 
@@ -52,9 +56,9 @@ float olsr_hyst_calc_instability(float);
 
 void olsr_update_hysteresis_hello(struct link_entry *, olsr_reltime);
 
-void update_hysteresis_incoming(union olsr_ip_addr *, struct interface *, uint16_t);
+void update_hysteresis_incoming(union olsr_ip_addr *, struct network_interface *, uint16_t);
 
-#endif
+#endif /* _HYSTERESIS_H */
 
 /*
  * Local Variables:

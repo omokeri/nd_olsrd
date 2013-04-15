@@ -39,18 +39,22 @@
  *
  */
 
-#include <signal.h>
-#include <unistd.h>
+/* System includes */
+#include <stdlib.h> /* free() */
+#include <unistd.h>  /* close() */
 
+/* OLSRD includes */
 #include "defs.h"
+#include "ifnet.h" /* chk_if_up() */
+#include "scheduler.h" /* olsr_start_timer() */
+#include "olsr.h" /* olsr_calloc() */
+#include "net_olsr.h" /* net_remove_buffer() */
+#include "ipcalc.h" /* ip6equal() */
+#include "log.h" /* olsr_syslog() */
+#include "parser.h" /* olsr_input */
+#include "link_set.h" /* olsr_delete_link_entry_by_ip() */
+#include "process_routes.h" /* olsr_delete_interface_routes() */
 #include "interfaces.h"
-#include "ifnet.h"
-#include "scheduler.h"
-#include "olsr.h"
-#include "net_olsr.h"
-#include "ipcalc.h"
-#include "log.h"
-#include "parser.h"
 
 #ifdef WIN32
 #include <winbase.h>
@@ -58,11 +62,11 @@
 #endif
 
 /* The interface linked-list */
-struct interface *ifnet;
+struct network_interface *ifnet;
 
 /* Ifchange functions */
 struct ifchgf {
-  void (*function) (int if_index, struct interface *, enum olsr_ifchg_flag);
+  void (*function) (int if_index, struct network_interface *, enum olsr_ifchg_flag);
   struct ifchgf *next;
 };
 
@@ -119,7 +123,7 @@ olsr_init_interfacedb(void)
 }
 
 void
-olsr_trigger_ifchange(int if_index, struct interface *ifp, enum olsr_ifchg_flag flag)
+olsr_trigger_ifchange(int if_index, struct network_interface *ifp, enum olsr_ifchg_flag flag)
 {
   struct ifchgf *tmp_ifchgf_list = ifchgf_list;
 
@@ -138,10 +142,10 @@ olsr_trigger_ifchange(int if_index, struct interface *ifp, enum olsr_ifchg_flag 
  *that matched the address.
  */
 
-struct interface *
+struct network_interface *
 if_ifwithaddr(const union olsr_ip_addr *addr)
 {
-  struct interface *ifp;
+  struct network_interface *ifp;
 
   if (!addr)
     return NULL;
@@ -173,10 +177,10 @@ if_ifwithaddr(const union olsr_ip_addr *addr)
  *@return return the interface struct representing the interface
  *that matched the number.
  */
-struct interface *
+struct network_interface *
 if_ifwithsock(int fd)
 {
-  struct interface *ifp;
+  struct network_interface *ifp;
   ifp = ifnet;
 
   while (ifp) {
@@ -196,10 +200,10 @@ if_ifwithsock(int fd)
  *@return return the interface struct representing the interface
  *that matched the label.
  */
-struct interface *
+struct network_interface *
 if_ifwithname(const char *if_name)
 {
-  struct interface *ifp = ifnet;
+  struct network_interface *ifp = ifnet;
   while (ifp) {
     /* good ol' strcmp should be sufficcient here */
     if (strcmp(ifp->int_name, if_name) == 0) {
@@ -240,10 +244,10 @@ olsrif_ifwithname(const char *if_name)
  *@return return the interface struct representing the interface
  *that matched the iif_index.
  */
-struct interface *
+struct network_interface *
 if_ifwithindex(const int if_index)
 {
-  struct interface *ifp = ifnet;
+  struct network_interface *ifp = ifnet;
   while (ifp != NULL) {
     if (ifp->if_index == if_index) {
       return ifp;
@@ -263,7 +267,7 @@ if_ifwithindex(const int if_index)
 const char *
 if_ifwithindex_name(const int if_index)
 {
-  const struct interface *const ifp = if_ifwithindex(if_index);
+  const struct network_interface *const ifp = if_ifwithindex(if_index);
   return ifp == NULL ? "void" : ifp->int_name;
 }
 
@@ -292,15 +296,15 @@ olsr_create_olsrif(const char *name, int hemu)
     interf_n = interf_n->next;
   }
 
-  interf_n = olsr_malloc(sizeof(struct olsr_if), "queue interface");
+  interf_n = olsr_calloc(sizeof(struct olsr_if), "queue interface");
 
   name_size = strlen(name) + 1;
-  interf_n->name = olsr_malloc(name_size, "queue interface name");
+  interf_n->name = olsr_calloc(name_size, "queue interface name");
   strscpy(interf_n->name, name, name_size);
 
-  interf_n->cnf = olsr_malloc(sizeof(*interf_n->cnf), "queue cnf");
+  interf_n->cnf = olsr_calloc(sizeof(*interf_n->cnf), "queue cnf");
 
-  interf_n->cnfi = olsr_malloc(sizeof(*interf_n->cnfi), "queue cnfi");
+  interf_n->cnfi = olsr_calloc(sizeof(*interf_n->cnfi), "queue cnfi");
   memset(interf_n->cnfi, 0xFF, sizeof(*interf_n->cnfi));
   interf_n->cnfi->orig_lq_mult_cnt=0;
 
@@ -321,12 +325,12 @@ olsr_create_olsrif(const char *name, int hemu)
  *@return
  */
 int
-olsr_add_ifchange_handler(void (*f) (int if_index, struct interface *, enum olsr_ifchg_flag))
+olsr_add_ifchange_handler(void (*f) (int if_index, struct network_interface *, enum olsr_ifchg_flag))
 {
 
   struct ifchgf *new_ifchgf;
 
-  new_ifchgf = olsr_malloc(sizeof(struct ifchgf), "Add ifchgfunction");
+  new_ifchgf = olsr_calloc(sizeof(struct ifchgf), "Add ifchgfunction");
 
   new_ifchgf->next = ifchgf_list;
   new_ifchgf->function = f;
@@ -340,7 +344,7 @@ olsr_add_ifchange_handler(void (*f) (int if_index, struct interface *, enum olsr
  * Remove an ifchange function
  */
 int
-olsr_remove_ifchange_handler(void (*f) (int if_index, struct interface *, enum olsr_ifchg_flag))
+olsr_remove_ifchange_handler(void (*f) (int if_index, struct network_interface *, enum olsr_ifchg_flag))
 {
   struct ifchgf *tmp_ifchgf, *prev;
 
@@ -369,7 +373,7 @@ olsr_remove_ifchange_handler(void (*f) (int if_index, struct interface *, enum o
 void
 olsr_remove_interface(struct olsr_if * iface)
 {
-  struct interface *ifp, *tmp_ifp;
+  struct network_interface *ifp, *tmp_ifp;
   ifp = iface->interf;
 
   OLSR_PRINTF(1, "Removing interface %s (%d)\n", iface->name, ifp->if_index);

@@ -557,11 +557,15 @@ unsigned int CFrontendDlg::NetThreadFunc(void)
 			HandleOlsrHna((struct OlsrHeader *)Msg);
 			break;
 
-		case MSG_TYPE_OLSR_LQ_HELLO:
+		case MSG_TYPE_OLSR_LQ_ETX_HELLO:
+		case MSG_TYPE_OLSR_LQ_ETT_HELLO:
+		case MSG_TYPE_OLSR_LQ_ETXETH_HELLO:
 			HandleOlsrHello((struct OlsrHello *)Msg, 1);
 			break;
 
-		case MSG_TYPE_OLSR_LQ_TC:
+    case MSG_TYPE_OLSR_LQ_ETX_TC:
+    case MSG_TYPE_OLSR_LQ_ETT_TC:
+    case MSG_TYPE_OLSR_LQ_ETXETH_TC:
 			HandleOlsrTc((struct OlsrTc *)Msg, 1);
 			break;
 		}

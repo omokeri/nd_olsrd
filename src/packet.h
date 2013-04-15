@@ -39,60 +39,13 @@
  *
  */
 
-#ifndef _OLSR_PACKET
-#define _OLSR_PACKET
+#ifndef _PACKET_H
+#define _PACKET_H
 
-#include "olsr_protocol.h"
-#include "interfaces.h"
-#include "mantissa.h"
+#include "olsr_types.h" /* uint8_t, uint16_t, union olsr_ip_addr */
+#include "mantissa.h" /* olsr_reltime */
 
-struct hello_neighbor {
-  uint8_t status;
-  uint8_t link;
-  union olsr_ip_addr main_address;
-  union olsr_ip_addr address;
-  struct hello_neighbor *next;
-  olsr_linkcost cost;
-  uint32_t linkquality[0];
-};
-
-struct hello_message {
-  olsr_reltime vtime;
-  olsr_reltime htime;
-  union olsr_ip_addr source_addr;
-  uint16_t packet_seq_number;
-  uint8_t hop_count;
-  uint8_t ttl;
-  uint8_t willingness;
-  struct hello_neighbor *neighbors;
-
-};
-
-struct tc_mpr_addr {
-  union olsr_ip_addr address;
-  struct tc_mpr_addr *next;
-  uint32_t linkquality[0];
-};
-
-struct tc_message {
-  olsr_reltime vtime;
-  union olsr_ip_addr source_addr;
-  union olsr_ip_addr originator;
-  uint16_t packet_seq_number;
-  uint8_t hop_count;
-  uint8_t ttl;
-  uint16_t ansn;
-  struct tc_mpr_addr *multipoint_relay_selector_address;
-};
-
-/*
- *MID messages - format:
- *
- *ADDR
- *ADDR
- *ADDR
- *.....
- */
+/* Deserialized MID message */
 
 struct mid_alias {
   union olsr_ip_addr alias_addr;
@@ -109,23 +62,9 @@ struct mid_message {
   struct mid_alias *mid_addr;          /* variable length */
 };
 
-struct unknown_message {
-  uint16_t seqno;
-  union olsr_ip_addr originator;
-  uint8_t type;
-};
-
-void olsr_free_hello_packet(struct hello_message *);
-
-int olsr_build_hello_packet(struct hello_message *, struct interface *);
-
-void olsr_free_tc_packet(struct tc_message *);
-
-int olsr_build_tc_packet(struct tc_message *);
-
 void olsr_free_mid_packet(struct mid_message *);
 
-#endif
+#endif /* _PACKET_H */
 
 /*
  * Local Variables:

@@ -42,23 +42,17 @@
 #ifndef _BUILD_MSG_H
 #define _BUILD_MSG_H
 
-#include "packet.h"
-#include "olsr_protocol.h"
-#include <time.h>               /* For clock_t */
+#include "olsr_types.h" /* uint32_t */
+
+/* Forward declaration */
+struct network_interface;
 
 void set_empty_tc_timer(uint32_t);
-
 uint32_t get_empty_tc_timer(void);
+bool queue_mid(struct network_interface *);
+bool queue_hna(struct network_interface *);
 
-bool queue_hello(struct hello_message *, struct interface *);
-
-bool queue_tc(struct tc_message *, struct interface *);
-
-bool queue_mid(struct interface *);
-
-bool queue_hna(struct interface *);
-
-#endif
+#endif /* _BUILD_MSG_H */
 
 /*
  * Local Variables:

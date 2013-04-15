@@ -1,7 +1,7 @@
 
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2008 Henning Rogge <rogge@fgan.de>
+ * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,24 +39,22 @@
  *
  */
 
-#ifndef LQ_PLUGIN_DEFAULT_H_
-#define LQ_PLUGIN_DEFAULT_H_
+#ifndef _PROCESS_PACKET_H
+#define _PROCESS_PACKET_H
 
-#include "olsr_types.h"
-#include "lq_plugin.h"
+#include "olsr_types.h" /* bool */
 
-#define LQ_ALGORITHM_ETX_FLOAT_NAME "etx_float"
+/* Forward declarations */
+union pkt_olsr_message;
+struct network_interface;
+union olsr_ip_addr;
+struct lq_hello_message;
 
-#define LQ_PLUGIN_LC_MULTIPLIER 1024
+bool olsr_input_hello(union pkt_olsr_message*, struct network_interface*, union olsr_ip_addr*);
+void olsr_init_packet_process(void);
+void olsr_hello_tap(struct lq_hello_message*, struct network_interface*, const union olsr_ip_addr*);
 
-struct default_lq_float {
-  float lq, nlq;
-  uint16_t quickstart;
-};
-
-extern struct lq_handler lq_etx_float_handler;
-
-#endif /*LQ_PLUGIN_DEFAULT_H_ */
+#endif /* _PROCESS_PACKET_H */
 
 /*
  * Local Variables:

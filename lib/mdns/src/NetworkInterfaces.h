@@ -74,7 +74,7 @@ struct TBmfInterface {
 
   /* OLSRs idea of this network interface. NULL if this interface is not
    * OLSR-enabled. */
-  struct interface *olsrIntf;
+  struct network_interface *olsrIntf;
 
   /* IP address of this network interface */
   union olsr_ip_addr intAddr;
@@ -141,8 +141,8 @@ void FindNeighbors(struct TBestNeighbors *neighbors,
                    union olsr_ip_addr *source,
                    union olsr_ip_addr *forwardedBy, union olsr_ip_addr *forwardedTo, int *nPossibleNeighbors);
 
-int CreateBmfNetworkInterfaces(struct interface *skipThisIntf);
-void AddInterface(struct interface *newIntf);
+int CreateBmfNetworkInterfaces(struct network_interface *skipThisIntf);
+void AddInterface(struct network_interface *newIntf);
 void CloseBmfNetworkInterfaces(void);
 int AddNonOlsrBmfIf(const char *ifName, void *data, set_plugin_parameter_addon addon);
 int set_MDNS_TTL(const char *MDNS_TTL, void *data, set_plugin_parameter_addon addon);

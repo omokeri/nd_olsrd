@@ -39,13 +39,16 @@
  *
  */
 
-#ifndef _OLSR_MID
-#define _OLSR_MID
+#ifndef _MID_SET_H
+#define _MID_SET_H
 
-#include "olsr_types.h"
-#include "hashing.h"
-#include "mantissa.h"
-#include "packet.h"
+#include "olsr_types.h" /* uint32_t, olsr_ip_addr */
+#include "hashing.h" /* HASHSIZE */
+#include "mantissa.h" /* olsr_reltime */
+
+/* Forward declarations */
+struct network_interface;
+union pkt_olsr_message;
 
 struct mid_address {
   union olsr_ip_addr alias;
@@ -84,9 +87,9 @@ struct mid_entry *mid_lookup_entry_bymain(const union olsr_ip_addr *);
 void olsr_print_mid_set(void);
 int olsr_update_mid_table(const union olsr_ip_addr *, olsr_reltime);
 void olsr_delete_mid_entry(struct mid_entry *);
-bool olsr_input_mid(union olsr_message *, struct interface *, union olsr_ip_addr *);
+bool olsr_input_mid(union pkt_olsr_message *, struct network_interface *, union olsr_ip_addr *);
 
-#endif
+#endif /* _MID_SET_H */
 
 /*
  * Local Variables:

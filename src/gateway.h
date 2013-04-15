@@ -5,14 +5,14 @@
  *      Author: henning
  */
 
-#ifndef GATEWAY_H_
-#define GATEWAY_H_
+#ifndef _GATEWAY_H
+#define _GATEWAY_H
 
-#include "common/avl.h"
-#include "common/list.h"
-#include "defs.h"
-#include "olsr.h"
-#include "scheduler.h"
+#include "common/avl.h" /* avl_node */
+#include "olsr_types.h" /* uint16_t, uint32_t, olsr_ip_addr, olsr_ip_prefix */
+
+/* Forward declarations */
+struct timer_entry;
 
 #define FORCE_DELETE_GW_ENTRY 255
 #define GW_CLEANUP_INTERVAL 30000
@@ -91,4 +91,5 @@ struct olsr_gw_handler {
 };
 
 void olsr_set_inetgw_handler(struct olsr_gw_handler *l);
-#endif /* GATEWAY_H_ */
+
+#endif /* _GATEWAY_H */

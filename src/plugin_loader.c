@@ -39,13 +39,14 @@
  *
  */
 
-#include "plugin_loader.h"
-#include "olsrd_plugin.h"
-#include "plugin_util.h"
-#include "defs.h"
-#include "olsr.h"
+#include <stdlib.h> /* exit() */
+#include <errno.h> /* errno */
+#include <dlfcn.h> /* dlopen(), RTLD_NOW */
 
-#include <dlfcn.h>
+#include "defs.h"
+#include "olsrd_plugin.h" /* MOST_RECENT_PLUGIN_INTERFACE_VERSION */
+#include "olsr.h" /* olsr_calloc() */
+#include "plugin_loader.h"
 
 /* Local functions */
 static int init_olsr_plugin(struct olsr_plugin *);
@@ -90,7 +91,7 @@ olsr_load_dl(char *libname, struct plugin_param *params)
 #if TESTLIB_PATH
   char path[256] = "/usr/testlib/";
 #endif
-  struct olsr_plugin *plugin = olsr_malloc(sizeof(struct olsr_plugin), "Plugin entry");
+  struct olsr_plugin *plugin = olsr_calloc(sizeof(struct olsr_plugin), "Plugin entry");
   int rv;
 
   OLSR_PRINTF(0, "---------- LOADING LIBRARY %s ----------\n", libname);

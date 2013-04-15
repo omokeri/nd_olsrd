@@ -43,30 +43,27 @@
 #define ifr_netmask ifr_addr
 #endif
 
-#include "ifnet.h"
-#include "ipcalc.h"
-#include "interfaces.h"
-#include "defs.h"
-#include "olsr.h"
-#include "net_os.h"
-#include "net_olsr.h"
-#include "parser.h"
-#include "scheduler.h"
-#include "generate_msg.h"
-#include "mantissa.h"
-#include "lq_packet.h"
-#include "log.h"
-#include "link_set.h"
+#include <stdlib.h> /* EXIT_FAILURE  */
+#include <errno.h> /* errno */
+#include <net/if.h> /* ifreq, if_nametoindex() */
+#include <sys/ioctl.h> /* ioctl() */
+#include <signal.h> /* kill() */
+#include <unistd.h> /* getpid() */
+#include <linux/ip.h> /* IPTOS_PREC, IPTOS_TOS */
 
-#include <signal.h>
-#include <sys/types.h>
-#include <net/if.h>
-#include <net/if_arp.h>
-#include <netinet/in_systm.h>
-#include <netinet/ip.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
+#include "defs.h"
+#include "ipcalc.h" /* olsr_ip_prefix_to_string() */
+#include "olsr.h" /* olsr_calloc() */
+#include "net_os.h" /* check_wireless_interface() */
+#include "net_olsr.h" /* net_remove_buffer() */
+#include "parser.h" /* olsr_input_hostemu() */
+#include "scheduler.h" /* add_olsr_socket() */
+#include "olsr_protocol.h" /* HELLO_JITTER, TC_JITTER, MID_JITTER, HNA_JITTER */
+#include "generate_msg.h" /* generate_mid() */
+#include "lq_packet.h" /* olsr_output_lq_hello() */
+#include "log.h" /* olsr_syslog() */
+#include "ifnet.h"
+
 
 #define BUFSPACE  (127*1024)    /* max. input buffer size to request */
 
@@ -144,7 +141,7 @@ check_interface_updates(void *foo __attribute__ ((unused)))
 int
 chk_if_changed(struct olsr_if *iface)
 {
-  struct interface *ifp;
+  struct network_interface *ifp;
   struct ifreq ifr;
   struct sockaddr_in6 tmp_saddr6;
   int if_changes;
@@ -213,6 +210,13 @@ chk_if_changed(struct olsr_if *iface)
     ifp->int_metric = iface->cnf->weight.value;
   else
     ifp->int_metric = calculate_if_metric(ifr.ifr_name);
+
+  /* Set initial interface link-quality metrics */
+  ifp->int_lc_medium_time_weight = iface->cnf->cost.weight_medium_time;
+  ifp->int_lc_medium_speed = iface->cnf->cost.medium_speed;
+  ifp->int_lc_medium_type_weight = iface->cnf->cost.weight_medium_type;
+  ifp->int_lc_medium_type = iface->cnf->cost.medium_type;
+  ifp->int_lc_offset = iface->cnf->cost.user_added_cost;
 
   /* Get MTU */
   if (ioctl(olsr_cnf->ioctl_s, SIOCGIFMTU, &ifr) < 0)
@@ -369,7 +373,7 @@ remove_interface:
 int
 add_hemu_if(struct olsr_if *iface)
 {
-  struct interface *ifp;
+  struct network_interface *ifp;
   union olsr_ip_addr null_addr;
   uint32_t addr[4];
   struct ipaddr_str buf;
@@ -378,9 +382,9 @@ add_hemu_if(struct olsr_if *iface)
   if (!iface->host_emul)
     return -1;
 
-  ifp = olsr_malloc(sizeof(struct interface), "Interface update 2");
+  ifp = olsr_calloc(sizeof(struct network_interface), "Interface update 2");
 
-  memset(ifp, 0, sizeof(struct interface));
+  memset(ifp, 0, sizeof(struct network_interface));
 
   /* initialize backpointer */
   ifp->olsr_if = iface;
@@ -390,7 +394,7 @@ add_hemu_if(struct olsr_if *iface)
 
   name_size = strlen("hcif01") + 1;
   ifp->is_hcif = true;
-  ifp->int_name = olsr_malloc(name_size, "Interface update 3");
+  ifp->int_name = olsr_calloc(name_size, "Interface update 3");
   ifp->int_metric = 0;
 
   strscpy(ifp->int_name, "hcif01", name_size);
@@ -486,26 +490,47 @@ add_hemu_if(struct olsr_if *iface)
   /* Register socket */
   add_olsr_socket(ifp->olsr_socket, &olsr_input_hostemu, NULL, NULL, SP_PR_READ);
 
-  /*
-   * Register functions for periodic message generation
-   */
-
+  /* Register functions for periodic message generation */
   ifp->hello_gen_timer =
-    olsr_start_timer(iface->cnf->hello_params.emission_interval * MSEC_PER_SEC, HELLO_JITTER, OLSR_TIMER_PERIODIC,
-                     olsr_cnf->lq_level == 0 ? &generate_hello : &olsr_output_lq_hello, ifp, hello_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->hello_params.emission_interval * MSEC_PER_SEC,
+      HELLO_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &olsr_output_lq_hello,
+      ifp,
+      hello_gen_timer_cookie);
+
   ifp->tc_gen_timer =
-    olsr_start_timer(iface->cnf->tc_params.emission_interval * MSEC_PER_SEC, TC_JITTER, OLSR_TIMER_PERIODIC,
-                     olsr_cnf->lq_level == 0 ? &generate_tc : &olsr_output_lq_tc, ifp, tc_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->tc_params.emission_interval * MSEC_PER_SEC,
+      TC_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &olsr_output_lq_tc,
+      ifp,
+      tc_gen_timer_cookie);
+
   ifp->mid_gen_timer =
-    olsr_start_timer(iface->cnf->mid_params.emission_interval * MSEC_PER_SEC, MID_JITTER, OLSR_TIMER_PERIODIC, &generate_mid, ifp,
-                     mid_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->mid_params.emission_interval * MSEC_PER_SEC,
+      MID_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &generate_mid,
+      ifp,
+      mid_gen_timer_cookie);
+
   ifp->hna_gen_timer =
-    olsr_start_timer(iface->cnf->hna_params.emission_interval * MSEC_PER_SEC, HNA_JITTER, OLSR_TIMER_PERIODIC, &generate_hna, ifp,
-                     hna_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->hna_params.emission_interval * MSEC_PER_SEC,
+      HNA_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &generate_hna,
+      ifp,
+      hna_gen_timer_cookie);
 
   /* Recalculate max topology hold time */
-  if (olsr_cnf->max_tc_vtime < iface->cnf->tc_params.emission_interval)
+  if (olsr_cnf->max_tc_vtime < iface->cnf->tc_params.emission_interval) {
     olsr_cnf->max_tc_vtime = iface->cnf->tc_params.emission_interval;
+  }
 
   ifp->hello_etime = (olsr_reltime) (iface->cnf->hello_params.emission_interval * MSEC_PER_SEC);
   ifp->valtimes.hello = reltime_to_me(iface->cnf->hello_params.validity_time * MSEC_PER_SEC);
@@ -518,13 +543,12 @@ add_hemu_if(struct olsr_if *iface)
   return 1;
 }
 
-static char basenamestr[32];
-static const char *if_basename(const char *name);
 static const char *
 if_basename(const char *name)
 {
+  static char basenamestr[32];
   char *p = strchr(name, ':');
-  if (NULL == p || p - name >= (int)(sizeof(basenamestr) / sizeof(basenamestr[0]) - 1)) {
+  if (p == NULL || p - name >= (int)(sizeof(basenamestr) / sizeof(basenamestr[0]) - 1)) {
     return name;
   }
   memcpy(basenamestr, name, p - name);
@@ -543,7 +567,7 @@ if_basename(const char *name)
 int
 chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
 {
-  struct interface ifs, *ifp;
+  struct network_interface ifs, *ifp;
   struct ifreq ifr;
   union olsr_ip_addr null_addr;
   size_t name_size;
@@ -552,11 +576,12 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
   int tos_bits = IPTOS_TOS(olsr_cnf->tos);
 #endif
 
-  if (iface->host_emul)
+  if (iface->host_emul) {
     return -1;
+  }
 
   memset(&ifr, 0, sizeof(struct ifreq));
-  memset(&ifs, 0, sizeof(struct interface));
+  memset(&ifs, 0, sizeof(struct network_interface));
   strscpy(ifr.ifr_name, iface->name, sizeof(ifr.ifr_name));
 
   OLSR_PRINTF(debuglvl, "Checking %s:\n", ifr.ifr_name);
@@ -668,17 +693,26 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
   ifs.if_index = if_nametoindex(ifr.ifr_name);
 
   /* Set interface metric */
-  if (iface->cnf->weight.fixed)
+  if (iface->cnf->weight.fixed) {
     ifs.int_metric = iface->cnf->weight.value;
-  else
+  } else {
     ifs.int_metric = calculate_if_metric(ifr.ifr_name);
+  }
   OLSR_PRINTF(1, "\tMetric: %d\n", ifs.int_metric);
 
+  /* Set initial interface link-quality metrics */
+  ifs.int_lc_medium_time_weight = iface->cnf->cost.weight_medium_time;
+  ifs.int_lc_medium_speed = iface->cnf->cost.medium_speed;
+  ifs.int_lc_medium_type_weight = iface->cnf->cost.weight_medium_type;
+  ifs.int_lc_medium_type = iface->cnf->cost.medium_type;
+  ifs.int_lc_offset = iface->cnf->cost.user_added_cost;
+
   /* Get MTU */
-  if (ioctl(olsr_cnf->ioctl_s, SIOCGIFMTU, &ifr) < 0)
+  if (ioctl(olsr_cnf->ioctl_s, SIOCGIFMTU, &ifr) < 0) {
     ifs.int_mtu = OLSR_DEFAULT_MTU;
-  else
+  } else {
     ifs.int_mtu = ifr.ifr_mtu;
+  }
 
   ifs.int_mtu -= (olsr_cnf->ip_version == AF_INET6) ? UDP_IPV6_HDRSIZE : UDP_IPV4_HDRSIZE;
 
@@ -703,13 +737,13 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
     OLSR_PRINTF(1, "\tMulticast: %s\n", ip6_to_string(&buf, &ifs.int6_multaddr.sin6_addr));
   }
 
-  ifp = olsr_malloc(sizeof(struct interface), "Interface update 2");
+  ifp = olsr_calloc(sizeof(struct network_interface), "Interface update 2");
 
   iface->configured = 1;
   iface->interf = ifp;
 
-  /* XXX bad code */
-  memcpy(ifp, &ifs, sizeof(struct interface));
+  /* Copy from temporary storage into permanent memory */
+  *ifp = ifs;
 
   /* initialize backpointer */
   ifp->olsr_if = iface;
@@ -723,7 +757,7 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
 
   name_size = strlen(if_basename(ifr.ifr_name)) + 1;
   ifp->gen_properties = NULL;
-  ifp->int_name = olsr_malloc(name_size, "Interface update 3");
+  ifp->int_name = olsr_calloc(name_size, "Interface update 3");
   strscpy(ifp->int_name, if_basename(ifr.ifr_name), name_size);
   ifp->int_next = ifnet;
   ifnet = ifp;
@@ -811,17 +845,37 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
    * Register functions for periodic message generation
    */
   ifp->hello_gen_timer =
-    olsr_start_timer(iface->cnf->hello_params.emission_interval * MSEC_PER_SEC, HELLO_JITTER, OLSR_TIMER_PERIODIC,
-                     olsr_cnf->lq_level == 0 ? &generate_hello : &olsr_output_lq_hello, ifp, hello_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->hello_params.emission_interval * MSEC_PER_SEC,
+      HELLO_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &olsr_output_lq_hello,
+      ifp,
+      hello_gen_timer_cookie);
   ifp->tc_gen_timer =
-    olsr_start_timer(iface->cnf->tc_params.emission_interval * MSEC_PER_SEC, TC_JITTER, OLSR_TIMER_PERIODIC,
-                     olsr_cnf->lq_level == 0 ? &generate_tc : &olsr_output_lq_tc, ifp, tc_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->tc_params.emission_interval * MSEC_PER_SEC,
+      TC_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &olsr_output_lq_tc,
+      ifp,
+      tc_gen_timer_cookie);
   ifp->mid_gen_timer =
-    olsr_start_timer(iface->cnf->mid_params.emission_interval * MSEC_PER_SEC, MID_JITTER, OLSR_TIMER_PERIODIC, &generate_mid, ifp,
-                     mid_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->mid_params.emission_interval * MSEC_PER_SEC,
+      MID_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &generate_mid,
+      ifp,
+      mid_gen_timer_cookie);
   ifp->hna_gen_timer =
-    olsr_start_timer(iface->cnf->hna_params.emission_interval * MSEC_PER_SEC, HNA_JITTER, OLSR_TIMER_PERIODIC, &generate_hna, ifp,
-                     hna_gen_timer_cookie);
+    olsr_start_timer(
+      iface->cnf->hna_params.emission_interval * MSEC_PER_SEC,
+      HNA_JITTER,
+      OLSR_TIMER_PERIODIC,
+      &generate_hna,
+      ifp,
+      hna_gen_timer_cookie);
 
   /* Recalculate max topology hold time */
   if (olsr_cnf->max_tc_vtime < iface->cnf->tc_params.emission_interval) {
