@@ -1,3 +1,31 @@
+0.6.4.1 -------------------------------------------------------------------
+
+Ferry Huberts (20):
+      main: add release script
+      release: move the stringTrim function up a bit
+      release: make gitIsGitDirectory do the correct thing
+      release: fix usage of literal dot in regular expressions
+      release: move into the base directory earlier
+      release: convert some code into checkIsOlsrdGitCheckout function
+      release: convert some code into checkGitSigningKeyIsConfigured function
+      release: convert some code into getPrevRelTag function
+      release: the script can now also create a release branch
+      release: use olsrd-version prefix for files in the tarballs
+      Remove mercurial ignore file; we use git
+      build: ignore builddata.c when hashing sources
+      release: fix the list of generated files
+      release: update some comments
+      release: refactor the checkVersionIncrementing function
+      release: do not update the version on master when it's already higher
+      release: only report that master changed when it was actually changed
+      release: checkVersionIncrementing: optionally allow equal versions
+      release: also check against the Makefile version when branching
+      txtinfo: prevent buffer overflow
+
+Henning Rogge (2):
+      Fix multicast join for IPv6
+      Release v0.6.4.1
+
 0.6.4 --------------------------------------------------------------------
 
 Bugfix and plugin release 0.6.4
