@@ -139,9 +139,9 @@ void
 register_lq_handler(struct lq_handler *handler, const char *name)
 {
   struct lq_handler_node *node;
-  size_t name_size = sizeof(*node) + strlen(name) + 1;
+  size_t name_size = strlen(name) + 1;
 
-  node = olsr_malloc(name_size, "olsr lq handler");
+  node = olsr_malloc(sizeof(*node) + name_size, "olsr lq handler");
 
   strscpy(node->name, name, name_size);
   node->node.key = node->name;
