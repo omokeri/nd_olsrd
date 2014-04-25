@@ -172,7 +172,8 @@ abuf_puts(struct autobuf *autobuf, const char *s)
   if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
     return -1;
   }
-  strncpy(autobuf->buf + autobuf->len, s, len + 1);
+  /* we already checked length of source and destination buffer */
+  memcpy(autobuf->buf + autobuf->len, s, len+1);
   autobuf->len += len;
   return len;
 }
