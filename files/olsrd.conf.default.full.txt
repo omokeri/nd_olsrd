@@ -46,7 +46,7 @@
 # The lockfile is used to prevent multiple OLSR instances running at the same
 # time.
 # (Linux/BSD default is "/var/run/olsrd-ipv(4/6).lock")
-# (Win32     default is "configfile-ipv(4/6).lock")
+# (Win32     default is "[configfile]-ipv(4/6).lock")
 
 # LockFile "/var/run/olsrd-ipv4.lock"
 
