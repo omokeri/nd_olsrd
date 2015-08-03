@@ -79,6 +79,7 @@
 #define DEF_LQ_NAT_THRESH    1.0
 #define DEF_LQ_AGING         0.05
 #define DEF_CLEAR_SCREEN     true
+#define DEF_DIJKSTRA_BINARY_HEAP false
 #define DEF_OLSRPORT         698
 #define DEF_RTPROTO          0 /* 0 means OS-specific default */
 #define DEF_RT_NONE          -1
@@ -308,6 +309,7 @@ struct olsrd_config {
   float pollrate;
   float nic_chgs_pollrate;
   bool clear_screen;
+  bool dijkstra_binary_heap;
   uint8_t tc_redundancy;
   uint8_t mpr_coverage;
   uint8_t lq_level;

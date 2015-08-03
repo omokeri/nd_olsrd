@@ -1053,6 +1053,14 @@ void olsrd_write_cnf_autobuf_uncached(struct autobuf *out, struct olsrd_config *
       cnf->mpr_coverage);
   abuf_appendf(out,
     "\n"
+    "# Use the binary heap implementation when running the Dijkstra algorithm.\n"
+    "# (default is %s)\n"
+    "\n", DEF_DIJKSTRA_BINARY_HEAP ? "yes" : "no");
+  abuf_appendf(out, "%sDijkstraBinaryHeap %s\n",
+      cnf->dijkstra_binary_heap == DEF_DIJKSTRA_BINARY_HEAP ? "# " : "",
+      cnf->dijkstra_binary_heap ? "yes" : "no");
+  abuf_appendf(out,
+    "\n"
     "################################\n"
     "### OLSR protocol extensions ###\n"
     "################################\n"

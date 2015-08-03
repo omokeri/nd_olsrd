@@ -1191,6 +1191,7 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_boolean(&json_session, abuf, "clearScreen", olsr_cnf->clear_screen);
   abuf_json_int(&json_session, abuf, "tcRedundancy", olsr_cnf->tc_redundancy);
   abuf_json_int(&json_session, abuf, "mprCoverage", olsr_cnf->mpr_coverage);
+  abuf_json_boolean(&json_session, abuf, "dijkstraBinaryHeap", olsr_cnf->dijkstra_binary_heap);
 
 
   abuf_json_mark_object(&json_session, true, false, abuf, "linkQuality");

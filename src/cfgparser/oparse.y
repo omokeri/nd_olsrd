@@ -211,6 +211,7 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
 %token TOK_NICCHGSPOLLRT
 %token TOK_TCREDUNDANCY
 %token TOK_MPRCOVERAGE
+%token TOK_DIJKSTRA_BINARY_HEAP
 %token TOK_LQ_LEVEL
 %token TOK_LQ_FISH
 %token TOK_LQ_AGING
@@ -312,6 +313,7 @@ stmt:       idebug
           | fnicchgspollrt
           | atcredundancy
           | amprcoverage
+          | bdijkstra_binary_heap
           | alq_level
           | alq_plugin
           | alq_fish
@@ -1261,6 +1263,14 @@ amprcoverage: TOK_MPRCOVERAGE TOK_INTEGER
 {
   PARSER_DEBUG_PRINTF("MPR coverage %d\n", $2->integer);
   olsr_cnf->mpr_coverage = $2->integer;
+  free($2);
+}
+;
+
+bdijkstra_binary_heap: TOK_DIJKSTRA_BINARY_HEAP TOK_BOOLEAN
+{
+  PARSER_DEBUG_PRINTF("Dijkstra Binary Heap %s\n", $2->boolean ? "enabled" : "disabled");
+  olsr_cnf->dijkstra_binary_heap = $2->boolean;
   free($2);
 }
 ;

@@ -1111,6 +1111,7 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->clear_screen = DEF_CLEAR_SCREEN;
   cnf->tc_redundancy = TC_REDUNDANCY;
   cnf->mpr_coverage = MPR_COVERAGE;
+  cnf->dijkstra_binary_heap = DEF_DIJKSTRA_BINARY_HEAP;
   cnf->lq_level = DEF_LQ_LEVEL;
   cnf->lq_fish = DEF_LQ_FISH;
   cnf->lq_aging = DEF_LQ_AGING;
@@ -1270,6 +1271,8 @@ olsrd_print_cnf(struct olsrd_config *cnf)
   printf("TC redundancy    : %d\n", cnf->tc_redundancy);
 
   printf("MPR coverage     : %d\n", cnf->mpr_coverage);
+
+  printf("Dijkstra Bin Heap: %s\n", cnf->dijkstra_binary_heap ? "yes" : "no");
 
   printf("LQ level         : %d\n", cnf->lq_level);
 

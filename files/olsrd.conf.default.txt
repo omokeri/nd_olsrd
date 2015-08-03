@@ -409,6 +409,11 @@ Hna6
 
 # MprCoverage 7
 
+# Use the binary heap implementation when running the Dijkstra algorithm.
+# (default is no)
+
+# DijkstraBinaryHeap no
+
 ################################
 ### OLSR protocol extensions ###
 ################################
