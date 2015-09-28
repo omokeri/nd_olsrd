@@ -1,3 +1,16 @@
+0.9.0.3 -------------------------------------------------------------------
+
+Alex Dunn (1):
+      Makefile.osx: create .dylibs
+
+Ferry Huberts (1):
+      Fix CHANGELOG
+
+Henning Rogge (3):
+      Update version after release of v0.9.0.2
+      Handle interface broadcast/multicast address zero
+      Release v0.9.0.3
+
 0.9.0.2 -------------------------------------------------------------------
 
 Ferry Huberts (4):
