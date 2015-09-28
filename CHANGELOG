@@ -146,6 +146,20 @@ Sebastian Kürten (2):
 Teco Boot (1):
       arprefresh: README adjusted for plugin name
 
+0.6.8.1 -------------------------------------------------------------------
+
+Ferry Huberts (4):
+      pud: wireformat-java: improve java detection
+      release: stricter matching of release tags
+      autobuf: fix warning in Windows release builds
+      neighbors: signal link changes when deleting a neighbor
+
+Henning Rogge (4):
+      Update version after release of v0.6.8
+      tc: properly initialise the path_costs field in a new tc
+      Handle interface broadcast/multicast address zero
+      Release v0.6.8.1
+
 0.6.8 -------------------------------------------------------------------
 
 Ferry Huberts (81):
