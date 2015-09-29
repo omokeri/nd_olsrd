@@ -538,12 +538,14 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
  * @param fmtv the format for printing
  */
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const char * fmtv) {
+  struct interfaceName * sgwTunnelInterfaceNames;
+
   abuf_appendf(abuf, "# Table: Smart Gateway IPv%s\n", ipv6 ? "6" : "4");
   abuf_appendf(abuf, fmth, "#", "Originator", "Prefix", "Uplink", "Downlink", "PathCost", "IPv4", "IPv4-NAT", "IPv6", "Tunnel-Name", "Destination", "Cost");
 
-  if (olsr_cnf->smart_gw_active) {
+  sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
+  if (olsr_cnf->smart_gw_active && sgwTunnelInterfaceNames) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
-    struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
     int i = 0;
     for (i = 0; i < olsr_cnf->smart_gw_use_count; i++) {
       bool selected;
@@ -558,7 +560,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
       struct ipaddr_str tunnelGwStr;
       const char * tunnelGw;
 
-      struct gateway_entry * gw = node ? node->gw : NULL;
+      struct gateway_entry * gw = node->gw;
       struct tc_entry* tc;
 
       if (!gw) {
