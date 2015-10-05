@@ -7,6 +7,9 @@
 # activate debugging with 1 or deactivate with 0
 DEBUG ?= 1
 
+# set NOSTRIP to non-zero to inhibit stripping the binaries
+NOSTRIP ?= 0
+
 # compile OLSR_PRINTF out
 NO_DEBUG_MESSAGES ?= 0
 
@@ -49,9 +52,13 @@ else
 CC ?= 		$(CCACHE) gcc
 endif
 ifeq ($(DEBUG),0)
-STRIP ?=	strip
+  ifeq ($(NOSTRIP),0)
+  STRIP ?=  strip
+  else
+  STRIP ?=  :
+  endif
 else
-STRIP ?=	:
+STRIP ?=  :
 endif
 BISON ?=	bison
 FLEX ?=		flex

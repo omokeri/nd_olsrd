@@ -7,6 +7,8 @@
 # activate debugging with 1 or deactivate with 0
 DEBUG ?= 1
 
+# set NOSTRIP to non-zero to inhibit stripping the binaries
+NOSTRIP ?= 0
 
 # shows full compiler/linker calls if activated
 VERBOSE ?= 0
@@ -23,7 +25,11 @@ endif
 #
 
 ifeq ($(DEBUG),0)
-STRIP ?=	strip
+  ifeq ($(NOSTRIP),0)
+  STRIP ?=  strip
+  else
+  STRIP ?=  :
+  endif
 else
 STRIP ?=	:
 endif
