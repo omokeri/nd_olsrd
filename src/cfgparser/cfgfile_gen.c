@@ -853,6 +853,17 @@ void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf) {
       cnf->smart_gw_divider_etx == DEF_GW_DIVIDER_ETX ? "# " : "",
       cnf->smart_gw_divider_etx);
   abuf_appendf(out,
+      "\n"
+      "# When a node advertises the maximum bandwidth and its ETX\n"
+      "# is below the value of this setting then the resulting gateway\n"
+      "# costs are equal to the ETX, otherwise the normal calculation\n"
+      "# of the gateway costs applies.\n"
+      "# (default is %u)\n"
+      "\n", DEF_GW_MAX_COST_MAX_ETX);
+  abuf_appendf(out, "%sSmartGatewayMaxCostMaxEtx %d\n",
+        cnf->smart_gw_path_max_cost_etx_max == DEF_GW_MAX_COST_MAX_ETX ? "# " : "",
+        cnf->smart_gw_path_max_cost_etx_max);
+  abuf_appendf(out,
     "\n"
     "# Defines what kind of Uplink this node will publish as a\n"
     "# smartgateway. The existence of the uplink is detected by\n"

@@ -343,7 +343,7 @@ bool egressBwCalculateCosts(struct egress_if_bw * bw, bool up) {
 
   {
     int64_t costsPrevious = bw->costs;
-    bw->costs = gw_costs_weigh(up, gw_costs_weights_storage, bw->path_cost, bw->egressUk, bw->egressDk);
+    bw->costs = gw_costs_weigh(up, gw_costs_weights_storage, bw->path_cost, olsr_cnf->smart_gw_path_max_cost_etx_max, bw->egressUk, bw->egressDk);
     return (costsPrevious != bw->costs);
   }
 }

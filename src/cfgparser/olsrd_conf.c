@@ -999,6 +999,7 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->smart_gw_weight_exitlink_down = DEF_GW_WEIGHT_EXITLINK_DOWN;
   cnf->smart_gw_weight_etx = DEF_GW_WEIGHT_ETX;
   cnf->smart_gw_divider_etx = DEF_GW_DIVIDER_ETX;
+  cnf->smart_gw_path_max_cost_etx_max = DEF_GW_MAX_COST_MAX_ETX;
   cnf->smart_gw_type = DEF_GW_TYPE;
   smartgw_set_uplink(cnf, DEF_UPLINK_SPEED);
   cnf->smart_gw_uplink_nat = DEF_GW_UPLINK_NAT;

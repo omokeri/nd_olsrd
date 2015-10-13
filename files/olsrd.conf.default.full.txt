@@ -283,6 +283,14 @@
 
 # SmartGatewayDividerEtx 0
 
+# When a node advertises the maximum bandwidth and its ETX
+# is below the value of this setting then the resulting gateway
+# costs are equal to the ETX, otherwise the normal calculation
+# of the gateway costs applies.
+# (default is 2560)
+
+# SmartGatewayMaxCostMaxEtx 2560
+
 # Defines what kind of Uplink this node will publish as a
 # smartgateway. The existence of the uplink is detected by
 # a route to 0.0.0.0/0, ::ffff:0:0/96 and/or 2000::/3.
