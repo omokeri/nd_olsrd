@@ -117,6 +117,7 @@
 #define DEF_GW_WEIGHT_EXITLINK_DOWN 1
 #define DEF_GW_WEIGHT_ETX           1
 #define DEF_GW_DIVIDER_ETX          0
+#define DEF_GW_MAX_COST_MAX_ETX     2560
 #define DEF_GW_TYPE          GW_UPLINK_IPV46
 #define DEF_GW_UPLINK_NAT    true
 #define DEF_UPLINK_SPEED     128
@@ -331,6 +332,7 @@ struct olsrd_config {
   uint8_t smart_gw_weight_exitlink_down;
   uint8_t smart_gw_weight_etx;
   uint32_t smart_gw_divider_etx;
+  uint32_t smart_gw_path_max_cost_etx_max;
   enum smart_gw_uplinktype smart_gw_type;
   uint32_t smart_gw_uplink, smart_gw_downlink;
   bool smart_gateway_bandwidth_zero;

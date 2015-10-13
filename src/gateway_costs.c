@@ -8,7 +8,7 @@ extern "C" {
 #define SCALING_SHIFT 23
 #define MAX_SMARTGW_SPEED 320000000
 
-int64_t gw_costs_weigh(bool up, const struct costs_weights weights, uint32_t path_cost, uint32_t exitUk, uint32_t exitDk) {
+int64_t gw_costs_weigh(bool up, const struct costs_weights weights, uint32_t path_cost, uint32_t max_cost_etx_max, uint32_t exitUk, uint32_t exitDk) {
   int64_t costU;
   int64_t costD;
   int64_t costE;
@@ -28,8 +28,8 @@ int64_t gw_costs_weigh(bool up, const struct costs_weights weights, uint32_t pat
     return INT64_MAX;
   }
 
-  if ((exitUk >= MAX_SMARTGW_SPEED) && (exitDk >= MAX_SMARTGW_SPEED)) {
-    /* maximum bandwidth: only consider path costs */
+  if ((exitUk >= MAX_SMARTGW_SPEED) && (exitDk >= MAX_SMARTGW_SPEED) && (path_cost < max_cost_etx_max)) {
+    /* maximum bandwidth AND below max_cost_etx_max: only consider path costs */
     return path_cost;
   }
 

@@ -237,6 +237,7 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
 %token TOK_SMART_GW_WEIGHT_EXITLINK_DOWN
 %token TOK_SMART_GW_WEIGHT_ETX
 %token TOK_SMART_GW_DIVIDER_ETX
+%token TOK_SMART_GW_MAX_COST_MAX_ETX
 %token TOK_SMART_GW_UPLINK
 %token TOK_SMART_GW_UPLINK_NAT
 %token TOK_SMART_GW_SPEED
@@ -1550,6 +1551,14 @@ asmart_gw_divider_etx: TOK_SMART_GW_DIVIDER_ETX TOK_INTEGER
 {
   PARSER_DEBUG_PRINTF("Smart gateway ETX divider: %d\n", $2->integer);
   olsr_cnf->smart_gw_divider_etx = $2->integer;
+  free($2);
+}
+;
+
+asmart_gw_divider_etx: TOK_SMART_GW_MAX_COST_MAX_ETX TOK_INTEGER
+{
+  PARSER_DEBUG_PRINTF("Smart gateway max cost max ETX: %d\n", $2->integer);
+  olsr_cnf->smart_gw_path_max_cost_etx_max = $2->integer;
   free($2);
 }
 ;

@@ -333,6 +333,10 @@ All other parameters will be ignored if SmartGateway is set to "no"
 13-SmartGatewayWeightExitLinkUp, SmartGatewayWeightExitLinkDown,
    SmartGatewayWeightEtx and SmartGatewayDividerEtx control the weighing
    of gateway bandwidth and ETX costs.
+14-SmartGatewayMaxCostMaxEtx: When a node advertises the maximum bandwidth
+   and its ETX is below the value of this setting then the resulting gateway
+   costs are equal to the ETX, otherwise the normal calculation of the
+   gateway costs applies (default is 2560).
 
    If SmartGatewayDividerEtx is zero then no weighing is performed (classical
    behaviour). Classical behaviour only takes ETX costs into account when
