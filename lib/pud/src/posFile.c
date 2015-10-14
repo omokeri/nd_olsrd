@@ -117,23 +117,25 @@ static char line[LINE_LENGTH];
  * @param nmeaInfo the NMEA data
  */
 bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
-	bool retval = false;
 	int fd;
 	struct stat statBuf;
-	nmeaINFO result;
 	FILE * fp = NULL;
 	unsigned int lineNumber = 0;
 	char * name = NULL;
 	char * value = NULL;
+	nmeaINFO result;
+	bool retval = false;
 
 	fd = open(fileName, O_RDONLY);
 	if (fd < 0) {
-		/* could not access the file */
+		/* could not open the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
 	if (fstat(fd, &statBuf)) {
-		/* could not access the file */
+		/* could not stat the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
@@ -144,6 +146,7 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 
 	fp = fdopen(fd, "r");
 	if (!fp) {
+		/* could not open the file */
 		goto out;
 	}
 
