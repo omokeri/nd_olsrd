@@ -20,6 +20,9 @@
 #include <assert.h>
 #include <net/if.h>
 
+/** the maximum length of a line that is read from the file */
+#define LINE_LENGTH 256
+
 /** the weights for the cost calculation */
 static struct costs_weights gw_costs_weights_storage;
 static struct costs_weights * gw_costs_weights = NULL;
@@ -79,9 +82,6 @@ static CachedStat cachedStatClear;
 
 /** the malloc-ed buffer in which to store a line read from the file */
 static char * line = NULL;
-
-/** the maximum length of a line that is read from the file */
-static size_t line_length = 256;
 
 /* forward declaration */
 static bool readEgressFile(const char * fileName);
@@ -402,7 +402,7 @@ bool startEgressFile(void) {
     return true;
   }
 
-  line = malloc(line_length);
+  line = malloc(LINE_LENGTH);
   if (!line) {
     egressFileError(false, __LINE__, "Could not allocate a line buffer");
     return false;
@@ -411,7 +411,7 @@ bool startEgressFile(void) {
 
   r = regcomp(&compiledRegexComment, regexComment, REG_EXTENDED);
   if (r) {
-    regerror(r, &compiledRegexComment, line, line_length);
+    regerror(r, &compiledRegexComment, line, LINE_LENGTH);
     egressFileError(false, __LINE__, "Could not compile regex \"%s\" (%d = %s)", regexComment, r, line);
 
     free(line);
@@ -421,7 +421,7 @@ bool startEgressFile(void) {
 
   r = regcomp(&compiledRegexEgress, regexEgress, REG_EXTENDED);
   if (r) {
-    regerror(r, &compiledRegexEgress, line, line_length);
+    regerror(r, &compiledRegexEgress, line, LINE_LENGTH);
     egressFileError(false, __LINE__, "Could not compile regex \"%s\" (%d = %s)", regexEgress, r, line);
 
     regfree(&compiledRegexComment);
@@ -495,6 +495,7 @@ static bool readEgressFile(const char * fileName) {
   bool reportedErrorsLocal = false;
   const char * filepath = !fileName ? DEF_GW_EGRESS_FILE : fileName;
   void * mtim;
+  size_t line_length = LINE_LENGTH;
 
   if (memcmp(&cachedStat.timeStamp, &cachedStatClear.timeStamp, sizeof(cachedStat.timeStamp))) {
     /* read the file before */
