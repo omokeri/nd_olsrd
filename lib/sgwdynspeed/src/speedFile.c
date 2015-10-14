@@ -181,6 +181,7 @@ void readSpeedFile(char * fileName) {
 	unsigned int lineNumber = 0;
 	char * name = NULL;
 	char * value = NULL;
+
 	unsigned long uplink = DEF_UPLINK_SPEED;
 	unsigned long downlink = DEF_DOWNLINK_SPEED;
 	bool uplinkSet = false;
@@ -189,12 +190,14 @@ void readSpeedFile(char * fileName) {
 
 	fd = open(fileName, O_RDONLY);
 	if (fd < 0) {
-		/* could not access the file */
+		/* could not open the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
 	if (fstat(fd, &statBuf)) {
-		/* could not access the file */
+		/* could not stat the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
@@ -205,6 +208,7 @@ void readSpeedFile(char * fileName) {
 
 	fp = fdopen(fd, "r");
 	if (!fp) {
+		/* could not open the file */
 		goto out;
 	}
 
