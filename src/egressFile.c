@@ -20,6 +20,9 @@
 #include <assert.h>
 #include <net/if.h>
 
+/** the maximum length of a line that is read from the file */
+#define LINE_LENGTH 256
+
 /** the weights for the cost calculation */
 static struct costs_weights gw_costs_weights_storage;
 static struct costs_weights * gw_costs_weights = NULL;
@@ -75,13 +78,9 @@ typedef struct _CachedStat {
 
 /** the cached stat result */
 static CachedStat cachedStat;
-static CachedStat cachedStatClear;
 
 /** the malloc-ed buffer in which to store a line read from the file */
 static char * line = NULL;
-
-/** the maximum length of a line that is read from the file */
-static size_t line_length = 256;
 
 /* forward declaration */
 static bool readEgressFile(const char * fileName);
@@ -144,41 +143,6 @@ static void egressFileError(bool useErrno, int lineNo, const char *format, ...) 
 /*
  * Helpers
  */
-
-#ifdef __ANDROID__
-static ssize_t getline(char **lineptr, size_t *n, FILE *stream)
-{
-    char *ptr;
-    size_t len;
-
-    ptr = fgetln(stream, n);
-
-    if (ptr == NULL) {
-        return -1;
-    }
-
-    /* Free the original ptr */
-    if (*lineptr != NULL) free(*lineptr);
-
-    /* Add one more space for '\0' */
-    len = n[0] + 1;
-
-    /* Update the length */
-    n[0] = len;
-
-    /* Allocate a new buffer */
-    *lineptr = malloc(len);
-
-    /* Copy over the string */
-    memcpy(*lineptr, ptr, len-1);
-
-    /* Write the NULL character */
-    (*lineptr)[len-1] = '\0';
-
-    /* Return the length of the new buffer */
-    return len;
-}
-#endif
 
 /**
  * Read an (olsr_ip_addr) IP address from a string:
@@ -402,7 +366,7 @@ bool startEgressFile(void) {
     return true;
   }
 
-  line = malloc(line_length);
+  line = malloc(LINE_LENGTH);
   if (!line) {
     egressFileError(false, __LINE__, "Could not allocate a line buffer");
     return false;
@@ -411,7 +375,7 @@ bool startEgressFile(void) {
 
   r = regcomp(&compiledRegexComment, regexComment, REG_EXTENDED);
   if (r) {
-    regerror(r, &compiledRegexComment, line, line_length);
+    regerror(r, &compiledRegexComment, line, LINE_LENGTH);
     egressFileError(false, __LINE__, "Could not compile regex \"%s\" (%d = %s)", regexComment, r, line);
 
     free(line);
@@ -421,7 +385,7 @@ bool startEgressFile(void) {
 
   r = regcomp(&compiledRegexEgress, regexEgress, REG_EXTENDED);
   if (r) {
-    regerror(r, &compiledRegexEgress, line, line_length);
+    regerror(r, &compiledRegexEgress, line, LINE_LENGTH);
     egressFileError(false, __LINE__, "Could not compile regex \"%s\" (%d = %s)", regexEgress, r, line);
 
     regfree(&compiledRegexComment);
@@ -431,7 +395,6 @@ bool startEgressFile(void) {
   }
 
   memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
-  memset(&cachedStatClear.timeStamp, 0, sizeof(cachedStatClear.timeStamp));
 
   readEgressFile(olsr_cnf->smart_gw_egress_file);
 
@@ -486,49 +449,55 @@ static void readEgressFileClear(void) {
  * @return true to indicate changes (any egress_if->bwChanged is true)
  */
 static bool readEgressFile(const char * fileName) {
-  bool changed = false;
-
-  FILE * fp = NULL;
+  int fd;
   struct stat statBuf;
+  FILE * fp = NULL;
+  void * mtim;
   unsigned int lineNumber = 0;
+
+  bool changed = false;
   ssize_t length = -1;
   bool reportedErrorsLocal = false;
   const char * filepath = !fileName ? DEF_GW_EGRESS_FILE : fileName;
-  void * mtim;
 
-  if (memcmp(&cachedStat.timeStamp, &cachedStatClear.timeStamp, sizeof(cachedStat.timeStamp))) {
-    /* read the file before */
-
-    if (stat(filepath, &statBuf)) {
-      /* could not stat the file */
-      memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
-      readEgressFileClear();
-      goto outerror;
-    }
-
-#if defined(__linux__) && !defined(__ANDROID__)
-    mtim = &statBuf.st_mtim;
-#else
-    mtim = &statBuf.st_mtime;
-#endif
-    if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
-      /* file did not change since last read */
-      return false;
-    }
-  }
-
-  fp = fopen(filepath, "r");
-  if (!fp) {
+  fd = open(filepath, O_RDONLY);
+  if (fd < 0) {
     /* could not open the file */
     memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
     readEgressFileClear();
     goto outerror;
   }
 
+  if (fstat(fd, &statBuf)) {
+    /* could not stat the file */
+    memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
+    readEgressFileClear();
+    goto outerror;
+  }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+  mtim = &statBuf.st_mtim;
+#else
+  mtim = &statBuf.st_mtime;
+#endif
+
+  if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
+    /* file did not change since last read */
+    goto out;
+  }
+
+  fp = fdopen(fd, "r");
+  if (!fp) {
+    /* could not open the file */
+    goto out;
+  }
+
+  memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
+
   /* copy 'current' egress interfaces into 'previous' field */
   readEgressFileClear();
 
-  while ((length = getline(&line, &line_length, fp)) != -1) {
+  while (fgets(line, LINE_LENGTH, fp)) {
     struct sgw_egress_if * egress_if = NULL;
     unsigned long long uplink = DEF_EGRESS_UPLINK_KBPS;
     unsigned long long downlink = DEF_EGRESS_DOWNLINK_KBPS;
@@ -718,13 +687,6 @@ static bool readEgressFile(const char * fileName) {
   fclose(fp);
   fp = NULL;
 
-#if defined(__linux__) && !defined(__ANDROID__)
-    mtim = &statBuf.st_mtim;
-#else
-    mtim = &statBuf.st_mtime;
-#endif
-  memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
-
   reportedErrors = reportedErrorsLocal;
 
   outerror:
@@ -749,6 +711,12 @@ static bool readEgressFile(const char * fileName) {
     }
   }
 
+  out: if (fp) {
+    fclose(fp);
+  }
+  if (fd >= 0) {
+    close(fd);
+  }
   return changed;
 }
 

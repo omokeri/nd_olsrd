@@ -38,7 +38,11 @@ static bool started = false;
 
 /** type to hold the cached stat result */
 typedef struct _CachedStat {
-	time_t timeStamp; /* Time of last modification (second resolution) */
+#if defined(__linux__) && !defined(__ANDROID__)
+  struct timespec timeStamp; /* Time of last modification (full resolution) */
+#else
+  time_t timeStamp; /* Time of last modification (second resolution) */
+#endif
 } CachedStat;
 
 /** the cached stat result */
@@ -64,7 +68,7 @@ bool startPositionFile(void) {
 		return false;
 	}
 
-	cachedStat.timeStamp = -1;
+	memset(&cachedStat, 0, sizeof(cachedStat));
 
 	started = true;
 	return true;
@@ -117,33 +121,45 @@ static char line[LINE_LENGTH];
  * @param nmeaInfo the NMEA data
  */
 bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
-	bool retval = false;
 	int fd;
 	struct stat statBuf;
-	nmeaINFO result;
 	FILE * fp = NULL;
+	void * mtim;
 	unsigned int lineNumber = 0;
+
 	char * name = NULL;
 	char * value = NULL;
 
+	nmeaINFO result;
+	bool retval = false;
+
 	fd = open(fileName, O_RDONLY);
 	if (fd < 0) {
-		/* could not access the file */
+		/* could not open the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
 	if (fstat(fd, &statBuf)) {
-		/* could not access the file */
+		/* could not stat the file */
+		memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
 		goto out;
 	}
 
-	if (!memcmp(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp))) {
+#if defined(__linux__) && !defined(__ANDROID__)
+	mtim = &statBuf.st_mtim;
+#else
+	mtim = &statBuf.st_mtime;
+#endif
+
+	if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
 		/* file did not change since last read */
 		goto out;
 	}
 
 	fp = fdopen(fd, "r");
 	if (!fp) {
+		/* could not open the file */
 		goto out;
 	}
 
@@ -161,7 +177,7 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 	result.mtrack = POSFILE_DEFAULT_MTRACK;
 	result.magvar = POSFILE_DEFAULT_MAGVAR;
 
-	memcpy(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp));
+	memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
 
 	while (fgets(line, LINE_LENGTH, fp)) {
 		regmatch_t pmatch[regexNameValuematchCount];
@@ -291,7 +307,7 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 	}
 
 	fclose(fp);
-	fp = 0;
+	fp = NULL;
 
 	result.smask = POSFILE_DEFAULT_SMASK;
 	nmea_INFO_set_present(&result.present, SMASK);
