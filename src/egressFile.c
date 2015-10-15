@@ -78,7 +78,6 @@ typedef struct _CachedStat {
 
 /** the cached stat result */
 static CachedStat cachedStat;
-static CachedStat cachedStatClear;
 
 /** the malloc-ed buffer in which to store a line read from the file */
 static char * line = NULL;
@@ -431,7 +430,6 @@ bool startEgressFile(void) {
   }
 
   memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
-  memset(&cachedStatClear.timeStamp, 0, sizeof(cachedStatClear.timeStamp));
 
   readEgressFile(olsr_cnf->smart_gw_egress_file);
 
@@ -486,37 +484,33 @@ static void readEgressFileClear(void) {
  * @return true to indicate changes (any egress_if->bwChanged is true)
  */
 static bool readEgressFile(const char * fileName) {
-  bool changed = false;
-
-  FILE * fp = NULL;
   struct stat statBuf;
+  FILE * fp = NULL;
+  void * mtim;
   unsigned int lineNumber = 0;
+
+  bool changed = false;
   ssize_t length = -1;
   bool reportedErrorsLocal = false;
   const char * filepath = !fileName ? DEF_GW_EGRESS_FILE : fileName;
-  void * mtim;
   size_t line_length = LINE_LENGTH;
 
-  if (memcmp(&cachedStat.timeStamp, &cachedStatClear.timeStamp, sizeof(cachedStat.timeStamp))) {
-    /* read the file before */
-
-    if (stat(filepath, &statBuf)) {
-      /* could not stat the file */
-      memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
-      readEgressFileClear();
-      goto outerror;
-    }
+  if (stat(filepath, &statBuf)) {
+    /* could not stat the file */
+    memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
+    readEgressFileClear();
+    goto outerror;
+  }
 
 #if defined(__linux__) && !defined(__ANDROID__)
-    mtim = &statBuf.st_mtim;
+  mtim = &statBuf.st_mtim;
 #else
-    mtim = &statBuf.st_mtime;
+  mtim = &statBuf.st_mtime;
 #endif
 
-    if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
-      /* file did not change since last read */
-      return false;
-    }
+  if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
+    /* file did not change since last read */
+    return false;
   }
 
   fp = fopen(filepath, "r");
