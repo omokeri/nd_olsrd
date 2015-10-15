@@ -177,7 +177,7 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 	result.mtrack = POSFILE_DEFAULT_MTRACK;
 	result.magvar = POSFILE_DEFAULT_MAGVAR;
 
-	memcpy(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp));
+	memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
 
 	while (fgets(line, LINE_LENGTH, fp)) {
 		regmatch_t pmatch[regexNameValuematchCount];
