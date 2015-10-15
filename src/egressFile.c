@@ -516,9 +516,7 @@ static bool readEgressFile(const char * fileName) {
   fp = fopen(filepath, "r");
   if (!fp) {
     /* could not open the file */
-    memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
-    readEgressFileClear();
-    goto outerror;
+    goto out;
   }
 
   memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
