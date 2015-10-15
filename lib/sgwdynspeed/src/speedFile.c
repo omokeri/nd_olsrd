@@ -224,7 +224,7 @@ void readSpeedFile(char * fileName) {
 		goto out;
 	}
 
-	memcpy(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp));
+	memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
 
 	while (fgets(line, LINE_LENGTH, fp)) {
 		regmatch_t pmatch[regexNameValuematchCount];
