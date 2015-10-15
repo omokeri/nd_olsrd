@@ -126,8 +126,10 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 	FILE * fp = NULL;
 	void * mtim;
 	unsigned int lineNumber = 0;
+
 	char * name = NULL;
 	char * value = NULL;
+
 	nmeaINFO result;
 	bool retval = false;
 
@@ -305,7 +307,7 @@ bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo) {
 	}
 
 	fclose(fp);
-	fp = 0;
+	fp = NULL;
 
 	result.smask = POSFILE_DEFAULT_SMASK;
 	nmea_INFO_set_present(&result.present, SMASK);
