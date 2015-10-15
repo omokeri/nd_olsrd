@@ -184,6 +184,7 @@ void readSpeedFile(char * fileName) {
 	FILE * fp = NULL;
 	void * mtim;
 	unsigned int lineNumber = 0;
+
 	char * name = NULL;
 	char * value = NULL;
 
@@ -288,7 +289,10 @@ void readSpeedFile(char * fileName) {
 	  refresh_smartgw_netmask();
 	}
 
-	out: if (fd >= 0) {
+	out: if (fp) {
+		fclose(fp);
+	}
+	if (fd >= 0) {
 		close(fd);
 	}
 }
