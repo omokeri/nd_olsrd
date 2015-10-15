@@ -512,6 +512,7 @@ static bool readEgressFile(const char * fileName) {
 #else
     mtim = &statBuf.st_mtime;
 #endif
+
     if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
       /* file did not change since last read */
       return false;
@@ -526,7 +527,7 @@ static bool readEgressFile(const char * fileName) {
     goto outerror;
   }
 
-  memcpy(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp));
+  memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
 
   /* copy 'current' egress interfaces into 'previous' field */
   readEgressFileClear();
