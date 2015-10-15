@@ -167,8 +167,10 @@ zclient_read(ssize_t * size)
 
     /* (re)allocate buffer */
     if (*size == bufsize) {
+      ssize_t start = bufsize;
       bufsize += BUFSIZE;
       buf = my_realloc(buf, bufsize, "QUAGGA: Grow read buffer");
+      memset(&buf[start], 0, BUFSIZE);
     }
 
     /* read from socket */
