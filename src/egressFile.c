@@ -144,41 +144,6 @@ static void egressFileError(bool useErrno, int lineNo, const char *format, ...) 
  * Helpers
  */
 
-#ifdef __ANDROID__
-static ssize_t getline(char **lineptr, size_t *n, FILE *stream)
-{
-    char *ptr;
-    size_t len;
-
-    ptr = fgetln(stream, n);
-
-    if (ptr == NULL) {
-        return -1;
-    }
-
-    /* Free the original ptr */
-    if (*lineptr != NULL) free(*lineptr);
-
-    /* Add one more space for '\0' */
-    len = n[0] + 1;
-
-    /* Update the length */
-    n[0] = len;
-
-    /* Allocate a new buffer */
-    *lineptr = malloc(len);
-
-    /* Copy over the string */
-    memcpy(*lineptr, ptr, len-1);
-
-    /* Write the NULL character */
-    (*lineptr)[len-1] = '\0';
-
-    /* Return the length of the new buffer */
-    return len;
-}
-#endif
-
 /**
  * Read an (olsr_ip_addr) IP address from a string:
  * First tries to parse the value as an IPv4 address, and if not successful
@@ -484,6 +449,7 @@ static void readEgressFileClear(void) {
  * @return true to indicate changes (any egress_if->bwChanged is true)
  */
 static bool readEgressFile(const char * fileName) {
+  int fd;
   struct stat statBuf;
   FILE * fp = NULL;
   void * mtim;
@@ -493,9 +459,16 @@ static bool readEgressFile(const char * fileName) {
   ssize_t length = -1;
   bool reportedErrorsLocal = false;
   const char * filepath = !fileName ? DEF_GW_EGRESS_FILE : fileName;
-  size_t line_length = LINE_LENGTH;
 
-  if (stat(filepath, &statBuf)) {
+  fd = open(filepath, O_RDONLY);
+  if (fd < 0) {
+    /* could not open the file */
+    memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
+    readEgressFileClear();
+    goto outerror;
+  }
+
+  if (fstat(fd, &statBuf)) {
     /* could not stat the file */
     memset(&cachedStat.timeStamp, 0, sizeof(cachedStat.timeStamp));
     readEgressFileClear();
@@ -513,7 +486,7 @@ static bool readEgressFile(const char * fileName) {
     goto out;
   }
 
-  fp = fopen(filepath, "r");
+  fp = fdopen(fd, "r");
   if (!fp) {
     /* could not open the file */
     goto out;
@@ -524,7 +497,7 @@ static bool readEgressFile(const char * fileName) {
   /* copy 'current' egress interfaces into 'previous' field */
   readEgressFileClear();
 
-  while ((length = getline(&line, &line_length, fp)) != -1) {
+  while (fgets(line, LINE_LENGTH, fp)) {
     struct sgw_egress_if * egress_if = NULL;
     unsigned long long uplink = DEF_EGRESS_UPLINK_KBPS;
     unsigned long long downlink = DEF_EGRESS_DOWNLINK_KBPS;
@@ -740,6 +713,9 @@ static bool readEgressFile(const char * fileName) {
 
   out: if (fp) {
     fclose(fp);
+  }
+  if (fd >= 0) {
+    close(fd);
   }
   return changed;
 }
