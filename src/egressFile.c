@@ -526,6 +526,8 @@ static bool readEgressFile(const char * fileName) {
     goto outerror;
   }
 
+  memcpy(&cachedStat.timeStamp, &statBuf.st_mtime, sizeof(cachedStat.timeStamp));
+
   /* copy 'current' egress interfaces into 'previous' field */
   readEgressFileClear();
 
@@ -718,13 +720,6 @@ static bool readEgressFile(const char * fileName) {
 
   fclose(fp);
   fp = NULL;
-
-#if defined(__linux__) && !defined(__ANDROID__)
-    mtim = &statBuf.st_mtim;
-#else
-    mtim = &statBuf.st_mtime;
-#endif
-  memcpy(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp));
 
   reportedErrors = reportedErrorsLocal;
 
