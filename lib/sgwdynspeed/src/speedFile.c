@@ -276,9 +276,6 @@ void readSpeedFile(char * fileName) {
 
 	reportedErrorsPrevious = reportedErrors;
 
-	fclose(fp);
-	fp = NULL;
-
 	if (uplinkSet) {
 	  smartgw_set_uplink(olsr_cnf, uplink);
 	}
