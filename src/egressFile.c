@@ -510,7 +510,7 @@ static bool readEgressFile(const char * fileName) {
 
   if (!memcmp(&cachedStat.timeStamp, mtim, sizeof(cachedStat.timeStamp))) {
     /* file did not change since last read */
-    return false;
+    goto out;
   }
 
   fp = fopen(filepath, "r");
@@ -740,6 +740,9 @@ static bool readEgressFile(const char * fileName) {
     }
   }
 
+  out: if (fp) {
+    fclose(fp);
+  }
   return changed;
 }
 
