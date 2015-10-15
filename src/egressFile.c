@@ -239,10 +239,9 @@ static bool readULL(const char * value, unsigned long long * valueNumber) {
  * Strip EOL characters from the end of a string
  *
  * @param str the string to strip
- * @param length the length of the string
  */
-static void stripEols(char * str, ssize_t length) {
-  ssize_t len = length;
+static void stripEols(char * str) {
+  ssize_t len = strlen(str);
   while ((len > 0) && ((str[len - 1] == '\n') || (str[len - 1] == '\r'))) {
     len--;
   }
@@ -456,7 +455,6 @@ static bool readEgressFile(const char * fileName) {
   unsigned int lineNumber = 0;
 
   bool changed = false;
-  ssize_t length = -1;
   bool reportedErrorsLocal = false;
   const char * filepath = !fileName ? DEF_GW_EGRESS_FILE : fileName;
 
@@ -519,7 +517,7 @@ static bool readEgressFile(const char * fileName) {
     memset(&network, 0, sizeof(network));
     memset(&gateway, 0, sizeof(gateway));
 
-    stripEols(line, length);
+    stripEols(line);
 
     memset(pmatch, 0, sizeof(pmatch));
     if (regexec(&compiledRegexEgress, line, REGEX_EGRESS_LINE_MATCH_COUNT, pmatch, 0)) {
