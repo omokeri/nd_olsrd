@@ -177,6 +177,9 @@ zclient_read(ssize_t * size)
     bytes = read(zebra.sock, buf + *size, bufsize - *size);
     /* handle broken packet */
     if (!bytes) {
+      /* restore socket status */
+      (void)fcntl(zebra.sock, F_SETFL, sockstatus);
+
       free(buf);
       return NULL;
     }
@@ -188,6 +191,10 @@ zclient_read(ssize_t * size)
         zebra.status &= ~STATUS_CONNECTED;
         /* TODO: Remove HNAs added from redistribution */
       }
+
+      /* restore socket status */
+      (void)fcntl(zebra.sock, F_SETFL, sockstatus);
+
       free(buf);
       return NULL;
     }
