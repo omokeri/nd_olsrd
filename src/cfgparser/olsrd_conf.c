@@ -158,6 +158,13 @@ olsrd_parse_cnf(const char *filename)
   rc = yyparse();
   fclose(yyin);
   if (rc != 0) {
+    /* Interface names that were parsed successfully are not cleaned up. */
+    struct olsr_if* b = olsr_cnf->interfaces;
+    while (b) {
+      free(b->name);
+      b->name = NULL;
+      b = b->next;
+    }
     return -1;
   }
 
