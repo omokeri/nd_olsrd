@@ -67,7 +67,12 @@ olsr_alloc_cookie(const char *cookie_name, olsr_cookie_type cookie_type)
     }
   }
 
-  assert(ci_index < COOKIE_ID_MAX);     /* increase COOKIE_ID_MAX */
+  /* 1 <= ci_index <= COOKIE_ID_MAX */
+
+  if (ci_index == COOKIE_ID_MAX) {
+    olsr_exit("No more cookies available", 1);
+    return NULL;
+  }
 
   ci = calloc(1, sizeof(struct olsr_cookie_info));
   cookies[ci_index] = ci;
