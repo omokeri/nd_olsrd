@@ -27,6 +27,8 @@
 
 #include <assert.h>
 #include <linux/rtnetlink.h>
+#include <net/if.h>
+#include <sys/ioctl.h>
 
 /*
  * Defines for the multi-gateway script
@@ -1620,6 +1622,32 @@ static bool determineBestOverallLink(enum sgw_multi_change_phase phase) {
   return memcmp(&bestOverallLink, &bestOverallLinkPrevious, sizeof(bestOverallLink));
 }
 
+static bool isInterfaceUp(int if_index) {
+  char nameBuf[IF_NAMESIZE];
+  char * name;
+  struct ifreq ifr;
+
+  name = if_indextoname(if_index, nameBuf);
+  if (!name) {
+    /* interface doesn't exist */
+    return false;
+  }
+
+  memset(&ifr, 0, sizeof(struct ifreq));
+  strscpy(ifr.ifr_name, name, sizeof(ifr.ifr_name));
+
+  /* Get flags (and check if interface exists) */
+  if (ioctl(olsr_cnf->ioctl_s, SIOCGIFFLAGS, &ifr) < 0) {
+    return false;
+  }
+
+  if (ifr.ifr_flags & IFF_UP) {
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * Program a route (add or remove) through netlink
  *
@@ -1630,6 +1658,10 @@ static bool determineBestOverallLink(enum sgw_multi_change_phase phase) {
  */
 static void programRoute(bool add, struct sgw_route_info * route, const char * linkName) {
   if (!route || !route->active) {
+    return;
+  }
+
+  if (!isInterfaceUp(route->route.if_index)) {
     return;
   }
 
