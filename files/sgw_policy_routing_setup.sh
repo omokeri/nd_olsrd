@@ -159,38 +159,38 @@ shift 3
 argc=$#
 
 # check IP version argument
-if [ ! "$ipVersion" == "$IPVERSION_4" ] && \
-   [ ! "$ipVersion" == "$IPVERSION_6" ]; then
+if [ ! "$ipVersion" = "$IPVERSION_4" ] && \
+   [ ! "$ipVersion" = "$IPVERSION_6" ]; then
   error "Illegal IP version"
   usage
   exit 1
 fi
 
 # check mode argument
-if [ ! "$mode" == "$MODE_GENERIC" ] && \
-   [ ! "$mode" == "$MODE_OLSRIF" ] && \
-   [ ! "$mode" == "$MODE_SGWSRVTUN" ] && \
-   [ ! "$mode" == "$MODE_EGRESSIF" ] && \
-   [ ! "$mode" == "$MODE_SGWTUN" ]; then
+if [ ! "$mode" = "$MODE_GENERIC" ] && \
+   [ ! "$mode" = "$MODE_OLSRIF" ] && \
+   [ ! "$mode" = "$MODE_SGWSRVTUN" ] && \
+   [ ! "$mode" = "$MODE_EGRESSIF" ] && \
+   [ ! "$mode" = "$MODE_SGWTUN" ]; then
   error "Illegal mode"
   usage
   exit 1
 fi
 
 # check addMode argument
-if [ ! "$addMode" == "$ADDMODE_ADD" ] && \
-   [ ! "$addMode" == "$ADDMODE_DEL" ]; then
+if [ ! "$addMode" = "$ADDMODE_ADD" ] && \
+   [ ! "$addMode" = "$ADDMODE_DEL" ]; then
   error "Illegal addMode"
   usage
   exit 1
 fi
 
 # check argument count for all modes
-if ([ "$mode" == "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
-   ([ "$mode" == "$MODE_OLSRIF" ]    && [ $argc -lt $MODE_OLSRIF_ARGC    ]) || \
-   ([ "$mode" == "$MODE_EGRESSIF"  ] && [ $argc -lt $MODE_EGRESSIF_ARGC  ]) || \
-   ([ "$mode" == "$MODE_SGWSRVTUN" ] && [ $argc -lt $MODE_SGWSRVTUN_ARGC ]) || \
-   ([ "$mode" == "$MODE_SGWTUN"  ]   && [ $argc -lt $MODE_SGWTUN_ARGC    ]); then
+if ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
+   ([ "$mode" = "$MODE_OLSRIF" ]    && [ $argc -lt $MODE_OLSRIF_ARGC    ]) || \
+   ([ "$mode" = "$MODE_EGRESSIF"  ] && [ $argc -lt $MODE_EGRESSIF_ARGC  ]) || \
+   ([ "$mode" = "$MODE_SGWSRVTUN" ] && [ $argc -lt $MODE_SGWSRVTUN_ARGC ]) || \
+   ([ "$mode" = "$MODE_SGWTUN"  ]   && [ $argc -lt $MODE_SGWTUN_ARGC    ]); then
   if [ $argc -eq 0 ]; then
     error "Not enough arguments arguments ($argc) for mode $mode"
   else
@@ -201,11 +201,11 @@ if ([ "$mode" == "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
 fi
 
 # check argument count for all modes
-if ([ "$mode" == "$MODE_GENERIC" ]   && [ $argc -gt $MODE_GENERIC_ARGC   ]) || \
-   ([ "$mode" == "$MODE_OLSRIF" ]    && [ $argc -gt $MODE_OLSRIF_ARGC    ]) || \
-   ([ "$mode" == "$MODE_EGRESSIF"  ] && [ $argc -gt $MODE_EGRESSIF_ARGC  ]) || \
-   ([ "$mode" == "$MODE_SGWSRVTUN" ] && [ $argc -gt $MODE_SGWSRVTUN_ARGC ]) || \
-   ([ "$mode" == "$MODE_SGWTUN"  ]   && [ $argc -gt $MODE_SGWTUN_ARGC    ]); then
+if ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -gt $MODE_GENERIC_ARGC   ]) || \
+   ([ "$mode" = "$MODE_OLSRIF" ]    && [ $argc -gt $MODE_OLSRIF_ARGC    ]) || \
+   ([ "$mode" = "$MODE_EGRESSIF"  ] && [ $argc -gt $MODE_EGRESSIF_ARGC  ]) || \
+   ([ "$mode" = "$MODE_SGWSRVTUN" ] && [ $argc -gt $MODE_SGWSRVTUN_ARGC ]) || \
+   ([ "$mode" = "$MODE_SGWTUN"  ]   && [ $argc -gt $MODE_SGWTUN_ARGC    ]); then
   if [ $argc -eq 0 ]; then
     error "Too many arguments arguments ($argc) for mode $mode"
   else
@@ -220,7 +220,7 @@ declare IPTABLES="iptables"
 declare IPTABLES_ARGS=""
 declare IP="ip"
 declare IP_ARGS="-4"
-if [ "$ipVersion" == "$IPVERSION_6" ]; then
+if [ "$ipVersion" = "$IPVERSION_6" ]; then
   IPTABLES="ip6tables"
   IPTABLES_ARGS=""
   IP="ip"
@@ -230,7 +230,7 @@ fi
 # process addMode argument
 declare ADDMODE_IPTABLES="-D"
 declare ADDMODE_IP="delete"
-if [ "$addMode" == "$ADDMODE_ADD" ]; then
+if [ "$addMode" = "$ADDMODE_ADD" ]; then
   # first call the delete mode to remove any left-over rules
   set +e
   "$mode" "${@}" 2> /dev/null
