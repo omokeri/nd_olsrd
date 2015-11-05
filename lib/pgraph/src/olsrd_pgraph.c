@@ -55,6 +55,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 #ifdef _WIN32
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
@@ -271,8 +272,9 @@ ipc_action(int fd __attribute__ ((unused)), void *data __attribute__ ((unused)),
   addrlen = sizeof(struct sockaddr_in);
 
   if ((ipc_connection = accept(ipc_socket, (struct sockaddr *)&pin, &addrlen)) == -1) {
-    olsr_printf(1, "(DOT DRAW)IPC accept: %s\n", strerror(errno));
-    exit(1);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "(DOT DRAW)IPC accept error: %s", strerror(errno));
+    olsr_exit(buf2, 1);
   } else {
     struct ipaddr_str main_addr;
     addr = inet_ntoa(pin.sin_addr);
