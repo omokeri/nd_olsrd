@@ -34,6 +34,7 @@
  * Defines for the multi-gateway script
  */
 
+#define SCRIPT_MODE_CLEANUP   "cleanup"
 #define SCRIPT_MODE_GENERIC   "generic"
 #define SCRIPT_MODE_OLSRIF    "olsrif"
 #define SCRIPT_MODE_SGWSRVTUN "sgwsrvtun"
@@ -296,12 +297,16 @@ static bool multiGwRunScript(const char * mode, bool addMode, const char * ifNam
   struct autobuf buf;
   int r;
 
-  assert(!strcmp(mode, SCRIPT_MODE_GENERIC) //
+  assert(!strcmp(mode, SCRIPT_MODE_CLEANUP) //
+      || !strcmp(mode, SCRIPT_MODE_GENERIC) //
       || !strcmp(mode, SCRIPT_MODE_OLSRIF)//
       || !strcmp(mode, SCRIPT_MODE_SGWSRVTUN)//
       || !strcmp(mode, SCRIPT_MODE_EGRESSIF)//
       || !strcmp(mode, SCRIPT_MODE_SGWTUN)//
       );
+
+  assert(strcmp(mode, SCRIPT_MODE_CLEANUP) //
+      || (!strcmp(mode, SCRIPT_MODE_CLEANUP) && !ifName && !tableNr && !ruleNr && !bypassRuleNr));
 
   assert(strcmp(mode, SCRIPT_MODE_GENERIC) //
       || (!strcmp(mode, SCRIPT_MODE_GENERIC) && !ifName && !tableNr && !ruleNr && !bypassRuleNr));
@@ -351,6 +356,16 @@ static bool multiGwRunScript(const char * mode, bool addMode, const char * ifNam
   abuf_free(&buf);
 
   return (r == 0);
+}
+
+/**
+ * Cleanup multi-gateway iptables and ip rules
+ *
+ * @param add true to add policy routing, false to remove it
+ * @return true when successful
+ */
+static bool multiGwRulesCleanup(bool add) {
+  return multiGwRunScript(SCRIPT_MODE_CLEANUP, add, NULL, 0, 0, 0);
 }
 
 /**
@@ -814,6 +829,7 @@ int olsr_startup_gateways(void) {
     return 0;
   }
 
+  ok = ok && multiGwRulesCleanup(true);
   ok = ok && multiGwRulesGeneric(true);
   ok = ok && multiGwRulesSgwServerTunnel(true);
   ok = ok && multiGwRulesOlsrInterfaces(true);
@@ -900,6 +916,7 @@ void olsr_shutdown_gateways(void) {
   (void)multiGwRulesOlsrInterfaces(false);
   (void)multiGwRulesSgwServerTunnel(false);
   (void)multiGwRulesGeneric(false);
+  (void)multiGwRulesCleanup(false);
 }
 
 /**
