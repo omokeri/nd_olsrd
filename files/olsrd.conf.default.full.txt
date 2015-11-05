@@ -179,7 +179,7 @@
 # rules such that multi-gateway mode works. A sample script is included.
 # (default is not set)
 
-# SmartGatewayPolicyRoutingScript ""
+# SmartGatewayPolicyRoutingScript <not set>
 
 # Determines the egress interfaces that are part of the multi-gateway setup and
 # therefore only relevant when SmartGatewayUseCount is larger than 1 (in which
