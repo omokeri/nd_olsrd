@@ -144,8 +144,9 @@ ipc_accept(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
   addrlen = sizeof(struct sockaddr_in);
 
   if ((ipc_conn = accept(fd, (struct sockaddr *)&pin, &addrlen)) == -1) {
-    perror("IPC accept");
-    olsr_exit("IPC accept", EXIT_FAILURE);
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "IPC accept error: %s", strerror(errno));
+    olsr_exit(buf, EXIT_FAILURE);
   } else {
     OLSR_PRINTF(1, "Front end connected\n");
     addr = inet_ntoa(pin.sin_addr);
