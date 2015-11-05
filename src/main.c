@@ -319,10 +319,10 @@ int main(int argc, char *argv[]) {
   if (argc == 2) {
     if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "/?") == 0)) {
       print_usage(false);
-      exit(0);
+      olsr_exit(NULL, 0);
     }
     if (strcmp(argv[1], "-v") == 0) {
-      exit(0);
+      olsr_exit(NULL, 0);
     }
   }
 
@@ -336,8 +336,7 @@ int main(int argc, char *argv[]) {
 #ifndef _WIN32
   /* Check if user is root */
   if (geteuid()) {
-    fprintf(stderr, "You must be root(uid = 0) to run olsrd!\nExiting\n\n");
-    exit(EXIT_FAILURE);
+    olsr_exit("You must be root (uid = 0) to run olsrd", EXIT_FAILURE);
   }
 #else /* _WIN32 */
   DisableIcmpRedirects();
@@ -384,7 +383,7 @@ int main(int argc, char *argv[]) {
       loadedConfig = true;
 
       if (olsrmain_load_config(argv[i+1]) < 0) {
-        exit(EXIT_FAILURE);
+        olsr_exit(NULL, EXIT_FAILURE);
       }
       strscpy(conf_file_name, argv[i+1], sizeof(conf_file_name));
 
@@ -412,8 +411,7 @@ int main(int argc, char *argv[]) {
 
   default_ifcnf = get_default_if_config();
   if (default_ifcnf == NULL) {
-    fprintf(stderr, "No default ifconfig found!\n");
-    exit(EXIT_FAILURE);
+    olsr_exit("No default ifconfig found", EXIT_FAILURE);
   }
 
   /* Initialize timers */
@@ -615,8 +613,9 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->debug_level == 0 && !olsr_cnf->no_fork) {
     printf("%s detaching from the current process...\n", olsrd_version);
     if (daemon(0, 0) < 0) {
-      printf("daemon(3) failed: %s\n", strerror(errno));
-      exit(EXIT_FAILURE);
+      char buf2[1024];
+      snprintf(buf2, sizeof(buf2), "daemon(3) failed: %s", strerror(errno));
+      olsr_exit(buf2, EXIT_FAILURE);
     }
   }
 #endif /* _WIN32 */
@@ -982,7 +981,7 @@ static int olsr_process_arguments(int argc, char *argv[],
      */
     if (strcmp(*argv, "-int") == 0) {
       ListInterfaces();
-      exit(0);
+      olsr_exit(NULL, 0);
     }
 #endif /* _WIN32 */
 
@@ -1178,8 +1177,9 @@ static int olsr_process_arguments(int argc, char *argv[],
       NEXT_ARG;
       CHECK_ARGC;
       if (inet_pton(AF_INET6, *argv, &in6) <= 0) {
-        fprintf(stderr, "Failed converting IP address %s\n", *argv);
-        exit(EXIT_FAILURE);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "Failed converting IP address %s", *argv);
+        olsr_exit(buf, EXIT_FAILURE);
       }
 
       memcpy(&ifcnf->ipv6_multicast, &in6, sizeof(struct in6_addr));
@@ -1197,8 +1197,9 @@ static int olsr_process_arguments(int argc, char *argv[],
       NEXT_ARG;
       CHECK_ARGC;
       if (inet_pton(AF_INET, *argv, &in) <= 0) {
-        fprintf(stderr, "Failed converting IP address %s\n", *argv);
-        exit(EXIT_FAILURE);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "Failed converting IP address %s", *argv);
+        olsr_exit(buf, EXIT_FAILURE);
       }
       /* Add hemu interface */
 
