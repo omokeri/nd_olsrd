@@ -153,7 +153,7 @@ PacketReceivedFromOLSR(unsigned char *encapsulationUdpData, int len)
       }
 
       // Sven-Ola: Don't know how to handle the "stripped_len is uninitialized"
-      // condition, maybe exit(1) is better...?
+      // condition, maybe olsr_exit is better...?
       if (0 == stripped_len)
         return;
 
