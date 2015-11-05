@@ -5,6 +5,7 @@ set -u
 
 
 declare script="$0"
+declare scriptName="$(basename "${0%\.*}")"
 declare -a arguments=( ${@} )
 declare -i argc=$#
 
@@ -38,6 +39,7 @@ declare -i argc=$#
 declare IPVERSION_4="ipv4"
 declare IPVERSION_6="ipv6"
 
+declare MODE_CLEANUP="cleanup"
 declare MODE_GENERIC="generic"
 declare MODE_OLSRIF="olsrif"
 declare MODE_SGWSRVTUN="sgwsrvtun"
@@ -47,6 +49,7 @@ declare MODE_SGWTUN="sgwtun"
 declare ADDMODE_ADD="add"
 declare ADDMODE_DEL="del"
 
+declare -i MODE_CLEANUP_ARGC=0
 declare -i MODE_GENERIC_ARGC=0
 declare -i MODE_OLSRIF_ARGC=2
 declare -i MODE_EGRESSIF_ARGC=4
@@ -69,7 +72,7 @@ function usage() {
   echo "  $script instanceId ipVersion mode addMode ifName tableNr ruleNr bypassRuleNr"
   echo "    - instanceId  : the olsrd instance id"
   echo "    - ipVersion   : $IPVERSION_4 or $IPVERSION_6"
-  echo "    - mode        : $MODE_GENERIC, $MODE_OLSRIF, $MODE_EGRESSIF, $MODE_SGWSRVTUN or $MODE_SGWTUN"
+  echo "    - mode        : $MODE_CLEANUP, $MODE_GENERIC, $MODE_OLSRIF, $MODE_EGRESSIF, $MODE_SGWSRVTUN or $MODE_SGWTUN"
   echo "    - addMode     : $ADDMODE_ADD or $ADDMODE_DEL"
   echo "    - ifName      : the interface name       , only relevant for modes $MODE_EGRESSIF, $MODE_SGWSRVTUN, $MODE_SGWTUN"
   echo "    - tableNr     : the routing table number , only relevant for modes $MODE_EGRESSIF, $MODE_SGWSRVTUN, $MODE_SGWTUN"
@@ -93,9 +96,52 @@ function error() {
 
 ###############################################################################
 #
+# HELPER FUNCTIONS
+#
+###############################################################################
+
+function updateLogFile() {
+  local logLine="$ipVersion $mode $ADDMODE_DEL"
+  while [ $# -gt 0 ]; do
+    logLine="$logLine $1"
+    shift 1
+  done
+
+  echo "$logLine" >> "$logFile"
+}
+
+
+###############################################################################
+#
 # MODE FUNCTIONS
 #
 ###############################################################################
+
+function cleanup() {
+  if [ ! -e "$logFile" ]; then
+    return
+  fi
+
+  if [ "$addMode" = "$ADDMODE_ADD" ] && \
+     [ -s "$logFile" ]; then
+    # read logFile
+    local ifsOrg="$IFS"
+    IFS=$'\n'
+    local -a lines=( $(cat "$logFile" | sed -r '/^[[:space:]]*$/ d') )
+    IFS="$ifsOrg"
+
+    local -i index=${#lines[*]}
+    index+=-1
+    while [ $index -ge 0 ]; do
+      set +e
+      "$script" "$instanceId" ${lines[$index]}
+      set -e
+      index+=-1
+    done
+  fi
+
+  rm -f "$logFile"
+}
 
 function generic() {
   "$IPTABLES" $IPTABLES_ARGS -t mangle "$ADDMODE_IPTABLES" PREROUTING  -m conntrack ! --ctstate NEW -j CONNMARK --restore-mark
@@ -159,6 +205,7 @@ declare ipVersion="$2"
 declare mode="$3"
 declare addMode="$4"
 shift 4
+declare logFile="/var/run/$scriptName-$instanceId.log"
 argc=$#
 
 # check IP version argument
@@ -170,7 +217,8 @@ if [ ! "$ipVersion" = "$IPVERSION_4" ] && \
 fi
 
 # check mode argument
-if [ ! "$mode" = "$MODE_GENERIC" ] && \
+if [ ! "$mode" = "$MODE_CLEANUP" ] && \
+   [ ! "$mode" = "$MODE_GENERIC" ] && \
    [ ! "$mode" = "$MODE_OLSRIF" ] && \
    [ ! "$mode" = "$MODE_SGWSRVTUN" ] && \
    [ ! "$mode" = "$MODE_EGRESSIF" ] && \
@@ -189,7 +237,8 @@ if [ ! "$addMode" = "$ADDMODE_ADD" ] && \
 fi
 
 # check argument count for all modes
-if ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
+if ([ "$mode" = "$MODE_CLEANUP" ]   && [ $argc -lt $MODE_CLEANUP_ARGC   ]) || \
+   ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
    ([ "$mode" = "$MODE_OLSRIF" ]    && [ $argc -lt $MODE_OLSRIF_ARGC    ]) || \
    ([ "$mode" = "$MODE_EGRESSIF"  ] && [ $argc -lt $MODE_EGRESSIF_ARGC  ]) || \
    ([ "$mode" = "$MODE_SGWSRVTUN" ] && [ $argc -lt $MODE_SGWSRVTUN_ARGC ]) || \
@@ -204,7 +253,8 @@ if ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -lt $MODE_GENERIC_ARGC   ]) || \
 fi
 
 # check argument count for all modes
-if ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -gt $MODE_GENERIC_ARGC   ]) || \
+if ([ "$mode" = "$MODE_CLEANUP" ]   && [ $argc -gt $MODE_CLEANUP_ARGC   ]) || \
+   ([ "$mode" = "$MODE_GENERIC" ]   && [ $argc -gt $MODE_GENERIC_ARGC   ]) || \
    ([ "$mode" = "$MODE_OLSRIF" ]    && [ $argc -gt $MODE_OLSRIF_ARGC    ]) || \
    ([ "$mode" = "$MODE_EGRESSIF"  ] && [ $argc -gt $MODE_EGRESSIF_ARGC  ]) || \
    ([ "$mode" = "$MODE_SGWSRVTUN" ] && [ $argc -gt $MODE_SGWSRVTUN_ARGC ]) || \
@@ -244,4 +294,7 @@ if [ "$addMode" = "$ADDMODE_ADD" ]; then
 fi
 
 # call the mode
+if [ "$addMode" = "$ADDMODE_ADD" ] && [ ! "$mode" = "$MODE_CLEANUP" ]; then
+  updateLogFile "${@}"
+fi
 "$mode" "${@}"
