@@ -207,9 +207,9 @@ if ([ "$mode" == "$MODE_GENERIC" ]   && [ $argc -gt $MODE_GENERIC_ARGC   ]) || \
    ([ "$mode" == "$MODE_SGWSRVTUN" ] && [ $argc -gt $MODE_SGWSRVTUN_ARGC ]) || \
    ([ "$mode" == "$MODE_SGWTUN"  ]   && [ $argc -gt $MODE_SGWTUN_ARGC    ]); then
   if [ $argc -eq 0 ]; then
-    error "Not enough arguments arguments ($argc) for mode $mode"
+    error "Too many arguments arguments ($argc) for mode $mode"
   else
-    error "Not enough arguments arguments ($argc) for mode $mode" "Arguments: ${@}"
+    error "Too many arguments arguments ($argc) for mode $mode" "Arguments: ${@}"
   fi
   usage
   exit 1
