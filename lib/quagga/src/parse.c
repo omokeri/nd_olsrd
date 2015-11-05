@@ -61,7 +61,7 @@ static struct zroute
     pnt = &opt[6];
     break;
   default:
-    olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
     break;
   }
   r->type = *pnt++;
@@ -105,7 +105,7 @@ static struct zroute
   case 2:
     break;
   default:
-    olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
     break;
   }
 
@@ -122,7 +122,7 @@ static struct zroute
   }
 
   if (pnt - opt != length) {
-    olsr_exit("(QUAGGA) Length does not match!", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Length does not match", EXIT_FAILURE);
   }
 
   return r;
@@ -148,7 +148,7 @@ zparse(void *foo __attribute__ ((unused)))
       memcpy(&length, f, sizeof length);
       length = ntohs (length);
       if (!length) // something weired happened
-        olsr_exit("(QUAGGA) Zero message length!", EXIT_FAILURE);
+        olsr_exit("QUAGGA: Zero message length", EXIT_FAILURE);
       command = f[2];
       switch (zebra.version) {
       case 0:
@@ -156,12 +156,12 @@ zparse(void *foo __attribute__ ((unused)))
       case 1:
       case 2:
         if ((f[2] != ZEBRA_HEADER_MARKER) || (f[3] != zebra.version))
-          olsr_exit("(QUAGGA) Invalid zebra header received!", EXIT_FAILURE);
+          olsr_exit("QUAGGA: Invalid zebra header received", EXIT_FAILURE);
         memcpy(&command, &f[4], sizeof command);
         command = ntohs (command);
         break;
       default:
-        olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+        olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
         break;
       }
       if (olsr_cnf->ip_version == AF_INET) {

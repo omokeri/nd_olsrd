@@ -171,7 +171,7 @@ zebra_redistribute(uint16_t cmd)
   for (type = 0; type < ZEBRA_ROUTE_MAX; type++)
     if (zebra.redistribute[type]) {
       if (zclient_write(zpacket_redistribute(cmd, type)) < 0)
-        olsr_exit("(QUAGGA) Could not write redistribute packet!", EXIT_FAILURE);
+        olsr_exit("QUAGGA: Could not write redistribute packet", EXIT_FAILURE);
     }
 
 }
@@ -181,7 +181,7 @@ zebra_hello(uint16_t cmd)
 {
 
   if (zclient_write(zpacket_redistribute(cmd, ZEBRA_ROUTE_OLSR)) < 0)
-    olsr_exit("(QUAGGA) Could not write hello packet!", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Could not write hello packet", EXIT_FAILURE);
 
 }
 

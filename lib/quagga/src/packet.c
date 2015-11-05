@@ -48,7 +48,7 @@ unsigned char
     t += sizeof cmd;
     break;
   default:
-    olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
     break;
   }
   *t++ = r->type;
@@ -64,7 +64,7 @@ unsigned char
     t += sizeof safi;
     break;
   default:
-    olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
     break;
   }
   *t++ = r->prefixlen;
@@ -131,7 +131,7 @@ unsigned char
     pnt += sizeof cmd;
     break;
   default:
-    olsr_exit("(QUAGGA) Unsupported zebra packet version!\n", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Unsupported zebra packet version", EXIT_FAILURE);
     break;
   }
   *pnt++ = type;

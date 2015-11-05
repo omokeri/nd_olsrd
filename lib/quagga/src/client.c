@@ -60,11 +60,12 @@ zclient_connect(void)
   } sockaddr;
 
   if (close(zebra.sock) < 0)
-    olsr_exit("(QUAGGA) Could not close socket!", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Could not close socket", EXIT_FAILURE);
+
   zebra.sock = socket(zebra.port ? AF_INET : AF_UNIX, SOCK_STREAM, 0);
 
   if (zebra.sock < 0)
-    olsr_exit("(QUAGGA) Could not create socket!", EXIT_FAILURE);
+    olsr_exit("QUAGGA: Could not create socket", EXIT_FAILURE);
 
   memset(&sockaddr, 0, sizeof sockaddr);
 
