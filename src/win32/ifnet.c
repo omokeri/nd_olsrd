@@ -546,8 +546,7 @@ add_hemu_if(struct olsr_if *iface)
     ifp->olsr_socket = gethemusocket(&sin);
 
     if (ifp->olsr_socket < 0) {
-      fprintf(stderr, "Could not initialize socket... exiting!\n\n");
-      exit(1);
+      olsr_exit("Could not initialize socket", 1);
     }
 
   } else {
@@ -842,8 +841,7 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
   New->send_socket = getsocket(0, New);
 
   if (New->olsr_socket < 0) {
-    fprintf(stderr, "Could not initialize socket... exiting!\n\n");
-    exit(1);
+    olsr_exit("Could not initialize socket", 1);
   }
 
   add_olsr_socket(New->olsr_socket, &olsr_input, NULL, NULL, SP_PR_READ);

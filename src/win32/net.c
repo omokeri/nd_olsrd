@@ -58,6 +58,7 @@
 #include "net_os.h"
 #include "net_olsr.h"
 #include "ipcalc.h"
+#include "olsr.h"
 
 #if defined WINCE
 #define WIDE_STRING(s) L##s
@@ -324,7 +325,7 @@ DisableIcmpRedirects(void)
   fprintf(stderr, "I have disabled ICMP redirect processing in the registry for you.\n");
   fprintf(stderr, "REBOOT NOW, so that these changes take effect. Exiting...\n\n");
 
-  exit(0);
+  olsr_exit(NULL, 0);
 }
 
 int
