@@ -4,6 +4,11 @@ set -e
 set -u
 
 
+declare script="$0"
+declare -a arguments=( ${@} )
+declare -i argc=$#
+
+
 ###############################################################################
 #
 # OVERVIEW
@@ -139,10 +144,6 @@ function sgwtun() {
 # MAIN
 #
 ###############################################################################
-
-declare script="$0"
-declare -a arguments=( ${@} )
-declare -i argc=$#
 
 # we always need 3 arguments, check it
 if [ $argc -lt 3 ]; then
