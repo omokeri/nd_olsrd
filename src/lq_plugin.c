@@ -85,8 +85,9 @@ activate_lq_handler(const char *name)
 
   node = (struct lq_handler_node *)avl_find(&lq_handler_tree, name);
   if (node == NULL) {
-    OLSR_PRINTF(1, "Error, unknown lq_handler '%s'\n", name);
-    olsr_exit("", 1);
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "Error, unknown lq_handler '%s'", name);
+    olsr_exit(buf, 1);
   }
 
   OLSR_PRINTF(1, "Using '%s' algorithm for lq calculation.\n", name);
