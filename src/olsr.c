@@ -596,10 +596,9 @@ olsr_malloc(size_t size, const char *id)
   ptr = calloc(1, size);
 
   if (!ptr) {
-    const char *const err_msg = strerror(errno);
-    OLSR_PRINTF(1, "OUT OF MEMORY: %s\n", err_msg);
-    olsr_syslog(OLSR_LOG_ERR, "olsrd: out of memory!: %s\n", err_msg);
-    olsr_exit(id, EXIT_FAILURE);
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s: out of memory!: %s\n", id, strerror(errno));
+    olsr_exit(buf, EXIT_FAILURE);
   }
 
   return ptr;
