@@ -225,7 +225,7 @@ net_os_set_global_ifoptions(void) {
     olsr_startup_sleep(3);
   }
   else if ((!olsr_cnf->set_ip_forward) && (orig_fwd_state != OLSRD_FORWARD_VALUE)) {
-    olsr_exit("IP forwarding not activated, shutting down.\n", 1);
+    olsr_exit("IP forwarding not activated", 1);
   }
 
   if (olsr_cnf->smart_gw_active) {
