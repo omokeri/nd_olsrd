@@ -70,8 +70,7 @@ olsr_load_plugins(void)
     }
   }
   if (rv != 0) {
-    OLSR_PRINTF(0, "-- PLUGIN LOADING FAILED! --\n");
-    exit(1);
+    olsr_exit("-- PLUGIN LOADING FAILED --", 1);
   }
   OLSR_PRINTF(0, "-- ALL PLUGINS LOADED! --\n\n");
 }
@@ -289,8 +288,9 @@ init_olsr_plugin(struct olsr_plugin *entry)
       OLSR_PRINTF(0, "Registering parameter \"%s\": ", params->key);
       rc = entry->register_param(params->key, params->value);
       if (rc < 0) {
-        fprintf(stderr, "\nFatal error in plugin parameter \"%s\"/\"%s\"\n", params->key, params->value);
-        exit(EXIT_FAILURE);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "Fatal error in plugin parameter \"%s\"/\"%s\"", params->key, params->value);
+        olsr_exit(buf, EXIT_FAILURE);
       }
       OLSR_PRINTF(0, "%s\n", rc == 0 ? "FAILED" : "OK");
 #endif /* defined SUPPORT_OLD_PLUGIN_VERSIONS && SUPPORT_OLD_PLUGIN_VERSIONS */
