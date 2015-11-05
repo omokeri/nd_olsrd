@@ -41,9 +41,9 @@ my_realloc(void *buf, size_t s, const char *c)
 
   buf = realloc(buf, s);
   if (!buf) {
-    OLSR_PRINTF(1, "(QUAGGA) Out of memory: %s!\n", strerror(errno));
-    olsr_syslog(OLSR_LOG_ERR, "(QUAGGA) Out of memory!\n");
-    olsr_exit(c, EXIT_FAILURE);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "QUAGGA: Out of memory (%s): %s", c, strerror(errno));
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 
   return buf;
@@ -169,7 +169,7 @@ zclient_read(ssize_t * size)
     if (*size == bufsize) {
       ssize_t start = bufsize;
       bufsize += BUFSIZE;
-      buf = my_realloc(buf, bufsize, "QUAGGA: Grow read buffer");
+      buf = my_realloc(buf, bufsize, "grow read buffer");
       memset(&buf[start], 0, BUFSIZE);
     }
 
