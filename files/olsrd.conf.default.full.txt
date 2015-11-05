@@ -173,6 +173,16 @@
 
 # SmartGatewayTakeDownPercentage 25
 
+# Determines the olsrd instance id, which is needed for proper cleanup
+# of multi-gateway iptables and ip rules when running multiple olsrd
+# instances on a node. This setting MUST be configured when the
+# multi-gateway mode is enabled and must be unique between the olsrd
+# instances running on the node. It may not contain whitespace and may
+# not be empty.
+# (default is not set)
+
+# SmartGatewayInstanceId <not set>
+
 # Determines the policy routing script that is executed during startup and
 # shutdown of olsrd. The script is only executed when SmartGatewayUseCount
 # is set to a value larger than 1. The script must setup policy routing

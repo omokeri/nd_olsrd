@@ -317,6 +317,7 @@ struct olsrd_config {
   bool smart_gw_active, smart_gw_always_remove_server_tunnel, smart_gw_allow_nat, smart_gw_uplink_nat;
   uint8_t smart_gw_use_count;
   uint8_t smart_gw_takedown_percentage;
+  char *smart_gw_instance_id;
   char *smart_gw_policyrouting_script;
   struct sgw_egress_if * smart_gw_egress_interfaces;
   uint8_t smart_gw_egress_interfaces_count;

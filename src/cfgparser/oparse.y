@@ -222,6 +222,7 @@ static int add_ipv6_addr(YYSTYPE ipaddr_arg, YYSTYPE prefixlen_arg)
 %token TOK_SMART_GW_ALWAYS_REMOVE_SERVER_TUNNEL
 %token TOK_SMART_GW_USE_COUNT
 %token TOK_SMART_GW_TAKEDOWN_PERCENTAGE
+%token TOK_SMART_GW_INSTANCE_ID
 %token TOK_SMART_GW_POLICYROUTING_SCRIPT
 %token TOK_SMART_GW_EGRESS_IFS
 %token TOK_SMART_GW_EGRESS_FILE
@@ -321,6 +322,7 @@ stmt:       idebug
           | bsmart_gw_always_remove_server_tunnel
           | ismart_gw_use_count
           | ismart_gw_takedown_percentage
+          | ssmart_gw_instance_id
           | ssmart_gw_policyrouting_script
           | ssmart_gw_egress_file
           | ismart_gw_egress_file_period
@@ -1359,6 +1361,14 @@ ismart_gw_takedown_percentage: TOK_SMART_GW_TAKEDOWN_PERCENTAGE TOK_INTEGER
 {
   PARSER_DEBUG_PRINTF("Smart gateway takedown percentage: %d\n", $2->integer);
   olsr_cnf->smart_gw_takedown_percentage = $2->integer;
+  free($2);
+}
+;
+
+ssmart_gw_instance_id: TOK_SMART_GW_INSTANCE_ID TOK_STRING
+{
+  PARSER_DEBUG_PRINTF("Smart gateway instance id: %s\n", $2->string);
+  olsr_cnf->smart_gw_instance_id = $2->string;
   free($2);
 }
 ;

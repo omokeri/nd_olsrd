@@ -685,6 +685,21 @@ void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf) {
       cnf->smart_gw_takedown_percentage);
   abuf_puts(out,
     "\n"
+    "# Determines the olsrd instance id, which is needed for proper cleanup\n"
+    "# of multi-gateway iptables and ip rules when running multiple olsrd\n"
+    "# instances on a node. This setting MUST be configured when the\n"
+    "# multi-gateway mode is enabled and must be unique between the olsrd\n"
+    "# instances running on the node. It may not contain whitespace and may\n"
+    "# not be empty.\n"
+    "# (default is <not set>)\n"
+    "\n");
+  abuf_appendf(out, "%sSmartGatewayInstanceId %s%s%s\n",
+      !cnf->smart_gw_instance_id ? "# " : "",
+      !cnf->smart_gw_instance_id ? "" : "\"",
+      !cnf->smart_gw_instance_id ? "<not set>" : cnf->smart_gw_instance_id,
+      !cnf->smart_gw_instance_id ? "" : "\"");
+  abuf_puts(out,
+    "\n"
     "# Determines the policy routing script that is executed during startup and\n"
     "# shutdown of olsrd. The script is only executed when SmartGatewayUseCount\n"
     "# is set to a value larger than 1. The script must setup policy routing\n"

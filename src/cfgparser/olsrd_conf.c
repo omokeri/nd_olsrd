@@ -63,6 +63,7 @@
 #include <linux/version.h>
 #include <sys/stat.h>
 #include <net/if.h>
+#include <ctype.h>
 #endif /* __linux__ */
 
 extern FILE *yyin;
@@ -600,6 +601,28 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 	  return -1;
 	}
 
+    if (!cnf->smart_gw_instance_id) {
+      fprintf(stderr, "Error, no smart gateway instance id configured in multi-gateway mode\n");
+      return -1;
+    }
+
+    {
+      size_t len = strlen(cnf->smart_gw_instance_id);
+      size_t index = 0;
+
+      if (!len) {
+        fprintf(stderr, "Error, smart gateway instance id can not be empty\n");
+        return -1;
+      }
+
+      while (index++ < len) {
+        if (isspace(cnf->smart_gw_instance_id[index])) {
+          fprintf(stderr, "Error, smart gateway instance id contains whitespace\n");
+          return -1;
+        }
+      }
+    }
+
     if (!cnf->smart_gw_policyrouting_script) {
       fprintf(stderr, "Error, no policy routing script configured in multi-gateway mode\n");
       return -1;
@@ -990,6 +1013,7 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->smart_gw_always_remove_server_tunnel = DEF_SMART_GW_ALWAYS_REMOVE_SERVER_TUNNEL;
   cnf->smart_gw_use_count = DEF_GW_USE_COUNT;
   cnf->smart_gw_takedown_percentage = DEF_GW_TAKEDOWN_PERCENTAGE;
+  cnf->smart_gw_instance_id = NULL;
   cnf->smart_gw_policyrouting_script = NULL;
   cnf->smart_gw_egress_interfaces = NULL;
   cnf->smart_gw_egress_interfaces_count = 0;
@@ -1132,6 +1156,8 @@ olsrd_print_cnf(struct olsrd_config *cnf)
   printf("SmGw. Use Count  : %u\n", cnf->smart_gw_use_count);
 
   printf("SmGw. Takedown%%  : %u\n", cnf->smart_gw_takedown_percentage);
+
+  printf("SmGw. Instance Id: %s\n", cnf->smart_gw_instance_id);
 
   printf("SmGw. Pol. Script: %s\n", cnf->smart_gw_policyrouting_script);
 

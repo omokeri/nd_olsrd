@@ -486,6 +486,11 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
     return TOK_SMART_GW_TAKEDOWN_PERCENTAGE;
 }
 
+"SmartGatewayInstanceId" {
+    yylval = NULL;
+    return TOK_SMART_GW_INSTANCE_ID;
+}
+
 "SmartGatewayPolicyRoutingScript" {
     yylval = NULL;
     return TOK_SMART_GW_POLICYROUTING_SCRIPT;
