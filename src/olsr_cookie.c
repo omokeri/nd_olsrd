@@ -231,10 +231,9 @@ olsr_cookie_malloc(struct olsr_cookie_info *ci)
     ptr = calloc(1, ci->ci_size + sizeof(struct olsr_cookie_mem_brand));
 
     if (!ptr) {
-      const char *const err_msg = strerror(errno);
-      OLSR_PRINTF(1, "OUT OF MEMORY: %s\n", err_msg);
-      olsr_syslog(OLSR_LOG_ERR, "olsrd: out of memory!: %s\n", err_msg);
-      olsr_exit(ci->ci_name, EXIT_FAILURE);
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s: out of memory: %s", ci->ci_name, strerror(errno));
+      olsr_exit(buf, EXIT_FAILURE);
     }
     assert(ptr);
   } else {
