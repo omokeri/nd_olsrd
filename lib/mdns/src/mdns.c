@@ -152,7 +152,7 @@ PacketReceivedFromOLSR(unsigned char *encapsulationUdpData, int len)
         if(my_TTL_Check)
 		ip6Header->ip6_hops = (uint8_t) 1; //setting up Hop Limit to 1 to avoid mdns packets flood
         }
-      // Sven-Ola: Don't know how to handle the "stripped_len is uninitialized" condition, maybe exit(1) is better...?
+      // Sven-Ola: Don't know how to handle the "stripped_len is uninitialized" condition, maybe olsr_exit is better...?
       if (0 == stripped_len) return;
       //TODO: if packet is not IP die here
       
