@@ -231,9 +231,9 @@ static void
 check_buffspace(int msgsize, int buffsize, const char *type)
 {
   if (msgsize > buffsize) {
-    OLSR_PRINTF(1, "%s build, outputbuffer to small(%d/%u)!\n", type, msgsize, buffsize);
-    olsr_syslog(OLSR_LOG_ERR, "%s build, outputbuffer to small(%d/%u)!\n", type, msgsize, buffsize);
-    olsr_exit(__func__, EXIT_FAILURE);
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s: %s build, output buffer too small (%d/%u)", __func__, type, msgsize, buffsize);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 }
 
