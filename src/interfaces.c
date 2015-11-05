@@ -423,8 +423,7 @@ olsr_remove_interface(struct olsr_if * iface)
   free(ifp);
 
   if ((ifnet == NULL) && (!olsr_cnf->allow_no_interfaces)) {
-    olsr_syslog(OLSR_LOG_INFO, "No more active interfaces - exiting.\n");
-    olsr_exit("No more active interfaces - exiting.\n", EXIT_FAILURE);
+    olsr_exit("No more active interfaces", EXIT_FAILURE);
   }
 }
 
