@@ -452,13 +452,7 @@ add_hemu_if(struct olsr_if *iface)
     ifp->olsr_socket = gethemusocket(&sin);
 
     if (ifp->olsr_socket < 0) {
-      fprintf(stderr, "Could not initialize socket... exiting!\n\n");
-      olsr_syslog(OLSR_LOG_ERR, "Could not initialize socket... exiting!\n\n");
-      olsr_cnf->exit_value = EXIT_FAILURE;
-      kill(getpid(), SIGINT);
-
-      /* the kill command should not come back, just to be sure */
-      exit(1);
+      olsr_exit("Could not initialize socket", EXIT_FAILURE);
     }
 
   } else {
