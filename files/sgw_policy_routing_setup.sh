@@ -153,10 +153,10 @@ if [ $argc -lt 3 ]; then
 fi
 
 # get first 3 arguments
-declare ipVersion=$1
 declare mode="$2"
 declare addMode="$3"
 shift 3
+declare ipVersion="$1"
 argc=$#
 
 # check IP version argument
