@@ -581,9 +581,7 @@ add_to_ping_list(const char *ping_address, struct ping_list *the_ping_list)
 {
   struct ping_list *new = calloc(1, sizeof(struct ping_list));
   if (!new) {
-    fprintf(stderr, "DYN GW: Out of memory!\n");
-    olsr_syslog(OLSR_LOG_ERR, "DYN GW: Out of memory!\n");
-    exit(0);
+    olsr_exit("DYN GW: Out of memory", 0);
   }
   new->ping_address = strdup(ping_address);
   new->next = the_ping_list;
@@ -605,9 +603,7 @@ add_to_hna_list(struct hna_list *list_root, union olsr_ip_addr *hna_addr, uint8_
 {
   struct hna_list *new = calloc(1, sizeof(struct hna_list));
   if (new == NULL) {
-    fprintf(stderr, "DYN GW: Out of memory!\n");
-    olsr_syslog(OLSR_LOG_ERR, "DYN GW: Out of memory!\n");
-    exit(0);
+    olsr_exit("DYN GW: Out of memory", 0);
   }
 
   new->hna_addr.v4 = hna_addr->v4;
@@ -630,9 +626,7 @@ add_to_hna_group(struct hna_group *list_root)
 {
   struct hna_group *new = calloc(1, sizeof(struct hna_group));
   if (new == NULL) {
-    fprintf(stderr, "DYN GW: Out of memory!\n");
-    olsr_syslog(OLSR_LOG_ERR, "DYN GW: Out of memory!\n");
-    exit(0);
+    olsr_exit("DYN GW: Out of memory", 0);
   }
 	
   new->next =  list_root;
