@@ -321,8 +321,7 @@ olsrd_plugin_init(void)
   http_socket = get_http_socket(http_port != 0 ? http_port : DEFAULT_TCP_PORT);
 
   if (http_socket < 0) {
-    fprintf(stderr, "(HTTPINFO) could not initialize HTTP socket\n");
-    exit(1);
+    olsr_exit("HTTPINFO: could not initialize HTTP socket", 1);
   }
 
   /* Register socket */
