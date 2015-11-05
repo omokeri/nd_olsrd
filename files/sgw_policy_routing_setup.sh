@@ -66,7 +66,8 @@ function usage() {
   echo "  $script ${arguments[@]:-}"
   echo ""
   echo "Usage:"
-  echo "  $script ipVersion mode addMode ifName tableNr ruleNr bypassRuleNr"
+  echo "  $script instanceId ipVersion mode addMode ifName tableNr ruleNr bypassRuleNr"
+  echo "    - instanceId  : the olsrd instance id"
   echo "    - ipVersion   : $IPVERSION_4 or $IPVERSION_6"
   echo "    - mode        : $MODE_GENERIC, $MODE_OLSRIF, $MODE_EGRESSIF, $MODE_SGWSRVTUN or $MODE_SGWTUN"
   echo "    - addMode     : $ADDMODE_ADD or $ADDMODE_DEL"
@@ -145,18 +146,19 @@ function sgwtun() {
 #
 ###############################################################################
 
-# we always need 3 arguments, check it
-if [ $argc -lt 3 ]; then
-  error "Need at least 3 arguments"
+# we always need 4 arguments, check it
+if [ $argc -lt 4 ]; then
+  error "Need at least 4 arguments"
   usage
   exit 1
 fi
 
-# get first 3 arguments
-declare ipVersion="$1"
-declare mode="$2"
-declare addMode="$3"
-shift 3
+# get first 4 arguments
+declare instanceId="$1"
+declare ipVersion="$2"
+declare mode="$3"
+declare addMode="$4"
+shift 4
 argc=$#
 
 # check IP version argument

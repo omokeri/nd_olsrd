@@ -322,6 +322,8 @@ static bool multiGwRunScript(const char * mode, bool addMode, const char * ifNam
 
   abuf_appendf(&buf, "\"%s\"", olsr_cnf->smart_gw_policyrouting_script);
 
+  abuf_appendf(&buf, " \"%s\"", olsr_cnf->smart_gw_instance_id);
+
   abuf_appendf(&buf, " \"%s\"", (olsr_cnf->ip_version == AF_INET) ? "ipv4" : "ipv6");
 
   abuf_appendf(&buf, " \"%s\"", mode);
