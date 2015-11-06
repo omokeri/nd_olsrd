@@ -416,7 +416,7 @@ int main(int argc, char *argv[]) {
    */
   if (olsr_process_arguments(argc, argv, olsr_cnf, default_ifcnf) < 0) {
     print_usage(true);
-    olsr_exit(__func__, EXIT_FAILURE);
+    olsr_exit(NULL, EXIT_FAILURE);
   }
 
   /*
@@ -471,16 +471,16 @@ int main(int argc, char *argv[]) {
    */
   olsr_cnf->ioctl_s = socket(olsr_cnf->ip_version, SOCK_DGRAM, 0);
   if (olsr_cnf->ioctl_s < 0) {
-#ifndef _WIN32
-    olsr_syslog(OLSR_LOG_ERR, "ioctl socket: %m");
-#endif /* _WIN32 */
-    olsr_exit(__func__, 0);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "ioctl socket: %s", strerror(errno));
+    olsr_exit(buf2, 0);
   }
 #ifdef __linux__
   olsr_cnf->rtnl_s = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
   if (olsr_cnf->rtnl_s < 0) {
-    olsr_syslog(OLSR_LOG_ERR, "rtnetlink socket: %m");
-    olsr_exit(__func__, 0);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "rtnetlink socket: %s", strerror(errno));
+    olsr_exit(buf2, 0);
   }
 
   if (fcntl(olsr_cnf->rtnl_s, F_SETFL, O_NONBLOCK)) {
@@ -488,8 +488,9 @@ int main(int argc, char *argv[]) {
   }
 
   if ((olsr_cnf->rt_monitor_socket = rtnetlink_register_socket(RTMGRP_LINK)) < 0) {
-    olsr_syslog(OLSR_LOG_ERR, "rtmonitor socket: %m");
-    olsr_exit(__func__, 0);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "rtmonitor socket: %s", strerror(errno));
+    olsr_exit(buf2, 0);
   }
 #endif /* __linux__ */
 
@@ -499,8 +500,9 @@ int main(int argc, char *argv[]) {
 #if defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__
   olsr_cnf->rts = socket(PF_ROUTE, SOCK_RAW, 0);
   if (olsr_cnf->rts < 0) {
-    olsr_syslog(OLSR_LOG_ERR, "routing socket: %m");
-    olsr_exit(__func__, 0);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "routing socket: %s", strerror(errno));
+    olsr_exit(buf2, 0);
   }
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
 
