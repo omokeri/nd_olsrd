@@ -689,11 +689,13 @@ void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf) {
     "# shutdown of olsrd. The script is only executed when SmartGatewayUseCount\n"
     "# is set to a value larger than 1. The script must setup policy routing\n"
     "# rules such that multi-gateway mode works. A sample script is included.\n"
-    "# (default is not set)\n"
+    "# (default is <not set>)\n"
     "\n");
-  abuf_appendf(out, "%sSmartGatewayPolicyRoutingScript %s\n",
+  abuf_appendf(out, "%sSmartGatewayPolicyRoutingScript %s%s%s\n",
       !cnf->smart_gw_policyrouting_script ? "# " : "",
-      !cnf->smart_gw_policyrouting_script ? "<not set>" : cnf->smart_gw_policyrouting_script);
+      !cnf->smart_gw_policyrouting_script ? "" : "\"",
+      !cnf->smart_gw_policyrouting_script ? "<not set>" : cnf->smart_gw_policyrouting_script,
+      !cnf->smart_gw_policyrouting_script ? "" : "\"");
   abuf_puts(out,
     "\n"
     "# Determines the egress interfaces that are part of the multi-gateway setup and\n"
@@ -757,8 +759,11 @@ void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf) {
       "\n", "<not set>");
     {
       bool def = !cnf->smart_gw_status_file || !strlen(cnf->smart_gw_status_file);
-      abuf_appendf(out, "%sSmartGatewayStatusFile %s\n",
-        def ? "# " : "", def ? "<not set>" : cnf->smart_gw_status_file);
+      abuf_appendf(out, "%sSmartGatewayStatusFile %s%s%s\n",
+        def ? "# " : "",
+        def ? "" : "\"",
+        def ? "<not set>" : cnf->smart_gw_status_file,
+        def ? "" : "\"");
     }
   abuf_appendf(out,
     "\n"
