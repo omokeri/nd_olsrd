@@ -89,6 +89,10 @@ prefix_to_netmask(uint8_t * a, int len, uint8_t prefixlen)
   int p;
   const uint8_t *a_end;
 
+  if (len <= 0 || !a) {
+    return 0;
+  }
+
   a_end = a + len;
   for (p = prefixlen; a < a_end && p > 8; p -= 8) {
     *a++ = 0xff;
