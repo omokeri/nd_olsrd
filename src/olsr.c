@@ -571,7 +571,7 @@ olsr_exit(const char *msg, int val)
 
   raise(SIGTERM);
 
-  /* just to be sure */
+  /* in case the signal handler was not setup yet */
   exit(val);
 }
 
