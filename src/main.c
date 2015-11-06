@@ -151,31 +151,27 @@ static int olsr_create_lock_file(bool noExitOnFail) {
       return -1;
     }
     if (NULL == lck) {
-      fprintf(stderr,
-          "Error, cannot create OLSR lock '%s'.\n",
-          lock_file_name);
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "Cannot create OLSR lock '%s'", lock_file_name);
+      olsr_exit(buf, EXIT_FAILURE);
     } else {
+      char buf[1024];
       CloseHandle(lck);
-      fprintf(stderr,
-          "Error, cannot aquire OLSR lock '%s'.\n"
-          "Another OLSR instance might be running.\n",
-          lock_file_name);
+      snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+      olsr_exit(buf, EXIT_FAILURE);
     }
-    olsr_exit("", EXIT_FAILURE);
   }
 
   success = LockFile( lck, 0, 0, 0, 0);
 
   if (!success) {
-      CloseHandle(lck);
-      if (noExitOnFail) {
-          return -1;
-      }
-      fprintf(stderr,
-          "Error, cannot aquire OLSR lock '%s'.\n"
-          "Another OLSR instance might be running.\n",
-          lock_file_name);
-    olsr_exit("", EXIT_FAILURE);
+    char buf[1024];
+    CloseHandle(lck);
+    if (noExitOnFail) {
+      return -1;
+    }
+    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+    olsr_exit(buf, EXIT_FAILURE);
   }
       
 #else /* _WIN32 */
@@ -184,13 +180,12 @@ static int olsr_create_lock_file(bool noExitOnFail) {
   /* create file for lock */
   lock_fd = open(lock_file_name, O_WRONLY | O_CREAT, S_IRWXU);
   if (lock_fd < 0) {
+    char buf[1024];
     if (noExitOnFail) {
       return -1;
     }
-    fprintf(stderr,
-        "Error, cannot create OLSR lock '%s'.\n",
-        lock_file_name);
-    olsr_exit("", EXIT_FAILURE);
+    snprintf(buf, sizeof(buf), "Error, cannot create OLSR lock '%s'", lock_file_name);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 
   /* create exclusive lock for the whole file */
@@ -201,15 +196,13 @@ static int olsr_create_lock_file(bool noExitOnFail) {
   lck.l_pid = 0;
 
   if (fcntl(lock_fd, F_SETLK, &lck) == -1) {
+    char buf[1024];
     close(lock_fd);
     if (noExitOnFail) {
       return -1;
     }
-    fprintf(stderr,
-        "Error, cannot aquire OLSR lock '%s'.\n"
-        "Another OLSR instance might be running.\n",
-        lock_file_name);
-    olsr_exit("", EXIT_FAILURE);
+    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 #endif /* _WIN32 */
   return 0;
@@ -342,8 +335,9 @@ int main(int argc, char *argv[]) {
   DisableIcmpRedirects();
 
   if (WSAStartup(0x0202, &WsaData)) {
-    fprintf(stderr, "Could not initialize WinSock.\n");
-    olsr_exit(__func__, EXIT_FAILURE);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "%s: Could not initialize WinSock", __func__);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 #endif /* _WIN32 */
 
@@ -435,8 +429,9 @@ int main(int argc, char *argv[]) {
 
   /* Sanity check configuration */
   if (olsrd_sanity_check_cnf(olsr_cnf) < 0) {
-    fprintf(stderr, "Bad configuration!\n");
-    olsr_exit(__func__, EXIT_FAILURE);
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "%s: Bad configuration", __func__);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 
   /*
@@ -573,8 +568,9 @@ int main(int argc, char *argv[]) {
           "No interfaces detected! This might be intentional, but it also might mean that your configuration is fubar.\nI will continue after 5 seconds...\n");
       olsr_startup_sleep(5);
     } else {
-      fprintf(stderr, "No interfaces detected!\nBailing out!\n");
-      olsr_exit(__func__, EXIT_FAILURE);
+      char buf2[1024];
+      snprintf(buf2, sizeof(buf2), "%s: No interfaces detected", __func__);
+      olsr_exit(buf2, EXIT_FAILURE);
     }
   }
 
@@ -962,9 +958,10 @@ int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf) {
 
 #define NEXT_ARG do { argv++;argc--; } while (0)
 #define CHECK_ARGC do { if(!argc) { \
+     char buf[1024]; \
      argv--; \
-     fprintf(stderr, "You must provide a parameter when using the %s switch!\n", *argv); \
-     olsr_exit(__func__, EXIT_FAILURE); \
+     snprintf(buf, sizeof(buf), "%s: You must provide a parameter when using the %s switch", __func__, *argv); \
+     olsr_exit(buf, EXIT_FAILURE); \
      } } while (0)
 
 /**
@@ -989,8 +986,9 @@ static int olsr_process_arguments(int argc, char *argv[],
      *Configfilename
      */
     if (strcmp(*argv, "-f") == 0) {
-      fprintf(stderr, "Configfilename must ALWAYS be first argument!\n\n");
-      olsr_exit(__func__, EXIT_FAILURE);
+      char buf2[1024];
+      snprintf(buf2, sizeof(buf2), "%s: Configfilename must ALWAYS be first argument", __func__);
+      olsr_exit(buf2, EXIT_FAILURE);
     }
 
     /*
@@ -1042,9 +1040,10 @@ static int olsr_process_arguments(int argc, char *argv[],
       sscanf(*argv, "%f", &tmp_lq_aging);
 
       if (tmp_lq_aging < (float)MIN_LQ_AGING || tmp_lq_aging > (float)MAX_LQ_AGING) {
-        printf("LQ aging factor %f not allowed. Range [%f-%f]\n", (double)tmp_lq_aging,
-        		(double)MIN_LQ_AGING, (double)MAX_LQ_AGING);
-        olsr_exit(__func__, EXIT_FAILURE);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "%s: LQ aging factor %f not allowed. Range [%f-%f]", __func__,
+            (double)tmp_lq_aging, (double)MIN_LQ_AGING, (double)MAX_LQ_AGING);
+        olsr_exit(buf, EXIT_FAILURE);
       }
       olsr_cnf->lq_aging = tmp_lq_aging;
       continue;
@@ -1061,9 +1060,10 @@ static int olsr_process_arguments(int argc, char *argv[],
       sscanf(*argv, "%f", &tmp_lq_nat_thresh);
 
       if (tmp_lq_nat_thresh < 0.1f || tmp_lq_nat_thresh > 1.0f) {
-        printf("NAT threshold %f not allowed. Range [%f-%f]\n",
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "%s: NAT threshold %f not allowed. Range [%f-%f]", __func__,
         		(double)tmp_lq_nat_thresh, (double)0.1, (double)1.0);
-        olsr_exit(__func__, EXIT_FAILURE);
+        olsr_exit(buf, EXIT_FAILURE);
       }
       olsr_cnf->lq_nat_thresh = tmp_lq_nat_thresh;
       continue;
@@ -1088,8 +1088,9 @@ static int olsr_process_arguments(int argc, char *argv[],
       CHECK_ARGC;
 
       if (*argv[0] == '-') {
-        fprintf(stderr, "You must provide an interface label!\n");
-        olsr_exit(__func__, EXIT_FAILURE);
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "%s: You must provide an interface label", __func__);
+        olsr_exit(buf, EXIT_FAILURE);
       }
       printf("Queuing if %s\n", *argv);
       olsr_create_olsrif(*argv, false);
