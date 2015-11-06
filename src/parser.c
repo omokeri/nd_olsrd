@@ -535,8 +535,9 @@ olsr_input_hostemu(int fd, void *data __attribute__ ((unused)), unsigned int fla
   /* Extract size */
   if ((cc = recv(fd, (void *)&pcklen, 2, MSG_PEEK)) != 2) {     /* Win needs a cast */
     if (cc <= 0) {
-      fprintf(stderr, "Lost olsr_switch connection - exit!\n");
-      olsr_exit(__func__, EXIT_FAILURE);
+      char buf[1024];
+      snprintf(buf, sizeof(buf), "%s: Lost olsr_switch connection", __func__);
+      olsr_exit(buf, EXIT_FAILURE);
     }
     fprintf(stderr, "[hust-emu] error extracting size(%d) %s!\n", cc, strerror(errno));
     return;
