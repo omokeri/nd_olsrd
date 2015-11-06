@@ -563,6 +563,7 @@ olsr_exit(const char *msg, int val)
     olsr_syslog(OLSR_LOG_ERR, "olsrd exit: %s\n", msg);
   }
   fflush(stdout);
+  fflush(stderr);
 
   if (olsr_cnf) {
     olsr_cnf->exit_value = val;
