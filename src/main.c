@@ -86,16 +86,6 @@ bool olsr_win32_end_flag = false;
 static void olsr_shutdown(int) __attribute__ ((noreturn));
 #endif /* _WIN32 */
 
-#if defined __ANDROID__
-#define DEFAULT_LOCKFILE_PREFIX "/data/local/olsrd"
-#elif defined linux || defined __FreeBSD__ || defined __NetBSD__ || defined __OpenBSD__
-#define DEFAULT_LOCKFILE_PREFIX "/var/run/olsrd"
-#elif defined _WIN32
-#define DEFAULT_LOCKFILE_PREFIX "C:\\olsrd"
-#else /* defined _WIN32 */
-#define DEFAULT_LOCKFILE_PREFIX "olsrd"
-#endif /* defined _WIN32 */
-
 /*
  * Local function prototypes
  */

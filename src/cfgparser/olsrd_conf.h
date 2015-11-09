@@ -47,6 +47,16 @@
 
 #define PARSER_VERSION "0.1.2"
 
+#if defined __ANDROID__
+#define DEFAULT_LOCKFILE_PREFIX "/data/local/olsrd"
+#elif defined linux || defined __FreeBSD__ || defined __NetBSD__ || defined __OpenBSD__
+#define DEFAULT_LOCKFILE_PREFIX "/var/run/olsrd"
+#elif defined _WIN32
+#define DEFAULT_LOCKFILE_PREFIX "C:\\olsrd"
+#else /* defined _WIN32 */
+#define DEFAULT_LOCKFILE_PREFIX "olsrd"
+#endif /* defined _WIN32 */
+
 extern int current_line;
 
 struct conf_token {

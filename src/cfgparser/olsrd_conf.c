@@ -1379,11 +1379,12 @@ void set_derived_cnf(struct olsrd_config * cnf) {
 char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
   char buf[FILENAME_MAX];
   int ipv = (cnf->ip_version == AF_INET) ? 4 : 6;
-#ifdef _WIN32
-  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", cnf->configuration_file ? cnf->configuration_file : "olsrd" , ipv);
+
+#ifndef DEFAULT_LOCKFILE_PREFIX
+  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", cnf->configuration_file ? cnf->configuration_file : "olsrd", ipv);
 #else
-  snprintf(buf, sizeof(buf), "/var/run/olsrd-ipv%d.lock", ipv);
-#endif
+  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", DEFAULT_LOCKFILE_PREFIX, ipv);
+#endif /* DEFAULT_LOCKFILE_PREFIX */
 
   return strdup(buf);
 }
