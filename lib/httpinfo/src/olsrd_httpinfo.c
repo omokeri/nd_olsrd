@@ -95,9 +95,6 @@
 #define OS "Undefined"
 #endif /* OS */
 
-static char copyright_string[] __attribute__ ((unused)) =
-  "olsr.org HTTPINFO plugin Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org) All rights reserved.";
-
 #define MAX_CLIENTS 3
 
 #define MAX_HTTPREQ_SIZE (1024 * 10)
