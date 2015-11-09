@@ -112,10 +112,6 @@ static int olsr_process_arguments(int, char *[], struct olsrd_config *,
 static char **olsr_argv;
 #endif /* _WIN32 */
 
-static char
-    copyright_string[] __attribute__ ((unused)) =
-        "The olsr.org Optimized Link-State Routing daemon(olsrd) Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org) All rights reserved.";
-
 /* Data for OLSR locking */
 #ifndef _WIN32
 static int lock_fd = 0;
