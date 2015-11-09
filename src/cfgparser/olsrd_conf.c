@@ -1056,7 +1056,6 @@ get_default_if_config(void)
   struct if_config_options *io = malloc(sizeof(*io));
 
   if (io == NULL) {
-    fprintf(stderr, "Out of memory %s\n", __func__);
     return NULL;
   }
 
