@@ -104,7 +104,6 @@ static char **olsr_argv = NULL;
 #ifndef _WIN32
 static int lock_fd = 0;
 #endif /* _WIN32 */
-static char lock_file_name[FILENAME_MAX] = { 0 };
 struct olsr_cookie_info *def_timer_ci = NULL;
 
 /*
@@ -121,7 +120,7 @@ static int olsr_create_lock_file(bool noExitOnFail) {
     bool success;
     HANDLE lck;
 
-    lck = CreateFile(lock_file_name,
+    lck = CreateFile(olsr_cnf->lock_file,
             GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE,
             NULL,
@@ -129,19 +128,19 @@ static int olsr_create_lock_file(bool noExitOnFail) {
             FILE_ATTRIBUTE_NORMAL |
             FILE_FLAG_DELETE_ON_CLOSE,
             NULL);
-  CreateEvent(NULL, TRUE, FALSE, lock_file_name);
+  CreateEvent(NULL, TRUE, FALSE, olsr_cnf->lock_file);
   if (INVALID_HANDLE_VALUE == lck || ERROR_ALREADY_EXISTS == GetLastError()) {
     if (noExitOnFail) {
       return -1;
     }
     if (NULL == lck) {
       char buf[1024];
-      snprintf(buf, sizeof(buf), "Cannot create OLSR lock '%s'", lock_file_name);
+      snprintf(buf, sizeof(buf), "Cannot create OLSR lock '%s'", olsr_cnf->lock_file);
       olsr_exit(buf, EXIT_FAILURE);
     } else {
       char buf[1024];
       CloseHandle(lck);
-      snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+      snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", olsr_cnf->lock_file);
       olsr_exit(buf, EXIT_FAILURE);
     }
   }
@@ -154,7 +153,7 @@ static int olsr_create_lock_file(bool noExitOnFail) {
     if (noExitOnFail) {
       return -1;
     }
-    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", olsr_cnf->lock_file);
     olsr_exit(buf, EXIT_FAILURE);
   }
       
@@ -162,13 +161,13 @@ static int olsr_create_lock_file(bool noExitOnFail) {
   struct flock lck;
 
   /* create file for lock */
-  lock_fd = open(lock_file_name, O_WRONLY | O_CREAT, S_IRWXU);
+  lock_fd = open(olsr_cnf->lock_file, O_WRONLY | O_CREAT, S_IRWXU);
   if (lock_fd < 0) {
     char buf[1024];
     if (noExitOnFail) {
       return -1;
     }
-    snprintf(buf, sizeof(buf), "Error, cannot create OLSR lock '%s'", lock_file_name);
+    snprintf(buf, sizeof(buf), "Error, cannot create OLSR lock '%s'", olsr_cnf->lock_file);
     olsr_exit(buf, EXIT_FAILURE);
   }
 
@@ -185,7 +184,7 @@ static int olsr_create_lock_file(bool noExitOnFail) {
     if (noExitOnFail) {
       return -1;
     }
-    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", lock_file_name);
+    snprintf(buf, sizeof(buf), "Cannot acquire OLSR lock '%s', another OLSR instance might be running", olsr_cnf->lock_file);
     olsr_exit(buf, EXIT_FAILURE);
   }
 #endif /* _WIN32 */
@@ -597,7 +596,6 @@ int main(int argc, char *argv[]) {
   /*
    * Create locking file for olsrd, will be cleared after olsrd exits
    */
-  strscpy(lock_file_name, olsr_cnf->lock_file, sizeof(lock_file_name));
   for (i=5; i>=0; i--) {
     OLSR_PRINTF(3, "Trying to get olsrd lock...\n");
     if (!olsr_cnf->host_emul && olsr_create_lock_file(i > 0) == 0) {
