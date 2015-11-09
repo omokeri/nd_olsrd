@@ -64,6 +64,7 @@
 #include "gateway.h"
 #include "olsr_niit.h"
 #include "olsr_random.h"
+#include "pid_file.h"
 #include "lock_file.h"
 
 #ifdef __linux__
@@ -90,6 +91,7 @@ static void olsr_shutdown(int) __attribute__ ((noreturn));
 /*
  * Local function prototypes
  */
+
 void olsr_reconfigure(int signo) __attribute__ ((noreturn));
 
 static void print_version(void);
@@ -103,55 +105,6 @@ static int olsr_process_arguments(int, char *[], struct olsrd_config *,
 static char **olsr_argv = NULL;
 
 struct olsr_cookie_info *def_timer_ci = NULL;
-
-/**
- * Write the current PID to the configured PID file (if one is configured)
- */
-static void writePidFile(void) {
-  if (olsr_cnf->pidfile) {
-    char buf[PATH_MAX + 256];
-
-    /* create / open the PID file */
-#ifdef __WIN32
-    mode_t mode = S_IRUSR | S_IWUSR;
-#else
-    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-#endif
-    int fd = open(olsr_cnf->pidfile, O_CREAT | O_WRONLY, mode);
-    if (fd < 0) {
-      snprintf(buf, sizeof(buf), "Could not open PID file %s", olsr_cnf->pidfile);
-      perror(buf);
-      olsr_shutdown(0);
-    }
-
-    /* write the PID */
-    {
-      pid_t pid = getpid();
-      int chars = snprintf(buf, sizeof(buf), "%d", (int)pid);
-      ssize_t chars_written = write(fd, buf, chars);
-      if (chars_written != chars) {
-        close(fd);
-        snprintf(buf, sizeof(buf), "Could not write the PID %d to the PID file %s", (int)pid, olsr_cnf->pidfile);
-        perror(buf);
-        if (remove(olsr_cnf->pidfile) < 0) {
-          snprintf(buf, sizeof(buf), "Could not remove the PID file %s", olsr_cnf->pidfile);
-          perror(buf);
-        }
-        olsr_shutdown(0);
-      }
-    }
-
-    if (close(fd) < 0) {
-      snprintf(buf, sizeof(buf), "Could not close PID file %s", olsr_cnf->pidfile);
-      perror(buf);
-      if (remove(olsr_cnf->pidfile) < 0) {
-        snprintf(buf, sizeof(buf), "Could not remove the PID file %s", olsr_cnf->pidfile);
-        perror(buf);
-      }
-      olsr_shutdown(0);
-    }
-  }
-}
 
 /**
  * Main entrypoint
@@ -430,7 +383,9 @@ int main(int argc, char *argv[]) {
   }
 #endif /* _WIN32 */
 
-  writePidFile();
+  if (!writePidFile()) {
+    olsr_shutdown(0);
+  }
 
   /*
    * Create locking file for olsrd, will be cleared after olsrd exits
