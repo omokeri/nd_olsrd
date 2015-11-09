@@ -432,23 +432,6 @@ int main(int argc, char *argv[]) {
   set_derived_cnf(olsr_cnf);
 
   /*
-   * Establish file lock to prevent multiple instances
-   */
-  if (olsr_cnf->lock_file) {
-    strscpy(lock_file_name, olsr_cnf->lock_file, sizeof(lock_file_name));
-  } else {
-    size_t l;
-#ifdef DEFAULT_LOCKFILE_PREFIX
-    strscpy(lock_file_name, DEFAULT_LOCKFILE_PREFIX, sizeof(lock_file_name));
-#else /* DEFAULT_LOCKFILE_PREFIX */
-    strscpy(lock_file_name, conf_file_name, sizeof(lock_file_name));
-#endif /* DEFAULT_LOCKFILE_PREFIX */
-    l = strlen(lock_file_name);
-    snprintf(&lock_file_name[l], sizeof(lock_file_name) - l, "-ipv%d.lock",
-        olsr_cnf->ip_version == AF_INET ? 4 : 6);
-  }
-
-  /*
    * Print configuration
    */
   if (olsr_cnf->debug_level > 1) {
@@ -614,6 +597,7 @@ int main(int argc, char *argv[]) {
   /*
    * Create locking file for olsrd, will be cleared after olsrd exits
    */
+  strscpy(lock_file_name, olsr_cnf->lock_file, sizeof(lock_file_name));
   for (i=5; i>=0; i--) {
     OLSR_PRINTF(3, "Trying to get olsrd lock...\n");
     if (!olsr_cnf->host_emul && olsr_create_lock_file(i > 0) == 0) {
