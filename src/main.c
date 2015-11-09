@@ -300,6 +300,24 @@ int main(int argc, char *argv[]) {
 
   memset(&buf, 0, sizeof(buf));
 
+  /* setup debug printf destination */
+  debug_handle = stdout;
+
+  /* set stdout and stderr to unbuffered output */
+  setbuf(stdout, NULL);
+  setbuf(stderr, NULL);
+
+  /* setup random seed */
+  olsr_init_random();
+
+  /* Init widely used statics */
+  memset(&all_zero, 0, sizeof(union olsr_ip_addr));
+
+  /* store the arguments for restart */
+#ifndef _WIN32
+  olsr_argv = argv;
+#endif /* _WIN32 */
+
   /*
    * Start
    */
@@ -319,15 +337,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  debug_handle = stdout;
+  /* check root privileges */
 #ifndef _WIN32
-  olsr_argv = argv;
-#endif /* _WIN32 */
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
-
-#ifndef _WIN32
-  /* Check if user is root */
   if (geteuid()) {
     olsr_exit("You must be root (uid = 0) to run olsrd", EXIT_FAILURE);
   }
@@ -343,12 +354,6 @@ int main(int argc, char *argv[]) {
 
   /* Open syslog */
   olsr_openlog("olsrd");
-
-  /* setup random seed */
-  olsr_init_random();
-
-  /* Init widely used statics */
-  memset(&all_zero, 0, sizeof(union olsr_ip_addr));
 
   /*
    * Set configfile name and
