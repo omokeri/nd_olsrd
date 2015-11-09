@@ -109,14 +109,14 @@ static int olsr_process_arguments(int, char *[], struct olsrd_config *,
     struct if_config_options *);
 
 #ifndef _WIN32
-static char **olsr_argv;
+static char **olsr_argv = NULL;
 #endif /* _WIN32 */
 
 /* Data for OLSR locking */
 #ifndef _WIN32
 static int lock_fd = 0;
 #endif /* _WIN32 */
-static char lock_file_name[FILENAME_MAX];
+static char lock_file_name[FILENAME_MAX] = { 0 };
 struct olsr_cookie_info *def_timer_ci = NULL;
 
 /*
@@ -279,8 +279,8 @@ olsrmain_load_config(char *file) {
  */
 
 int main(int argc, char *argv[]) {
-  struct if_config_options *default_ifcnf;
-  char conf_file_name[FILENAME_MAX];
+  struct if_config_options *default_ifcnf = NULL;
+  char conf_file_name[FILENAME_MAX] = { 0 };
   struct ipaddr_str buf;
   bool loadedConfig = false;
   int i;
@@ -294,15 +294,27 @@ int main(int argc, char *argv[]) {
   size_t len;
 #endif /* __linux__ */
 
+  /*
+   * Initialisation
+   */
+
+  memset(&buf, 0, sizeof(buf));
+
+  /*
+   * Start
+   */
+
   printf("\n *** %s ***\n Build date: %s on %s\n http://www.olsr.org\n\n",
       olsrd_version, build_date, build_host);
 
   if (argc == 2) {
     if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "/?") == 0)) {
+      /* help */
       print_usage(false);
       olsr_exit(NULL, 0);
     }
     if (strcmp(argv[1], "-v") == 0) {
+      /* version */
       olsr_exit(NULL, 0);
     }
   }
