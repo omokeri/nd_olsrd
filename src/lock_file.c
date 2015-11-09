@@ -90,7 +90,7 @@ char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
  * Additionally the lock can be killed by removing the
  * locking file.
  */
-bool olsr_create_lock_file(void) {
+static bool olsr_create_lock_file_internal(void) {
 #ifdef _WIN32
   bool success;
 
@@ -139,6 +139,28 @@ bool olsr_create_lock_file(void) {
 #endif /* _WIN32 */
 
   return true;
+}
+
+bool olsr_create_lock_file(void) {
+  bool created = false;
+  int i;
+
+  if (!olsr_cnf->host_emul) {
+    return true;
+  }
+
+  for (i = 5; i >= 0; i--) {
+    OLSR_PRINTF(3, "Trying to get olsrd lock...\n");
+    if (olsr_create_lock_file_internal()) {
+      /* lock successfully created */
+      created = true;
+      break;
+    }
+
+    sleep(1);
+  }
+
+  return created;
 }
 
 void olsr_remove_lock_file(void) {

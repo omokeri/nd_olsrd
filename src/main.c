@@ -114,7 +114,6 @@ int main(int argc, char *argv[]) {
   int argcLocal = argc;
   char conf_file_name[FILENAME_MAX] = { 0 };
   struct ipaddr_str buf;
-  int i;
 
 #ifdef __linux__
   struct interface_olsr *ifn;
@@ -390,24 +389,10 @@ int main(int argc, char *argv[]) {
   /*
    * Create locking file for olsrd, will be cleared after olsrd exits
    */
-  if (!olsr_cnf->host_emul) {
-    bool created = false;
-    for (i = 5; i >= 0; i--) {
-      OLSR_PRINTF(3, "Trying to get olsrd lock...\n");
-      if (olsr_create_lock_file()) {
-        /* lock successfully created */
-        created = true;
-        break;
-      }
-
-      sleep(1);
-    }
-
-    if (!created) {
-      char buf2[1024];
-      snprintf(buf2, sizeof(buf2), "Error, cannot create OLSR lock file '%s'", olsr_cnf->lock_file);
-      olsr_exit(buf2, EXIT_FAILURE);
-    }
+  if (!olsr_create_lock_file()) {
+    char buf2[1024];
+    snprintf(buf2, sizeof(buf2), "Error, cannot create OLSR lock file '%s'", olsr_cnf->lock_file);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 
   /* Load plugins */
