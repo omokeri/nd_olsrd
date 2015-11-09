@@ -294,14 +294,6 @@ int main(int argc, char *argv[]) {
   size_t len;
 #endif /* __linux__ */
 
-  /* paranoia checks */
-  assert(sizeof(uint8_t) == 1);
-  assert(sizeof(uint16_t) == 2);
-  assert(sizeof(uint32_t) == 4);
-  assert(sizeof(int8_t) == 1);
-  assert(sizeof(int16_t) == 2);
-  assert(sizeof(int32_t) == 4);
-
   printf("\n *** %s ***\n Build date: %s on %s\n http://www.olsr.org\n\n",
       olsrd_version, build_date, build_host);
 
