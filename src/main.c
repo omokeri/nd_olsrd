@@ -92,6 +92,7 @@ static void olsr_shutdown(int) __attribute__ ((noreturn));
  */
 void olsr_reconfigure(int signo) __attribute__ ((noreturn));
 
+static void print_version(void);
 static void print_usage(bool error);
 
 static int set_default_ifcnfs(struct olsr_if *, struct if_config_options *);
@@ -219,8 +220,7 @@ int main(int argc, char *argv[]) {
    * Start
    */
 
-  printf("\n *** %s ***\n Build date: %s on %s\n http://www.olsr.org\n\n",
-      olsrd_version, build_date, build_host);
+  print_version();
 
   if (argc == 2) {
     if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "/?") == 0)) {
@@ -814,6 +814,11 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   errno = errNr;
 #endif
   exit(exit_value);
+}
+
+static void print_version(void) {
+  printf("\n *** %s ***\n Build date: %s on %s\n http://www.olsr.org\n\n",
+      olsrd_version, build_date, build_host);
 }
 
 /**
