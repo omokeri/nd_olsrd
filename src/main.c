@@ -246,7 +246,6 @@ static void loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_
 
 int main(int argc, char *argv[]) {
   int argcLocal = argc;
-  struct if_config_options *default_ifcnf = NULL;
   char conf_file_name[FILENAME_MAX] = { 0 };
   struct ipaddr_str buf;
   int i;
@@ -317,28 +316,30 @@ int main(int argc, char *argv[]) {
   /* Open syslog */
   olsr_openlog("olsrd");
 
+  /* load the configuration */
   loadConfig(&argcLocal, argv, conf_file_name, sizeof(conf_file_name));
 
-  default_ifcnf = get_default_if_config();
-  if (default_ifcnf == NULL) {
-    olsr_exit("No default ifconfig found", EXIT_FAILURE);
-  }
+  /* process arguments */
+  {
+    /* get the default interface config */
+    struct if_config_options *default_ifcnf = get_default_if_config();
+    if (!default_ifcnf) {
+      olsr_exit("No default ifconfig found", EXIT_FAILURE);
+    }
 
-  /*
-   * Process olsrd options.
-   */
+    /* Process olsrd options */
   if (olsr_process_arguments(argcLocal, argv, olsr_cnf, default_ifcnf) < 0) {
-    print_usage(true);
-    olsr_exit(NULL, EXIT_FAILURE);
+      print_usage(true);
+      free(default_ifcnf);
+      olsr_exit(NULL, EXIT_FAILURE);
+    }
+
+    /* Set configuration for command-line specified interfaces */
+    set_default_ifcnfs(olsr_cnf->interfaces, default_ifcnf);
+
+    /* free the default ifcnf */
+    free(default_ifcnf);
   }
-
-  /*
-   * Set configuration for command-line specified interfaces
-   */
-  set_default_ifcnfs(olsr_cnf->interfaces, default_ifcnf);
-
-  /* free the default ifcnf */
-  free(default_ifcnf);
 
   /* Sanity check configuration */
   if (olsrd_sanity_check_cnf(olsr_cnf) < 0) {
@@ -347,10 +348,7 @@ int main(int argc, char *argv[]) {
     olsr_exit(buf2, EXIT_FAILURE);
   }
 
-  /*
-   * Setup derived configuration
-   */
-
+  /* Setup derived configuration */
   set_derived_cnf(olsr_cnf);
 
   /*
