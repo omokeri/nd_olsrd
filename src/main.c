@@ -796,6 +796,9 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   close(olsr_cnf->rts);
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
 
+  /* remove the lock file */
+  olsr_remove_lock_file();
+
   /* Free cookies and memory pools attached. */
   OLSR_PRINTF(0, "Free all memory...\n");
   olsr_delete_all_cookies();
