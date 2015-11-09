@@ -287,12 +287,12 @@ int main(int argc, char *argv[]) {
   print_version();
 
   if (argcLocal == 2) {
-    if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "/?") == 0)) {
+    if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "/?")) {
       /* help */
       print_usage(false);
       olsr_exit(NULL, 0);
     }
-    if (strcmp(argv[1], "-v") == 0) {
+    if (!strcmp(argv[1], "-v")) {
       /* version */
       olsr_exit(NULL, 0);
     }
