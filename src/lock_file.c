@@ -42,6 +42,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #if defined __ANDROID__
   #define DEFAULT_LOCKFILE_PREFIX "/data/local/olsrd"
@@ -52,6 +56,12 @@
 #else /* defined _WIN32 */
   #define DEFAULT_LOCKFILE_PREFIX "olsrd"
 #endif /* defined _WIN32 */
+
+#ifdef _WIN32
+  static HANDLE lck = INVALID_HANDLE_VALUE;
+#else
+  static int lock_fd = -1;
+#endif
 
 /**
  * @param cnf the olsrd configuration
@@ -69,4 +79,68 @@ char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
 #endif /* DEFAULT_LOCKFILE_PREFIX */
 
   return strdup(buf);
+}
+
+/*
+ * Creates a zero-length locking file and use fcntl to
+ * place an exclusive lock over it. The lock will be
+ * automatically erased when the olsrd process ends,
+ * so it will even work well with a SIGKILL.
+ *
+ * Additionally the lock can be killed by removing the
+ * locking file.
+ */
+bool olsr_create_lock_file(void) {
+#ifdef _WIN32
+  bool success;
+
+  lck = CreateFile(olsr_cnf->lock_file,
+      GENERIC_READ | GENERIC_WRITE,
+      FILE_SHARE_READ | FILE_SHARE_WRITE,
+      NULL,
+      OPEN_ALWAYS,
+      FILE_ATTRIBUTE_NORMAL |
+      FILE_FLAG_DELETE_ON_CLOSE,
+      NULL);
+  CreateEvent(NULL, TRUE, FALSE, olsr_cnf->lock_file);
+  if ((INVALID_HANDLE_VALUE == lck) || (ERROR_ALREADY_EXISTS == GetLastError())) {
+    if (INVALID_HANDLE_VALUE != lck) {
+      CloseHandle(lck);
+      lck = INVALID_HANDLE_VALUE;
+    }
+    return false;
+  }
+
+  success = LockFile( lck, 0, 0, 0, 0);
+
+  if (!success) {
+    CloseHandle(lck);
+    lck = INVALID_HANDLE_VALUE;
+    return false;
+  }
+
+#else /* _WIN32 */
+  struct flock lck;
+
+  /* create file for lock */
+  lock_fd = open(olsr_cnf->lock_file, O_WRONLY | O_CREAT, S_IRWXU);
+  if (lock_fd < 0) {
+    return false;
+  }
+
+  /* create exclusive lock for the whole file */
+  lck.l_type = F_WRLCK;
+  lck.l_whence = SEEK_SET;
+  lck.l_start = 0;
+  lck.l_len = 0;
+  lck.l_pid = 0;
+
+  if (fcntl(lock_fd, F_SETLK, &lck) == -1) {
+    close(lock_fd);
+    lock_fd = -1;
+    return false;
+  }
+#endif /* _WIN32 */
+
+  return true;
 }

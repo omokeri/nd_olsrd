@@ -43,6 +43,10 @@
 
 #include "olsr_cfg.h"
 
+#include <stdbool.h>
+
 char * olsrd_get_default_lockfile(struct olsrd_config *cnf);
+
+bool olsr_create_lock_file(void);
 
 #endif /* SRC_LOCK_FILE_H_ */
