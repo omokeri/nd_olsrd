@@ -465,7 +465,7 @@ int main(int argc, char *argv[]) {
   olsr_scheduler();
 
   /* Like we're ever going to reach this ;-) */
-  return 1;
+  olsr_exit(NULL, 0);
 } /* main */
 
 #ifndef _WIN32
