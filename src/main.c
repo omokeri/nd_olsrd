@@ -112,21 +112,9 @@ struct olsr_cookie_info *def_timer_ci = NULL;
 
 int main(int argc, char *argv[]) {
   int argcLocal = argc;
-  struct ipaddr_str buf;
-
-#ifdef __linux__
-  struct interface_olsr *ifn;
-#endif /* __linux__ */
-
-#ifdef _WIN32
-  WSADATA WsaData;
-#endif /* __linux__ */
-
   /*
    * Initialisation
    */
-
-  memset(&buf, 0, sizeof(buf));
 
   /* setup debug printf destination */
   debug_handle = stdout;
@@ -170,10 +158,13 @@ int main(int argc, char *argv[]) {
 #else /* _WIN32 */
   DisableIcmpRedirects();
 
-  if (WSAStartup(0x0202, &WsaData)) {
-    char buf2[1024];
-    snprintf(buf2, sizeof(buf2), "%s: Could not initialize WinSock", __func__);
-    olsr_exit(buf2, EXIT_FAILURE);
+  {
+    WSADATA WsaData;
+    if (WSAStartup(0x0202, &WsaData)) {
+      char buf2[1024];
+      snprintf(buf2, sizeof(buf2), "%s: Could not initialize WinSock", __func__);
+      olsr_exit(buf2, EXIT_FAILURE);
+    }
   }
 #endif /* _WIN32 */
 
@@ -397,7 +388,10 @@ int main(int argc, char *argv[]) {
   /* Load plugins */
   olsr_load_plugins();
 
-  OLSR_PRINTF(1, "Main address: %s\n\n", olsr_ip_to_string(&buf, &olsr_cnf->main_addr));
+  {
+    struct ipaddr_str buf;
+    OLSR_PRINTF(1, "Main address: %s\n\n", olsr_ip_to_string(&buf, &olsr_cnf->main_addr));
+  }
 
 #ifdef __linux__
   /* create policy routing rules with priorities if necessary */
@@ -416,6 +410,7 @@ int main(int argc, char *argv[]) {
 
   /* rule to default table on all olsrd interfaces */
   if (DEF_RT_NONE != olsr_cnf->rt_table_defaultolsr_pri) {
+    struct interface_olsr *ifn;
     for (ifn = ifnet; ifn; ifn = ifn->int_next) {
       olsr_os_policy_rule(olsr_cnf->ip_version,
           olsr_cnf->rt_table_default, olsr_cnf->rt_table_defaultolsr_pri, ifn->int_name, true);
