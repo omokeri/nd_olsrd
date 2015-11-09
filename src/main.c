@@ -324,9 +324,6 @@ int main(int argc, char *argv[]) {
     olsr_exit("No default ifconfig found", EXIT_FAILURE);
   }
 
-  /* Initialize timers */
-  olsr_init_timers();
-
   /*
    * Process olsrd options.
    */
@@ -362,6 +359,9 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->debug_level > 1) {
     olsrd_print_cnf(olsr_cnf);
   }
+
+  /* Initialize timers */
+  olsr_init_timers();
 
   def_timer_ci = olsr_alloc_cookie("Default Timer Cookie", OLSR_COOKIE_TYPE_TIMER);
 
