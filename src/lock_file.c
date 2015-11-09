@@ -1,7 +1,6 @@
-
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
+ * Copyright (c) 2004-2009, the olsr.org team - see HISTORY file
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,35 +38,35 @@
  *
  */
 
-#ifndef _OLSRD_CONF_H
-#define _OLSRD_CONF_H
+#include "lock_file.h"
 
-#include "olsr_protocol.h"
-#include "olsr_cfg.h"
+#include <stdio.h>
+#include <string.h>
 
-#define PARSER_VERSION "0.1.2"
+#if defined __ANDROID__
+  #define DEFAULT_LOCKFILE_PREFIX "/data/local/olsrd"
+#elif defined linux || defined __FreeBSD__ || defined __NetBSD__ || defined __OpenBSD__
+  #define DEFAULT_LOCKFILE_PREFIX "/var/run/olsrd"
+#elif defined _WIN32
+  #define DEFAULT_LOCKFILE_PREFIX "C:\\olsrd"
+#else /* defined _WIN32 */
+  #define DEFAULT_LOCKFILE_PREFIX "olsrd"
+#endif /* defined _WIN32 */
 
-extern int current_line;
-
-struct conf_token {
-  uint32_t integer;
-  float floating;
-  bool boolean;
-  char *string;
-};
-
-#define DEFAULT_STR(val) \
-(((!defcnf) && ((*((uint8_t *)(&cnfi->val)))==0))?" (d)":"")
-
-void set_default_cnf(struct olsrd_config *, char * configuration_file);
-
-void set_derived_cnf(struct olsrd_config * olsr_cnf);
-
-#endif /* _OLSRD_CONF_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
+/**
+ * @param cnf the olsrd configuration
+ * @param ip_version the ip version
+ * @return a malloc-ed string for the default lock file name
  */
+char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
+  char buf[FILENAME_MAX];
+  int ipv = (cnf->ip_version == AF_INET) ? 4 : 6;
+
+#ifndef DEFAULT_LOCKFILE_PREFIX
+  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", cnf->configuration_file ? cnf->configuration_file : "olsrd", ipv);
+#else
+  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", DEFAULT_LOCKFILE_PREFIX, ipv);
+#endif /* DEFAULT_LOCKFILE_PREFIX */
+
+  return strdup(buf);
+}

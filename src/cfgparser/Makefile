@@ -57,7 +57,7 @@ else
 LIBNAME ?=	olsrd_cfgparser.so.0.1
 BINNAME ?=	olsrd_cfgparser
 
-OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o
+OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../lock_file.o
 endif
 
 

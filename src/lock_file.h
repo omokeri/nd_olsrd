@@ -1,7 +1,6 @@
-
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
+ * Copyright (c) 2004-2009, the olsr.org team - see HISTORY file
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,35 +38,11 @@
  *
  */
 
-#ifndef _OLSRD_CONF_H
-#define _OLSRD_CONF_H
+#ifndef SRC_LOCK_FILE_H_
+#define SRC_LOCK_FILE_H_
 
-#include "olsr_protocol.h"
 #include "olsr_cfg.h"
 
-#define PARSER_VERSION "0.1.2"
+char * olsrd_get_default_lockfile(struct olsrd_config *cnf);
 
-extern int current_line;
-
-struct conf_token {
-  uint32_t integer;
-  float floating;
-  bool boolean;
-  char *string;
-};
-
-#define DEFAULT_STR(val) \
-(((!defcnf) && ((*((uint8_t *)(&cnfi->val)))==0))?" (d)":"")
-
-void set_default_cnf(struct olsrd_config *, char * configuration_file);
-
-void set_derived_cnf(struct olsrd_config * olsr_cnf);
-
-#endif /* _OLSRD_CONF_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+#endif /* SRC_LOCK_FILE_H_ */

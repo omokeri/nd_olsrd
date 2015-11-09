@@ -44,6 +44,7 @@
 #include "../net_olsr.h"
 #include "../common/autobuf.h"
 #include "../egressTypes.h"
+#include "../lock_file.h"
 
 #include <stdarg.h>
 #include <stdio.h>

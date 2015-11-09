@@ -47,6 +47,7 @@
 #include "olsr.h"
 #include "egressTypes.h"
 #include "gateway.h"
+#include "lock_file.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -1369,24 +1370,6 @@ void set_derived_cnf(struct olsrd_config * cnf) {
   if (!cnf->lock_file) {
     cnf->lock_file = olsrd_get_default_lockfile(cnf);
   }
-}
-
-/**
- * @param cnf the olsrd configuration
- * @param ip_version the ip version
- * @return a malloc-ed string for the default lock file name
- */
-char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
-  char buf[FILENAME_MAX];
-  int ipv = (cnf->ip_version == AF_INET) ? 4 : 6;
-
-#ifndef DEFAULT_LOCKFILE_PREFIX
-  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", cnf->configuration_file ? cnf->configuration_file : "olsrd", ipv);
-#else
-  snprintf(buf, sizeof(buf), "%s-ipv%d.lock", DEFAULT_LOCKFILE_PREFIX, ipv);
-#endif /* DEFAULT_LOCKFILE_PREFIX */
-
-  return strdup(buf);
 }
 
 /*
