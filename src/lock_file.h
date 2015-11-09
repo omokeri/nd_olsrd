@@ -49,4 +49,6 @@ char * olsrd_get_default_lockfile(struct olsrd_config *cnf);
 
 bool olsr_create_lock_file(void);
 
+void olsr_remove_lock_file(void);
+
 #endif /* SRC_LOCK_FILE_H_ */

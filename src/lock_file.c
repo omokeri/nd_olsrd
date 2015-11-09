@@ -104,18 +104,14 @@ bool olsr_create_lock_file(void) {
       NULL);
   CreateEvent(NULL, TRUE, FALSE, olsr_cnf->lock_file);
   if ((INVALID_HANDLE_VALUE == lck) || (ERROR_ALREADY_EXISTS == GetLastError())) {
-    if (INVALID_HANDLE_VALUE != lck) {
-      CloseHandle(lck);
-      lck = INVALID_HANDLE_VALUE;
-    }
+    olsr_remove_lock_file();
     return false;
   }
 
   success = LockFile( lck, 0, 0, 0, 0);
 
   if (!success) {
-    CloseHandle(lck);
-    lck = INVALID_HANDLE_VALUE;
+    olsr_remove_lock_file();
     return false;
   }
 
@@ -125,6 +121,7 @@ bool olsr_create_lock_file(void) {
   /* create file for lock */
   lock_fd = open(olsr_cnf->lock_file, O_WRONLY | O_CREAT, S_IRWXU);
   if (lock_fd < 0) {
+    olsr_remove_lock_file();
     return false;
   }
 
@@ -136,11 +133,30 @@ bool olsr_create_lock_file(void) {
   lck.l_pid = 0;
 
   if (fcntl(lock_fd, F_SETLK, &lck) == -1) {
-    close(lock_fd);
-    lock_fd = -1;
+    olsr_remove_lock_file();
     return false;
   }
 #endif /* _WIN32 */
 
   return true;
+}
+
+void olsr_remove_lock_file(void) {
+#ifdef _WIN32
+  if (INVALID_HANDLE_VALUE != lck) {
+    CloseHandle(lck);
+    lck = INVALID_HANDLE_VALUE;
+  }
+#else
+  if (lock_fd >= 0) {
+    close(lock_fd);
+    lock_fd = -1;
+  }
+#endif
+
+  if (!olsr_cnf->lock_file || !strlen(olsr_cnf->lock_file)) {
+    return;
+  }
+
+  remove(olsr_cnf->lock_file);
 }
