@@ -95,9 +95,6 @@ const char *OLSR_IF_MODE[] = {
   "ether"
 };
 
-static char copyright_string[] __attribute__ ((unused)) =
-  "The olsr.org Optimized Link-State Routing daemon(olsrd) Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org) All rights reserved.";
-
 int current_line;
 
 /* Global stuff externed in defs.h */
