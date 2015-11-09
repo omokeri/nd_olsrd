@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
   setbuf(stderr, NULL);
 
   /* setup random seed */
-  olsr_init_random();
+  srandom(time(NULL));
 
   /* Init widely used statics */
   memset(&all_zero, 0, sizeof(union olsr_ip_addr));

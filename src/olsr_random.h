@@ -33,8 +33,4 @@ static inline long int olsr_random(void) {
   return abs(value);
 }
 
-static inline void olsr_init_random(void) {
-  srandom(time(NULL));
-}
-
 #endif /* _OLSR_RANDOM_H */
