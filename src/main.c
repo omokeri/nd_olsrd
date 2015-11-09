@@ -108,9 +108,7 @@ static int set_default_ifcnfs(struct olsr_if *, struct if_config_options *);
 static int olsr_process_arguments(int, char *[], struct olsrd_config *,
     struct if_config_options *);
 
-#ifndef _WIN32
 static char **olsr_argv = NULL;
-#endif /* _WIN32 */
 
 /* Data for OLSR locking */
 #ifndef _WIN32
@@ -314,9 +312,7 @@ int main(int argc, char *argv[]) {
   memset(&all_zero, 0, sizeof(union olsr_ip_addr));
 
   /* store the arguments for restart */
-#ifndef _WIN32
   olsr_argv = argv;
-#endif /* _WIN32 */
 
   /*
    * Start
