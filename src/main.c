@@ -369,9 +369,7 @@ int main(int argc, char *argv[]) {
     olsr_exit(NULL, EXIT_FAILURE);
   }
 
-  /*
-   * Create locking file for olsrd, will be cleared after olsrd exits
-   */
+  /* Create locking file for olsrd, will be cleared after olsrd exits */
   if (!olsr_create_lock_file()) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "Error, cannot create OLSR lock file '%s'", olsr_cnf->lock_file);
@@ -381,32 +379,31 @@ int main(int argc, char *argv[]) {
   /* Load plugins */
   olsr_load_plugins();
 
+  /* print the main address */
   {
     struct ipaddr_str buf;
     OLSR_PRINTF(1, "Main address: %s\n\n", olsr_ip_to_string(&buf, &olsr_cnf->main_addr));
   }
 
-#ifdef __linux__
   /* create policy routing rules with priorities if necessary */
+#ifdef __linux__
   if (DEF_RT_NONE != olsr_cnf->rt_table_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table, olsr_cnf->rt_table_pri, NULL, true);
+    olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table, olsr_cnf->rt_table_pri, NULL, true);
   }
+
   if (DEF_RT_NONE != olsr_cnf->rt_table_tunnel_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table_tunnel, olsr_cnf->rt_table_tunnel_pri, NULL, true);
+    olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table_tunnel, olsr_cnf->rt_table_tunnel_pri, NULL, true);
   }
+
   if (DEF_RT_NONE != olsr_cnf->rt_table_default_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table_default, olsr_cnf->rt_table_default_pri, NULL, true);
+    olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table_default, olsr_cnf->rt_table_default_pri, NULL, true);
   }
 
   /* rule to default table on all olsrd interfaces */
   if (DEF_RT_NONE != olsr_cnf->rt_table_defaultolsr_pri) {
     struct interface_olsr *ifn;
     for (ifn = ifnet; ifn; ifn = ifn->int_next) {
-      olsr_os_policy_rule(olsr_cnf->ip_version,
-          olsr_cnf->rt_table_default, olsr_cnf->rt_table_defaultolsr_pri, ifn->int_name, true);
+      olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table_default, olsr_cnf->rt_table_defaultolsr_pri, ifn->int_name, true);
     }
   }
 
@@ -429,11 +426,7 @@ int main(int argc, char *argv[]) {
   /* Start syslog entry */
   olsr_syslog(OLSR_LOG_INFO, "%s successfully started", olsrd_version);
 
-  /*
-   *signal-handlers
-   */
-
-  /* ctrl-C and friends */
+  /* setup signal-handlers */
 #ifdef _WIN32
 #ifndef WINCE
   SetConsoleCtrlHandler(SignalHandler, true);
