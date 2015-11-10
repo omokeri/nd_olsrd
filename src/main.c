@@ -334,6 +334,16 @@ int main(int argc, char *argv[]) {
   }
 #endif /* __linux__ */
 
+  /* initialise the IPC socket */
+  if (olsr_cnf->ipc_connections > 0) {
+    if (ipc_init()) {
+      olsr_exit("ipc_init failure", 1);
+    }
+  }
+
+  /* Initialisation of different tables to be used. */
+  olsr_init_tables();
+
   olsr_do_startup_sleep();
 
   /* start heartbeat that is showing on stdout */
@@ -342,15 +352,6 @@ int main(int argc, char *argv[]) {
     olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC, &generate_stdout_pulse, NULL, 0);
   }
 #endif /* !defined WINCE */
-
-  /* initialise the IPC socket */
-  if (olsr_cnf->ipc_connections > 0) {
-    if (ipc_init()) {
-      olsr_exit("ipc_init failure", 1);
-    }
-  }
-  /* Initialisation of different tables to be used. */
-  olsr_init_tables();
 
   /* daemon mode */
 #ifndef _WIN32
