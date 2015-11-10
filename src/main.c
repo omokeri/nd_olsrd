@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
     WSADATA WsaData;
     if (WSAStartup(0x0202, &WsaData)) {
       char buf2[1024];
-      snprintf(buf2, sizeof(buf2), "%s: Could not initialize WinSock", __func__);
+      snprintf(buf2, sizeof(buf2), "%s: Could not initialise WinSock", __func__);
       olsr_exit(buf2, EXIT_FAILURE);
     }
   }
@@ -208,27 +208,27 @@ int main(int argc, char *argv[]) {
   /* Setup derived configuration */
   set_derived_cnf(olsr_cnf);
 
-  /*
-   * Print configuration
-   */
+  /* Print configuration */
   if (olsr_cnf->debug_level > 1) {
     olsrd_print_cnf(olsr_cnf);
   }
 
-  /* Initialize timers */
+  /* config loaded and sane */
+
+  /* initialise timers */
   olsr_init_timers();
 
   def_timer_ci = olsr_alloc_cookie("Default Timer Cookie", OLSR_COOKIE_TYPE_TIMER);
 
-  /*
-   * socket for ioctl calls
-   */
+  /* create a socket for ioctl calls */
   olsr_cnf->ioctl_s = socket(olsr_cnf->ip_version, SOCK_DGRAM, 0);
   if (olsr_cnf->ioctl_s < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "ioctl socket: %s", strerror(errno));
     olsr_exit(buf2, 0);
   }
+
+  /* create a socket for netlink calls */
 #ifdef __linux__
   olsr_cnf->rtnl_s = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
   if (olsr_cnf->rtnl_s < 0) {
@@ -248,9 +248,7 @@ int main(int argc, char *argv[]) {
   }
 #endif /* __linux__ */
 
-  /*
-   * create routing socket
-   */
+  /* create routing socket */
 #if defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__
   olsr_cnf->rts = socket(PF_ROUTE, SOCK_RAW, 0);
   if (olsr_cnf->rts < 0) {
@@ -260,68 +258,65 @@ int main(int argc, char *argv[]) {
   }
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
 
+  /* initialise gateway system */
 #ifdef __linux__
-  /* initialize gateway system */
   if (olsr_cnf->smart_gw_active) {
     if (olsr_init_gateways()) {
-      olsr_exit("Cannot initialize gateway tunnels", 1);
+      olsr_exit("Cannot initialise gateway tunnels", 1);
     }
   }
+#endif /* __linux__ */
 
-  /* initialize niit if index */
+  /* initialise niit if index */
+#ifdef __linux__
   if (olsr_cnf->use_niit) {
     olsr_init_niit();
   }
 #endif /* __linux__ */
 
-  /* Init empty TC timer */
+  /* initialise empty TC timer */
   set_empty_tc_timer(GET_TIMESTAMP(0));
 
-  /* enable ip forwarding on host */
-  /* Disable redirects globally (not for WIN32) */
+  /* enable ip forwarding on host and disable redirects globally (not for WIN32) */
   net_os_set_global_ifoptions();
 
-  /* Initialize parser */
+  /* initialise parser */
   olsr_init_parser();
 
-  /* Initialize route-exporter */
+  /* initialise route exporter */
   olsr_init_export_route();
 
-  /* Initialize message sequencnumber */
+  /* initialise message sequence number */
   init_msg_seqno();
 
-  /* Initialize dynamic willingness calculation */
+  /* initialise dynamic willingness calculation */
   olsr_init_willingness();
 
-  /*
-   *Set up willingness/APM
-   */
+  /* Set up willingness/APM */
   if (olsr_cnf->willingness_auto) {
     if (apm_init() < 0) {
       OLSR_PRINTF(1, "Could not read APM info - setting default willingness(%d)\n", WILL_DEFAULT);
 
-      olsr_syslog(OLSR_LOG_ERR,
-          "Could not read APM info - setting default willingness(%d)\n",
-          WILL_DEFAULT);
+      olsr_syslog(OLSR_LOG_ERR, "Could not read APM info - setting default willingness(%d)\n",
+      WILL_DEFAULT);
 
       olsr_cnf->willingness_auto = 0;
       olsr_cnf->willingness = WILL_DEFAULT;
     } else {
       olsr_cnf->willingness = olsr_calculate_willingness();
 
-      OLSR_PRINTF(1, "Willingness set to %d - next update in %.1f secs\n", olsr_cnf->willingness, (double)olsr_cnf->will_int);
+      OLSR_PRINTF(1, "Willingness set to %d - next update in %.1f secs\n", olsr_cnf->willingness, (double )olsr_cnf->will_int);
     }
   }
 
-  /* Initialize net */
+  /* initialise net */
   init_net();
 
-  /* Initializing networkinterfaces */
+  /* initialise network interfaces */
   if (!olsr_init_interfacedb()) {
     if (olsr_cnf->allow_no_interfaces) {
-      fprintf(
-          stderr,
-          "No interfaces detected! This might be intentional, but it also might mean that your configuration is fubar.\nI will continue after 5 seconds...\n");
+      fprintf( stderr, "No interfaces detected! This might be intentional, but it also might mean"
+          " that your configuration is fubar.\nI will continue after 5 seconds...\n");
       olsr_startup_sleep(5);
     } else {
       char buf2[1024];
@@ -341,17 +336,14 @@ int main(int argc, char *argv[]) {
 
   olsr_do_startup_sleep();
 
-  /* Print heartbeat to stdout */
-
+  /* start heartbeat that is showing on stdout */
 #if !defined WINCE
   if (olsr_cnf->debug_level > 0 && isatty(STDOUT_FILENO)) {
-    olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC,
-        &generate_stdout_pulse, NULL, 0);
+    olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC, &generate_stdout_pulse, NULL, 0);
   }
 #endif /* !defined WINCE */
 
-  /* Initialize the IPC socket */
-
+  /* initialise the IPC socket */
   if (olsr_cnf->ipc_connections > 0) {
     if (ipc_init()) {
       olsr_exit("ipc_init failure", 1);
