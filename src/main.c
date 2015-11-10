@@ -88,6 +88,8 @@ bool olsr_win32_end_flag = false;
 static void olsr_shutdown(int) __attribute__ ((noreturn));
 #endif /* _WIN32 */
 
+struct timer_entry * heartBeatTimer = NULL;
+
 /*
  * Local function prototypes
  */
@@ -349,7 +351,7 @@ int main(int argc, char *argv[]) {
   /* start heartbeat that is showing on stdout */
 #if !defined WINCE
   if (olsr_cnf->debug_level > 0 && isatty(STDOUT_FILENO)) {
-    olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC, &generate_stdout_pulse, NULL, 0);
+    heartBeatTimer = olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC, &generate_stdout_pulse, NULL, 0);
   }
 #endif /* !defined WINCE */
 
