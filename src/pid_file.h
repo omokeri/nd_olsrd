@@ -45,4 +45,6 @@
 
 bool writePidFile(void);
 
+void removePidFile(void);
+
 #endif /* SRC_PID_FILE_H_ */

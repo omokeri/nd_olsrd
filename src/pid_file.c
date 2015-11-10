@@ -65,7 +65,7 @@ bool writePidFile(void) {
 #endif
     int fd = open(olsr_cnf->pidfile, O_CREAT | O_WRONLY, mode);
     if (fd < 0) {
-      snprintf(buf, sizeof(buf), "Could not open PID file %s", olsr_cnf->pidfile);
+      snprintf(buf, sizeof(buf), "Could not create the PID file %s", olsr_cnf->pidfile);
       perror(buf);
       return false;
     }
@@ -81,12 +81,9 @@ bool writePidFile(void) {
       ssize_t chars_written = write(fd, buf, chars);
       if (chars_written != chars) {
         close(fd);
-        snprintf(buf, sizeof(buf), "Could not write the PID %d to the PID file %s", (int) pid, olsr_cnf->pidfile);
+        snprintf(buf, sizeof(buf), "Could not write PID %d to the PID file %s", (int) pid, olsr_cnf->pidfile);
         perror(buf);
-        if (remove(olsr_cnf->pidfile) < 0) {
-          snprintf(buf, sizeof(buf), "Could not remove the PID file %s", olsr_cnf->pidfile);
-          perror(buf);
-        }
+        removePidFile();
         return false;
       }
     }
@@ -94,13 +91,22 @@ bool writePidFile(void) {
     if (close(fd) < 0) {
       snprintf(buf, sizeof(buf), "Could not close PID file %s", olsr_cnf->pidfile);
       perror(buf);
-      if (remove(olsr_cnf->pidfile) < 0) {
-        snprintf(buf, sizeof(buf), "Could not remove the PID file %s", olsr_cnf->pidfile);
-        perror(buf);
-      }
+      removePidFile();
       return false;
     }
   }
 
   return true;
+}
+
+void removePidFile(void) {
+  if (!olsr_cnf || !olsr_cnf->pidfile) {
+    return;
+  }
+
+  if (remove(olsr_cnf->pidfile) < 0) {
+    char buf[PATH_MAX + 256];
+    snprintf(buf, sizeof(buf), "Could not remove the PID file %s", olsr_cnf->pidfile);
+    perror(buf);
+  }
 }
