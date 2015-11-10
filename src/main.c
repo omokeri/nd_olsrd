@@ -490,7 +490,7 @@ void olsr_reconfigure(int signo __attribute__ ((unused))) {
 #ifndef _WIN32
   errno = errNr;
 #endif
-  olsr_shutdown(0);
+  olsr_exit(NULL, 0);
 }
 #endif /* _WIN32 */
 
