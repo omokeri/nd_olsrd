@@ -366,7 +366,7 @@ int main(int argc, char *argv[]) {
 #endif /* _WIN32 */
 
   if (!writePidFile()) {
-    olsr_shutdown(0);
+    olsr_exit(NULL, EXIT_FAILURE);
   }
 
   /*
