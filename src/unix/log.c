@@ -63,6 +63,14 @@ olsr_openlog(const char *ident __attribute__((unused)))
   return;
 }
 
+void olsr_closelog(void) {
+#ifndef __ANDROID__
+  closelog();
+#endif /* __ANDROID__ */
+
+  return;
+}
+
 #if defined SYSLOG_NUMBERING && SYSLOG_NUMBERING
 
 unsigned int olsr_syslog_ctr = 0;

@@ -53,6 +53,8 @@
 
 void olsr_openlog(const char *ident);
 
+void olsr_closelog(void);
+
 #if defined SYSLOG_NUMBERING && SYSLOG_NUMBERING
 void olsr_syslog_real(int level, const char *format, ...) __attribute__ ((format(printf, 2, 3)));
 
