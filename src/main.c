@@ -470,7 +470,8 @@ void olsr_reconfigure(int signo __attribute__ ((unused))) {
     if (!fork()) {
       int i;
       sigset_t sigs;
-      /* New process */
+
+      /* New process, wait a bit to let the old process exit */
       sleep(3);
       sigemptyset(&sigs);
       sigaddset(&sigs, SIGHUP);
@@ -478,13 +479,12 @@ void olsr_reconfigure(int signo __attribute__ ((unused))) {
       for (i = sysconf(_SC_OPEN_MAX); --i > STDERR_FILENO;) {
         close(i);
       }
-      printf("Restarting %s\n", olsr_argv[0]);
-      olsr_syslog(OLSR_LOG_INFO, "Restarting %s\n", olsr_argv[0]);
+      printf("Restarting %s", olsr_argv[0]);
+      olsr_syslog(OLSR_LOG_INFO, "Restarting %s", olsr_argv[0]);
       execv(olsr_argv[0], olsr_argv);
-      olsr_syslog(OLSR_LOG_ERR, "execv(%s) fails: %s!\n", olsr_argv[0],
-          strerror(errno));
+      olsr_syslog(OLSR_LOG_ERR, "execv(%s) failed: %s", olsr_argv[0], strerror(errno));
     } else {
-      olsr_syslog(OLSR_LOG_INFO, "RECONFIGURING!\n");
+      olsr_syslog(OLSR_LOG_INFO, "RECONFIGURING");
     }
   }
 #ifndef _WIN32
@@ -506,8 +506,7 @@ static void olsr_shutdown_messages(void) {
     if (olsr_cnf->lq_level > 0) {
       olsr_output_lq_tc(ifn);
       olsr_output_lq_hello(ifn);
-    }
-    else {
+    } else {
       generate_tc(ifn);
       generate_hello(ifn);
     }
