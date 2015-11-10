@@ -61,7 +61,7 @@
 /* head node for all link sets */
 struct list_node link_entry_head;
 
-bool link_changes;                     /* is set if changes occur in MPRS set */
+bool link_changes = false; /* is set if changes occur in MPRS set */
 
 void
 signal_link_changes(bool val)

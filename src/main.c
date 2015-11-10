@@ -445,8 +445,6 @@ int main(int argc, char *argv[]) {
   signal(SIGUSR2, SIG_IGN);
 #endif /* _WIN32 */
 
-  link_changes = false;
-
   /* Starting scheduler */
   olsr_scheduler();
 
