@@ -82,23 +82,246 @@
 #define close(x) closesocket(x)
 int __stdcall SignalHandler(unsigned long signo) __attribute__ ((noreturn));
 void DisableIcmpRedirects(void);
-#else /* _WIN32 */
-static void olsr_shutdown(int) __attribute__ ((noreturn));
 #endif /* _WIN32 */
 
 struct timer_entry * heartBeatTimer = NULL;
 
-/*
- * Local function prototypes
- */
-
-void olsr_reconfigure(int signo) __attribute__ ((noreturn));
-
-static int set_default_ifcnfs(struct olsr_if *, struct if_config_options *);
-
 static char **olsr_argv = NULL;
 
 struct olsr_cookie_info *def_timer_ci = NULL;
+
+#ifndef _WIN32
+/**
+ * Reconfigure olsrd. Currently kind of a hack...
+ *
+ *@param signo the signal that triggered this callback
+ */
+static void olsr_reconfigure(int signo __attribute__ ((unused))) {
+#ifndef _WIN32
+  int errNr = errno;
+#endif
+  /* if we are started with -nofork, we do not want to go into the
+   * background here. So we can simply stop on -HUP
+   */
+  olsr_syslog(OLSR_LOG_INFO, "sot: olsr_reconfigure()\n");
+  if (!olsr_cnf->no_fork) {
+    if (!fork()) {
+      int i;
+      sigset_t sigs;
+
+      /* New process, wait a bit to let the old process exit */
+      sleep(3);
+      sigemptyset(&sigs);
+      sigaddset(&sigs, SIGHUP);
+      sigprocmask(SIG_UNBLOCK, &sigs, NULL);
+      for (i = sysconf(_SC_OPEN_MAX); --i > STDERR_FILENO;) {
+        close(i);
+      }
+      printf("Restarting %s", olsr_argv[0]);
+      olsr_syslog(OLSR_LOG_INFO, "Restarting %s", olsr_argv[0]);
+      execv(olsr_argv[0], olsr_argv);
+      olsr_syslog(OLSR_LOG_ERR, "execv(%s) failed: %s", olsr_argv[0], strerror(errno));
+    } else {
+      olsr_syslog(OLSR_LOG_INFO, "RECONFIGURING");
+    }
+  }
+#ifndef _WIN32
+  errno = errNr;
+#endif
+  olsr_exit(NULL, 0);
+}
+#endif /* _WIN32 */
+
+static void olsr_shutdown_messages(void) {
+  struct interface_olsr *ifn;
+
+  /* send TC reset */
+  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
+    /* clean output buffer */
+    net_output(ifn);
+
+    /* send 'I'm gone' messages */
+    if (olsr_cnf->lq_level > 0) {
+      olsr_output_lq_tc(ifn);
+      olsr_output_lq_hello(ifn);
+    } else {
+      generate_tc(ifn);
+      generate_hello(ifn);
+    }
+    net_output(ifn);
+  }
+}
+
+/**
+ *Function called at shutdown. Signal handler
+ *
+ * @param signo the signal that triggered this call
+ */
+#ifdef _WIN32
+int __stdcall
+SignalHandler(unsigned long signo)
+#else /* _WIN32 */
+static void olsr_shutdown(int signo __attribute__ ((unused)))
+#endif /* _WIN32 */
+{
+#ifndef _WIN32
+  int errNr = errno;
+#endif
+  struct interface_olsr *ifn;
+  int exit_value;
+
+  OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
+
+  /* instruct the scheduler to stop */
+  olsr_scheduler_stop();
+
+  /* clear all links and send empty hellos/tcs */
+  olsr_reset_all_links();
+
+  /* deactivate fisheye and immediate TCs */
+  olsr_cnf->lq_fish = 0;
+  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
+    ifn->immediate_send_tc = false;
+  }
+  increase_local_ansn();
+
+  /* send first shutdown message burst */
+  olsr_shutdown_messages();
+
+  /* delete all routes */
+  olsr_delete_all_kernel_routes();
+
+  /* send second shutdown message burst */
+  olsr_shutdown_messages();
+
+  /* now try to cleanup the rest of the mess */
+  olsr_delete_all_tc_entries();
+
+  olsr_delete_all_mid_entries();
+
+#ifdef __linux__
+  /* trigger gateway selection */
+  if (olsr_cnf->smart_gw_active) {
+    olsr_shutdown_gateways();
+    olsr_cleanup_gateways();
+  }
+
+  /* trigger niit static route cleanup */
+  if (olsr_cnf->use_niit) {
+    olsr_cleanup_niit_routes();
+  }
+
+  /* cleanup lo:olsr interface */
+  if (olsr_cnf->use_src_ip_routes) {
+    olsr_os_localhost_if(&olsr_cnf->main_addr, false);
+  }
+#endif /* __linux__ */
+
+  olsr_destroy_parser();
+
+  OLSR_PRINTF(1, "Closing sockets...\n");
+
+  /* front-end IPC socket */
+  if (olsr_cnf->ipc_connections > 0) {
+    shutdown_ipc();
+  }
+
+  /* OLSR sockets */
+  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
+    close(ifn->olsr_socket);
+    close(ifn->send_socket);
+
+#ifdef __linux__
+    if (DEF_RT_NONE != olsr_cnf->rt_table_defaultolsr_pri) {
+      olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table_default,
+          olsr_cnf->rt_table_defaultolsr_pri, ifn->int_name, false);
+    }
+#endif /* __linux__ */
+  }
+
+  /* Closing plug-ins */
+  olsr_close_plugins();
+
+  /* Reset network settings */
+  net_os_restore_ifoptions();
+
+  /* ioctl socket */
+  close(olsr_cnf->ioctl_s);
+
+#ifdef __linux__
+  if (DEF_RT_NONE != olsr_cnf->rt_table_pri) {
+    olsr_os_policy_rule(olsr_cnf->ip_version,
+        olsr_cnf->rt_table, olsr_cnf->rt_table_pri, NULL, false);
+  }
+  if (DEF_RT_NONE != olsr_cnf->rt_table_tunnel_pri) {
+    olsr_os_policy_rule(olsr_cnf->ip_version,
+        olsr_cnf->rt_table_tunnel, olsr_cnf->rt_table_tunnel_pri, NULL, false);
+  }
+  if (DEF_RT_NONE != olsr_cnf->rt_table_default_pri) {
+    olsr_os_policy_rule(olsr_cnf->ip_version,
+        olsr_cnf->rt_table_default, olsr_cnf->rt_table_default_pri, NULL, false);
+  }
+  close(olsr_cnf->rtnl_s);
+  close (olsr_cnf->rt_monitor_socket);
+#endif /* __linux__ */
+
+#if defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__
+  /* routing socket */
+  close(olsr_cnf->rts);
+#endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
+
+  /* remove the lock file */
+  olsr_remove_lock_file();
+
+  /* stop heartbeat that is showing on stdout */
+#if !defined WINCE
+  if (heartBeatTimer) {
+    olsr_stop_timer(heartBeatTimer);
+    heartBeatTimer = NULL;
+  }
+#endif /* !defined WINCE */
+
+  /* Free cookies and memory pools attached. */
+  OLSR_PRINTF(0, "Free all memory...\n");
+  olsr_delete_all_cookies();
+
+  olsr_syslog(OLSR_LOG_INFO, "%s stopped", olsrd_version);
+
+  OLSR_PRINTF(1, "\n <<<< %s - terminating >>>>\n           http://www.olsr.org\n", olsrd_version);
+
+  exit_value = olsr_cnf->exit_value;
+  olsrd_free_cnf(olsr_cnf);
+
+  /* close the log */
+  olsr_closelog();
+
+#ifndef _WIN32
+  errno = errNr;
+#endif
+  exit(exit_value);
+}
+
+/**
+ * Sets the provided configuration on all unconfigured
+ * interfaces
+ *
+ * @param ifs a linked list of interfaces to check and possible update
+ * @param cnf the default configuration to set on unconfigured interfaces
+ */
+static int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf) {
+  int changes = 0;
+
+  while (ifs) {
+    if (ifs->cnf == NULL) {
+      ifs->cnf = olsr_malloc(sizeof(struct if_config_options),
+          "Set default config");
+      *ifs->cnf = *cnf;
+      changes++;
+    }
+    ifs = ifs->next;
+  }
+  return changes;
+}
 
 /**
  * Main entrypoint
@@ -449,239 +672,6 @@ int main(int argc, char *argv[]) {
   sleep(30);
   exit(1);
 } /* main */
-
-#ifndef _WIN32
-/**
- * Reconfigure olsrd. Currently kind of a hack...
- *
- *@param signo the signal that triggered this callback
- */
-void olsr_reconfigure(int signo __attribute__ ((unused))) {
-#ifndef _WIN32
-  int errNr = errno;
-#endif
-  /* if we are started with -nofork, we do not want to go into the
-   * background here. So we can simply stop on -HUP
-   */
-  olsr_syslog(OLSR_LOG_INFO, "sot: olsr_reconfigure()\n");
-  if (!olsr_cnf->no_fork) {
-    if (!fork()) {
-      int i;
-      sigset_t sigs;
-
-      /* New process, wait a bit to let the old process exit */
-      sleep(3);
-      sigemptyset(&sigs);
-      sigaddset(&sigs, SIGHUP);
-      sigprocmask(SIG_UNBLOCK, &sigs, NULL);
-      for (i = sysconf(_SC_OPEN_MAX); --i > STDERR_FILENO;) {
-        close(i);
-      }
-      printf("Restarting %s", olsr_argv[0]);
-      olsr_syslog(OLSR_LOG_INFO, "Restarting %s", olsr_argv[0]);
-      execv(olsr_argv[0], olsr_argv);
-      olsr_syslog(OLSR_LOG_ERR, "execv(%s) failed: %s", olsr_argv[0], strerror(errno));
-    } else {
-      olsr_syslog(OLSR_LOG_INFO, "RECONFIGURING");
-    }
-  }
-#ifndef _WIN32
-  errno = errNr;
-#endif
-  olsr_exit(NULL, 0);
-}
-#endif /* _WIN32 */
-
-static void olsr_shutdown_messages(void) {
-  struct interface_olsr *ifn;
-
-  /* send TC reset */
-  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
-    /* clean output buffer */
-    net_output(ifn);
-
-    /* send 'I'm gone' messages */
-    if (olsr_cnf->lq_level > 0) {
-      olsr_output_lq_tc(ifn);
-      olsr_output_lq_hello(ifn);
-    } else {
-      generate_tc(ifn);
-      generate_hello(ifn);
-    }
-    net_output(ifn);
-  }
-}
-
-/**
- *Function called at shutdown. Signal handler
- *
- * @param signo the signal that triggered this call
- */
-#ifdef _WIN32
-int __stdcall
-SignalHandler(unsigned long signo)
-#else /* _WIN32 */
-static void olsr_shutdown(int signo __attribute__ ((unused)))
-#endif /* _WIN32 */
-{
-#ifndef _WIN32
-  int errNr = errno;
-#endif
-  struct interface_olsr *ifn;
-  int exit_value;
-
-  OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
-
-  /* instruct the scheduler to stop */
-  olsr_scheduler_stop();
-
-  /* clear all links and send empty hellos/tcs */
-  olsr_reset_all_links();
-
-  /* deactivate fisheye and immediate TCs */
-  olsr_cnf->lq_fish = 0;
-  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
-    ifn->immediate_send_tc = false;
-  }
-  increase_local_ansn();
-
-  /* send first shutdown message burst */
-  olsr_shutdown_messages();
-
-  /* delete all routes */
-  olsr_delete_all_kernel_routes();
-
-  /* send second shutdown message burst */
-  olsr_shutdown_messages();
-
-  /* now try to cleanup the rest of the mess */
-  olsr_delete_all_tc_entries();
-
-  olsr_delete_all_mid_entries();
-
-#ifdef __linux__
-  /* trigger gateway selection */
-  if (olsr_cnf->smart_gw_active) {
-    olsr_shutdown_gateways();
-    olsr_cleanup_gateways();
-  }
-
-  /* trigger niit static route cleanup */
-  if (olsr_cnf->use_niit) {
-    olsr_cleanup_niit_routes();
-  }
-
-  /* cleanup lo:olsr interface */
-  if (olsr_cnf->use_src_ip_routes) {
-    olsr_os_localhost_if(&olsr_cnf->main_addr, false);
-  }
-#endif /* __linux__ */
-
-  olsr_destroy_parser();
-
-  OLSR_PRINTF(1, "Closing sockets...\n");
-
-  /* front-end IPC socket */
-  if (olsr_cnf->ipc_connections > 0) {
-    shutdown_ipc();
-  }
-
-  /* OLSR sockets */
-  for (ifn = ifnet; ifn; ifn = ifn->int_next) {
-    close(ifn->olsr_socket);
-    close(ifn->send_socket);
-
-#ifdef __linux__
-    if (DEF_RT_NONE != olsr_cnf->rt_table_defaultolsr_pri) {
-      olsr_os_policy_rule(olsr_cnf->ip_version, olsr_cnf->rt_table_default,
-          olsr_cnf->rt_table_defaultolsr_pri, ifn->int_name, false);
-    }
-#endif /* __linux__ */
-  }
-
-  /* Closing plug-ins */
-  olsr_close_plugins();
-
-  /* Reset network settings */
-  net_os_restore_ifoptions();
-
-  /* ioctl socket */
-  close(olsr_cnf->ioctl_s);
-
-#ifdef __linux__
-  if (DEF_RT_NONE != olsr_cnf->rt_table_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table, olsr_cnf->rt_table_pri, NULL, false);
-  }
-  if (DEF_RT_NONE != olsr_cnf->rt_table_tunnel_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table_tunnel, olsr_cnf->rt_table_tunnel_pri, NULL, false);
-  }
-  if (DEF_RT_NONE != olsr_cnf->rt_table_default_pri) {
-    olsr_os_policy_rule(olsr_cnf->ip_version,
-        olsr_cnf->rt_table_default, olsr_cnf->rt_table_default_pri, NULL, false);
-  }
-  close(olsr_cnf->rtnl_s);
-  close (olsr_cnf->rt_monitor_socket);
-#endif /* __linux__ */
-
-#if defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__
-  /* routing socket */
-  close(olsr_cnf->rts);
-#endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
-
-  /* remove the lock file */
-  olsr_remove_lock_file();
-
-  /* stop heartbeat that is showing on stdout */
-#if !defined WINCE
-  if (heartBeatTimer) {
-    olsr_stop_timer(heartBeatTimer);
-    heartBeatTimer = NULL;
-  }
-#endif /* !defined WINCE */
-
-  /* Free cookies and memory pools attached. */
-  OLSR_PRINTF(0, "Free all memory...\n");
-  olsr_delete_all_cookies();
-
-  olsr_syslog(OLSR_LOG_INFO, "%s stopped", olsrd_version);
-
-  OLSR_PRINTF(1, "\n <<<< %s - terminating >>>>\n           http://www.olsr.org\n", olsrd_version);
-
-  exit_value = olsr_cnf->exit_value;
-  olsrd_free_cnf(olsr_cnf);
-
-  /* close the log */
-  olsr_closelog();
-
-#ifndef _WIN32
-  errno = errNr;
-#endif
-  exit(exit_value);
-}
-
-/**
- * Sets the provided configuration on all unconfigured
- * interfaces
- *
- * @param ifs a linked list of interfaces to check and possible update
- * @param cnf the default configuration to set on unconfigured interfaces
- */
-int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf) {
-  int changes = 0;
-
-  while (ifs) {
-    if (ifs->cnf == NULL) {
-      ifs->cnf = olsr_malloc(sizeof(struct if_config_options),
-          "Set default config");
-      *ifs->cnf = *cnf;
-      changes++;
-    }
-    ifs = ifs->next;
-  }
-  return changes;
-}
 
 /*
  * Local Variables:
