@@ -112,7 +112,6 @@ struct olsr_cookie_info *def_timer_ci = NULL;
 
 int main(int argc, char *argv[]) {
   int argcLocal = argc;
-  char conf_file_name[FILENAME_MAX] = { 0 };
   struct ipaddr_str buf;
 
 #ifdef __linux__
@@ -182,7 +181,7 @@ int main(int argc, char *argv[]) {
   olsr_openlog("olsrd");
 
   /* load the configuration */
-  if (!loadConfig(&argcLocal, argv, conf_file_name, sizeof(conf_file_name))) {
+  if (!loadConfig(&argcLocal, argv)) {
     olsr_exit(NULL, EXIT_FAILURE);
   }
 

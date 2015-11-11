@@ -165,7 +165,8 @@ olsrmain_load_config(char *file) {
  * Set configfile name and
  * check if a configfile name was given as parameter
  */
-bool loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_name_size) {
+bool loadConfig(int *argc, char *argv[]) {
+  char conf_file_name[FILENAME_MAX] = { 0 };
   bool loadedConfig = false;
   int i;
 
@@ -187,7 +188,7 @@ bool loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_na
 
   strscpy(conf_file_name + len, "olsrd.conf", sizeof(conf_file_name) - len);
 #else /* _WIN32 */
-  strscpy(conf_file_name, OLSRD_GLOBAL_CONF_FILE, conf_file_name_size);
+  strscpy(conf_file_name, OLSRD_GLOBAL_CONF_FILE, sizeof(conf_file_name));
 #endif /* _WIN32 */
 
   /* get the default configuration */
@@ -197,7 +198,7 @@ bool loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_na
   for (i = 1; i < (*argc - 1);) {
     if (strcmp(argv[i], "-f") == 0) {
       /* setup the provided olsrd configuration file name in conf_file_name */
-      strscpy(conf_file_name, argv[i + 1], conf_file_name_size);
+      strscpy(conf_file_name, argv[i + 1], sizeof(conf_file_name));
 
       /* remove -f confgFile arguments from argc and argv */
       if ((i + 2) < *argc) {
