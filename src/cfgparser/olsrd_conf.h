@@ -59,6 +59,8 @@ struct conf_token {
 #define DEFAULT_STR(val) \
 (((!defcnf) && ((*((uint8_t *)(&cnfi->val)))==0))?" (d)":"")
 
+bool loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_name_size);
+
 void set_default_cnf(struct olsrd_config *, char * configuration_file);
 
 void set_derived_cnf(struct olsrd_config * olsr_cnf);

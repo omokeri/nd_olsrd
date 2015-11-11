@@ -154,93 +154,6 @@ static void writePidFile(void) {
 }
 
 /**
- * loads a config file
- * @return <0 if load failed, 0 otherwise
- */
-static int
-olsrmain_load_config(char *file) {
-  struct stat statbuf;
-
-  if (stat(file, &statbuf) < 0) {
-    fprintf(stderr, "Could not find specified config file %s!\n%s\n\n",
-        file, strerror(errno));
-    return -1;
-  }
-
-  if (olsrd_parse_cnf(file) < 0) {
-    fprintf(stderr, "Error while reading config file %s!\n", file);
-    return -1;
-  }
-  return 0;
-}
-
-/*
- * Set configfile name and
- * check if a configfile name was given as parameter
- */
-static void loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_name_size) {
-  bool loadedConfig = false;
-  int i;
-
-  /* setup the default olsrd configuration file name in conf_file_name */
-#ifdef _WIN32
-  size_t len = 0;
-
-#ifndef WINCE
-  /* get the current directory */
-  GetWindowsDirectory(conf_file_name, FILENAME_MAX - 11);
-#else /* WINCE */
-  conf_file_name[0] = '\0';
-#endif /* WINCE */
-
-  len = strlen(conf_file_name);
-  if (!len || (conf_file_name[len - 1] != '\\')) {
-    conf_file_name[len++] = '\\';
-  }
-
-  strscpy(conf_file_name + len, "olsrd.conf", sizeof(conf_file_name) - len);
-#else /* _WIN32 */
-  strscpy(conf_file_name, OLSRD_GLOBAL_CONF_FILE, conf_file_name_size);
-#endif /* _WIN32 */
-
-  /* get the default configuration */
-  olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
-
-  /* scan for -f configFile arguments */
-  for (i = 1; i < (*argc - 1);) {
-    if (strcmp(argv[i], "-f") == 0) {
-      /* setup the provided olsrd configuration file name in conf_file_name */
-      strscpy(conf_file_name, argv[i + 1], conf_file_name_size);
-
-      /* remove -f confgFile arguments from argc and argv */
-      if ((i + 2) < *argc) {
-        memmove(&argv[i], &argv[i + 2], sizeof(*argv) * (*argc - i - 1));
-      }
-      *argc -= 2;
-
-      /* load the config from the file */
-      if (olsrmain_load_config(conf_file_name) < 0) {
-        olsr_exit(NULL, EXIT_FAILURE);
-      }
-
-      loadedConfig = true;
-    } else {
-      i++;
-    }
-  }
-
-  /* set up configuration prior to processing command-line options */
-  if (!loadedConfig && olsrmain_load_config(conf_file_name) == 0) {
-    loadedConfig = true;
-  }
-
-  if (!loadedConfig) {
-    olsrd_free_cnf(olsr_cnf);
-    olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
-  }
-}
-
-/**
  * Main entrypoint
  */
 
@@ -317,7 +230,9 @@ int main(int argc, char *argv[]) {
   olsr_openlog("olsrd");
 
   /* load the configuration */
-  loadConfig(&argcLocal, argv, conf_file_name, sizeof(conf_file_name));
+  if (!loadConfig(&argcLocal, argv, conf_file_name, sizeof(conf_file_name))) {
+    olsr_exit(NULL, EXIT_FAILURE);
+  }
 
   /* process arguments */
   {
@@ -328,7 +243,7 @@ int main(int argc, char *argv[]) {
     }
 
     /* Process olsrd options */
-  if (olsr_process_arguments(argcLocal, argv, olsr_cnf, default_ifcnf) < 0) {
+    if (olsr_process_arguments(argcLocal, argv, olsr_cnf, default_ifcnf) < 0) {
       print_usage(true);
       free(default_ifcnf);
       olsr_exit(NULL, EXIT_FAILURE);
