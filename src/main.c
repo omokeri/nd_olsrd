@@ -645,6 +645,14 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   /* remove the lock file */
   olsr_remove_lock_file();
 
+  /* stop heartbeat that is showing on stdout */
+#if !defined WINCE
+  if (heartBeatTimer) {
+    olsr_stop_timer(heartBeatTimer);
+    heartBeatTimer = NULL;
+  }
+#endif /* !defined WINCE */
+
   /* Free cookies and memory pools attached. */
   OLSR_PRINTF(0, "Free all memory...\n");
   olsr_delete_all_cookies();
