@@ -187,11 +187,6 @@ extern struct olsrd_config *olsr_cnf;
 extern uint32_t now_times;              /* current idea of times(2) reported uptime */
 extern struct olsr_cookie_info *def_timer_ci;
 
-#if defined _WIN32
-extern bool olsr_win32_end_request;
-extern bool olsr_win32_end_flag;
-#endif /* defined _WIN32 */
-
 /*
  *IPC functions
  *These are moved to a plugin soon

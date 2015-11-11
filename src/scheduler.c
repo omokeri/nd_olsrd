@@ -452,6 +452,24 @@ handle_fds(uint32_t next_interval)
   } OLSR_FOR_ALL_SOCKETS_END(entry);
 }
 
+typedef enum {
+  INIT, RUNNING, STOPPING, ENDED
+} state_t;
+
+static volatile state_t state = INIT;
+
+static bool olsr_scheduler_is_stopped(void) {
+  return ((state == INIT) || (state == ENDED));
+}
+
+void olsr_scheduler_stop(void) {
+  if (olsr_scheduler_is_stopped()) {
+    return;
+  }
+
+  state = STOPPING;
+}
+
 /**
  * Main scheduler event loop. Polls at every
  * sched_poll_interval and calls all functions
@@ -461,13 +479,13 @@ handle_fds(uint32_t next_interval)
  *
  * @return nada
  */
-void __attribute__ ((noreturn))
-olsr_scheduler(void)
+void olsr_scheduler(void)
 {
+  state = RUNNING;
   OLSR_PRINTF(1, "Scheduler started - polling every %d ms\n", (int)(olsr_cnf->pollrate*1000));
 
   /* Main scheduler loop */
-  while (true) {
+  while (state == RUNNING) {
     uint32_t next_interval;
 
     /*
@@ -480,11 +498,23 @@ olsr_scheduler(void)
     /* Read incoming data */
     poll_sockets();
 
+    if (state != RUNNING) {
+      break;
+    }
+
     /* Process timers */
     walk_timers(&timer_last_run);
 
+    if (state != RUNNING) {
+      break;
+    }
+
     /* Update */
     olsr_process_changes();
+
+    if (state != RUNNING) {
+      break;
+    }
 
     /* Check for changes in topology */
     if (link_changes) {
@@ -493,15 +523,15 @@ olsr_scheduler(void)
       link_changes = false;
     }
 
+    if (state != RUNNING) {
+      break;
+    }
+
     /* Read incoming data and handle it immediiately */
     handle_fds(next_interval);
-
-#ifdef _WIN32
-    if (olsr_win32_end_request) {
-      olsr_win32_end_flag = true;
-    }
-#endif /* _WIN32 */
   }
+
+  state = ENDED;
 }
 
 /**

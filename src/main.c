@@ -82,8 +82,6 @@
 int __stdcall SignalHandler(unsigned long signo) __attribute__ ((noreturn));
 void ListInterfaces(void);
 void DisableIcmpRedirects(void);
-bool olsr_win32_end_request = false;
-bool olsr_win32_end_flag = false;
 #else /* _WIN32 */
 static void olsr_shutdown(int) __attribute__ ((noreturn));
 #endif /* _WIN32 */
@@ -450,8 +448,9 @@ int main(int argc, char *argv[]) {
   /* Starting scheduler */
   olsr_scheduler();
 
-  /* Like we're ever going to reach this ;-) */
-  olsr_exit(NULL, 0);
+  /* We'll only get here when olsr_shutdown has stopped the scheduler */
+  sleep(30);
+  exit(1);
 } /* main */
 
 #ifndef _WIN32
@@ -536,16 +535,8 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 
   OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
 
-#ifdef _WIN32
-  OLSR_PRINTF(1, "Waiting for the scheduler to stop.\n");
-
-  olsr_win32_end_request = TRUE;
-
-  while (!olsr_win32_end_flag)
-  sleep(1);
-
-  OLSR_PRINTF(1, "Scheduler stopped.\n");
-#endif /* _WIN32 */
+  /* instruct the scheduler to stop */
+  olsr_scheduler_stop();
 
   /* clear all links and send empty hellos/tcs */
   olsr_reset_all_links();
