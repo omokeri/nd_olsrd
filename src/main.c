@@ -174,15 +174,75 @@ olsrmain_load_config(char *file) {
   return 0;
 }
 
+/*
+ * Set configfile name and
+ * check if a configfile name was given as parameter
+ */
+static void loadConfig(int *argc, char *argv[], char * conf_file_name, int conf_file_name_size) {
+  bool loadedConfig = false;
+  int i;
+
+#ifdef _WIN32
+  size_t len = 0;
+
+#ifndef WINCE
+  GetWindowsDirectory(conf_file_name, FILENAME_MAX - 11);
+#else /* WINCE */
+  conf_file_name[0] = 0;
+#endif /* WINCE */
+
+  len = strlen(conf_file_name);
+
+  if (len == 0 || conf_file_name[len - 1] != '\\')
+  conf_file_name[len++] = '\\';
+
+  strscpy(conf_file_name + len, "olsrd.conf", sizeof(conf_file_name) - len);
+#else /* _WIN32 */
+  strscpy(conf_file_name, OLSRD_GLOBAL_CONF_FILE, conf_file_name_size);
+#endif /* _WIN32 */
+
+  olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
+
+  for (i = 1; i < *argc - 1;) {
+    if (strcmp(argv[i], "-f") == 0) {
+      loadedConfig = true;
+
+      if (olsrmain_load_config(argv[i + 1]) < 0) {
+        olsr_exit(NULL, EXIT_FAILURE);
+      }
+      strscpy(conf_file_name, argv[i + 1], conf_file_name_size);
+
+      if (i + 2 < *argc) {
+        memmove(&argv[i], &argv[i + 2], sizeof(*argv) * (*argc - i - 1));
+      }
+      *argc -= 2;
+    } else {
+      i++;
+    }
+  }
+
+  /*
+   * set up configuration prior to processing commandline options
+   */
+  if (!loadedConfig && olsrmain_load_config(conf_file_name) == 0) {
+    loadedConfig = true;
+  }
+
+  if (!loadedConfig) {
+    olsrd_free_cnf(olsr_cnf);
+    olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
+  }
+}
+
 /**
  * Main entrypoint
  */
 
 int main(int argc, char *argv[]) {
+  int argcLocal = argc;
   struct if_config_options *default_ifcnf = NULL;
   char conf_file_name[FILENAME_MAX] = { 0 };
   struct ipaddr_str buf;
-  bool loadedConfig = false;
   int i;
 
 #ifdef __linux__
@@ -191,7 +251,6 @@ int main(int argc, char *argv[]) {
 
 #ifdef _WIN32
   WSADATA WsaData;
-  size_t len;
 #endif /* __linux__ */
 
   /*
@@ -222,7 +281,7 @@ int main(int argc, char *argv[]) {
 
   print_version();
 
-  if (argc == 2) {
+  if (argcLocal == 2) {
     if ((strcmp(argv[1], "-h") == 0) || (strcmp(argv[1], "/?") == 0)) {
       /* help */
       print_usage(false);
@@ -252,58 +311,7 @@ int main(int argc, char *argv[]) {
   /* Open syslog */
   olsr_openlog("olsrd");
 
-  /*
-   * Set configfile name and
-   * check if a configfile name was given as parameter
-   */
-#ifdef _WIN32
-#ifndef WINCE
-  GetWindowsDirectory(conf_file_name, FILENAME_MAX - 11);
-#else /* WINCE */
-  conf_file_name[0] = 0;
-#endif /* WINCE */
-
-  len = strlen(conf_file_name);
-
-  if (len == 0 || conf_file_name[len - 1] != '\\')
-  conf_file_name[len++] = '\\';
-
-  strscpy(conf_file_name + len, "olsrd.conf", sizeof(conf_file_name) - len);
-#else /* _WIN32 */
-  strscpy(conf_file_name, OLSRD_GLOBAL_CONF_FILE, sizeof(conf_file_name));
-#endif /* _WIN32 */
-
-  olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
-  for (i=1; i < argc-1;) {
-    if (strcmp(argv[i], "-f") == 0) {
-      loadedConfig = true;
-
-      if (olsrmain_load_config(argv[i+1]) < 0) {
-        olsr_exit(NULL, EXIT_FAILURE);
-      }
-      strscpy(conf_file_name, argv[i+1], sizeof(conf_file_name));
-
-      if (i+2 < argc) {
-        memmove(&argv[i], &argv[i+2], sizeof(*argv) * (argc-i-1));
-      }
-      argc -= 2;
-    }
-    else {
-      i++;
-    }
-  }
-
-  /*
-   * set up configuration prior to processing commandline options
-   */
-  if (!loadedConfig && olsrmain_load_config(conf_file_name) == 0) {
-    loadedConfig = true;
-  }
-
-  if (!loadedConfig) {
-    olsrd_free_cnf(olsr_cnf);
-    olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
-  }
+  loadConfig(&argcLocal, argv, conf_file_name, sizeof(conf_file_name));
 
   default_ifcnf = get_default_if_config();
   if (default_ifcnf == NULL) {
@@ -316,7 +324,7 @@ int main(int argc, char *argv[]) {
   /*
    * Process olsrd options.
    */
-  if (olsr_process_arguments(argc, argv, olsr_cnf, default_ifcnf) < 0) {
+  if (olsr_process_arguments(argcLocal, argv, olsr_cnf, default_ifcnf) < 0) {
     print_usage(true);
     olsr_exit(NULL, EXIT_FAILURE);
   }
