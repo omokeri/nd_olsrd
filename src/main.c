@@ -664,6 +664,9 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   exit_value = olsr_cnf->exit_value;
   olsrd_free_cnf(olsr_cnf);
 
+  /* close the log */
+  olsr_closelog();
+
 #ifndef _WIN32
   errno = errNr;
 #endif
