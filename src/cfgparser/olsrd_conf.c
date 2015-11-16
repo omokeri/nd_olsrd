@@ -987,8 +987,25 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 void
 olsrd_free_cnf(struct olsrd_config *cnf)
 {
+  free(cnf->smart_gw_status_file);
+  cnf->smart_gw_status_file = NULL;
+
+  free(cnf->smart_gw_egress_file);
+  cnf->smart_gw_egress_file = NULL;
+
+  // cnf->smart_gw_egress_interfaces : cleaned up by the gateway system
+
+  free(cnf->smart_gw_policyrouting_script);
+  cnf->smart_gw_policyrouting_script = NULL;
+
+  free(cnf->smart_gw_instance_id);
+  cnf->smart_gw_instance_id = NULL;
+
   free(cnf->lock_file);
   cnf->lock_file = NULL;
+
+  free(cnf->lq_algorithm);
+  cnf->lq_algorithm = NULL;
 
   while (cnf->interfaces) {
     struct olsr_if *interface;
@@ -1009,6 +1026,11 @@ olsrd_free_cnf(struct olsrd_config *cnf)
     free(interface);
   }
 
+  free(cnf->interface_defaults);
+  cnf->interface_defaults = NULL;
+
+  ip_prefix_list_clear(&cnf->ipc_nets);
+
   ip_prefix_list_clear(&cnf->hna_entries);
 
   while (cnf->plugins) {
@@ -1017,6 +1039,9 @@ olsrd_free_cnf(struct olsrd_config *cnf)
     free(plugin->name);
     free(plugin);
   }
+
+  free(cnf->pidfile);
+  cnf->pidfile = NULL;
 
   free(cnf->configuration_file);
   cnf->configuration_file = NULL;
