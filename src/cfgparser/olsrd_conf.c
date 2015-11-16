@@ -100,7 +100,7 @@ const char *OLSR_IF_MODE[] = {
 int current_line;
 
 /* Global stuff externed in defs.h */
-FILE *debug_handle;                    /* Where to send debug(defaults to stdout) */
+FILE *debug_handle = NULL;             /* Where to send debug(defaults to stdout) */
 struct olsrd_config *olsr_cnf = NULL;  /* The global configuration */
 
 #ifdef MAKEBIN
