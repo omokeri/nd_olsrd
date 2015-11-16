@@ -223,7 +223,7 @@ bool loadConfig(int *argc, char *argv[]) {
   }
 
   if (!loadedConfig) {
-    olsrd_free_cnf(olsr_cnf);
+    olsrd_free_cnf(&olsr_cnf);
     olsr_cnf = olsrd_get_default_cnf(strdup(conf_file_name));
   }
 
@@ -985,8 +985,16 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 }
 
 void
-olsrd_free_cnf(struct olsrd_config *cnf)
+olsrd_free_cnf(struct olsrd_config **cnfVariableAddress)
 {
+  struct olsrd_config *cnf;
+
+  if (!cnfVariableAddress || !*cnfVariableAddress) {
+    return;
+  }
+
+  cnf = *cnfVariableAddress;
+
   free(cnf->smart_gw_status_file);
   cnf->smart_gw_status_file = NULL;
 
@@ -1045,6 +1053,9 @@ olsrd_free_cnf(struct olsrd_config *cnf)
 
   free(cnf->configuration_file);
   cnf->configuration_file = NULL;
+
+  free(cnf);
+  *cnfVariableAddress = NULL;
 
   return;
 }

@@ -424,7 +424,7 @@ extern "C" {
 
   int olsrd_sanity_check_cnf(struct olsrd_config *);
 
-  void olsrd_free_cnf(struct olsrd_config *);
+  void olsrd_free_cnf(struct olsrd_config **);
 
   void olsrd_print_cnf(struct olsrd_config *);
 
