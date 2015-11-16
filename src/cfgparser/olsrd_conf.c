@@ -987,7 +987,8 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 void
 olsrd_free_cnf(struct olsrd_config *cnf)
 {
-  ip_prefix_list_clear(&cnf->hna_entries);
+  free(cnf->lock_file);
+  cnf->lock_file = NULL;
 
   while (cnf->interfaces) {
     struct olsr_if *interface;
@@ -1008,6 +1009,8 @@ olsrd_free_cnf(struct olsrd_config *cnf)
     free(interface);
   }
 
+  ip_prefix_list_clear(&cnf->hna_entries);
+
   while (cnf->plugins) {
     struct plugin_entry *plugin = cnf->plugins;
     cnf->plugins = cnf->plugins->next;
@@ -1017,9 +1020,6 @@ olsrd_free_cnf(struct olsrd_config *cnf)
 
   free(cnf->configuration_file);
   cnf->configuration_file = NULL;
-
-  free(cnf->lock_file);
-  cnf->lock_file = NULL;
 
   return;
 }
