@@ -1303,6 +1303,7 @@ alock_file: TOK_LOCK_FILE TOK_STRING
 ;
 alq_plugin: TOK_LQ_PLUGIN TOK_STRING
 {
+  if (olsr_cnf->lq_algorithm) free(olsr_cnf->lq_algorithm);
   olsr_cnf->lq_algorithm = $2->string;
   PARSER_DEBUG_PRINTF("LQ Algorithm: %s\n", $2->string);
   free($2);
@@ -1368,6 +1369,7 @@ ismart_gw_takedown_percentage: TOK_SMART_GW_TAKEDOWN_PERCENTAGE TOK_INTEGER
 ssmart_gw_instance_id: TOK_SMART_GW_INSTANCE_ID TOK_STRING
 {
   PARSER_DEBUG_PRINTF("Smart gateway instance id: %s\n", $2->string);
+  if (olsr_cnf->smart_gw_instance_id) free(olsr_cnf->smart_gw_instance_id);
   olsr_cnf->smart_gw_instance_id = $2->string;
   free($2);
 }
@@ -1376,6 +1378,7 @@ ssmart_gw_instance_id: TOK_SMART_GW_INSTANCE_ID TOK_STRING
 ssmart_gw_policyrouting_script: TOK_SMART_GW_POLICYROUTING_SCRIPT TOK_STRING
 {
   PARSER_DEBUG_PRINTF("Smart gateway policy routing script: %s\n", $2->string);
+  if (olsr_cnf->smart_gw_policyrouting_script) free(olsr_cnf->smart_gw_policyrouting_script);
   olsr_cnf->smart_gw_policyrouting_script = $2->string;
   free($2);
 }
@@ -1464,6 +1467,7 @@ sgw_egress_if: TOK_STRING
 ssmart_gw_egress_file: TOK_SMART_GW_EGRESS_FILE TOK_STRING
 {
   PARSER_DEBUG_PRINTF("Smart gateway egress file: %s\n", $2->string);
+  if (olsr_cnf->smart_gw_egress_file) free(olsr_cnf->smart_gw_egress_file);
   olsr_cnf->smart_gw_egress_file = $2->string;
   free($2);
 }
@@ -1480,6 +1484,7 @@ ismart_gw_egress_file_period: TOK_SMART_GW_EGRESS_FILE_PERIOD TOK_INTEGER
 ssmart_gw_status_file: TOK_SMART_GW_STATUS_FILE TOK_STRING
 {
   PARSER_DEBUG_PRINTF("Smart gateway status file: %s\n", $2->string);
+  if (olsr_cnf->smart_gw_status_file) free(olsr_cnf->smart_gw_status_file);
   olsr_cnf->smart_gw_status_file = $2->string;
   free($2);
 }
