@@ -1146,6 +1146,8 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->smart_gw_divider_etx = DEF_GW_DIVIDER_ETX;
   cnf->smart_gw_path_max_cost_etx_max = DEF_GW_MAX_COST_MAX_ETX;
   cnf->smart_gw_type = DEF_GW_TYPE;
+  cnf->smart_gw_uplink = 0;
+  cnf->smart_gw_downlink = 0;
   smartgw_set_uplink(cnf, DEF_UPLINK_SPEED);
   smartgw_set_downlink(cnf, DEF_DOWNLINK_SPEED);
   // cnf->smart_gateway_bandwidth_zero : derived config set by smartgw_set_(up|down)link
