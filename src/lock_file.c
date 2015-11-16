@@ -180,5 +180,5 @@ void olsr_remove_lock_file(void) {
     return;
   }
 
-  remove(olsr_cnf->lock_file);
+  (void)remove(olsr_cnf->lock_file);
 }
