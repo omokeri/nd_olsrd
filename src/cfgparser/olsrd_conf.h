@@ -63,6 +63,8 @@ bool loadConfig(int *argc, char *argv[]);
 
 void set_default_cnf(struct olsrd_config *, char * configuration_file);
 
+void ip_prefix_list_clear(struct ip_prefix_list **list);
+
 void set_derived_cnf(struct olsrd_config * olsr_cnf);
 
 #endif /* _OLSRD_CONF_H */

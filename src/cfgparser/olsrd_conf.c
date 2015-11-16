@@ -1457,6 +1457,16 @@ ip_prefix_list_remove(struct ip_prefix_list **list, const union olsr_ip_addr *ne
   return 0;
 }
 
+void ip_prefix_list_clear(struct ip_prefix_list **list) {
+  if (!list) {
+    return;
+  }
+
+  while (*list) {
+    ip_prefix_list_remove(list, &((*list)->net.prefix), (*list)->net.prefix_len);
+  }
+}
+
 struct ip_prefix_list *
 ip_prefix_list_find(struct ip_prefix_list *list, const union olsr_ip_addr *net, uint8_t prefix_len)
 {
