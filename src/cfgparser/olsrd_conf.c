@@ -987,41 +987,37 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 void
 olsrd_free_cnf(struct olsrd_config *cnf)
 {
-  struct ip_prefix_list *hd, *h = cnf->hna_entries;
-  struct olsr_if *ind, *in = cnf->interfaces;
-  struct plugin_entry *ped, *pe = cnf->plugins;
-  struct olsr_lq_mult *mult, *next_mult;
+  ip_prefix_list_clear(&cnf->hna_entries);
 
-  while (h) {
-    hd = h;
-    h = h->next;
-    free(hd);
-  }
+  while (cnf->interfaces) {
+    struct olsr_if *interface;
+    struct olsr_lq_mult *mult = NULL;
+    struct olsr_lq_mult *next_mult = NULL;
 
-  while (in) {
-    for (mult = in->cnf->lq_mult; mult != NULL; mult = next_mult) {
+    for (mult = cnf->interfaces->cnf->lq_mult; mult != NULL; mult = next_mult) {
       next_mult = mult->next;
       free(mult);
     }
 
-    free(in->cnf);
-    free(in->cnfi);
+    free(cnf->interfaces->cnf);
+    free(cnf->interfaces->cnfi);
 
-    ind = in;
-    in = in->next;
+    interface = cnf->interfaces;
+    cnf->interfaces = cnf->interfaces->next;
 
-    free(ind);
+    free(interface);
   }
 
-  while (pe) {
-    ped = pe;
-    pe = pe->next;
-    free(ped->name);
-    free(ped);
+  while (cnf->plugins) {
+    struct plugin_entry *plugin = cnf->plugins;
+    cnf->plugins = cnf->plugins->next;
+    free(plugin->name);
+    free(plugin);
   }
 
   free(cnf->configuration_file);
   cnf->configuration_file = NULL;
+
   free(cnf->lock_file);
   cnf->lock_file = NULL;
 
