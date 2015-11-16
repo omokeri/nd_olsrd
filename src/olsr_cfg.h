@@ -282,9 +282,13 @@ struct olsrd_config {
   bool allow_no_interfaces;
   uint8_t tos;
   uint8_t rt_proto;
-  uint8_t rt_table, rt_table_default, rt_table_tunnel;
-  int32_t rt_table_pri, rt_table_tunnel_pri;
-  int32_t rt_table_defaultolsr_pri, rt_table_default_pri;
+  uint8_t rt_table;
+  uint8_t rt_table_default;
+  uint8_t rt_table_tunnel;
+  int32_t rt_table_pri;
+  int32_t rt_table_tunnel_pri;
+  int32_t rt_table_defaultolsr_pri;
+  int32_t rt_table_default_pri;
   uint8_t willingness;
   bool willingness_auto;
   int ipc_connections;
@@ -314,7 +318,10 @@ struct olsrd_config {
   char *lock_file;
   bool use_niit;
 
-  bool smart_gw_active, smart_gw_always_remove_server_tunnel, smart_gw_allow_nat, smart_gw_uplink_nat;
+  bool smart_gw_active;
+  bool smart_gw_always_remove_server_tunnel;
+  bool smart_gw_allow_nat;
+  bool smart_gw_uplink_nat;
   uint8_t smart_gw_use_count;
   uint8_t smart_gw_takedown_percentage;
   char *smart_gw_instance_id;
@@ -335,12 +342,14 @@ struct olsrd_config {
   uint32_t smart_gw_divider_etx;
   uint32_t smart_gw_path_max_cost_etx_max;
   enum smart_gw_uplinktype smart_gw_type;
-  uint32_t smart_gw_uplink, smart_gw_downlink;
+  uint32_t smart_gw_uplink;
+  uint32_t smart_gw_downlink;
   bool smart_gateway_bandwidth_zero;
   struct olsr_ip_prefix smart_gw_prefix;
 
   /* Main address of this node */
-  union olsr_ip_addr main_addr, unicast_src_ip;
+  union olsr_ip_addr main_addr;
+  union olsr_ip_addr unicast_src_ip;
   bool use_src_ip_routes;
 
   /* Stuff set by olsrd */
@@ -352,10 +361,12 @@ struct olsrd_config {
   int exit_value;                      /* Global return value for process termination */
   float max_tc_vtime;
 
-  int niit4to6_if_index, niit6to4_if_index;
+  int niit4to6_if_index;
+  int niit6to4_if_index;
 
   /*many potential parameters or helper variables for smartgateway*/
-  bool has_ipv4_gateway, has_ipv6_gateway;
+  bool has_ipv4_gateway;
+  bool has_ipv6_gateway;
 
   int ioctl_s;                         /* Socket used for ioctl calls */
 #ifdef __linux__

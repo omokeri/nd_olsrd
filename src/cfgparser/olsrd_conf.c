@@ -1042,64 +1042,56 @@ olsrd_get_default_cnf(char * configuration_file)
 void
 set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
 {
-  memset(cnf, 0, sizeof(*cnf));
-
   cnf->configuration_file = configuration_file;
+  cnf->olsrport = DEF_OLSRPORT;
   cnf->debug_level = DEF_DEBUGLVL;
   cnf->no_fork = false;
   cnf->pidfile = NULL;
   cnf->host_emul = false;
   cnf->ip_version = AF_INET;
-  cnf->ipsize = sizeof(struct in_addr);
-  cnf->maxplen = 32;
   cnf->allow_no_interfaces = DEF_ALLOW_NO_INTS;
   cnf->tos = DEF_TOS;
-  cnf->olsrport = DEF_OLSRPORT;
   cnf->rt_proto = DEF_RTPROTO;
   cnf->rt_table = DEF_RT_AUTO;
   cnf->rt_table_default = DEF_RT_AUTO;
   cnf->rt_table_tunnel = DEF_RT_AUTO;
   cnf->rt_table_pri = DEF_RT_AUTO;
-  cnf->rt_table_default_pri = DEF_RT_AUTO;
-  cnf->rt_table_defaultolsr_pri = DEF_RT_AUTO;
   cnf->rt_table_tunnel_pri = DEF_RT_AUTO;
-
-  cnf->willingness_auto = DEF_WILL_AUTO;
+  cnf->rt_table_defaultolsr_pri = DEF_RT_AUTO;
+  cnf->rt_table_default_pri = DEF_RT_AUTO;
   cnf->willingness = DEF_WILLINGNESS;
+  cnf->willingness_auto = DEF_WILL_AUTO;
   cnf->ipc_connections = DEF_IPC_CONNECTIONS;
+  cnf->use_hysteresis = DEF_USE_HYST;
   cnf->fib_metric = DEF_FIB_METRIC;
   cnf->fib_metric_default = DEF_FIB_METRIC_DEFAULT;
-
-  cnf->use_hysteresis = DEF_USE_HYST;
-  cnf->hysteresis_param.scaling = HYST_SCALING;
-  cnf->hysteresis_param.thr_high = HYST_THRESHOLD_HIGH;
-  cnf->hysteresis_param.thr_low = HYST_THRESHOLD_LOW;
-
+  cnf->hysteresis_param.scaling = HYST_SCALING;cnf->hysteresis_param.thr_high = HYST_THRESHOLD_HIGH;cnf->hysteresis_param.thr_low = HYST_THRESHOLD_LOW;
+  cnf->plugins = NULL;
+  cnf->hna_entries = NULL;
+  cnf->ipc_nets = NULL;
+  cnf->interface_defaults = NULL;
+  cnf->interfaces = NULL;
   cnf->pollrate = DEF_POLLRATE;
   cnf->nic_chgs_pollrate = DEF_NICCHGPOLLRT;
-
+  cnf->clear_screen = DEF_CLEAR_SCREEN;
   cnf->tc_redundancy = TC_REDUNDANCY;
   cnf->mpr_coverage = MPR_COVERAGE;
   cnf->lq_level = DEF_LQ_LEVEL;
   cnf->lq_fish = DEF_LQ_FISH;
   cnf->lq_aging = DEF_LQ_AGING;
   cnf->lq_algorithm = NULL;
-  cnf->lq_nat_thresh = DEF_LQ_NAT_THRESH;
-  cnf->clear_screen = DEF_CLEAR_SCREEN;
 
-  cnf->del_gws = false;
-  cnf->will_int = 10 * HELLO_INTERVAL;
-  cnf->max_jitter = 0.0;
-  cnf->exit_value = EXIT_SUCCESS;
-  cnf->max_tc_vtime = 0.0;
-  cnf->ioctl_s = 0;
+  cnf->min_tc_vtime = 0.0;
+
+  cnf->set_ip_forward = true;
+
   cnf->lock_file = NULL; /* derived config */
   cnf->use_niit = DEF_USE_NIIT;
-  cnf->niit4to6_if_index = 0;
-  cnf->niit6to4_if_index = 0;
 
   cnf->smart_gw_active = DEF_SMART_GW;
   cnf->smart_gw_always_remove_server_tunnel = DEF_SMART_GW_ALWAYS_REMOVE_SERVER_TUNNEL;
+  cnf->smart_gw_allow_nat = DEF_GW_ALLOW_NAT;
+  cnf->smart_gw_uplink_nat = DEF_GW_UPLINK_NAT;
   cnf->smart_gw_use_count = DEF_GW_USE_COUNT;
   cnf->smart_gw_takedown_percentage = DEF_GW_TAKEDOWN_PERCENTAGE;
   cnf->smart_gw_instance_id = NULL;
@@ -1111,7 +1103,6 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->smart_gw_status_file = NULL;
   cnf->smart_gw_offset_tables = DEF_GW_OFFSET_TABLES;
   cnf->smart_gw_offset_rules = DEF_GW_OFFSET_RULES;
-  cnf->smart_gw_allow_nat = DEF_GW_ALLOW_NAT;
   cnf->smart_gw_period = DEF_GW_PERIOD;
   cnf->smart_gw_stablecount = DEF_GW_STABLE_COUNT;
   cnf->smart_gw_thresh = DEF_GW_THRESH;
@@ -1122,19 +1113,41 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   cnf->smart_gw_path_max_cost_etx_max = DEF_GW_MAX_COST_MAX_ETX;
   cnf->smart_gw_type = DEF_GW_TYPE;
   smartgw_set_uplink(cnf, DEF_UPLINK_SPEED);
-  cnf->smart_gw_uplink_nat = DEF_GW_UPLINK_NAT;
   smartgw_set_downlink(cnf, DEF_DOWNLINK_SPEED);
+  // cnf->smart_gateway_bandwidth_zero : derived config set by smartgw_set_(up|down)link
+  memset(&cnf->smart_gw_prefix, 0, sizeof(cnf->smart_gw_prefix));
 
+
+  memset(&cnf->main_addr, 0, sizeof(cnf->main_addr));
+  memset(&cnf->unicast_src_ip, 0, sizeof(cnf->unicast_src_ip));
   cnf->use_src_ip_routes = DEF_USE_SRCIP_ROUTES;
-  cnf->set_ip_forward = true;
 
+
+  cnf->maxplen = 32;
+  cnf->ipsize = sizeof(struct in_addr);
+  cnf->del_gws = false;
+  cnf->will_int = 10 * HELLO_INTERVAL;
+  cnf->max_jitter = 0.0;
+  cnf->exit_value = EXIT_SUCCESS;
+  cnf->max_tc_vtime = 0.0;
+
+  cnf->niit4to6_if_index = 0;
+  cnf->niit6to4_if_index = 0;
+
+
+  cnf->has_ipv4_gateway = false;
+  cnf->has_ipv6_gateway = false;
+
+  cnf->ioctl_s = 0;
 #ifdef __linux__
   cnf->rtnl_s = 0;
+  cnf->rt_monitor_socket = -1;
 #endif /* __linux__ */
 
 #if defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__
   cnf->rts = 0;
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
+  cnf->lq_nat_thresh = DEF_LQ_NAT_THRESH;
 
 #ifdef HTTPINFO_PUD
   cnf->pud_position = NULL;
