@@ -1021,7 +1021,9 @@ olsrd_free_cnf(struct olsrd_config *cnf)
   }
 
   free(cnf->configuration_file);
+  cnf->configuration_file = NULL;
   free(cnf->lock_file);
+  cnf->lock_file = NULL;
 
   return;
 }
