@@ -329,6 +329,10 @@ static int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf
 
 int main(int argc, char *argv[]) {
   int argcLocal = argc;
+
+  /* Open syslog */
+  olsr_openlog("olsrd");
+
   /*
    * Initialisation
    */
@@ -384,9 +388,6 @@ int main(int argc, char *argv[]) {
     }
   }
 #endif /* _WIN32 */
-
-  /* Open syslog */
-  olsr_openlog("olsrd");
 
   /* load the configuration */
   if (!loadConfig(&argcLocal, argv)) {
