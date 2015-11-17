@@ -371,7 +371,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /* check root privileges */
+  /* Check root Privileges */
 #ifndef _WIN32
   if (geteuid()) {
     olsr_exit("You must be root (uid = 0) to run olsrd", EXIT_FAILURE);
@@ -394,7 +394,7 @@ int main(int argc, char *argv[]) {
     olsr_exit(NULL, EXIT_FAILURE);
   }
 
-  /* process arguments */
+  /* Process CLI Arguments */
   {
     char * error = NULL;
     int exitCode = EXIT_FAILURE;
@@ -434,7 +434,7 @@ int main(int argc, char *argv[]) {
     olsrd_print_cnf(olsr_cnf);
   }
 
-  /* config loaded and sane */
+  /* configuration loaded and sane */
 
   /* initialise timers */
   olsr_init_timers();
@@ -481,10 +481,8 @@ int main(int argc, char *argv[]) {
 
   /* initialise gateway system */
 #ifdef __linux__
-  if (olsr_cnf->smart_gw_active) {
-    if (olsr_init_gateways()) {
-      olsr_exit("Cannot initialise gateway tunnels", 1);
-    }
+  if (olsr_cnf->smart_gw_active && olsr_init_gateways()) {
+    olsr_exit("Cannot initialise gateway tunnels", 1);
   }
 #endif /* __linux__ */
 
@@ -548,18 +546,14 @@ int main(int argc, char *argv[]) {
 
 #ifdef __linux__
   /* startup gateway system */
-  if (olsr_cnf->smart_gw_active) {
-    if (olsr_startup_gateways()) {
-      olsr_exit("Cannot startup gateway tunnels", 1);
-    }
+  if (olsr_cnf->smart_gw_active && olsr_startup_gateways()) {
+    olsr_exit("Cannot startup gateway tunnels", 1);
   }
 #endif /* __linux__ */
 
   /* initialise the IPC socket */
-  if (olsr_cnf->ipc_connections > 0) {
-    if (ipc_init()) {
-      olsr_exit("ipc_init failure", 1);
-    }
+  if ((olsr_cnf->ipc_connections > 0) && ipc_init()) {
+    olsr_exit("ipc_init failure", 1);
   }
 
   /* Initialisation of different tables to be used. */
@@ -569,14 +563,14 @@ int main(int argc, char *argv[]) {
 
   /* start heartbeat that is showing on stdout */
 #if !defined WINCE
-  if (olsr_cnf->debug_level > 0 && isatty(STDOUT_FILENO)) {
+  if ((olsr_cnf->debug_level > 0) && isatty(STDOUT_FILENO)) {
     heartBeatTimer = olsr_start_timer(STDOUT_PULSE_INT, 0, OLSR_TIMER_PERIODIC, &generate_stdout_pulse, NULL, 0);
   }
 #endif /* !defined WINCE */
 
   /* daemon mode */
 #ifndef _WIN32
-  if (olsr_cnf->debug_level == 0 && !olsr_cnf->no_fork) {
+  if ((olsr_cnf->debug_level == 0) && !olsr_cnf->no_fork) {
     printf("%s detaching from the current process...\n", olsrd_version);
     if (daemon(0, 0) < 0) {
       char buf2[1024];
@@ -671,6 +665,7 @@ int main(int argc, char *argv[]) {
 
   /* We'll only get here when olsr_shutdown has stopped the scheduler */
   sleep(30);
+
   exit(1);
 } /* main */
 
