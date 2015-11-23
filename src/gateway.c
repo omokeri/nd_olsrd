@@ -108,16 +108,38 @@ struct sgw_route_info bestOverallLinkRoutes[2];
 static struct BestOverallLink bestOverallLinkPrevious;
 static struct BestOverallLink bestOverallLink;
 
+static bool olsrInterfacesAllDown = false;
+
 /*
  * Forward Declarations
  */
 
 static void olsr_delete_gateway_tree_entry(struct gateway_entry * gw, uint8_t prefixlen, bool immediate);
 static void writeProgramStatusFile(enum sgw_multi_change_phase phase);
+static bool isInterfaceUp(int if_index);
 
 /*
  * Helper Functions
  */
+
+/**
+ * @return true when all olsr interfaces are down
+ */
+static bool allOlsrInterfacesDown(struct olsrd_config * cfg) {
+  struct olsr_if * ifn;
+
+  for (ifn = cfg->interfaces; ifn; ifn = ifn->next) {
+    if (!ifn->interf) {
+      continue;
+    }
+
+    if (isInterfaceUp(ifn->interf->if_index)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 
 /**
  * @return the gateway 'server' tunnel name to use
@@ -568,6 +590,12 @@ static void smartgw_tunnel_monitor(int if_index, struct interface_olsr *ifh, enu
     /* non-olsr interface in multi-sgw mode */
     doEgressInterface(if_index, flag);
   }
+
+  /*
+   * The best gateway must always be re-evaluated since olsr and/or egress interfaces might have
+   * changed their UP/DOWN status
+   */
+  doRoutesMultiGw(true, true, GW_MULTI_CHANGE_PHASE_RUNTIME);
 
   return;
 }
@@ -1564,7 +1592,8 @@ static bool determineBestEgressLink(enum sgw_multi_change_phase phase) {
       egress_if = egress_if->next;
     }
     while (egress_if) {
-      if (egress_if->upCurrent && (egress_if->bwCurrent.costs < bestEgress->bwCurrent.costs)) {
+      if (egress_if->upCurrent && (egress_if->bwCurrent.costs < bestEgress->bwCurrent.costs &&
+          isInterfaceUp(egress_if->if_index))) {
         bestEgress = egress_if;
       }
 
@@ -1611,7 +1640,7 @@ static bool determineBestOverallLink(enum sgw_multi_change_phase phase) {
   struct gateway_entry * olsrGw = !gwContainer ? NULL : gwContainer->gw;
 
   int64_t egressCosts = !bestEgressLink ? INT64_MAX : bestEgressLink->bwCurrent.costs;
-  int64_t olsrCosts = !olsrGw ? INT64_MAX : olsrGw->path_cost;
+  int64_t olsrCosts = (!olsrGw || olsrInterfacesAllDown) ? INT64_MAX : olsrGw->path_cost;
   int64_t bestOverallCosts = MIN(egressCosts, olsrCosts);
 
   bestOverallLinkPrevious = bestOverallLink;
@@ -2227,6 +2256,11 @@ void doRoutesMultiGw(bool egressChanged, bool olsrChanged, enum sgw_multi_change
       (phase == GW_MULTI_CHANGE_PHASE_STARTUP) || //
       (phase == GW_MULTI_CHANGE_PHASE_RUNTIME) || //
       (phase == GW_MULTI_CHANGE_PHASE_SHUTDOWN));
+
+  if (allOlsrInterfacesDown(olsr_cnf) != olsrInterfacesAllDown) {
+    olsrInterfacesAllDown = !olsrInterfacesAllDown;
+    olsrChanged = true;
+  }
 
   if (!egressChanged && !olsrChanged && !force) {
     goto out;
