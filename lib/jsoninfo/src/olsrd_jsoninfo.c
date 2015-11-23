@@ -860,42 +860,31 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
     int i;
     for (i = 0; i < olsr_cnf->smart_gw_use_count; i++) {
-      bool selected;
-      struct ipaddr_str originatorStr;
-      const char * originator;
-      struct ipaddr_str prefixStr;
-      const char * prefix;
       struct interfaceName * node = &sgwTunnelInterfaceNames[i];
-      struct ipaddr_str tunnelGwStr;
-      const char * tunnelGw;
-
       struct gateway_entry * gw = node->gw;
-      struct tc_entry* tc;
 
       if (!gw) {
         continue;
       }
 
-      tc = olsr_lookup_tc_entry(&gw->originator);
-      if (!tc) {
-        continue;
-      }
-
-      selected = current_gw && (current_gw == gw);
-      originator = olsr_ip_to_string(&originatorStr, &gw->originator);
-      prefix = olsr_ip_to_string(&prefixStr, &gw->external_prefix.prefix);
-
-      tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
-
       abuf_json_mark_array_entry(true, abuf);
       {
-        abuf_json_boolean(abuf, "selected", selected);
+        struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+
+        struct ipaddr_str originatorStr;
+        const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
+        struct ipaddr_str prefixIpStr;
+        const char * prefix = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
+        struct ipaddr_str tunnelGwStr;
+        const char * tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
+
+        abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
         abuf_json_string(abuf, "originator", originator);
         abuf_json_string(abuf, "prefix", prefix);
         abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
         abuf_json_int(abuf, "uplink", gw->uplink);
         abuf_json_int(abuf, "downlink", gw->downlink);
-        abuf_json_int(abuf, "pathcost", tc->path_cost);
+        abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
         abuf_json_boolean(abuf, "IPv4", gw->ipv4);
         abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
         abuf_json_boolean(abuf, "IPv6", gw->ipv6);
