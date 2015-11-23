@@ -853,7 +853,6 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
   struct interfaceName * sgwTunnelInterfaceNames;
 
-  abuf_json_mark_array_entry(true, abuf);
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
 
   sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
@@ -917,7 +916,6 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
   }
 
   abuf_json_mark_object(false, true, abuf, NULL);
-  abuf_json_mark_array_entry(false, abuf);
 }
 #endif /* __linux__ */
 
@@ -925,12 +923,12 @@ static void ipc_print_sgw(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_json_string(abuf, "error", "Gateway mode is only supported in Linux");
 #else
-  abuf_json_mark_object(true, true, abuf, "sgw");
+  abuf_json_mark_object(true, false, abuf, "sgw");
 
   sgw_ipvx(abuf, false);
   sgw_ipvx(abuf, true);
 
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(false, false, abuf, NULL);
 #endif /* __linux__ */
 }
 
