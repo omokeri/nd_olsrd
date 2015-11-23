@@ -902,6 +902,9 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
         abuf_json_string(abuf, "tunnel", node->name);
         abuf_json_string(abuf, "destination", tunnelGw);
         abuf_json_int(abuf, "cost", gw->path_cost);
+        abuf_json_int(abuf, "tableNr", node->tableNr);
+        abuf_json_int(abuf, "ruleNr", node->ruleNr);
+        abuf_json_int(abuf, "bypassRuleNr", node->bypassRuleNr);
       }
       abuf_json_mark_array_entry(false, abuf);
     }
