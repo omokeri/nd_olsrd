@@ -863,11 +863,8 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
       bool selected;
       struct ipaddr_str originatorStr;
       const char * originator;
-      struct ipaddr_str prefixIpStr;
-      const char * prefixIPStr;
-      union olsr_ip_addr netmask = { { 0 } };
-      struct ipaddr_str prefixMaskStr;
-      const char * prefixMASKStr;
+      struct ipaddr_str prefixStr;
+      const char * prefix;
       struct interfaceName * node = &sgwTunnelInterfaceNames[i];
       struct ipaddr_str tunnelGwStr;
       const char * tunnelGw;
@@ -886,21 +883,16 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
 
       selected = current_gw && (current_gw == gw);
       originator = olsr_ip_to_string(&originatorStr, &gw->originator);
-      prefixIPStr = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
-
-      prefix_to_netmask((uint8_t *) &netmask, !ipv6 ? sizeof(netmask.v4) : sizeof(netmask.v6), gw->external_prefix.prefix_len);
-      prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
+      prefix = olsr_ip_to_string(&prefixStr, &gw->external_prefix.prefix);
 
       tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
 
       abuf_json_mark_array_entry(true, abuf);
       {
-        char prefix[strlen(prefixIPStr) + 1 + strlen(prefixMASKStr) + 1];
-        snprintf(prefix, sizeof(prefix), "%s/%s", prefixIPStr, prefixMASKStr);
-
         abuf_json_boolean(abuf, "selected", selected);
         abuf_json_string(abuf, "originator", originator);
         abuf_json_string(abuf, "prefix", prefix);
+        abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
         abuf_json_int(abuf, "uplink", gw->uplink);
         abuf_json_int(abuf, "downlink", gw->downlink);
         abuf_json_int(abuf, "pathcost", tc->path_cost);
