@@ -567,11 +567,6 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
         continue;
       }
 
-      tc = olsr_lookup_tc_entry(&gw->originator);
-      if (!tc) {
-        continue;
-      }
-
       selected = current_gw && (current_gw == gw);
       originator = olsr_ip_to_string(&originatorStr, &gw->originator);
       prefixIPStr = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
@@ -585,13 +580,15 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
         char prefix[strlen(prefixIPStr) + 1 + strlen(prefixMASKStr) + 1];
         snprintf(prefix, sizeof(prefix), "%s/%s", prefixIPStr, prefixMASKStr);
 
+        tc = olsr_lookup_tc_entry(&gw->originator);
+
         abuf_appendf(abuf, fmtv, //
             selected ? "*" : " ", // selected
             originator, // Originator
             prefix, // Prefix IP / Prefix Mask
             gw->uplink, // Uplink
             gw->downlink, // Downlink
-            tc->path_cost, // PathCost
+            !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
             gw->ipv4 ? "Y" : "N", // IPv4
             gw->ipv4nat ? "Y" : "N", // IPv4-NAT
             gw->ipv6 ? "Y" : "N", // IPv6
