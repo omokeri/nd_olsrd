@@ -546,46 +546,35 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
   sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
   if (olsr_cnf->smart_gw_active && sgwTunnelInterfaceNames) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
-    int i = 0;
+    int i;
     for (i = 0; i < olsr_cnf->smart_gw_use_count; i++) {
-      bool selected;
-      struct ipaddr_str originatorStr;
-      const char * originator;
-      struct ipaddr_str prefixIpStr;
-      const char * prefixIPStr;
-      union olsr_ip_addr netmask = { { 0 } };
-      struct ipaddr_str prefixMaskStr;
-      const char * prefixMASKStr;
       struct interfaceName * node = &sgwTunnelInterfaceNames[i];
-      struct ipaddr_str tunnelGwStr;
-      const char * tunnelGw;
-
       struct gateway_entry * gw = node->gw;
-      struct tc_entry* tc;
 
       if (!gw) {
         continue;
       }
 
-      selected = current_gw && (current_gw == gw);
-      originator = olsr_ip_to_string(&originatorStr, &gw->originator);
-      prefixIPStr = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
-
-      prefix_to_netmask((uint8_t *) &netmask, !ipv6 ? sizeof(netmask.v4) : sizeof(netmask.v6), gw->external_prefix.prefix_len);
-      prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
-
-      tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
-
       {
-        char prefix[strlen(prefixIPStr) + 1 + strlen(prefixMASKStr) + 1];
-        snprintf(prefix, sizeof(prefix), "%s/%s", prefixIPStr, prefixMASKStr);
+        struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
 
-        tc = olsr_lookup_tc_entry(&gw->originator);
+        struct ipaddr_str originatorStr;
+        const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
+        struct ipaddr_str prefixIpStr;
+        const char * prefix = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
+        union olsr_ip_addr netmask = { { 0 } };
+        struct ipaddr_str prefixMaskStr;
+        const char * prefixMASKStr;
+        char prefixAndMask[strlen(prefix) + 1 + strlen(prefixMASKStr) + 1];
+
+        prefix_to_netmask((uint8_t *) &netmask, !ipv6 ? sizeof(netmask.v4) : sizeof(netmask.v6), gw->external_prefix.prefix_len);
+        prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
+        snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%s", prefix, prefixMASKStr);
 
         abuf_appendf(abuf, fmtv, //
-            selected ? "*" : " ", // selected
+            (current_gw && (current_gw == gw)) ? "*" : " ", // selected
             originator, // Originator
-            prefix, // Prefix IP / Prefix Mask
+            prefixAndMask, // Prefix IP / Prefix Mask
             gw->uplink, // Uplink
             gw->downlink, // Downlink
             !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
@@ -593,7 +582,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
             gw->ipv4nat ? "Y" : "N", // IPv4-NAT
             gw->ipv6 ? "Y" : "N", // IPv6
             node->name, // Tunnel-Name
-            tunnelGw, // Destination
+            originator, // Destination
             gw->path_cost // Cost
             );
       }
