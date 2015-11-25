@@ -565,7 +565,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
         union olsr_ip_addr netmask = { { 0 } };
         struct ipaddr_str prefixMaskStr;
         const char * prefixMASKStr;
-        char prefixAndMask[strlen(prefix) + 1 + strlen(prefixMASKStr) + 1];
+        char prefixAndMask[strlen(prefix) + 1 + MAX(INET6_ADDRSTRLEN, INET_ADDRSTRLEN) + 1];
 
         prefix_to_netmask((uint8_t *) &netmask, !ipv6 ? sizeof(netmask.v4) : sizeof(netmask.v6), gw->external_prefix.prefix_len);
         prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
