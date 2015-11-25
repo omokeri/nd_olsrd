@@ -565,16 +565,20 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
         union olsr_ip_addr netmask = { { 0 } };
         struct ipaddr_str prefixMaskStr;
         const char * prefixMASKStr;
-        char prefixAndMask[strlen(prefix) + 1 + MAX(INET6_ADDRSTRLEN, INET_ADDRSTRLEN) + 1];
+        char prefixAndMask[strlen(prefix) + 1 + INET_ADDRSTRLEN + 1];
 
-        prefix_to_netmask((uint8_t *) &netmask, !ipv6 ? sizeof(netmask.v4) : sizeof(netmask.v6), gw->external_prefix.prefix_len);
-        prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
-        snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%s", prefix, prefixMASKStr);
+        if (!ipv6) {
+          prefix_to_netmask((uint8_t *) &netmask, sizeof(netmask.v4), gw->external_prefix.prefix_len);
+          prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
+          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%s", prefix, prefixMASKStr);
+        } else {
+          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%d", prefix, gw->external_prefix.prefix_len);
+        }
 
         abuf_appendf(abuf, fmtv, //
             (current_gw && (current_gw == gw)) ? "*" : " ", // selected
             originator, // Originator
-            prefixAndMask, // Prefix IP / Prefix Mask
+            prefixAndMask, // 4: Prefix IP / Prefix Mask, 6: Prefix IP / Prefix Length
             gw->uplink, // Uplink
             gw->downlink, // Downlink
             !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
@@ -601,8 +605,8 @@ ipc_print_sgw(struct autobuf *abuf)
   static const char * fmth4 = "%s%-15s %-31s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
   static const char * fmtv4 = "%s%-15s %-31s %-9u %-9u %-10u %-4s %-8s %-4s %-15s %-15s %lld\n";
 #if 0
-  static const char * fmth6 = "%s%-45s %-91s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-45s %s\n";
-  static const char * fmtv6 = "%s%-45s %-91s %-9u %-9u %-10u %-4s %-8s %-4s %-15s %-45s %lld\n";
+  static const char * fmth6 = "%s%-45s %-49s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-45s %s\n";
+  static const char * fmtv6 = "%s%-45s %-49s %-9u %-9u %-10u %-4s %-8s %-4s %-15s %-45s %lld\n";
 #endif
 
   sgw_ipvx(abuf, false, fmth4, fmtv4);
