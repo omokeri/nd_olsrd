@@ -127,14 +127,14 @@ static void ipc_print_sgw(struct autobuf *);
 
 #define TXT_IPC_BUFSIZE 256
 
-#define SIW_NEIGH 0x0001
-#define SIW_LINK 0x0002
-#define SIW_ROUTE 0x0004
+#define SIW_NEIGHBORS 0x0001
+#define SIW_LINKS 0x0002
+#define SIW_ROUTES 0x0004
 #define SIW_HNA 0x0008
 #define SIW_MID 0x0010
-#define SIW_TOPO 0x0020
-#define SIW_GATEWAY 0x0040
-#define SIW_INTERFACE 0x0080
+#define SIW_TOPOLOGY 0x0020
+#define SIW_GATEWAYS 0x0040
+#define SIW_INTERFACES 0x0080
 #define SIW_CONFIG 0x0100
 #define SIW_2HOP 0x0200
 #define SIW_VERSION 0x0400
@@ -328,7 +328,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
        * header parsing is sufficient for standard wget.
        */
       if (strstr(requ, "/neighbours"))
-        send_what = SIW_NEIGH | SIW_LINK;
+        send_what = SIW_NEIGHBORS | SIW_LINKS;
       else {
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
@@ -336,24 +336,24 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
           send_what = SIW_ALL;
         else { /*already included in /all*/
           if (strstr(requ, "/nei"))
-            send_what |= SIW_NEIGH;
+            send_what |= SIW_NEIGHBORS;
           if (strstr(requ, "/lin"))
-            send_what |= SIW_LINK;
+            send_what |= SIW_LINKS;
           if (strstr(requ, "/rou"))
-            send_what |= SIW_ROUTE;
+            send_what |= SIW_ROUTES;
           if (strstr(requ, "/hna"))
             send_what |= SIW_HNA;
           if (strstr(requ, "/mid"))
             send_what |= SIW_MID;
           if (strstr(requ, "/top"))
-            send_what |= SIW_TOPO;
+            send_what |= SIW_TOPOLOGY;
         }
         if (strstr(requ, "/gat"))
-          send_what |= SIW_GATEWAY;
+          send_what |= SIW_GATEWAYS;
         if (strstr(requ, "/con"))
           send_what |= SIW_CONFIG;
         if (strstr(requ, "/int"))
-          send_what |= SIW_INTERFACE;
+          send_what |= SIW_INTERFACES;
         if (strstr(requ, "/2ho"))
           send_what |= SIW_2HOP;
         if (strstr(requ, "/ver"))
@@ -818,13 +818,13 @@ static void send_info(unsigned int send_what, int the_socket) {
   /* Print tables to IPC socket */
 
   /* links */
-  if (send_what & SIW_LINK)
+  if (send_what & SIW_LINKS)
     ipc_print_links(&abuf);
   /* neighbours */
-  if (send_what & SIW_NEIGH)
+  if (send_what & SIW_NEIGHBORS)
     ipc_print_neighbors(&abuf, false);
   /* topology */
-  if (send_what & SIW_TOPO)
+  if (send_what & SIW_TOPOLOGY)
     ipc_print_topology(&abuf);
   /* hna */
   if (send_what & SIW_HNA)
@@ -836,16 +836,16 @@ static void send_info(unsigned int send_what, int the_socket) {
   if (send_what & SIW_MID)
     ipc_print_mid(&abuf);
   /* routes */
-  if (send_what & SIW_ROUTE)
+  if (send_what & SIW_ROUTES)
     ipc_print_routes(&abuf);
   /* gateways */
-  if (send_what & SIW_GATEWAY)
+  if (send_what & SIW_GATEWAYS)
     ipc_print_gateways(&abuf);
   /* config */
   if (send_what & SIW_CONFIG)
     ipc_print_olsrd_conf(&abuf);
   /* interface */
-  if (send_what & SIW_INTERFACE)
+  if (send_what & SIW_INTERFACES)
     ipc_print_interfaces(&abuf);
   /* 2hop neighbour list */
   if (send_what & SIW_2HOP)
