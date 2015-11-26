@@ -857,7 +857,7 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   assert(outbuffer_count < MAX_CLIENTS);
 
-  outbuffer[outbuffer_count] = olsr_malloc(abuf.len, "txt output buffer");
+  outbuffer[outbuffer_count] = olsr_malloc(abuf.len, PLUGIN_NAME" output buffer");
   outbuffer_size[outbuffer_count] = abuf.len;
   outbuffer_written[outbuffer_count] = 0;
   outbuffer_socket[outbuffer_count] = the_socket;
