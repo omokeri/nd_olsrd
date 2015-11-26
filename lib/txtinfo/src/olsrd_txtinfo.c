@@ -318,38 +318,38 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
        * page the normal output is somewhat lengthy. The
        * header parsing is sufficient for standard wget.
        */
-      if (0 != strstr(requ, "/neighbours"))
+      if (strstr(requ, "/neighbours"))
         send_what = SIW_NEIGH | SIW_LINK;
       else {
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
-        if (0 != strstr(requ, "/all"))
+        if (strstr(requ, "/all"))
           send_what = SIW_ALL;
         else { /*already included in /all*/
-          if (0 != strstr(requ, "/nei"))
+          if (strstr(requ, "/nei"))
             send_what |= SIW_NEIGH;
-          if (0 != strstr(requ, "/lin"))
+          if (strstr(requ, "/lin"))
             send_what |= SIW_LINK;
-          if (0 != strstr(requ, "/rou"))
+          if (strstr(requ, "/rou"))
             send_what |= SIW_ROUTE;
-          if (0 != strstr(requ, "/hna"))
+          if (strstr(requ, "/hna"))
             send_what |= SIW_HNA;
-          if (0 != strstr(requ, "/mid"))
+          if (strstr(requ, "/mid"))
             send_what |= SIW_MID;
-          if (0 != strstr(requ, "/top"))
+          if (strstr(requ, "/top"))
             send_what |= SIW_TOPO;
         }
-        if (0 != strstr(requ, "/gat"))
+        if (strstr(requ, "/gat"))
           send_what |= SIW_GATEWAY;
-        if (0 != strstr(requ, "/con"))
+        if (strstr(requ, "/con"))
           send_what |= SIW_CONFIG;
-        if (0 != strstr(requ, "/int"))
+        if (strstr(requ, "/int"))
           send_what |= SIW_INTERFACE;
-        if (0 != strstr(requ, "/2ho"))
+        if (strstr(requ, "/2ho"))
           send_what |= SIW_2HOP;
-        if (0 != strstr(requ, "/ver"))
+        if (strstr(requ, "/ver"))
           send_what |= SIW_VERSION;
-        if (0 != strstr(requ, "/sgw"))
+        if (strstr(requ, "/sgw"))
           send_what |= SIW_SGW;
       }
     }
