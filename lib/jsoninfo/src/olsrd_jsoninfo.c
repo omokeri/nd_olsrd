@@ -1412,7 +1412,7 @@ static void send_info(unsigned int send_what, int the_socket) {
     header_len = build_http_header(HTTP_200, content_type, abuf.len, header_buf, sizeof(header_buf));
   }
 
-  outbuffer[outbuffer_count] = olsr_malloc(header_len + abuf.len, "json output buffer");
+  outbuffer[outbuffer_count] = olsr_malloc(header_len + abuf.len, PLUGIN_NAME" output buffer");
   outbuffer_size[outbuffer_count] = header_len + abuf.len;
   outbuffer_written[outbuffer_count] = 0;
   outbuffer_socket[outbuffer_count] = the_socket;
