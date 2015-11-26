@@ -201,7 +201,7 @@ static int plugin_ipc_init(void) {
       return 0;
     }
 #if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
-    if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *)&yes, sizeof(yes)) < 0) {
+    if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
       perror("SO_REUSEADDR failed");
       return 0;
     }
@@ -292,11 +292,11 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifdef INFO_ALLOW_LOCALHOST
       if (ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
 #endif /* INFO_ALLOW_LOCALHOST */
-      olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
-      close(ipc_connection);
-      return;
+        olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
+        close(ipc_connection);
+        return;
 #ifdef INFO_ALLOW_LOCALHOST
-    }
+      }
 #endif /* INFO_ALLOW_LOCALHOST */
     }
   } else {
