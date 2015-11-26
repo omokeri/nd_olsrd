@@ -95,6 +95,9 @@
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
 
+/* defines to make txtinfo and jsoninfo look alike */
+#define PLUGIN_NAME "JSONINFO"
+
 static int ipc_socket;
 
 /* Response types */
@@ -328,13 +331,13 @@ static int plugin_ipc_init(void) {
   /* Init ipc socket */
   if ((ipc_socket = socket(olsr_cnf->ip_version, SOCK_STREAM, 0)) == -1) {
 #ifndef NODEBUG
-    olsr_printf(1, "(JSONINFO) socket()=%s\n", strerror(errno));
+    olsr_printf(1, "("PLUGIN_NAME") socket()=%s\n", strerror(errno));
 #endif /* NODEBUG */
     return 0;
   } else {
     if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
 #ifndef NODEBUG
-      olsr_printf(1, "(JSONINFO) setsockopt()=%s\n", strerror(errno));
+      olsr_printf(1, "("PLUGIN_NAME") setsockopt()=%s\n", strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -377,7 +380,7 @@ static int plugin_ipc_init(void) {
     /* bind the socket to the port number */
     if (bind(ipc_socket, &sst.in, addrlen) == -1) {
 #ifndef NODEBUG
-      olsr_printf(1, "(JSONINFO) bind()=%s\n", strerror(errno));
+      olsr_printf(1, "("PLUGIN_NAME") bind()=%s\n", strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -385,7 +388,7 @@ static int plugin_ipc_init(void) {
     /* show that we are willing to listen */
     if (listen(ipc_socket, 1) == -1) {
 #ifndef NODEBUG
-      olsr_printf(1, "(JSONINFO) listen()=%s\n", strerror(errno));
+      olsr_printf(1, "("PLUGIN_NAME") listen()=%s\n", strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -394,7 +397,7 @@ static int plugin_ipc_init(void) {
     add_olsr_socket(ipc_socket, &ipc_action, NULL, NULL, SP_PR_READ);
 
 #ifndef NODEBUG
-    olsr_printf(2, "(JSONINFO) listening on port %d\n", ipc_port);
+    olsr_printf(2, "("PLUGIN_NAME") listening on port %d\n", ipc_port);
 #endif /* NODEBUG */
   }
   return 1;
@@ -409,9 +412,9 @@ static int read_uuid_from_file(const char *file) {
   memset(uuid, 0, sizeof(uuid));
 
   f = fopen(file, "r");
-  olsr_printf(1, "(JSONINFO) Reading UUID from '%s'\n", file);
+  olsr_printf(1, "("PLUGIN_NAME") Reading UUID from '%s'\n", file);
   if (f == NULL) {
-    olsr_printf(1, "(JSONINFO) Could not open '%s': %s\n", file, strerror(errno));
+    olsr_printf(1, "("PLUGIN_NAME") Could not open '%s': %s\n", file, strerror(errno));
     return -1;
   }
   chars = fread(uuid, 1, UUIDLEN, f);
@@ -424,7 +427,7 @@ static int read_uuid_from_file(const char *file) {
       *end = 0;
     r = 0;
   } else {
-    olsr_printf(1, "(JSONINFO) Could not read UUID from '%s': %s\n", file, strerror(errno));
+    olsr_printf(1, "("PLUGIN_NAME") Could not read UUID from '%s': %s\n", file, strerror(errno));
     r = -1;
   }
 
@@ -445,7 +448,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if ((ipc_connection = accept(fd, &pin.in, &addrlen)) == -1) {
 #ifndef NODEBUG
-    olsr_printf(1, "(JSONINFO) accept()=%s\n", strerror(errno));
+    olsr_printf(1, "("PLUGIN_NAME") accept()=%s\n", strerror(errno));
 #endif /* NODEBUG */
     return;
   }
@@ -458,7 +461,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifdef JSONINFO_ALLOW_LOCALHOST
       if (pin.in4.sin_addr.s_addr != INADDR_LOOPBACK) {
 #endif /* JSONINFO_ALLOW_LOCALHOST */
-      olsr_printf(1, "(JSONINFO) From host(%s) not allowed!\n", addr);
+      olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
       close(ipc_connection);
       return;
 #ifdef JSONINFO_ALLOW_LOCALHOST
@@ -470,14 +473,14 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       addr[0] = '\0';
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
     if (!ip6equal(&in6addr_any, &jsoninfo_accept_ip.v6) && !ip6equal(&pin.in6.sin6_addr, &jsoninfo_accept_ip.v6)) {
-      olsr_printf(1, "(JSONINFO) From host(%s) not allowed!\n", addr);
+      olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
       close(ipc_connection);
       return;
     }
   }
 
 #ifndef NODEBUG
-  olsr_printf(2, "(JSONINFO) Connect from %s\n", addr);
+  olsr_printf(2, "("PLUGIN_NAME") Connect from %s\n", addr);
 #endif /* NODEBUG */
 
   /* purge read buffer to prevent blocking on linux */
@@ -1390,7 +1393,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
   size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", localtime(&currtime));
 
   /* Server version */
-  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD JSONInfo plugin\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME" plugin\r\n");
 
   /* connection-type */
   size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
