@@ -815,7 +815,7 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   /* Print minimal http header */
   if (http_headers) {
-    abuf_puts(&abuf, "HTTP/1.0 200 OK\r\n");
+    abuf_puts(&abuf, "HTTP/1.1 200 OK\r\n");
     abuf_puts(&abuf, "Content-type: text/plain\r\n\r\n");
   }
 
