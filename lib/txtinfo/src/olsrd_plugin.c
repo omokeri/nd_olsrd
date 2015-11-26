@@ -1,4 +1,3 @@
-
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
  * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
@@ -72,9 +71,7 @@ static void my_fini(void) __attribute__ ((destructor));
 /**
  *Constructor
  */
-static void
-my_init(void)
-{
+static void my_init(void) {
   /* Print plugin info to stdout */
   printf("%s\n", MOD_DESC);
 
@@ -97,9 +94,7 @@ my_init(void)
 /**
  *Destructor
  */
-static void
-my_fini(void)
-{
+static void my_fini(void) {
   /* Calls the destruction function
    * olsr_plugin_exit()
    * This function should be present in your
@@ -109,22 +104,19 @@ my_fini(void)
   olsr_plugin_exit();
 }
 
-int
-olsrd_plugin_interface_version(void)
-{
+int olsrd_plugin_interface_version(void) {
   return PLUGIN_INTERFACE_VERSION;
 }
 
-static const struct olsrd_plugin_parameters plugin_parameters[] = {
-  {.name = "port",.set_plugin_parameter = &set_plugin_port,.data = &ipc_port},
-  {.name = "accept",.set_plugin_parameter = &set_plugin_ipaddress,.data = &txtinfo_accept_ip},
-  {.name = "listen",.set_plugin_parameter = &set_plugin_ipaddress,.data = &txtinfo_listen_ip},
-  {.name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &txtinfo_ipv6_only},
-};
+static const struct olsrd_plugin_parameters plugin_parameters[] = { //
+    //
+        { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &ipc_port }, //
+        { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &txtinfo_accept_ip }, //
+        { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &txtinfo_listen_ip }, //
+        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &txtinfo_ipv6_only } //
+    };
 
-void
-olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size)
-{
+void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size) {
   *params = plugin_parameters;
   *size = sizeof(plugin_parameters) / sizeof(*plugin_parameters);
 }

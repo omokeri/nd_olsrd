@@ -1,4 +1,3 @@
-
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
  * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
@@ -47,7 +46,6 @@
 /*
  * Dynamic linked library for the olsr.org olsr daemon
  */
-
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -152,9 +150,7 @@ static struct timer_entry *writetimer_entry;
  *This function is called by the my_init
  *function in uolsrd_plugin.c
  */
-int
-olsrd_plugin_init(void)
-{
+int olsrd_plugin_init(void) {
   /* Initial IPC value */
   ipc_socket = -1;
 
@@ -165,16 +161,12 @@ olsrd_plugin_init(void)
 /**
  * destructor - called at unload
  */
-void
-olsr_plugin_exit(void)
-{
+void olsr_plugin_exit(void) {
   if (ipc_socket != -1)
     close(ipc_socket);
 }
 
-static int
-plugin_ipc_init(void)
-{
+static int plugin_ipc_init(void) {
   union olsr_sockaddr sst;
   uint32_t yes = 1;
   socklen_t addrlen;
@@ -186,7 +178,7 @@ plugin_ipc_init(void)
 #endif /* NODEBUG */
     return 0;
   } else {
-    if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *)&yes, sizeof(yes)) < 0) {
+    if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
 #ifndef NODEBUG
       olsr_printf(1, "(TXTINFO) setsockopt()=%s\n", strerror(errno));
 #endif /* NODEBUG */
@@ -200,7 +192,7 @@ plugin_ipc_init(void)
 #endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
 #if defined linux && defined IPV6_V6ONLY
     if (txtinfo_ipv6_only && olsr_cnf->ip_version == AF_INET6) {
-      if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&yes, sizeof(yes)) < 0) {
+      if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
         perror("IPV6_V6ONLY failed");
         return 0;
       }
@@ -254,9 +246,7 @@ plugin_ipc_init(void)
   return 1;
 }
 
-static void
-ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused)))
-{
+static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
   union olsr_sockaddr pin;
 
   char addr[INET6_ADDRSTRLEN];
@@ -286,11 +276,11 @@ ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
 #ifdef TXTINFO_ALLOW_LOCALHOST
       if (ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
 #endif /* TXTINFO_ALLOW_LOCALHOST */
-        olsr_printf(1, "(TXTINFO) From host(%s) not allowed!\n", addr);
-        close(ipc_connection);
-        return;
+      olsr_printf(1, "(TXTINFO) From host(%s) not allowed!\n", addr);
+      close(ipc_connection);
+      return;
 #ifdef TXTINFO_ALLOW_LOCALHOST
-      }
+    }
 #endif /* TXTINFO_ALLOW_LOCALHOST */
     }
   } else {
@@ -310,16 +300,17 @@ ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
 
   /* purge read buffer to prevent blocking on linux */
   FD_ZERO(&rfds);
-  FD_SET((unsigned int)ipc_connection, &rfds);  /* Win32 needs the cast here */
+  FD_SET((unsigned int )ipc_connection, &rfds); /* Win32 needs the cast here */
   if (0 <= select(ipc_connection + 1, &rfds, NULL, NULL, &tv)) {
     char requ[1024];
-    ssize_t s = recv(ipc_connection, (void *)&requ, sizeof(requ)-1, 0);   /* Win32 needs the cast here */
+    ssize_t s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
 
-    if (s == sizeof(requ)-1) {
+    if (s == sizeof(requ) - 1) {
       /* input was much too long, just skip the rest */
       char dummy[1024];
 
-      while (recv(ipc_connection, (void *)&dummy, sizeof(dummy), 0) == sizeof(dummy));
+      while (recv(ipc_connection, (void *) &dummy, sizeof(dummy), 0) == sizeof(dummy))
+        ;
     }
     if (0 < s) {
       requ[s] = 0;
@@ -327,67 +318,82 @@ ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
        * page the normal output is somewhat lengthy. The
        * header parsing is sufficient for standard wget.
        */
-      if (0 != strstr(requ, "/neighbours")) send_what = SIW_NEIGH | SIW_LINK;
+      if (0 != strstr(requ, "/neighbours"))
+        send_what = SIW_NEIGH | SIW_LINK;
       else {
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
-        if (0 != strstr(requ, "/all")) send_what = SIW_ALL;
+        if (0 != strstr(requ, "/all"))
+          send_what = SIW_ALL;
         else { /*already included in /all*/
-          if (0 != strstr(requ, "/nei")) send_what |= SIW_NEIGH;
-          if (0 != strstr(requ, "/lin")) send_what |= SIW_LINK;
-          if (0 != strstr(requ, "/rou")) send_what |= SIW_ROUTE;
-          if (0 != strstr(requ, "/hna")) send_what |= SIW_HNA;
-          if (0 != strstr(requ, "/mid")) send_what |= SIW_MID;
-          if (0 != strstr(requ, "/top")) send_what |= SIW_TOPO;
+          if (0 != strstr(requ, "/nei"))
+            send_what |= SIW_NEIGH;
+          if (0 != strstr(requ, "/lin"))
+            send_what |= SIW_LINK;
+          if (0 != strstr(requ, "/rou"))
+            send_what |= SIW_ROUTE;
+          if (0 != strstr(requ, "/hna"))
+            send_what |= SIW_HNA;
+          if (0 != strstr(requ, "/mid"))
+            send_what |= SIW_MID;
+          if (0 != strstr(requ, "/top"))
+            send_what |= SIW_TOPO;
         }
-        if (0 != strstr(requ, "/gat")) send_what |= SIW_GATEWAY;
-        if (0 != strstr(requ, "/con")) send_what |= SIW_CONFIG;
-        if (0 != strstr(requ, "/int")) send_what |= SIW_INTERFACE;
-        if (0 != strstr(requ, "/2ho")) send_what |= SIW_2HOP;
-        if (0 != strstr(requ, "/ver")) send_what |= SIW_VERSION;
-        if (0 != strstr(requ, "/sgw")) send_what |= SIW_SGW;
+        if (0 != strstr(requ, "/gat"))
+          send_what |= SIW_GATEWAY;
+        if (0 != strstr(requ, "/con"))
+          send_what |= SIW_CONFIG;
+        if (0 != strstr(requ, "/int"))
+          send_what |= SIW_INTERFACE;
+        if (0 != strstr(requ, "/2ho"))
+          send_what |= SIW_2HOP;
+        if (0 != strstr(requ, "/ver"))
+          send_what |= SIW_VERSION;
+        if (0 != strstr(requ, "/sgw"))
+          send_what |= SIW_SGW;
       }
     }
 
-    if ( send_what == 0 ) send_what = SIW_ALL;
+    if (send_what == 0)
+      send_what = SIW_ALL;
   }
 
   send_info(send_what, ipc_connection);
 }
 
-static void
-ipc_print_neigh(struct autobuf *abuf, bool list_2hop)
-{
+static void ipc_print_neigh(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
   int thop_cnt;
 
   abuf_puts(abuf, "Table: Neighbors\nIP address\tSYM\tMPR\tMPRS\tWill.");
-  if (list_2hop) abuf_puts(abuf,"\n\t2hop interface adrress\n");
-  else abuf_puts(abuf, "\t2 Hop Neighbors\n");
+  if (list_2hop)
+    abuf_puts(abuf, "\n\t2hop interface adrress\n");
+  else
+    abuf_puts(abuf, "\t2 Hop Neighbors\n");
 
   /* Neighbors */
-  OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
-    abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr), (neigh->status == SYM) ? "YES" : "NO",
-              neigh->is_mpr ? "YES" : "NO", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO", neigh->willingness);
-    thop_cnt = 0;
+  OLSR_FOR_ALL_NBR_ENTRIES(neigh)
+      {
+        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr), (neigh->status == SYM) ? "YES" : "NO",
+            neigh->is_mpr ? "YES" : "NO", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO", neigh->willingness);
+        thop_cnt = 0;
 
-    for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
-      if (list_2hop) abuf_appendf(abuf, "\t%s\n", olsr_ip_to_string(&buf1, &list_2->neighbor_2->neighbor_2_addr));
-      else thop_cnt++;
-    }
-    if (!list_2hop) {
-      abuf_appendf(abuf, "%d\n", thop_cnt);
-    }
-  }
-  OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
+        for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
+          if (list_2hop)
+            abuf_appendf(abuf, "\t%s\n", olsr_ip_to_string(&buf1, &list_2->neighbor_2->neighbor_2_addr));
+          else
+            thop_cnt++;
+        }
+        if (!list_2hop) {
+          abuf_appendf(abuf, "%d\n", thop_cnt);
+        }
+      }OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_puts(abuf, "\n");
 }
 
-static void
-ipc_print_link(struct autobuf *abuf)
-{
+static void ipc_print_link(struct autobuf *abuf) {
   struct ipaddr_str buf1, buf2;
   struct lqtextbuffer lqbuffer1, lqbuffer2;
 
@@ -400,29 +406,27 @@ ipc_print_link(struct autobuf *abuf)
 #endif /* ACTIVATE_VTIME_TXTINFO */
 
   /* Link set */
-  OLSR_FOR_ALL_LINK_ENTRIES(my_link) {
+  OLSR_FOR_ALL_LINK_ENTRIES(my_link)
+      {
 #ifdef ACTIVATE_VTIME_TXTINFO
-    int diff = (unsigned int)(my_link->link_timer->timer_clock - now_times);
+        int diff = (unsigned int)(my_link->link_timer->timer_clock - now_times);
 
-    abuf_appendf(abuf, "%s\t%s\t%d.%03d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
-              olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
-              diff/1000, abs(diff%1000),
-              get_link_entry_text(my_link, '\t', &lqbuffer1),
-              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+        abuf_appendf(abuf, "%s\t%s\t%d.%03d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
+            olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
+            diff/1000, abs(diff%1000),
+            get_link_entry_text(my_link, '\t', &lqbuffer1),
+            get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
 #else /* ACTIVATE_VTIME_TXTINFO */
-    abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
-              olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
-              get_link_entry_text(my_link, '\t', &lqbuffer1),
-              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+        abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
+            olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr), get_link_entry_text(my_link, '\t', &lqbuffer1),
+            get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
 #endif /* ACTIVATE_VTIME_TXTINFO */
-  } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
+      }OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
 
   abuf_puts(abuf, "\n");
 }
 
-static void
-ipc_print_routes(struct autobuf *abuf)
-{
+static void ipc_print_routes(struct autobuf *abuf) {
   struct ipaddr_str buf1, buf2;
   struct rt_entry *rt;
   struct lqtextbuffer lqbuffer;
@@ -430,20 +434,18 @@ ipc_print_routes(struct autobuf *abuf)
   abuf_puts(abuf, "Table: Routes\nDestination\tGateway IP\tMetric\tETX\tInterface\n");
 
   /* Walk the route table */
-  OLSR_FOR_ALL_RT_ENTRIES(rt) {
-    abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &rt->rt_dst.prefix), rt->rt_dst.prefix_len,
-              olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway), rt->rt_best->rtp_metric.hops,
-              get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer),
-              if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
-  } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
+  OLSR_FOR_ALL_RT_ENTRIES(rt)
+      {
+        abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &rt->rt_dst.prefix), rt->rt_dst.prefix_len,
+            olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway), rt->rt_best->rtp_metric.hops,
+            get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer), if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+      }OLSR_FOR_ALL_RT_ENTRIES_END(rt);
 
   abuf_puts(abuf, "\n");
 
 }
 
-static void
-ipc_print_topology(struct autobuf *abuf)
-{
+static void ipc_print_topology(struct autobuf *abuf) {
   struct tc_entry *tc;
 
 #ifdef ACTIVATE_VTIME_TXTINFO
@@ -453,34 +455,34 @@ ipc_print_topology(struct autobuf *abuf)
 #endif /* ACTIVATE_VTIME_TXTINFO */
 
   /* Topology */
-  OLSR_FOR_ALL_TC_ENTRIES(tc) {
-    struct tc_edge_entry *tc_edge;
-    OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
-      if (tc_edge->edge_inv) {
-        struct ipaddr_str dstbuf, addrbuf;
-        struct lqtextbuffer lqbuffer1, lqbuffer2;
+  OLSR_FOR_ALL_TC_ENTRIES(tc)
+      {
+        struct tc_edge_entry *tc_edge;
+        OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge)
+            {
+              if (tc_edge->edge_inv) {
+                struct ipaddr_str dstbuf, addrbuf;
+                struct lqtextbuffer lqbuffer1, lqbuffer2;
 #ifdef ACTIVATE_VTIME_TXTINFO
-        uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
-        int diff = (int)(vt);
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
-            olsr_ip_to_string(&addrbuf, &tc->addr),
-            get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
-            get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
-            diff/1000, diff%1000);
+                uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
+                int diff = (int)(vt);
+                abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
+                    olsr_ip_to_string(&addrbuf, &tc->addr),
+                    get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
+                    get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
+                    diff/1000, diff%1000);
 #else /* ACTIVATE_VTIME_TXTINFO */
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
-                  get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
+                abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
+                    get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
 #endif /* ACTIVATE_VTIME_TXTINFO */
-      }
-    } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
-  } OLSR_FOR_ALL_TC_ENTRIES_END(tc);
+              }
+            }OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
+      }OLSR_FOR_ALL_TC_ENTRIES_END(tc);
 
   abuf_puts(abuf, "\n");
 }
 
-static void
-ipc_print_hna(struct autobuf *abuf)
-{
+static void ipc_print_hna(struct autobuf *abuf) {
   struct ip_prefix_list *hna;
   struct hna_entry *tmp_hna;
   struct hna_net *tmp_net;
@@ -493,33 +495,31 @@ ipc_print_hna(struct autobuf *abuf)
 #endif /* ACTIVATE_VTIME_TXTINFO */
 
   /* Announced HNA entries */
-  for (hna = olsr_cnf->hna_entries; hna != NULL; hna = hna->next) {
-    abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &hna->net.prefix), hna->net.prefix_len,
-              olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
+  for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
+    abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &hna->net.prefix), hna->net.prefix_len, olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
   }
 
   /* HNA entries */
-  OLSR_FOR_ALL_HNA_ENTRIES(tmp_hna) {
+  OLSR_FOR_ALL_HNA_ENTRIES(tmp_hna)
+        {
 
-    /* Check all networks */
-    for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
+          /* Check all networks */
+          for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
 #ifdef ACTIVATE_VTIME_TXTINFO
-      uint32_t vt = tmp_net->hna_net_timer != NULL ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
-      int diff = (int)(vt);
-      abuf_appendf(abuf, "%s/%d\t%s\t\%d.%03d\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
-          tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr),
-          diff/1000, abs(diff%1000));
+            uint32_t vt = tmp_net->hna_net_timer != NULL ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
+            int diff = (int)(vt);
+            abuf_appendf(abuf, "%s/%d\t%s\t\%d.%03d\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
+                tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr),
+                diff/1000, abs(diff%1000));
 #else /* ACTIVATE_VTIME_TXTINFO */
-      abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
-          tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
+            abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len,
+                olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
 #endif /* ACTIVATE_VTIME_TXTINFO */
-    }
-  }
-  OLSR_FOR_ALL_HNA_ENTRIES_END(tmp_hna);
+          }
+        }OLSR_FOR_ALL_HNA_ENTRIES_END(tmp_hna);
 
   abuf_puts(abuf, "\n");
 }
-
 
 #ifdef __linux__
 
@@ -528,7 +528,6 @@ extern struct interfaceName * sgwTunnel4InterfaceNames;
 
 /** interface names for smart gateway tunnel interfaces, IPv6 */
 extern struct interfaceName * sgwTunnel6InterfaceNames;
-
 
 /**
  * Construct the sgw table for a given ip version
@@ -595,9 +594,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
 }
 #endif /* __linux__ */
 
-static void
-ipc_print_sgw(struct autobuf *abuf)
-{
+static void ipc_print_sgw(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_puts(abuf, "Gateway mode is only supported in linux\n");
 #else
@@ -618,9 +615,7 @@ ipc_print_sgw(struct autobuf *abuf)
 #endif /* __linux__ */
 }
 
-static void
-ipc_print_mid(struct autobuf *abuf)
-{
+static void ipc_print_mid(struct autobuf *abuf) {
   int idx;
   unsigned short is_first;
   struct mid_entry *entry;
@@ -650,10 +645,10 @@ ipc_print_mid(struct autobuf *abuf)
         uint32_t vt = alias->vtime - now_times;
         int diff = (int)(vt);
 
-        abuf_appendf(abuf, "%s\t%s\t%d.%03d\n", 
-                     olsr_ip_to_string(&buf, &entry->main_addr), 
-                     olsr_ip_to_string(&buf2, &alias->alias),
-                     diff/1000, abs(diff%1000));
+        abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
+            olsr_ip_to_string(&buf, &entry->main_addr),
+            olsr_ip_to_string(&buf2, &alias->alias),
+            diff/1000, abs(diff%1000));
 #else /* ACTIVATE_VTIME_TXTINFO */
         abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
 #endif /* ACTIVATE_VTIME_TXTINFO */
@@ -662,16 +657,14 @@ ipc_print_mid(struct autobuf *abuf)
       }
       entry = entry->next;
 #ifndef ACTIVATE_VTIME_TXTINFO
-      abuf_puts(abuf,"\n");
+      abuf_puts(abuf, "\n");
 #endif /* ACTIVATE_VTIME_TXTINFO */
     }
   }
   abuf_puts(abuf, "\n");
 }
 
-static void
-ipc_print_gateway(struct autobuf *abuf)
-{
+static void ipc_print_gateway(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_puts(abuf, "Gateway mode is only supported in linux\n");
 #else /* __linux__ */
@@ -686,98 +679,83 @@ ipc_print_gateway(struct autobuf *abuf)
 
   // Status IP ETX Hopcount Uplink-Speed Downlink-Speed ipv4/ipv4-nat/- ipv6/- ipv6-prefix/-
   abuf_puts(abuf, "Table: Gateways\nStatus\tGateway IP\tETX\tHopcnt\tUplink\tDownlnk\tIPv4\tIPv6\tPrefix\n");
-  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw) {
-    char v4 = '-', v6 = '-';
-    const char *v4type = NONE, *v6type = NONE;
-    struct tc_entry *tc;
+  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
+      {
+        char v4 = '-', v6 = '-';
+        const char *v4type = NONE, *v6type = NONE;
+        struct tc_entry *tc;
 
-    if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
-      continue;
-    }
+        if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
+          continue;
+        }
 
-    if (gw == olsr_get_inet_gateway(false)) {
-      v4 = 's';
-    }
-    else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit)
-        && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
-      v4 = 'u';
-    }
+        if (gw == olsr_get_inet_gateway(false)) {
+          v4 = 's';
+        } else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
+          v4 = 'u';
+        }
 
-    if (gw == olsr_get_inet_gateway(true)) {
-      v6 = 's';
-    }
-    else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
-      v6 = 'u';
-    }
+        if (gw == olsr_get_inet_gateway(true)) {
+          v6 = 's';
+        } else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
+          v6 = 'u';
+        }
 
-    if (gw->ipv4) {
-      v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
-    }
-    if (gw->ipv6) {
-      v6type = IPV6;
-    }
+        if (gw->ipv4) {
+          v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
+        }
+        if (gw->ipv6) {
+          v6type = IPV6;
+        }
 
-    abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n",
-        v4, v6, olsr_ip_to_string(&buf, &gw->originator),
-        get_linkcost_text(tc->path_cost, true, &lqbuf), tc->hops,
-        gw->uplink, gw->downlink, v4type, v6type,
-        gw->external_prefix.prefix_len == 0 ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
-  } OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
+        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", v4, v6, olsr_ip_to_string(&buf, &gw->originator),
+            get_linkcost_text(tc->path_cost, true, &lqbuf), tc->hops, gw->uplink, gw->downlink, v4type, v6type,
+            gw->external_prefix.prefix_len == 0 ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
+      }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
 #endif /* __linux__ */
 }
 
-static void
-ipc_print_config(struct autobuf *abuf)
-{
+static void ipc_print_config(struct autobuf *abuf) {
   olsrd_write_cnf_autobuf(abuf, olsr_cnf);
 }
 
-static void
-ipc_print_version(struct autobuf *abuf)
-{
-abuf_appendf(abuf, "Version: %s (built on %s on %s)\n", olsrd_version, build_date, build_host);
+static void ipc_print_version(struct autobuf *abuf) {
+  abuf_appendf(abuf, "Version: %s (built on %s on %s)\n", olsrd_version, build_date, build_host);
 }
-static void
-ipc_print_interface(struct autobuf *abuf)
-{
+static void ipc_print_interface(struct autobuf *abuf) {
   const struct olsr_if *ifs;
   abuf_puts(abuf, "Table: Interfaces\nName\tState\tMTU\tWLAN\tSrc-Adress\tMask\tDst-Adress\n");
-  for (ifs = olsr_cnf->interfaces; ifs != NULL; ifs = ifs->next) {
-    const struct interface_olsr *const rifs = ifs->interf;
+  for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
+    const struct interface_olsr * const rifs = ifs->interf;
     abuf_appendf(abuf, "%s\t", ifs->name);
     if (!rifs) {
       abuf_puts(abuf, "DOWN\n");
       continue;
     }
-    abuf_appendf(abuf, "UP\t%d\t%s\t",
-               rifs->int_mtu, rifs->is_wireless ? "Yes" : "No");
- 
+    abuf_appendf(abuf, "UP\t%d\t%s\t", rifs->int_mtu, rifs->is_wireless ? "Yes" : "No");
+
     if (olsr_cnf->ip_version == AF_INET) {
       struct ipaddr_str addrbuf, maskbuf, bcastbuf;
-      abuf_appendf(abuf, "%s\t%s\t%s\n",
-                 ip4_to_string(&addrbuf, rifs->int_addr.sin_addr), ip4_to_string(&maskbuf, rifs->int_netmask.sin_addr),
-                 ip4_to_string(&bcastbuf, rifs->int_broadaddr.sin_addr));
+      abuf_appendf(abuf, "%s\t%s\t%s\n", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr), ip4_to_string(&maskbuf, rifs->int_netmask.sin_addr),
+          ip4_to_string(&bcastbuf, rifs->int_broadaddr.sin_addr));
     } else {
-       struct ipaddr_str addrbuf, maskbuf;
-      abuf_appendf(abuf, "%s\t\t%s\n",
-                 ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr), ip6_to_string(&maskbuf, &rifs->int6_multaddr.sin6_addr));
+      struct ipaddr_str addrbuf, maskbuf;
+      abuf_appendf(abuf, "%s\t\t%s\n", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr), ip6_to_string(&maskbuf, &rifs->int6_multaddr.sin6_addr));
     }
   }
   abuf_puts(abuf, "\n");
 }
 
-
-static void
-txtinfo_write_data(void *foo __attribute__ ((unused))) {
+static void txtinfo_write_data(void *foo __attribute__ ((unused))) {
   fd_set set;
   int result, i, j, max;
   struct timeval tv;
 
   FD_ZERO(&set);
   max = 0;
-  for (i=0; i<outbuffer_count; i++) {
+  for (i = 0; i < outbuffer_count; i++) {
     /* And we cast here since we get a warning on Win32 */
-    FD_SET((unsigned int)(outbuffer_socket[i]), &set);
+    FD_SET((unsigned int )(outbuffer_socket[i]), &set);
 
     if (outbuffer_socket[i] > max) {
       max = outbuffer_socket[i];
@@ -792,7 +770,7 @@ txtinfo_write_data(void *foo __attribute__ ((unused))) {
     return;
   }
 
-  for (i=0; i<outbuffer_count; i++) {
+  for (i = 0; i < outbuffer_count; i++) {
     if (FD_ISSET(outbuffer_socket[i], &set)) {
       result = send(outbuffer_socket[i], outbuffer[i] + outbuffer_written[i], outbuffer_size[i] - outbuffer_written[i], 0);
       if (result > 0) {
@@ -802,13 +780,13 @@ txtinfo_write_data(void *foo __attribute__ ((unused))) {
       if (result <= 0 || outbuffer_written[i] == outbuffer_size[i]) {
         /* close this socket and cleanup*/
         close(outbuffer_socket[i]);
-        free (outbuffer[i]);
+        free(outbuffer[i]);
 
-        for (j=i+1; j<outbuffer_count; j++) {
-          outbuffer[j-1] = outbuffer[j];
-          outbuffer_size[j-1] = outbuffer_size[j];
-          outbuffer_socket[j-1] = outbuffer_socket[j];
-          outbuffer_written[j-1] = outbuffer_written[j];
+        for (j = i + 1; j < outbuffer_count; j++) {
+          outbuffer[j - 1] = outbuffer[j];
+          outbuffer_size[j - 1] = outbuffer_size[j];
+          outbuffer_socket[j - 1] = outbuffer_socket[j];
+          outbuffer_written[j - 1] = outbuffer_written[j];
         }
         outbuffer_count--;
       }
@@ -819,9 +797,7 @@ txtinfo_write_data(void *foo __attribute__ ((unused))) {
   }
 }
 
-static void
-send_info(unsigned int send_what, int the_socket)
-{
+static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
   abuf_init(&abuf, 4096);
@@ -833,29 +809,41 @@ send_info(unsigned int send_what, int the_socket)
   /* Print tables to IPC socket */
 
   /* links */
-  if ((send_what & SIW_LINK) == SIW_LINK) ipc_print_link(&abuf);
+  if ((send_what & SIW_LINK) == SIW_LINK)
+    ipc_print_link(&abuf);
   /* neighbours */
-  if ((send_what & SIW_NEIGH) == SIW_NEIGH) ipc_print_neigh(&abuf,false);
+  if ((send_what & SIW_NEIGH) == SIW_NEIGH)
+    ipc_print_neigh(&abuf, false);
   /* topology */
-  if ((send_what & SIW_TOPO) == SIW_TOPO) ipc_print_topology(&abuf);
+  if ((send_what & SIW_TOPO) == SIW_TOPO)
+    ipc_print_topology(&abuf);
   /* hna */
-  if ((send_what & SIW_HNA) == SIW_HNA) ipc_print_hna(&abuf);
+  if ((send_what & SIW_HNA) == SIW_HNA)
+    ipc_print_hna(&abuf);
   /* sgw */
-  if ((send_what & SIW_SGW) == SIW_SGW) ipc_print_sgw(&abuf);
+  if ((send_what & SIW_SGW) == SIW_SGW)
+    ipc_print_sgw(&abuf);
   /* mid */
-  if ((send_what & SIW_MID) == SIW_MID) ipc_print_mid(&abuf);
+  if ((send_what & SIW_MID) == SIW_MID)
+    ipc_print_mid(&abuf);
   /* routes */
-  if ((send_what & SIW_ROUTE) == SIW_ROUTE) ipc_print_routes(&abuf);
+  if ((send_what & SIW_ROUTE) == SIW_ROUTE)
+    ipc_print_routes(&abuf);
   /* gateways */
-  if ((send_what & SIW_GATEWAY) == SIW_GATEWAY) ipc_print_gateway(&abuf);
+  if ((send_what & SIW_GATEWAY) == SIW_GATEWAY)
+    ipc_print_gateway(&abuf);
   /* config */
-  if ((send_what & SIW_CONFIG) == SIW_CONFIG) ipc_print_config(&abuf);
+  if ((send_what & SIW_CONFIG) == SIW_CONFIG)
+    ipc_print_config(&abuf);
   /* interface */
-  if ((send_what & SIW_INTERFACE) == SIW_INTERFACE) ipc_print_interface(&abuf);
+  if ((send_what & SIW_INTERFACE) == SIW_INTERFACE)
+    ipc_print_interface(&abuf);
   /* 2hop neighbour list */
-  if ((send_what & SIW_2HOP) == SIW_2HOP) ipc_print_neigh(&abuf,true);
+  if ((send_what & SIW_2HOP) == SIW_2HOP)
+    ipc_print_neigh(&abuf, true);
   /* version */
-  if ((send_what & SIW_VERSION) == SIW_VERSION) ipc_print_version(&abuf);
+  if ((send_what & SIW_VERSION) == SIW_VERSION)
+    ipc_print_version(&abuf);
 
   assert(outbuffer_count < MAX_CLIENTS);
 
