@@ -866,7 +866,7 @@ static void send_info(unsigned int send_what, int the_socket) {
  * Local Variables:
  * mode: c
  * style: linux
- * c-basic-offset: 4
+ * c-basic-offset: 2
  * indent-tabs-mode: nil
  * End:
  */
