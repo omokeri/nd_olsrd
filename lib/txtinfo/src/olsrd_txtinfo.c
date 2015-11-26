@@ -530,6 +530,55 @@ static void ipc_print_hna(struct autobuf *abuf) {
   abuf_puts(abuf, "\n");
 }
 
+static void ipc_print_mid(struct autobuf *abuf) {
+  int idx;
+  unsigned short is_first;
+  struct mid_entry *entry;
+  struct mid_address *alias;
+#ifdef ACTIVATE_VTIME_TXTINFO
+  abuf_puts(abuf, "Table: MID\nIP address\tAlias\tVTime\n");
+#else /* ACTIVATE_VTIME_TXTINFO */
+  abuf_puts(abuf, "Table: MID\nIP address\tAliases\n");
+#endif /* ACTIVATE_VTIME_TXTINFO */
+
+  /* MID */
+  for (idx = 0; idx < HASHSIZE; idx++) {
+    entry = mid_set[idx].next;
+
+    while (entry != &mid_set[idx]) {
+#ifdef ACTIVATE_VTIME_TXTINFO
+      struct ipaddr_str buf, buf2;
+#else /* ACTIVATE_VTIME_TXTINFO */
+      struct ipaddr_str buf;
+      abuf_puts(abuf, olsr_ip_to_string(&buf, &entry->main_addr));
+#endif /* ACTIVATE_VTIME_TXTINFO */
+      alias = entry->aliases;
+      is_first = 1;
+
+      while (alias) {
+#ifdef ACTIVATE_VTIME_TXTINFO
+        uint32_t vt = alias->vtime - now_times;
+        int diff = (int)(vt);
+
+        abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
+            olsr_ip_to_string(&buf, &entry->main_addr),
+            olsr_ip_to_string(&buf2, &alias->alias),
+            diff/1000, abs(diff%1000));
+#else /* ACTIVATE_VTIME_TXTINFO */
+        abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
+#endif /* ACTIVATE_VTIME_TXTINFO */
+        alias = alias->next_alias;
+        is_first = 0;
+      }
+      entry = entry->next;
+#ifndef ACTIVATE_VTIME_TXTINFO
+      abuf_puts(abuf, "\n");
+#endif /* ACTIVATE_VTIME_TXTINFO */
+    }
+  }
+  abuf_puts(abuf, "\n");
+}
+
 #ifdef __linux__
 
 /** interface names for smart gateway tunnel interfaces, IPv4 */
@@ -622,55 +671,6 @@ static void ipc_print_sgw(struct autobuf *abuf) {
   abuf_puts(abuf, "\n");
 #endif
 #endif /* __linux__ */
-}
-
-static void ipc_print_mid(struct autobuf *abuf) {
-  int idx;
-  unsigned short is_first;
-  struct mid_entry *entry;
-  struct mid_address *alias;
-#ifdef ACTIVATE_VTIME_TXTINFO
-  abuf_puts(abuf, "Table: MID\nIP address\tAlias\tVTime\n");
-#else /* ACTIVATE_VTIME_TXTINFO */
-  abuf_puts(abuf, "Table: MID\nIP address\tAliases\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
-
-  /* MID */
-  for (idx = 0; idx < HASHSIZE; idx++) {
-    entry = mid_set[idx].next;
-
-    while (entry != &mid_set[idx]) {
-#ifdef ACTIVATE_VTIME_TXTINFO
-      struct ipaddr_str buf, buf2;
-#else /* ACTIVATE_VTIME_TXTINFO */
-      struct ipaddr_str buf;
-      abuf_puts(abuf, olsr_ip_to_string(&buf, &entry->main_addr));
-#endif /* ACTIVATE_VTIME_TXTINFO */
-      alias = entry->aliases;
-      is_first = 1;
-
-      while (alias) {
-#ifdef ACTIVATE_VTIME_TXTINFO
-        uint32_t vt = alias->vtime - now_times;
-        int diff = (int)(vt);
-
-        abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
-            olsr_ip_to_string(&buf, &entry->main_addr),
-            olsr_ip_to_string(&buf2, &alias->alias),
-            diff/1000, abs(diff%1000));
-#else /* ACTIVATE_VTIME_TXTINFO */
-        abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
-#endif /* ACTIVATE_VTIME_TXTINFO */
-        alias = alias->next_alias;
-        is_first = 0;
-      }
-      entry = entry->next;
-#ifndef ACTIVATE_VTIME_TXTINFO
-      abuf_puts(abuf, "\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
-    }
-  }
-  abuf_puts(abuf, "\n");
 }
 
 static void ipc_print_gateways(struct autobuf *abuf) {
