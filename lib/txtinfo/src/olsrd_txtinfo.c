@@ -579,6 +579,57 @@ static void ipc_print_mid(struct autobuf *abuf) {
   abuf_puts(abuf, "\n");
 }
 
+static void ipc_print_gateways(struct autobuf *abuf) {
+#ifndef __linux__
+  abuf_puts(abuf, "Gateway mode is only supported in linux\n");
+#else /* __linux__ */
+  static const char IPV4[] = "ipv4";
+  static const char IPV4_NAT[] = "ipv4(n)";
+  static const char IPV6[] = "ipv6";
+  static const char NONE[] = "-";
+
+  struct ipaddr_str buf;
+  struct gateway_entry *gw;
+  struct lqtextbuffer lqbuf;
+
+  // Status IP ETX Hopcount Uplink-Speed Downlink-Speed ipv4/ipv4-nat/- ipv6/- ipv6-prefix/-
+  abuf_puts(abuf, "Table: Gateways\nStatus\tGateway IP\tETX\tHopcnt\tUplink\tDownlnk\tIPv4\tIPv6\tPrefix\n");
+  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
+      {
+        char v4 = '-', v6 = '-';
+        const char *v4type = NONE, *v6type = NONE;
+        struct tc_entry *tc;
+
+        if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
+          continue;
+        }
+
+        if (gw == olsr_get_inet_gateway(false)) {
+          v4 = 's';
+        } else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
+          v4 = 'u';
+        }
+
+        if (gw == olsr_get_inet_gateway(true)) {
+          v6 = 's';
+        } else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
+          v6 = 'u';
+        }
+
+        if (gw->ipv4) {
+          v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
+        }
+        if (gw->ipv6) {
+          v6type = IPV6;
+        }
+
+        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", v4, v6, olsr_ip_to_string(&buf, &gw->originator),
+            get_linkcost_text(tc->path_cost, true, &lqbuf), tc->hops, gw->uplink, gw->downlink, v4type, v6type,
+            gw->external_prefix.prefix_len == 0 ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
+      }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
+#endif /* __linux__ */
+}
+
 #ifdef __linux__
 
 /** interface names for smart gateway tunnel interfaces, IPv4 */
@@ -670,57 +721,6 @@ static void ipc_print_sgw(struct autobuf *abuf) {
   sgw_ipvx(abuf, true, fmth6, fmtv6);
   abuf_puts(abuf, "\n");
 #endif
-#endif /* __linux__ */
-}
-
-static void ipc_print_gateways(struct autobuf *abuf) {
-#ifndef __linux__
-  abuf_puts(abuf, "Gateway mode is only supported in linux\n");
-#else /* __linux__ */
-  static const char IPV4[] = "ipv4";
-  static const char IPV4_NAT[] = "ipv4(n)";
-  static const char IPV6[] = "ipv6";
-  static const char NONE[] = "-";
-
-  struct ipaddr_str buf;
-  struct gateway_entry *gw;
-  struct lqtextbuffer lqbuf;
-
-  // Status IP ETX Hopcount Uplink-Speed Downlink-Speed ipv4/ipv4-nat/- ipv6/- ipv6-prefix/-
-  abuf_puts(abuf, "Table: Gateways\nStatus\tGateway IP\tETX\tHopcnt\tUplink\tDownlnk\tIPv4\tIPv6\tPrefix\n");
-  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
-      {
-        char v4 = '-', v6 = '-';
-        const char *v4type = NONE, *v6type = NONE;
-        struct tc_entry *tc;
-
-        if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
-          continue;
-        }
-
-        if (gw == olsr_get_inet_gateway(false)) {
-          v4 = 's';
-        } else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
-          v4 = 'u';
-        }
-
-        if (gw == olsr_get_inet_gateway(true)) {
-          v6 = 's';
-        } else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
-          v6 = 'u';
-        }
-
-        if (gw->ipv4) {
-          v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
-        }
-        if (gw->ipv6) {
-          v6type = IPV6;
-        }
-
-        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", v4, v6, olsr_ip_to_string(&buf, &gw->originator),
-            get_linkcost_text(tc->path_cost, true, &lqbuf), tc->hops, gw->uplink, gw->downlink, v4type, v6type,
-            gw->external_prefix.prefix_len == 0 ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
-      }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
 #endif /* __linux__ */
 }
 
