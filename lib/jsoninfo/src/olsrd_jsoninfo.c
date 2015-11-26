@@ -1305,7 +1305,7 @@ static void ipc_print_interfaces(struct autobuf *abuf) {
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
-static void jsoninfo_write_data(void *foo __attribute__ ((unused))) {
+static void info_write_data(void *foo __attribute__ ((unused))) {
   fd_set set;
   int result, i, j, max;
   struct timeval tv;
@@ -1426,9 +1426,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   outbuffer_count++;
 
   if (outbuffer_count == 1) {
-    writetimer_entry = olsr_start_timer(100, 0,
-    OLSR_TIMER_PERIODIC, &jsoninfo_write_data,
-    NULL, 0);
+    writetimer_entry = olsr_start_timer(100, 0, OLSR_TIMER_PERIODIC, &info_write_data, NULL, 0);
   }
 
   abuf_free(&abuf);
