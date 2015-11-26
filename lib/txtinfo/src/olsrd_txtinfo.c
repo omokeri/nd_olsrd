@@ -809,40 +809,40 @@ static void send_info(unsigned int send_what, int the_socket) {
   /* Print tables to IPC socket */
 
   /* links */
-  if ((send_what & SIW_LINK) == SIW_LINK)
+  if (send_what & SIW_LINK)
     ipc_print_link(&abuf);
   /* neighbours */
-  if ((send_what & SIW_NEIGH) == SIW_NEIGH)
+  if (send_what & SIW_NEIGH)
     ipc_print_neigh(&abuf, false);
   /* topology */
-  if ((send_what & SIW_TOPO) == SIW_TOPO)
+  if (send_what & SIW_TOPO)
     ipc_print_topology(&abuf);
   /* hna */
-  if ((send_what & SIW_HNA) == SIW_HNA)
+  if (send_what & SIW_HNA)
     ipc_print_hna(&abuf);
   /* sgw */
-  if ((send_what & SIW_SGW) == SIW_SGW)
+  if (send_what & SIW_SGW)
     ipc_print_sgw(&abuf);
   /* mid */
-  if ((send_what & SIW_MID) == SIW_MID)
+  if (send_what & SIW_MID)
     ipc_print_mid(&abuf);
   /* routes */
-  if ((send_what & SIW_ROUTE) == SIW_ROUTE)
+  if (send_what & SIW_ROUTE)
     ipc_print_routes(&abuf);
   /* gateways */
-  if ((send_what & SIW_GATEWAY) == SIW_GATEWAY)
+  if (send_what & SIW_GATEWAY)
     ipc_print_gateway(&abuf);
   /* config */
-  if ((send_what & SIW_CONFIG) == SIW_CONFIG)
+  if (send_what & SIW_CONFIG)
     ipc_print_config(&abuf);
   /* interface */
-  if ((send_what & SIW_INTERFACE) == SIW_INTERFACE)
+  if (send_what & SIW_INTERFACE)
     ipc_print_interface(&abuf);
   /* 2hop neighbour list */
-  if ((send_what & SIW_2HOP) == SIW_2HOP)
+  if (send_what & SIW_2HOP)
     ipc_print_neigh(&abuf, true);
   /* version */
-  if ((send_what & SIW_VERSION) == SIW_VERSION)
+  if (send_what & SIW_VERSION)
     ipc_print_version(&abuf);
 
   assert(outbuffer_count < MAX_CLIENTS);
