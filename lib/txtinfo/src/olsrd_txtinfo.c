@@ -321,6 +321,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       while (recv(ipc_connection, (void *) &dummy, sizeof(dummy), 0) == sizeof(dummy))
         ;
     }
+
     if (0 < s) {
       requ[s] = 0;
       /* To print out neighbours only on the Freifunk Status
@@ -363,7 +364,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       }
     }
 
-    if (send_what == 0)
+    if (!send_what)
       send_what = SIW_ALL;
   }
 
@@ -802,7 +803,7 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
       }
     }
   }
-  if (outbuffer_count == 0) {
+  if (!outbuffer_count) {
     olsr_stop_timer(writetimer_entry);
   }
 }
