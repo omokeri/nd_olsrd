@@ -494,6 +494,10 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   socklen_t addrlen = sizeof(pin);
 
+  if (outbuffer_count >= MAX_CLIENTS) {
+    return;
+  }
+
   if ((ipc_connection = accept(fd, &pin.in, &addrlen)) == -1) {
 #ifndef NODEBUG
     olsr_printf(1, "("PLUGIN_NAME") accept()=%s\n", strerror(errno));
