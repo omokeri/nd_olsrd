@@ -372,7 +372,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (!send_what)
-      send_what = SIW_RUNTIME_ALL;
+      send_what = SIW_ALL;
   }
 
   send_info(send_what, ipc_connection);
