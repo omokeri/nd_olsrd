@@ -811,7 +811,7 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
-  abuf_init(&abuf, 4096);
+  abuf_init(&abuf, 2 * 4096);
 
   /* Print minimal http header */
   if (http_headers) {
