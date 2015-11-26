@@ -724,13 +724,14 @@ static void ipc_print_sgw(struct autobuf *abuf) {
 #endif /* __linux__ */
 }
 
+static void ipc_print_version(struct autobuf *abuf) {
+  abuf_appendf(abuf, "Version: %s (built on %s on %s)\n", olsrd_version, build_date, build_host);
+}
+
 static void ipc_print_olsrd_conf(struct autobuf *abuf) {
   olsrd_write_cnf_autobuf(abuf, olsr_cnf);
 }
 
-static void ipc_print_version(struct autobuf *abuf) {
-  abuf_appendf(abuf, "Version: %s (built on %s on %s)\n", olsrd_version, build_date, build_host);
-}
 static void ipc_print_interfaces(struct autobuf *abuf) {
   const struct olsr_if *ifs;
   abuf_puts(abuf, "Table: Interfaces\nName\tState\tMTU\tWLAN\tSrc-Adress\tMask\tDst-Adress\n");
