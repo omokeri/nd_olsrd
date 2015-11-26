@@ -116,25 +116,13 @@ static int store_string(const char *value, void *data, set_plugin_parameter_addo
   return 0;
 }
 
-static int store_boolean(const char *value, void *data, set_plugin_parameter_addon addon __attribute__ ((unused))) {
-  bool *dest = data;
-  if (strcmp(value, "yes") == 0)
-    *dest = true;
-  else if (strcmp(value, "no") == 0)
-    *dest = false;
-  else
-    return 1; //error
-
-  return 0;
-}
-
 static const struct olsrd_plugin_parameters plugin_parameters[] = { //
     //
         { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &ipc_port }, //
         { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &jsoninfo_accept_ip }, //
         { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &jsoninfo_listen_ip }, //
         { .name = "uuidfile", .set_plugin_parameter = &store_string, .data = uuidfile }, //
-        { .name = "httpheaders", .set_plugin_parameter = &store_boolean, .data = &http_headers }, //
+        { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &http_headers }, //
         { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &jsoninfo_ipv6_only } //
     };
 
