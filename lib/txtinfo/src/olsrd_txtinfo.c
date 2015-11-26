@@ -127,6 +127,7 @@ static void ipc_print_sgw(struct autobuf *);
 
 #define TXT_IPC_BUFSIZE 256
 
+/* these provide all of the runtime status info */
 #define SIW_NEIGHBORS 0x0001
 #define SIW_LINKS 0x0002
 #define SIW_ROUTES 0x0004
@@ -135,13 +136,17 @@ static void ipc_print_sgw(struct autobuf *);
 #define SIW_TOPOLOGY 0x0020
 #define SIW_GATEWAYS 0x0040
 #define SIW_INTERFACES 0x0080
-#define SIW_CONFIG 0x0100
-#define SIW_2HOP 0x0200
-#define SIW_VERSION 0x0400
-#define SIW_SGW 0x0800
+#define SIW_2HOP 0x0100
+#define SIW_SGW 0x0200
+#define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY)
 
-/* ALL = neigh link route hna mid topo */
-#define SIW_ALL 0x003F
+/* these only change at olsrd startup */
+#define SIW_VERSION 0x0400
+#define SIW_CONFIG 0x0800
+#define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG)
+
+/* this is everything in normal format */
+#define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
 
 #define MAX_CLIENTS 3
 
@@ -334,7 +339,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
         if (strstr(requ, "/all"))
-          send_what = SIW_ALL;
+          send_what = SIW_RUNTIME_ALL;
         else { /*already included in /all*/
           if (strstr(requ, "/nei"))
             send_what |= SIW_NEIGHBORS;
@@ -365,7 +370,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (!send_what)
-      send_what = SIW_ALL;
+      send_what = SIW_RUNTIME_ALL;
   }
 
   send_info(send_what, ipc_connection);
