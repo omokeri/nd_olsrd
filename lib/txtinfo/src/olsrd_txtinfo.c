@@ -105,26 +105,6 @@ static void send_info(unsigned int /*send_what*/, int /*socket*/);
 
 static void ipc_action(int, void *, unsigned int);
 
-static void ipc_print_neighbors(struct autobuf *, bool);
-
-static void ipc_print_links(struct autobuf *);
-
-static void ipc_print_routes(struct autobuf *);
-
-static void ipc_print_topology(struct autobuf *);
-
-static void ipc_print_hna(struct autobuf *);
-
-static void ipc_print_mid(struct autobuf *);
-
-static void ipc_print_gateways(struct autobuf *);
-
-static void ipc_print_olsrd_conf(struct autobuf *);
-
-static void ipc_print_interfaces(struct autobuf *);
-
-static void ipc_print_sgw(struct autobuf *);
-
 #define TXT_IPC_BUFSIZE 256
 
 /* these provide all of the runtime status info */
