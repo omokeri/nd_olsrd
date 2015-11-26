@@ -116,7 +116,6 @@ static void send_info(unsigned int /*send_what*/, int /*socket*/);
 
 static void ipc_action(int, void *, unsigned int);
 
-
 /*
  * this is the size of the buffer used for build_http_header
  * the amount of data written into the buffer will be less than
@@ -422,7 +421,7 @@ static int plugin_ipc_init(void) {
       return 0;
     }
 #if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
-    if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *)&yes, sizeof(yes)) < 0) {
+    if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
       perror("SO_REUSEADDR failed");
       return 0;
     }
