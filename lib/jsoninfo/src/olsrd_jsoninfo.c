@@ -1,12 +1,7 @@
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
- *                     includes code by Bruno Randolf
- *                     includes code by Andreas Lopatic
- *                     includes code by Sven-Ola Tuecke
- *                     includes code by Lorenz Schori
- *                     includes bugs by Markus Kittenberger
- *                     includes bugs by Hans-Christoph Steiner
+ * Copyright (c) 2004
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
