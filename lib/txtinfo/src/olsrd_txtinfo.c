@@ -814,8 +814,10 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_init(&abuf, 4096);
 
   /* Print minimal http header */
-  abuf_puts(&abuf, "HTTP/1.0 200 OK\n");
-  abuf_puts(&abuf, "Content-type: text/plain\n\n");
+  if (http_headers) {
+    abuf_puts(&abuf, "HTTP/1.0 200 OK\n");
+    abuf_puts(&abuf, "Content-type: text/plain\n\n");
+  }
 
   /* Print tables to IPC socket */
 

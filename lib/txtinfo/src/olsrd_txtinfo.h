@@ -60,6 +60,7 @@ extern union olsr_ip_addr txtinfo_accept_ip;
 extern union olsr_ip_addr txtinfo_listen_ip;
 extern int ipc_port;
 extern int nompr;
+extern bool http_headers;
 extern int txtinfo_ipv6_only;
 
 int olsrd_plugin_interface_version(void);
