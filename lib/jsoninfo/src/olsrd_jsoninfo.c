@@ -112,12 +112,10 @@ static int ipc_socket;
 /* IPC initialization function */
 static int plugin_ipc_init(void);
 
-static int read_uuid_from_file(const char *file);
-
 static void send_info(unsigned int /*send_what*/, int /*socket*/);
+
 static void ipc_action(int, void *, unsigned int);
 
-static size_t build_http_header(const char *status, const char *mime, uint32_t msgsize, char *buf, uint32_t bufsize);
 
 /*
  * this is the size of the buffer used for build_http_header
@@ -300,6 +298,82 @@ static void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const
 
 #endif /* __linux__ */
 
+static int read_uuid_from_file(const char *file) {
+  FILE *f;
+  char* end;
+  int r = 0;
+  size_t chars;
+
+  memset(uuid, 0, sizeof(uuid));
+
+  f = fopen(file, "r");
+  olsr_printf(1, "("PLUGIN_NAME") Reading UUID from '%s'\n", file);
+  if (f == NULL) {
+    olsr_printf(1, "("PLUGIN_NAME") Could not open '%s': %s\n", file, strerror(errno));
+    return -1;
+  }
+  chars = fread(uuid, 1, UUIDLEN, f);
+  if (chars > 0) {
+    uuid[chars] = '\0'; /* null-terminate the string */
+
+    /* we only use the first line of the file */
+    end = strchr(uuid, '\n');
+    if (end)
+      *end = 0;
+    r = 0;
+  } else {
+    olsr_printf(1, "("PLUGIN_NAME") Could not read UUID from '%s': %s\n", file, strerror(errno));
+    r = -1;
+  }
+
+  fclose(f);
+  return r;
+}
+
+static size_t build_http_header(const char *status, const char *mime, uint32_t msgsize, char *buf, uint32_t bufsize) {
+  time_t currtime;
+  size_t size;
+
+  size = snprintf(buf, bufsize, "%s\r\n", status);
+
+  /* Date */
+  time(&currtime);
+  size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", localtime(&currtime));
+
+  /* Server version */
+  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME" plugin\r\n");
+
+  /* connection-type */
+  size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
+
+  /* MIME type */
+  if (mime != NULL) {
+    size += snprintf(&buf[size], bufsize - size, "Content-type: %s\r\n", mime);
+  }
+
+  /* CORS data */
+  /**No needs to be strict here, access control is based on source IP*/
+  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Origin: *\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Headers: Accept, Origin, X-Requested-With\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Access-Control-Max-Age: 1728000\r\n");
+
+  /* Content length */
+  if (msgsize > 0) {
+    size += snprintf(&buf[size], bufsize - size, "Content-length: %i\r\n", msgsize);
+  }
+
+  /* Cache-control
+   * No caching dynamic pages
+   */
+  size += snprintf(&buf[size], bufsize - size, "Cache-Control: no-cache\r\n");
+
+  /* End header */
+  size += snprintf(&buf[size], bufsize - size, "\r\n");
+
+  return size;
+}
+
 /**
  *Do initialization here
  *
@@ -407,38 +481,6 @@ static int plugin_ipc_init(void) {
 #endif /* NODEBUG */
   }
   return 1;
-}
-
-static int read_uuid_from_file(const char *file) {
-  FILE *f;
-  char* end;
-  int r = 0;
-  size_t chars;
-
-  memset(uuid, 0, sizeof(uuid));
-
-  f = fopen(file, "r");
-  olsr_printf(1, "("PLUGIN_NAME") Reading UUID from '%s'\n", file);
-  if (f == NULL) {
-    olsr_printf(1, "("PLUGIN_NAME") Could not open '%s': %s\n", file, strerror(errno));
-    return -1;
-  }
-  chars = fread(uuid, 1, UUIDLEN, f);
-  if (chars > 0) {
-    uuid[chars] = '\0'; /* null-terminate the string */
-
-    /* we only use the first line of the file */
-    end = strchr(uuid, '\n');
-    if (end)
-      *end = 0;
-    r = 0;
-  } else {
-    olsr_printf(1, "("PLUGIN_NAME") Could not read UUID from '%s': %s\n", file, strerror(errno));
-    r = -1;
-  }
-
-  fclose(f);
-  return r;
 }
 
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
@@ -933,6 +975,10 @@ static void ipc_print_version(struct autobuf *abuf) {
   abuf_json_mark_object(false, false, abuf, NULL);
 }
 
+static void ipc_print_olsrd_conf(struct autobuf *abuf) {
+  olsrd_write_cnf_autobuf(abuf, olsr_cnf);
+}
+
 static void ipc_print_config(struct autobuf *abuf) {
   struct ip_prefix_list *hna;
   struct ipaddr_str buf, mainaddrbuf;
@@ -1255,10 +1301,6 @@ static void ipc_print_interfaces(struct autobuf *abuf) {
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
-static void ipc_print_olsrd_conf(struct autobuf *abuf) {
-  olsrd_write_cnf_autobuf(abuf, olsr_cnf);
-}
-
 static void jsoninfo_write_data(void *foo __attribute__ ((unused))) {
   fd_set set;
   int result, i, j, max;
@@ -1386,50 +1428,6 @@ static void send_info(unsigned int send_what, int the_socket) {
   }
 
   abuf_free(&abuf);
-}
-
-static size_t build_http_header(const char *status, const char *mime, uint32_t msgsize, char *buf, uint32_t bufsize) {
-  time_t currtime;
-  size_t size;
-
-  size = snprintf(buf, bufsize, "%s\r\n", status);
-
-  /* Date */
-  time(&currtime);
-  size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", localtime(&currtime));
-
-  /* Server version */
-  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME" plugin\r\n");
-
-  /* connection-type */
-  size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
-
-  /* MIME type */
-  if (mime != NULL) {
-    size += snprintf(&buf[size], bufsize - size, "Content-type: %s\r\n", mime);
-  }
-
-  /* CORS data */
-  /**No needs to be strict here, access control is based on source IP*/
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Origin: *\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Headers: Accept, Origin, X-Requested-With\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Max-Age: 1728000\r\n");
-
-  /* Content length */
-  if (msgsize > 0) {
-    size += snprintf(&buf[size], bufsize - size, "Content-length: %i\r\n", msgsize);
-  }
-
-  /* Cache-control
-   * No caching dynamic pages
-   */
-  size += snprintf(&buf[size], bufsize - size, "Cache-Control: no-cache\r\n");
-
-  /* End header */
-  size += snprintf(&buf[size], bufsize - size, "\r\n");
-
-  return size;
 }
 
 /*
