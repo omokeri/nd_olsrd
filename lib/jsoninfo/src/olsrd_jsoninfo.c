@@ -161,7 +161,7 @@ static char *outbuffer[MAX_CLIENTS];
 static size_t outbuffer_size[MAX_CLIENTS];
 static size_t outbuffer_written[MAX_CLIENTS];
 static int outbuffer_socket[MAX_CLIENTS];
-static int outbuffer_count;
+static int outbuffer_count = 0;
 
 char uuid[UUIDLEN + 1];
 char uuidfile[FILENAME_MAX];
