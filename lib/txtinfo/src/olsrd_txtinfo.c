@@ -99,9 +99,9 @@ static void send_info(unsigned int /*send_what*/, int /*socket*/);
 
 static void ipc_action(int, void *, unsigned int);
 
-static void ipc_print_neigh(struct autobuf *, bool);
+static void ipc_print_neighbors(struct autobuf *, bool);
 
-static void ipc_print_link(struct autobuf *);
+static void ipc_print_links(struct autobuf *);
 
 static void ipc_print_routes(struct autobuf *);
 
@@ -111,11 +111,11 @@ static void ipc_print_hna(struct autobuf *);
 
 static void ipc_print_mid(struct autobuf *);
 
-static void ipc_print_gateway(struct autobuf *);
+static void ipc_print_gateways(struct autobuf *);
 
-static void ipc_print_config(struct autobuf *);
+static void ipc_print_olsrd_conf(struct autobuf *);
 
-static void ipc_print_interface(struct autobuf *);
+static void ipc_print_interfaces(struct autobuf *);
 
 static void ipc_print_sgw(struct autobuf *);
 
@@ -364,7 +364,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   send_info(send_what, ipc_connection);
 }
 
-static void ipc_print_neigh(struct autobuf *abuf, bool list_2hop) {
+static void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
@@ -396,7 +396,7 @@ static void ipc_print_neigh(struct autobuf *abuf, bool list_2hop) {
   abuf_puts(abuf, "\n");
 }
 
-static void ipc_print_link(struct autobuf *abuf) {
+static void ipc_print_links(struct autobuf *abuf) {
   struct ipaddr_str buf1, buf2;
   struct lqtextbuffer lqbuffer1, lqbuffer2;
 
@@ -667,7 +667,7 @@ static void ipc_print_mid(struct autobuf *abuf) {
   abuf_puts(abuf, "\n");
 }
 
-static void ipc_print_gateway(struct autobuf *abuf) {
+static void ipc_print_gateways(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_puts(abuf, "Gateway mode is only supported in linux\n");
 #else /* __linux__ */
@@ -718,14 +718,14 @@ static void ipc_print_gateway(struct autobuf *abuf) {
 #endif /* __linux__ */
 }
 
-static void ipc_print_config(struct autobuf *abuf) {
+static void ipc_print_olsrd_conf(struct autobuf *abuf) {
   olsrd_write_cnf_autobuf(abuf, olsr_cnf);
 }
 
 static void ipc_print_version(struct autobuf *abuf) {
   abuf_appendf(abuf, "Version: %s (built on %s on %s)\n", olsrd_version, build_date, build_host);
 }
-static void ipc_print_interface(struct autobuf *abuf) {
+static void ipc_print_interfaces(struct autobuf *abuf) {
   const struct olsr_if *ifs;
   abuf_puts(abuf, "Table: Interfaces\nName\tState\tMTU\tWLAN\tSrc-Adress\tMask\tDst-Adress\n");
   for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
@@ -813,10 +813,10 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   /* links */
   if (send_what & SIW_LINK)
-    ipc_print_link(&abuf);
+    ipc_print_links(&abuf);
   /* neighbours */
   if (send_what & SIW_NEIGH)
-    ipc_print_neigh(&abuf, false);
+    ipc_print_neighbors(&abuf, false);
   /* topology */
   if (send_what & SIW_TOPO)
     ipc_print_topology(&abuf);
@@ -834,16 +834,16 @@ static void send_info(unsigned int send_what, int the_socket) {
     ipc_print_routes(&abuf);
   /* gateways */
   if (send_what & SIW_GATEWAY)
-    ipc_print_gateway(&abuf);
+    ipc_print_gateways(&abuf);
   /* config */
   if (send_what & SIW_CONFIG)
-    ipc_print_config(&abuf);
+    ipc_print_olsrd_conf(&abuf);
   /* interface */
   if (send_what & SIW_INTERFACE)
-    ipc_print_interface(&abuf);
+    ipc_print_interfaces(&abuf);
   /* 2hop neighbour list */
   if (send_what & SIW_2HOP)
-    ipc_print_neigh(&abuf, true);
+    ipc_print_neighbors(&abuf, true);
   /* version */
   if (send_what & SIW_VERSION)
     ipc_print_version(&abuf);
