@@ -1359,7 +1359,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
   size_t header_len = 0;
   char header_buf[MAX_HTTPHEADER_SIZE];
-  const char *content_type = "application/json";
+  const char *content_type = (send_what & SIW_ALL) ? "application/json" : "text/plain";
 
   /* global variables for tracking when to put a comma in for JSON */
   entrynumber[0] = 0;
