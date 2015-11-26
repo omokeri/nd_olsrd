@@ -51,8 +51,12 @@ struct autobuf;
 #include "defs.h"
 #include <stdarg.h>
 #include <time.h>
+#include <limits.h>
 
 #define AUTOBUFCHUNK	4096
+
+#define AUTOBUFSIZEMAX INT_MAX
+
 struct autobuf {
     int size;
     int len;
