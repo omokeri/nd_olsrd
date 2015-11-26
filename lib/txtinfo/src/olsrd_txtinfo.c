@@ -49,9 +49,9 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#if !defined _WIN32
+#ifndef _WIN32
 #include <sys/select.h>
-#endif /* !defined _WIN32 */
+#endif /* _WIN32 */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
