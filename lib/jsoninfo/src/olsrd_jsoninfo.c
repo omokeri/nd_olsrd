@@ -97,6 +97,9 @@
 
 /* defines to make txtinfo and jsoninfo look alike */
 #define PLUGIN_NAME "JSONINFO"
+#define info_accept_ip jsoninfo_accept_ip
+#define info_listen_ip jsoninfo_listen_ip
+#define info_ipv6_only jsoninfo_ipv6_only
 
 static int ipc_socket;
 
@@ -348,7 +351,7 @@ static int plugin_ipc_init(void) {
     }
 #endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
 #if defined linux && defined IPV6_V6ONLY
-    if (jsoninfo_ipv6_only && olsr_cnf->ip_version == AF_INET6) {
+    if (info_ipv6_only && olsr_cnf->ip_version == AF_INET6) {
       if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
         perror("IPV6_V6ONLY failed");
         return 0;
@@ -365,7 +368,7 @@ static int plugin_ipc_init(void) {
 #ifdef SIN6_LEN
       sst.in4.sin_len = addrlen;
 #endif /* SIN6_LEN */
-      sst.in4.sin_addr.s_addr = jsoninfo_listen_ip.v4.s_addr;
+      sst.in4.sin_addr.s_addr = info_listen_ip.v4.s_addr;
       sst.in4.sin_port = htons(ipc_port);
     } else {
       sst.in6.sin6_family = AF_INET6;
@@ -373,7 +376,7 @@ static int plugin_ipc_init(void) {
 #ifdef SIN6_LEN
       sst.in6.sin6_len = addrlen;
 #endif /* SIN6_LEN */
-      sst.in6.sin6_addr = jsoninfo_listen_ip.v6;
+      sst.in6.sin6_addr = info_listen_ip.v6;
       sst.in6.sin6_port = htons(ipc_port);
     }
 
@@ -457,7 +460,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   if (olsr_cnf->ip_version == AF_INET) {
     if (inet_ntop(olsr_cnf->ip_version, &pin.in4.sin_addr, addr, INET6_ADDRSTRLEN) == NULL)
       addr[0] = '\0';
-    if (!ip4equal(&pin.in4.sin_addr, &jsoninfo_accept_ip.v4) && jsoninfo_accept_ip.v4.s_addr != INADDR_ANY) {
+    if (!ip4equal(&pin.in4.sin_addr, &info_accept_ip.v4) && info_accept_ip.v4.s_addr != INADDR_ANY) {
 #ifdef JSONINFO_ALLOW_LOCALHOST
       if (pin.in4.sin_addr.s_addr != INADDR_LOOPBACK) {
 #endif /* JSONINFO_ALLOW_LOCALHOST */
@@ -472,7 +475,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     if (inet_ntop(olsr_cnf->ip_version, &pin.in6.sin6_addr, addr, INET6_ADDRSTRLEN) == NULL)
       addr[0] = '\0';
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
-    if (!ip6equal(&in6addr_any, &jsoninfo_accept_ip.v6) && !ip6equal(&pin.in6.sin6_addr, &jsoninfo_accept_ip.v6)) {
+    if (!ip6equal(&in6addr_any, &info_accept_ip.v6) && !ip6equal(&pin.in6.sin6_addr, &info_accept_ip.v6)) {
       olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
       close(ipc_connection);
       return;
