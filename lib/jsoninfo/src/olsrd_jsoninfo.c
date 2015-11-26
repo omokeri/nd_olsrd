@@ -1362,7 +1362,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   entrynumber[0] = 0;
   currentjsondepth = 0;
 
-  abuf_init(&abuf, 32768);
+  abuf_init(&abuf, 2 * 4096);
 
   // only add if normal format
   if (send_what & SIW_ALL) {
