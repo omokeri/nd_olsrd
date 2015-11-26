@@ -118,7 +118,7 @@ static void ipc_action(int, void *, unsigned int);
 #define SIW_INTERFACES 0x0080
 #define SIW_2HOP 0x0100
 #define SIW_SGW 0x0200
-#define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY)
+#define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
 
 /* these only change at olsrd startup */
 #define SIW_VERSION 0x0400
