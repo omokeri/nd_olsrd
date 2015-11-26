@@ -81,7 +81,6 @@ int abuf_init(struct autobuf *autobuf, int initial_size) {
     autobuf->size = 0;
     return -1;
   }
-  *autobuf->buf = '\0';
   return 0;
 }
 
