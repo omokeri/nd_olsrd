@@ -155,11 +155,11 @@ static size_t outbuffer_written[MAX_CLIENTS];
 static int outbuffer_socket[MAX_CLIENTS];
 static int outbuffer_count = 0;
 
+static struct timer_entry *writetimer_entry;
+static struct timeval start_time;
+
 char uuid[UUIDLEN + 1];
 char uuidfile[FILENAME_MAX];
-
-static struct timeval start_time;
-static struct timer_entry *writetimer_entry;
 
 /* JSON support functions */
 
