@@ -818,42 +818,32 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   /* Print tables to IPC socket */
 
-  /* links */
-  if (send_what & SIW_LINKS)
-    ipc_print_links(&abuf);
-  /* neighbours */
   if (send_what & SIW_NEIGHBORS)
     ipc_print_neighbors(&abuf, false);
-  /* topology */
-  if (send_what & SIW_TOPOLOGY)
-    ipc_print_topology(&abuf);
-  /* hna */
-  if (send_what & SIW_HNA)
-    ipc_print_hna(&abuf);
-  /* sgw */
-  if (send_what & SIW_SGW)
-    ipc_print_sgw(&abuf);
-  /* mid */
-  if (send_what & SIW_MID)
-    ipc_print_mid(&abuf);
-  /* routes */
+  if (send_what & SIW_LINKS)
+    ipc_print_links(&abuf);
   if (send_what & SIW_ROUTES)
     ipc_print_routes(&abuf);
-  /* gateways */
+  if (send_what & SIW_HNA)
+    ipc_print_hna(&abuf);
+  if (send_what & SIW_MID)
+    ipc_print_mid(&abuf);
+  if (send_what & SIW_TOPOLOGY)
+    ipc_print_topology(&abuf);
   if (send_what & SIW_GATEWAYS)
     ipc_print_gateways(&abuf);
-  /* config */
-  if (send_what & SIW_CONFIG)
-    ipc_print_olsrd_conf(&abuf);
-  /* interface */
   if (send_what & SIW_INTERFACES)
     ipc_print_interfaces(&abuf);
-  /* 2hop neighbour list */
   if (send_what & SIW_2HOP)
     ipc_print_neighbors(&abuf, true);
-  /* version */
+  if (send_what & SIW_SGW)
+    ipc_print_sgw(&abuf);
+
   if (send_what & SIW_VERSION)
     ipc_print_version(&abuf);
+
+  if (send_what & SIW_CONFIG)
+    ipc_print_olsrd_conf(&abuf);
 
   assert(outbuffer_count < MAX_CLIENTS);
 
