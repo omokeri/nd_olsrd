@@ -149,10 +149,10 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
 #define SIW_PLUGINS 0x1000
 #define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
 
-/* this is everything in JSON format */
+/* this is everything in normal format */
 #define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
 
-/* this data is not JSON format but olsrd.conf format */
+/* this data is not normal format but olsrd.conf format */
 #define SIW_OLSRD_CONF 0x2000
 
 #define MAX_CLIENTS 3
@@ -497,7 +497,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     ssize_t s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
 
     if (s == sizeof(requ) - 1) {
-      /* input was too much long, just skip the rest */
+      /* input was much too long, just skip the rest */
       char dummy[1024];
 
       while (recv(ipc_connection, (void *) &dummy, sizeof(dummy), 0) == sizeof(dummy))
@@ -1322,7 +1322,7 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   abuf_init(&abuf, 32768);
 
-  // only add if outputing JSON
+  // only add if normal format
   if (send_what & SIW_ALL) {
     abuf_json_mark_output(true, &abuf);
 
@@ -1362,7 +1362,7 @@ static void send_info(unsigned int send_what, int the_socket) {
     abuf_json_mark_output(false, &abuf);
     abuf_puts(&abuf, "\n");
   } else if (send_what & SIW_OLSRD_CONF) {
-    /* this outputs the olsrd.conf text directly, not JSON */
+    /* this outputs the olsrd.conf text directly, not normal format */
     ipc_print_olsrd_conf(&abuf);
   }
 
