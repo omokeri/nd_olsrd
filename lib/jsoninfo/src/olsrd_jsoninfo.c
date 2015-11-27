@@ -174,7 +174,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
 
   /* MIME type */
   if (mime != NULL) {
-    size += snprintf(&buf[size], bufsize - size, "Content-type: %s\r\n", mime);
+    size += snprintf(&buf[size], bufsize - size, "Content-Type: %s\r\n", mime);
   }
 
   /* CORS data */
