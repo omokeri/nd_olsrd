@@ -167,7 +167,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
   size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", gmtime(&currtime));
 
   /* Server version */
-  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME" plugin\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME"\r\n");
 
   /* connection-type */
   size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
