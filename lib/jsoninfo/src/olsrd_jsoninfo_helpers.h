@@ -1,7 +1,7 @@
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
- *                     includes code by Bruno Randolf
+ * Copyright (c) 2004
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,39 +39,38 @@
  *
  */
 
-/*
- * Dynamic linked library for the olsr.org olsr daemon
- */
+#ifndef LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
+#define LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
 
-#ifndef _OLSRD_JSONINFO
-#define _OLSRD_JSONINFO
+#include <stdio.h>
 
-#include "olsr_types.h"
-#include "olsrd_plugin.h"
-#include "plugin_util.h"
+#include "common/autobuf.h"
 
-/* uncomment this to allow connections from 127.0.0.1 regardless of olsrd.conf (useful to allow externel ip/network + localhost) (ipv4 only)*/
-/* #define JSONINFO_ALLOW_LOCALHOST */
+#define UUIDLEN 256
+extern char uuid[UUIDLEN + 1];
 
-extern char uuidfile[FILENAME_MAX];
+void abuf_json_reset_entry_number_and_depth(void);
 
-extern union olsr_ip_addr jsoninfo_accept_ip;
-extern union olsr_ip_addr jsoninfo_listen_ip;
-extern int ipc_port;
-extern int nompr;
-extern bool http_headers;
-extern int jsoninfo_ipv6_only;
+void abuf_json_mark_output(bool open, struct autobuf *abuf);
 
-int olsrd_plugin_interface_version(void);
-int olsrd_plugin_init(void);
-void olsr_plugin_exit(void);
-void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size);
+void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header);
 
-#endif /* _OLSRD_JSONINFO */
+void abuf_json_mark_array_entry(bool open, struct autobuf *abuf);
 
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+void abuf_json_insert_comma(struct autobuf *abuf);
+
+void abuf_json_boolean(struct autobuf *abuf, const char* key, int value);
+
+void abuf_json_string(struct autobuf *abuf, const char* key, const char* value);
+
+void abuf_json_int(struct autobuf *abuf, const char* key, long value);
+
+void abuf_json_float(struct autobuf *abuf, const char* key, float value);
+
+#ifdef __linux__
+void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint);
+#endif /* __linux__ */
+
+int read_uuid_from_file(const char * name, const char *file);
+
+#endif /* LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_ */

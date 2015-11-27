@@ -62,10 +62,6 @@
 #include <libgen.h>
 #include <assert.h>
 
-#ifdef __linux__
-#include <fcntl.h>
-#endif /* __linux__ */
-
 #include "ipcalc.h"
 #include "olsr.h"
 #include "builddata.h"
@@ -82,6 +78,7 @@
 #include "common/autobuf.h"
 #include "gateway.h"
 #include "egressTypes.h"
+#include "olsrd_jsoninfo_helpers.h"
 
 #include "olsrd_jsoninfo.h"
 #include "olsrd_plugin.h"
@@ -158,171 +155,6 @@ static int outbuffer_count = 0;
 static struct timer_entry *writetimer_entry;
 static struct timeval start_time;
 
-char uuid[UUIDLEN + 1];
-char uuidfile[FILENAME_MAX];
-
-/* JSON support functions */
-
-/* JSON does not allow commas dangling at the end of arrays, so we need to
- * count which entry number we're at in order to make sure we don't tack a
- * dangling comma on at the end */
-static int entrynumber[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-static int currentjsondepth = 0;
-
-static void abuf_json_new_indent(struct autobuf *abuf) {
-  int i = currentjsondepth;
-
-  if (!i) {
-    return;
-  }
-
-  abuf_puts(abuf, "\n");
-  while (i-- > 0) {
-    abuf_puts(abuf, "  ");
-  }
-}
-
-static void abuf_json_mark_output(bool open, struct autobuf *abuf) {
-  if (open) {
-    assert(!currentjsondepth);
-    abuf_json_new_indent(abuf);
-    abuf_puts(abuf, "{");
-    currentjsondepth++;
-    entrynumber[currentjsondepth] = 0;
-  } else {
-    entrynumber[currentjsondepth] = 0;
-    currentjsondepth--;
-    assert(!currentjsondepth);
-    abuf_json_new_indent(abuf);
-    abuf_puts(abuf, "\n}");
-  }
-}
-
-static void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header) {
-  if (open) {
-    if (entrynumber[currentjsondepth]) {
-      abuf_appendf(abuf, ",");
-    }
-    abuf_json_new_indent(abuf);
-    if (header) {
-      abuf_appendf(abuf, "\"%s\": %s", header, array ? "[" : "{");
-    } else {
-      abuf_appendf(abuf, "%s", array ? "[" : "{");
-    }
-    entrynumber[currentjsondepth]++;
-    currentjsondepth++;
-    entrynumber[currentjsondepth] = 0;
-  } else {
-    entrynumber[currentjsondepth] = 0;
-    currentjsondepth--;
-    abuf_json_new_indent(abuf);
-    abuf_appendf(abuf, "%s", array ? "]" : "}");
-  }
-}
-
-static void abuf_json_mark_array_entry(bool open, struct autobuf *abuf) {
-  abuf_json_mark_object(open, false, abuf, NULL);
-}
-
-static void abuf_json_insert_comma(struct autobuf *abuf) {
-  if (entrynumber[currentjsondepth])
-    abuf_appendf(abuf, ",");
-}
-
-static void abuf_json_boolean(struct autobuf *abuf, const char* key, int value) {
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %s", key, value ? "true" : "false");
-  entrynumber[currentjsondepth]++;
-}
-
-static void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) {
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
-  entrynumber[currentjsondepth]++;
-}
-
-static void abuf_json_int(struct autobuf *abuf, const char* key, long value) {
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %li", key, value);
-  entrynumber[currentjsondepth]++;
-}
-
-static void abuf_json_float(struct autobuf *abuf, const char* key, float value) {
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %.03f", key, (double) value);
-  entrynumber[currentjsondepth]++;
-}
-
-/* Linux specific functions for getting system info */
-
-#ifdef __linux__
-static int get_string_from_file(const char* filename, char* buf, int len) {
-  int bytes = -1;
-  int fd = open(filename, O_RDONLY);
-  if (fd > -1) {
-    bytes = read(fd, buf, len);
-    if (bytes < len)
-      buf[bytes - 1] = '\0'; // remove trailing \n
-    else
-      buf[len - 1] = '\0';
-    close(fd);
-  }
-  return bytes;
-}
-
-static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* syspath) {
-  int ret = -1;
-  char buf[256];
-  *buf = 0;
-  ret = get_string_from_file(syspath, buf, 256);
-  if (*buf)
-    abuf_json_string(abuf, key, buf);
-  return ret;
-}
-
-static void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint) {
-  char filename[256];
-  snprintf(filename, 255, "/sys/class/net/%s/%s", ifname, datapoint);
-  abuf_json_sysdata(abuf, key, filename);
-}
-
-#endif /* __linux__ */
-
-static int read_uuid_from_file(const char *file) {
-  FILE *f;
-  char* end;
-  int r = 0;
-  size_t chars;
-
-  memset(uuid, 0, sizeof(uuid));
-
-  f = fopen(file, "r");
-  olsr_printf(1, "("PLUGIN_NAME") Reading UUID from '%s'\n", file);
-  if (f == NULL) {
-    olsr_printf(1, "("PLUGIN_NAME") Could not open '%s': %s\n", file, strerror(errno));
-    return -1;
-  }
-  chars = fread(uuid, 1, UUIDLEN, f);
-  if (chars > 0) {
-    uuid[chars] = '\0'; /* null-terminate the string */
-
-    /* we only use the first line of the file */
-    end = strchr(uuid, '\n');
-    if (end)
-      *end = 0;
-    r = 0;
-  } else {
-    olsr_printf(1, "("PLUGIN_NAME") Could not read UUID from '%s': %s\n", file, strerror(errno));
-    r = -1;
-  }
-
-  fclose(f);
-  return r;
-}
 
 static size_t build_http_header(const char *status, const char *mime, uint32_t msgsize, char *buf, uint32_t bufsize) {
   time_t currtime;
@@ -383,7 +215,7 @@ int olsrd_plugin_init(void) {
 
   if (!strlen(uuidfile))
     strscpy(uuidfile, "uuid.txt", sizeof(uuidfile));
-  read_uuid_from_file(uuidfile);
+  read_uuid_from_file(PLUGIN_NAME, uuidfile);
 
   plugin_ipc_init();
   return 1;
@@ -1357,8 +1189,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   const char *content_type = (send_what & SIW_ALL) ? "application/json" : "text/plain";
 
   /* global variables for tracking when to put a comma in for JSON */
-  entrynumber[0] = 0;
-  currentjsondepth = 0;
+  abuf_json_reset_entry_number_and_depth();
 
   abuf_init(&abuf, 2 * 4096);
 

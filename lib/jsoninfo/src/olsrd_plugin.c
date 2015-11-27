@@ -63,6 +63,7 @@ union olsr_ip_addr jsoninfo_accept_ip;
 union olsr_ip_addr jsoninfo_listen_ip;
 int ipc_port;
 int nompr;
+char uuidfile[FILENAME_MAX];
 bool http_headers;
 int jsoninfo_ipv6_only;
 
