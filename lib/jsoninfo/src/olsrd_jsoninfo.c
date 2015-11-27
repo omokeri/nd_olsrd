@@ -155,49 +155,61 @@ static int outbuffer_count = 0;
 static struct timer_entry *writetimer_entry;
 static struct timeval start_time;
 
-
-static size_t build_http_header(const char *status, const char *mime, uint32_t msgsize, char *buf, uint32_t bufsize) {
-  time_t currtime;
-  size_t size;
-
-  size = snprintf(buf, bufsize, "%s\r\n", status);
+static void build_http_header(const char *status, const char *mime, struct autobuf *abuf, int *contentLengthPlaceholderStart) {
+  /* Status */
+  abuf_appendf(abuf, "%s\r\n", status);
 
   /* Date */
-  time(&currtime);
-  size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", gmtime(&currtime));
+  {
+    time_t currtime;
+    char buf[128];
+
+    time(&currtime);
+    if (strftime(buf, sizeof(buf), "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", gmtime(&currtime))) {
+      abuf_puts(abuf, buf);
+    }
+  }
 
   /* Server version */
-  size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME"\r\n");
+  abuf_puts(abuf, "Server: OLSRD "PLUGIN_NAME"\r\n");
 
   /* connection-type */
-  size += snprintf(&buf[size], bufsize - size, "Connection: close\r\n");
+  abuf_puts(abuf, "Connection: close\r\n");
 
   /* MIME type */
   if (mime != NULL) {
-    size += snprintf(&buf[size], bufsize - size, "Content-Type: %s\r\n", mime);
+    abuf_appendf(abuf, "Content-Type: %s\r\n", mime);
   }
 
   /* CORS data */
-  /**No needs to be strict here, access control is based on source IP*/
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Origin: *\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Allow-Headers: Accept, Origin, X-Requested-With\r\n");
-  size += snprintf(&buf[size], bufsize - size, "Access-Control-Max-Age: 1728000\r\n");
+  /* No needs to be strict here, access control is based on source IP */
+  abuf_puts(abuf, "Access-Control-Allow-Origin: *\r\n");
+  abuf_puts(abuf, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
+  abuf_puts(abuf, "Access-Control-Allow-Headers: Accept, Origin, X-Requested-With\r\n");
+  abuf_puts(abuf, "Access-Control-Max-Age: 1728000\r\n");
 
   /* Content length */
-  if (msgsize > 0) {
-    size += snprintf(&buf[size], bufsize - size, "Content-Length: %i\r\n", msgsize);
-  }
+  abuf_puts(abuf, "Content-Length: ");
+  *contentLengthPlaceholderStart = abuf->len;
+  abuf_puts(abuf, "            "); /* 12 spaces reserved for the length (max. 1TB-1), to be filled at the end */
+  abuf_puts(abuf, "\r\n");
 
   /* Cache-control
    * No caching dynamic pages
    */
-  size += snprintf(&buf[size], bufsize - size, "Cache-Control: no-cache\r\n");
+  abuf_puts(abuf, "Cache-Control: no-cache\r\n");
 
   /* End header */
-  size += snprintf(&buf[size], bufsize - size, "\r\n");
+  abuf_puts(abuf, "\r\n");
+}
 
-  return size;
+static void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthPlaceholderStart, int contentLength) {
+  char buf[12 + 1]; /* size must match to number of spaces used (+1 for the terminating byte) */
+
+  memset(buf, 0, sizeof(buf));
+  snprintf(buf, sizeof(buf), "%d", contentLength);
+  buf[sizeof(buf) - 1] = '\0';
+  memcpy(&abuf->buf[contentLengthPlaceholderStart], buf, strlen(buf));
 }
 
 /**
@@ -1184,14 +1196,20 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
-  size_t header_len = 0;
-  char header_buf[MAX_HTTPHEADER_SIZE];
+
   const char *content_type = (send_what & SIW_ALL) ? "application/json" : "text/plain";
+  int contentLengthPlaceholderStart = 0;
+  int headerLength = 0;
 
   /* global variables for tracking when to put a comma in for JSON */
   abuf_json_reset_entry_number_and_depth();
 
   abuf_init(&abuf, 2 * 4096);
+
+  if (http_headers) {
+    build_http_header(HTTP_200, content_type, &abuf, &contentLengthPlaceholderStart);
+    headerLength = abuf.len;
+  }
 
   // only add if normal format
   if (send_what & SIW_ALL) {
@@ -1238,16 +1256,15 @@ static void send_info(unsigned int send_what, int the_socket) {
   }
 
   if (http_headers) {
-    header_len = build_http_header(HTTP_200, content_type, abuf.len, header_buf, sizeof(header_buf));
+    http_header_adjust_content_length(&abuf, contentLengthPlaceholderStart, abuf.len - headerLength);
   }
 
-  outbuffer[outbuffer_count] = olsr_malloc(header_len + abuf.len, PLUGIN_NAME" output buffer");
-  outbuffer_size[outbuffer_count] = header_len + abuf.len;
+  outbuffer[outbuffer_count] = olsr_malloc(abuf.len, PLUGIN_NAME" output buffer");
+  outbuffer_size[outbuffer_count] = abuf.len;
   outbuffer_written[outbuffer_count] = 0;
   outbuffer_socket[outbuffer_count] = the_socket;
 
-  memcpy(outbuffer[outbuffer_count], header_buf, header_len);
-  memcpy((outbuffer[outbuffer_count]) + header_len, abuf.buf, abuf.len);
+  memcpy(outbuffer[outbuffer_count], abuf.buf, abuf.len);
   outbuffer_count++;
 
   if (outbuffer_count == 1) {
