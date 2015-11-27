@@ -831,12 +831,15 @@ static void send_info(unsigned int send_what, int the_socket) {
   if (send_what & SIW_OLSRD_CONF)
     ipc_print_olsrd_conf(&abuf);
 
-  outbuffer[outbuffer_count] = olsr_malloc(abuf.len, PLUGIN_NAME" output buffer");
+  /* avoid a memcpy: just move the abuf.buf pointer and clear abuf */
+  outbuffer[outbuffer_count] = abuf.buf;
   outbuffer_size[outbuffer_count] = abuf.len;
   outbuffer_written[outbuffer_count] = 0;
   outbuffer_socket[outbuffer_count] = the_socket;
+  abuf.buf = NULL;
+  abuf.len = 0;
+  abuf.size = 0;
 
-  memcpy(outbuffer[outbuffer_count], abuf.buf, abuf.len);
   outbuffer_count++;
 
   if (outbuffer_count == 1) {
