@@ -164,7 +164,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
 
   /* Date */
   time(&currtime);
-  size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", localtime(&currtime));
+  size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", gmtime(&currtime));
 
   /* Server version */
   size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME" plugin\r\n");
