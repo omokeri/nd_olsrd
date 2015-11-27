@@ -170,7 +170,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
   size += snprintf(&buf[size], bufsize - size, "Server: OLSRD "PLUGIN_NAME"\r\n");
 
   /* connection-type */
-  size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
+  size += snprintf(&buf[size], bufsize - size, "Connection: close\r\n");
 
   /* MIME type */
   if (mime != NULL) {
