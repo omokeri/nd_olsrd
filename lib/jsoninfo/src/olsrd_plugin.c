@@ -79,7 +79,7 @@ static void my_init(void) {
 
   /* defaults for parameters */
   ipc_port = 9090;
-  http_headers = false;
+  http_headers = true;
   jsoninfo_ipv6_only = false;
 
   if (olsr_cnf->ip_version == AF_INET) {
