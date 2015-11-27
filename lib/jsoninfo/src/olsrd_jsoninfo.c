@@ -1197,7 +1197,7 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
-  const char *content_type = (send_what & SIW_ALL) ? "application/json" : "text/plain";
+  const char *content_type = (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
   int contentLengthPlaceholderStart = 0;
   int headerLength = 0;
 
