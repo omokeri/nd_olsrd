@@ -831,8 +831,6 @@ static void send_info(unsigned int send_what, int the_socket) {
   if (send_what & SIW_OLSRD_CONF)
     ipc_print_olsrd_conf(&abuf);
 
-  assert(outbuffer_count < MAX_CLIENTS);
-
   outbuffer[outbuffer_count] = olsr_malloc(abuf.len, PLUGIN_NAME" output buffer");
   outbuffer_size[outbuffer_count] = abuf.len;
   outbuffer_written[outbuffer_count] = 0;
