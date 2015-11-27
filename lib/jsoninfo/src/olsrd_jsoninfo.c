@@ -186,7 +186,7 @@ static size_t build_http_header(const char *status, const char *mime, uint32_t m
 
   /* Content length */
   if (msgsize > 0) {
-    size += snprintf(&buf[size], bufsize - size, "Content-length: %i\r\n", msgsize);
+    size += snprintf(&buf[size], bufsize - size, "Content-Length: %i\r\n", msgsize);
   }
 
   /* Cache-control
