@@ -446,7 +446,7 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->ioctl_s < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "ioctl socket: %s", strerror(errno));
-    olsr_exit(buf2, EXIT_SUCCESS);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 
   /* create a socket for netlink calls */
@@ -455,7 +455,7 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->rtnl_s < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "rtnetlink socket: %s", strerror(errno));
-    olsr_exit(buf2, EXIT_SUCCESS);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 
   if (fcntl(olsr_cnf->rtnl_s, F_SETFL, O_NONBLOCK)) {
@@ -465,7 +465,7 @@ int main(int argc, char *argv[]) {
   if ((olsr_cnf->rt_monitor_socket = rtnetlink_register_socket(RTMGRP_LINK)) < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "rtmonitor socket: %s", strerror(errno));
-    olsr_exit(buf2, EXIT_SUCCESS);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 #endif /* __linux__ */
 
@@ -475,7 +475,7 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->rts < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "routing socket: %s", strerror(errno));
-    olsr_exit(buf2, EXIT_SUCCESS);
+    olsr_exit(buf2, EXIT_FAILURE);
   }
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
 

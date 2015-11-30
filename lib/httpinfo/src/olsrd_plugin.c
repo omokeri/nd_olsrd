@@ -127,12 +127,12 @@ add_plugin_access(const char *value, void *data, set_plugin_parameter_addon addo
   if (olsr_string_to_prefix(olsr_cnf->ip_version, &prefix, value)) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "HTTPINFO: unknown access restriction parameter: %s", value);
-    olsr_exit(buf, EXIT_SUCCESS);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 
   an = olsr_malloc(sizeof(*an), __func__);
   if (an == NULL) {
-    olsr_exit("HTTPINFO: register param net out of memory", EXIT_SUCCESS);
+    olsr_exit("HTTPINFO: register param net out of memory", EXIT_FAILURE);
   }
 
   an->prefix = prefix;
