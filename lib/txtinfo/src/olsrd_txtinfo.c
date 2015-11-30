@@ -121,7 +121,9 @@ static void ipc_action(int, void *, unsigned int);
 
 /* these only change at olsrd startup */
 #define SIW_VERSION 0x0400
-#define SIW_STARTUP_ALL (SIW_VERSION)
+#define SIW_CONFIG 0x0800
+#define SIW_PLUGINS 0x1000
+#define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
 
 /* this is everything in normal format */
 #define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
@@ -399,6 +401,10 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
         // specials
         if (strstr(requ, "/ver"))
           send_what |= SIW_VERSION;
+        if (strstr(requ, "/config"))
+          send_what |= SIW_CONFIG;
+        if (strstr(requ, "/plugins"))
+          send_what |= SIW_PLUGINS;
 
         /* To print out neighbours only on the Freifunk Status
          * page the normal output is somewhat lengthy. The
@@ -885,12 +891,18 @@ static void send_info(unsigned int send_what, int the_socket) {
       ipc_print_routes(&abuf);
     if (send_what & SIW_GATEWAYS)
       ipc_print_gateways(&abuf);
+    if (send_what & SIW_CONFIG) {
+      /* not supported */
+    }
     if (send_what & SIW_INTERFACES)
       ipc_print_interfaces(&abuf);
     if (send_what & SIW_2HOP)
       ipc_print_neighbors(&abuf, true);
     if (send_what & SIW_VERSION)
       ipc_print_version(&abuf);
+    if (send_what & SIW_PLUGINS) {
+      /* not supported */
+    }
   } else if (send_what & SIW_OLSRD_CONF) {
     /* this outputs the olsrd.conf text directly, not normal format */
     ipc_print_olsrd_conf(&abuf);
