@@ -108,15 +108,6 @@ static void send_info(unsigned int /*send_what*/, int /*socket*/);
 
 static void ipc_action(int, void *, unsigned int);
 
-/*
- * this is the size of the buffer used for build_http_header
- * the amount of data written into the buffer will be less than
- * 400 bytes approximatively.
- * The size may vary because the Content-Length header contains
- * the length of the json data
- */
-#define MAX_HTTPHEADER_SIZE 512
-
 #define TXT_IPC_BUFSIZE 256
 
 /* these provide all of the runtime status info */
