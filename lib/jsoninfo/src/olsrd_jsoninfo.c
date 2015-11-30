@@ -1220,31 +1220,30 @@ static void send_info(unsigned int send_what, int the_socket) {
     if (*uuid)
       abuf_json_string(&abuf, "uuid", uuid);
 
-    if (send_what & SIW_NEIGHBORS)
-      ipc_print_neighbors(&abuf, false);
     if (send_what & SIW_LINKS)
       ipc_print_links(&abuf);
-    if (send_what & SIW_ROUTES)
-      ipc_print_routes(&abuf);
-    if (send_what & SIW_HNA)
-      ipc_print_hna(&abuf);
-    if (send_what & SIW_MID)
-      ipc_print_mid(&abuf);
+    if (send_what & SIW_NEIGHBORS)
+      ipc_print_neighbors(&abuf, false);
     if (send_what & SIW_TOPOLOGY)
       ipc_print_topology(&abuf);
+    if (send_what & SIW_HNA)
+      ipc_print_hna(&abuf);
+    if (send_what & SIW_SGW)
+      ipc_print_sgw(&abuf);
+    if (send_what & SIW_MID)
+      ipc_print_mid(&abuf);
+    if (send_what & SIW_ROUTES)
+      ipc_print_routes(&abuf);
     if (send_what & SIW_GATEWAYS)
       ipc_print_gateways(&abuf);
+    if (send_what & SIW_CONFIG)
+      ipc_print_config(&abuf);
     if (send_what & SIW_INTERFACES)
       ipc_print_interfaces(&abuf);
     if (send_what & SIW_2HOP)
       ipc_print_neighbors(&abuf, true);
-    if (send_what & SIW_SGW)
-      ipc_print_sgw(&abuf);
-
     if (send_what & SIW_VERSION)
       ipc_print_version(&abuf);
-    if (send_what & SIW_CONFIG)
-      ipc_print_config(&abuf);
     if (send_what & SIW_PLUGINS)
       ipc_print_plugins(&abuf);
 
