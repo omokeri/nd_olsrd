@@ -423,8 +423,16 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
           send_what |= SIW_CONFIG;
         if (strstr(requ, "/plugins"))
           send_what |= SIW_PLUGINS;
+
+        /* To print out neighbours only on the Freifunk Status
+         * page the normal output is somewhat lengthy. The
+         * header parsing is sufficient for standard wget.
+         */
+        if (strstr(requ, "/neighbours"))
+          send_what = SIW_NEIGHBORS | SIW_LINKS;
       }
     }
+
     if (!send_what)
       send_what = SIW_ALL;
   }
