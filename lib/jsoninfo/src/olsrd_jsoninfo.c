@@ -340,7 +340,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       addr[0] = '\0';
     if (!ip4equal(&pin.in4.sin_addr, &info_accept_ip.v4) && info_accept_ip.v4.s_addr != INADDR_ANY) {
 #ifdef INFO_ALLOW_LOCALHOST
-      if (pin.in4.sin_addr.s_addr != INADDR_LOOPBACK) {
+      if (ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
 #endif /* INFO_ALLOW_LOCALHOST */
       olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
       close(ipc_connection);
