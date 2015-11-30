@@ -666,7 +666,7 @@ int main(int argc, char *argv[]) {
   /* We'll only get here when olsr_shutdown has stopped the scheduler */
   sleep(30);
 
-  exit(1);
+  exit(EXIT_FAILURE);
 } /* main */
 
 /*

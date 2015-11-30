@@ -237,7 +237,7 @@ gui_shutdown(GtkObject * object __attribute__((unused)),
     printf("Could not close socket!\n");
 
   printf("BYE-BYE!\n");
-  exit(0);
+  exit(EXIT_SUCCESS);
 
 }
 

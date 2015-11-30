@@ -149,7 +149,7 @@ ohs_cmd_olsrd(const char *args)
 
     if (execve(olsrd_path, (char *const *)olsrd_args, NULL) < 0) {
       printf("Error executing olsrd: %s\n", strerror(errno));
-      exit(1);
+      exit(EXIT_FAILURE);
     }
   }
   /* Stop olsrd instance */

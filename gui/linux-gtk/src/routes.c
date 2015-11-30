@@ -52,7 +52,7 @@ add_route_entry(struct route_entry *entry __attribute__((unused)))
 
   if ((new_entry = malloc(sizeof(struct route_entry))) == 0) {
     fprintf(stderr, "OUT OF MEMORY!\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   /* queue */

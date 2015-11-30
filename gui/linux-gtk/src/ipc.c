@@ -63,7 +63,7 @@ ipc_connect(struct sockaddr_in *pin)
   if (!ipc_socket)
     if ((ipc_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
       perror("socket");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
   printf("Attempting connect...");
@@ -82,17 +82,17 @@ ipc_connect(struct sockaddr_in *pin)
 #ifdef _WIN32
     if (WSAIoctl(ipc_socket, FIONBIO, &On, sizeof(On), NULL, 0, &Len, NULL, NULL) < 0) {
       fprintf(stderr, "Error while making socket non-blocking!\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 #else /* _WIN32 */
     if ((flags = fcntl(ipc_socket, F_GETFL, 0)) < 0) {
       fprintf(stderr, "Error getting socket flags!\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 
     if (fcntl(ipc_socket, F_SETFL, flags | O_NONBLOCK) < 0) {
       fprintf(stderr, "Error setting socket flags!\n");
-      exit(1);
+      exit(EXIT_FAILURE);
     }
 #endif /* _WIN32 */
     connected = 1;

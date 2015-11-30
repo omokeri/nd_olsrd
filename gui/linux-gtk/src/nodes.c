@@ -46,7 +46,7 @@ insert_node(struct node *n, olsr_u8_t vtime)
 
   if ((new_node = malloc(sizeof(struct node))) == 0) {
     fprintf(stderr, "OUT OF MEMORY!\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   memcpy(new_node, n, sizeof(struct node));
@@ -225,7 +225,7 @@ add_mid_node(union olsr_ip_addr *node, union olsr_ip_addr *alias, olsr_u8_t vtim
       printf("ADDED FOR %s\n", ip_to_string(node));
       if ((tmp_mid = malloc(sizeof(struct mid))) == 0) {
         fprintf(stderr, "OUT OF MEMORY\n");
-        exit(1);
+        exit(EXIT_FAILURE);
       }
 
       memcpy(&tmp_mid->alias, alias, ipsize);
@@ -253,7 +253,7 @@ add_mid_node(union olsr_ip_addr *node, union olsr_ip_addr *alias, olsr_u8_t vtim
 
   if ((tmp_mid = malloc(sizeof(struct mid))) == 0) {
     fprintf(stderr, "OUT OF MEMORY!\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   memcpy(&tmp_mid->alias, alias, ipsize);
@@ -292,7 +292,7 @@ add_hna_node(union olsr_ip_addr *node, union olsr_ip_addr *net, union olsr_ip_ad
       /* we didn't find the address */
       if ((tmp_hna = malloc(sizeof(struct hna))) == 0) {
         fprintf(stderr, "OUT OF MEMORY\n");
-        exit(1);
+        exit(EXIT_FAILURE);
       }
 
       memcpy(&tmp_hna->net, net, ipsize);
@@ -317,7 +317,7 @@ add_hna_node(union olsr_ip_addr *node, union olsr_ip_addr *net, union olsr_ip_ad
 
   if ((tmp_hna = malloc(sizeof(struct hna))) == 0) {
     fprintf(stderr, "OUT OF MEMORY!\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   memcpy(&tmp_hna->net, net, ipsize);
@@ -363,7 +363,7 @@ add_mpr(union olsr_ip_addr *node, union olsr_ip_addr *mpr, struct timeval *tmp_t
 
       if ((tmp_mpr = malloc(sizeof(struct mpr))) == 0) {
         fprintf(stderr, "OUT OF MEMORY\n");
-        exit(1);
+        exit(EXIT_FAILURE);
       }
 
       memcpy(&tmp_mpr->addr, mpr, ipsize);

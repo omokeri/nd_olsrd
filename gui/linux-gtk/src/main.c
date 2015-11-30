@@ -41,14 +41,14 @@ main(int argc, char *argv[])
 #ifdef _WIN32
   if (WSAStartup(0x0202, &WsaData)) {
     fprintf(stderr, "Could not initialize WinSock.\n");
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 #endif /* _WIN32 */
 
   /* Get IP */
   if ((hp = gethostbyname(argc > 1 ? argv[1] : "localhost")) == 0) {
     fprintf(stderr, "Not a valid host \"%s\"\n", argv[1]);
-    exit(1);
+    exit(EXIT_FAILURE);
   }
 
   in.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
