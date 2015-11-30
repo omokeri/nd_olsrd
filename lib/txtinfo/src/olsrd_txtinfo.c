@@ -375,8 +375,13 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       else if (strstr(requ, "/all"))
         send_what = SIW_ALL;
       else {
-        /* print out every combinations of requested tabled
-         * 3++ letter abbreviations are matched */
+        // these are the two overarching categories
+        if (strstr(requ, "/runtime"))
+          send_what |= SIW_RUNTIME_ALL;
+        if (strstr(requ, "/startup"))
+          send_what |= SIW_STARTUP_ALL;
+
+        // these are the individual sections
         if (strstr(requ, "/nei"))
           send_what |= SIW_NEIGHBORS;
         if (strstr(requ, "/lin"))
