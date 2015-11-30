@@ -87,7 +87,7 @@ activate_lq_handler(const char *name)
   if (node == NULL) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "Error, unknown lq_handler '%s'", name);
-    olsr_exit(buf, 1);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 
   OLSR_PRINTF(1, "Using '%s' algorithm for lq calculation.\n", name);

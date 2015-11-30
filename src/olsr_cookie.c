@@ -70,7 +70,7 @@ olsr_alloc_cookie(const char *cookie_name, olsr_cookie_type cookie_type)
   /* 1 <= ci_index <= COOKIE_ID_MAX */
 
   if (ci_index == COOKIE_ID_MAX) {
-    olsr_exit("No more cookies available", 1);
+    olsr_exit("No more cookies available", EXIT_FAILURE);
     return NULL;
   }
 

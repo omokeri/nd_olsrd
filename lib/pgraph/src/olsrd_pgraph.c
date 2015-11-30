@@ -274,7 +274,7 @@ ipc_action(int fd __attribute__ ((unused)), void *data __attribute__ ((unused)),
   if ((ipc_connection = accept(ipc_socket, (struct sockaddr *)&pin, &addrlen)) == -1) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "(DOT DRAW)IPC accept error: %s", strerror(errno));
-    olsr_exit(buf2, 1);
+    olsr_exit(buf2, EXIT_FAILURE);
   } else {
     struct ipaddr_str main_addr;
     addr = inet_ntoa(pin.sin_addr);

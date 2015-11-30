@@ -181,12 +181,12 @@ secure_plugin_init(void)
   if (i < 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "SECURE: Could not read key from file %s", keyfile);
-    olsr_exit(buf, 1);
+    olsr_exit(buf, EXIT_FAILURE);
   }
   if (i == 0) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "SECURE: There was a problem reading key from file %s. Is the key long enough?", keyfile);
-    olsr_exit(buf, 1);
+    olsr_exit(buf, EXIT_FAILURE);
   }
 
   /* Register the packet transform function */

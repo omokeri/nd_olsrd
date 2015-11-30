@@ -91,7 +91,7 @@ olsr_times(void)
   uint32_t t;
 
   if (gettimeofday(&tv, NULL) != 0) {
-    olsr_exit("OS clock is not working, have to shut down OLSR", 1);
+    olsr_exit("OS clock is not working, have to shut down OLSR", EXIT_FAILURE);
   }
 
   /* test if time jumped backward or more than 60 seconds forward */
@@ -578,7 +578,7 @@ olsr_init_timers(void)
 
   /* Grab initial timestamp */
   if (gettimeofday(&first_tv, NULL)) {
-    olsr_exit("OS clock is not working, have to shut down OLSR", 1);
+    olsr_exit("OS clock is not working, have to shut down OLSR", EXIT_FAILURE);
   }
   last_tv = first_tv;
   now_times = olsr_times();

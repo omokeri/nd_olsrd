@@ -325,7 +325,7 @@ DisableIcmpRedirects(void)
   fprintf(stderr, "I have disabled ICMP redirect processing in the registry for you.\n");
   fprintf(stderr, "REBOOT NOW, so that these changes take effect. Exiting...\n\n");
 
-  olsr_exit(NULL, 0);
+  olsr_exit(NULL, EXIT_SUCCESS);
 }
 
 int

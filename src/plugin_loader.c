@@ -70,7 +70,7 @@ olsr_load_plugins(void)
     }
   }
   if (rv != 0) {
-    olsr_exit("-- PLUGIN LOADING FAILED --", 1);
+    olsr_exit("-- PLUGIN LOADING FAILED --", EXIT_FAILURE);
   }
   OLSR_PRINTF(0, "-- ALL PLUGINS LOADED! --\n\n");
 }

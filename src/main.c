@@ -128,7 +128,7 @@ static void olsr_reconfigure(int signo __attribute__ ((unused))) {
 #ifndef _WIN32
   errno = errNr;
 #endif
-  olsr_exit(NULL, 0);
+  olsr_exit(NULL, EXIT_SUCCESS);
 }
 #endif /* _WIN32 */
 
@@ -363,11 +363,11 @@ int main(int argc, char *argv[]) {
     if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "/?")) {
       /* help */
       print_usage(false);
-      olsr_exit(NULL, 0);
+      olsr_exit(NULL, EXIT_SUCCESS);
     }
     if (!strcmp(argv[1], "-v")) {
       /* version */
-      olsr_exit(NULL, 0);
+      olsr_exit(NULL, EXIT_SUCCESS);
     }
   }
 
@@ -446,7 +446,7 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->ioctl_s < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "ioctl socket: %s", strerror(errno));
-    olsr_exit(buf2, 0);
+    olsr_exit(buf2, EXIT_SUCCESS);
   }
 
   /* create a socket for netlink calls */
@@ -455,7 +455,7 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->rtnl_s < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "rtnetlink socket: %s", strerror(errno));
-    olsr_exit(buf2, 0);
+    olsr_exit(buf2, EXIT_SUCCESS);
   }
 
   if (fcntl(olsr_cnf->rtnl_s, F_SETFL, O_NONBLOCK)) {
@@ -465,7 +465,7 @@ int main(int argc, char *argv[]) {
   if ((olsr_cnf->rt_monitor_socket = rtnetlink_register_socket(RTMGRP_LINK)) < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "rtmonitor socket: %s", strerror(errno));
-    olsr_exit(buf2, 0);
+    olsr_exit(buf2, EXIT_SUCCESS);
   }
 #endif /* __linux__ */
 
@@ -475,14 +475,14 @@ int main(int argc, char *argv[]) {
   if (olsr_cnf->rts < 0) {
     char buf2[1024];
     snprintf(buf2, sizeof(buf2), "routing socket: %s", strerror(errno));
-    olsr_exit(buf2, 0);
+    olsr_exit(buf2, EXIT_SUCCESS);
   }
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
 
   /* initialise gateway system */
 #ifdef __linux__
   if (olsr_cnf->smart_gw_active && olsr_init_gateways()) {
-    olsr_exit("Cannot initialise gateway tunnels", 1);
+    olsr_exit("Cannot initialise gateway tunnels", EXIT_FAILURE);
   }
 #endif /* __linux__ */
 
@@ -547,13 +547,13 @@ int main(int argc, char *argv[]) {
 #ifdef __linux__
   /* startup gateway system */
   if (olsr_cnf->smart_gw_active && olsr_startup_gateways()) {
-    olsr_exit("Cannot startup gateway tunnels", 1);
+    olsr_exit("Cannot startup gateway tunnels", EXIT_FAILURE);
   }
 #endif /* __linux__ */
 
   /* initialise the IPC socket */
   if ((olsr_cnf->ipc_connections > 0) && ipc_init()) {
-    olsr_exit("ipc_init failure", 1);
+    olsr_exit("ipc_init failure", EXIT_FAILURE);
   }
 
   /* Initialisation of different tables to be used. */
