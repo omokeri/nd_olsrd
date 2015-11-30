@@ -367,11 +367,14 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
     if (0 < s) {
       requ[s] = 0;
+      /* print out the requested tables */
+      if (strstr(requ, "/con"))
+        send_what |= SIW_OLSRD_CONF;
       /* To print out neighbours only on the Freifunk Status
        * page the normal output is somewhat lengthy. The
        * header parsing is sufficient for standard wget.
        */
-      if (strstr(requ, "/neighbours"))
+      else if (strstr(requ, "/neighbours"))
         send_what = SIW_NEIGHBORS | SIW_LINKS;
       else {
         /* print out every combinations of requested tabled
@@ -394,8 +397,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
         }
         if (strstr(requ, "/gat"))
           send_what |= SIW_GATEWAYS;
-        if (strstr(requ, "/con"))
-          send_what |= SIW_OLSRD_CONF;
         if (strstr(requ, "/int"))
           send_what |= SIW_INTERFACES;
         if (strstr(requ, "/2ho"))
@@ -865,32 +866,34 @@ static void send_info(unsigned int send_what, int the_socket) {
     headerLength = abuf.len;
   }
 
-  /* Print tables to IPC socket */
-
-  if (send_what & SIW_LINKS)
-    ipc_print_links(&abuf);
-  if (send_what & SIW_NEIGHBORS)
-    ipc_print_neighbors(&abuf, false);
-  if (send_what & SIW_TOPOLOGY)
-    ipc_print_topology(&abuf);
-  if (send_what & SIW_HNA)
-    ipc_print_hna(&abuf);
-  if (send_what & SIW_SGW)
-    ipc_print_sgw(&abuf);
-  if (send_what & SIW_MID)
-    ipc_print_mid(&abuf);
-  if (send_what & SIW_ROUTES)
-    ipc_print_routes(&abuf);
-  if (send_what & SIW_GATEWAYS)
-    ipc_print_gateways(&abuf);
-  if (send_what & SIW_OLSRD_CONF)
+  // only add if normal format
+  if (send_what & SIW_ALL) {
+    if (send_what & SIW_LINKS)
+      ipc_print_links(&abuf);
+    if (send_what & SIW_NEIGHBORS)
+      ipc_print_neighbors(&abuf, false);
+    if (send_what & SIW_TOPOLOGY)
+      ipc_print_topology(&abuf);
+    if (send_what & SIW_HNA)
+      ipc_print_hna(&abuf);
+    if (send_what & SIW_SGW)
+      ipc_print_sgw(&abuf);
+    if (send_what & SIW_MID)
+      ipc_print_mid(&abuf);
+    if (send_what & SIW_ROUTES)
+      ipc_print_routes(&abuf);
+    if (send_what & SIW_GATEWAYS)
+      ipc_print_gateways(&abuf);
+    if (send_what & SIW_INTERFACES)
+      ipc_print_interfaces(&abuf);
+    if (send_what & SIW_2HOP)
+      ipc_print_neighbors(&abuf, true);
+    if (send_what & SIW_VERSION)
+      ipc_print_version(&abuf);
+  } else if (send_what & SIW_OLSRD_CONF) {
+    /* this outputs the olsrd.conf text directly, not normal format */
     ipc_print_olsrd_conf(&abuf);
-  if (send_what & SIW_INTERFACES)
-    ipc_print_interfaces(&abuf);
-  if (send_what & SIW_2HOP)
-    ipc_print_neighbors(&abuf, true);
-  if (send_what & SIW_VERSION)
-    ipc_print_version(&abuf);
+  }
 
   if (http_headers) {
     http_header_adjust_content_length(&abuf, contentLengthPlaceholderStart, abuf.len - headerLength);
