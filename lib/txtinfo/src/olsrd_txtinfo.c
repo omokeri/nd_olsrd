@@ -372,12 +372,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
         send_what |= SIW_OLSRD_CONF;
       else if (strstr(requ, "/all"))
         send_what = SIW_ALL;
-      /* To print out neighbours only on the Freifunk Status
-       * page the normal output is somewhat lengthy. The
-       * header parsing is sufficient for standard wget.
-       */
-      else if (strstr(requ, "/neighbours"))
-        send_what = SIW_NEIGHBORS | SIW_LINKS;
       else {
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
@@ -399,10 +393,19 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
           send_what |= SIW_INTERFACES;
         if (strstr(requ, "/2ho"))
           send_what |= SIW_2HOP;
-        if (strstr(requ, "/ver"))
-          send_what |= SIW_VERSION;
         if (strstr(requ, "/sgw"))
           send_what |= SIW_SGW;
+
+        // specials
+        if (strstr(requ, "/ver"))
+          send_what |= SIW_VERSION;
+
+        /* To print out neighbours only on the Freifunk Status
+         * page the normal output is somewhat lengthy. The
+         * header parsing is sufficient for standard wget.
+         */
+        if (strstr(requ, "/neighbours"))
+          send_what = SIW_NEIGHBORS | SIW_LINKS;
       }
     }
 
