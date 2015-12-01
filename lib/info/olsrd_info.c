@@ -62,8 +62,10 @@ typedef struct {
   int count;
 } info_plugin_outbuffer_t;
 
-static const char * PLUGIN_NAME = NULL;
+static const char * name = NULL;
+
 static info_plugin_functions_t *functions = NULL;
+
 static info_plugin_config_t *config;
 
 static int ipc_socket = -1;
@@ -187,7 +189,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_init(&abuf, 2 * 4096);
 
   if (config->http_headers) {
-    http_header_build(PLUGIN_NAME, HTTP_200, content_type, &abuf, &contentLengthIndex);
+    http_header_build(name, HTTP_200, content_type, &abuf, &contentLengthIndex);
     headerLength = abuf.len;
   }
 
@@ -269,7 +271,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if ((ipc_connection = accept(fd, &pin.in, &addrlen)) == -1) {
 #ifndef NODEBUG
-    olsr_printf(1, "(%s) accept()=%s\n", PLUGIN_NAME, strerror(errno));
+    olsr_printf(1, "(%s) accept()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
     return;
   }
@@ -280,7 +282,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       addr[0] = '\0';
     if (!ip4equal(&pin.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
       if (!config->allow_localhost || ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
-        olsr_printf(1, "(%s) From host(%s) not allowed!\n", PLUGIN_NAME, addr);
+        olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
         close(ipc_connection);
         return;
       }
@@ -290,14 +292,14 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       addr[0] = '\0';
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
     if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&pin.in6.sin6_addr, &config->accept_ip.v6)) {
-      olsr_printf(1, "(%s) From host(%s) not allowed!\n", PLUGIN_NAME, addr);
+      olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
       close(ipc_connection);
       return;
     }
   }
 
 #ifndef NODEBUG
-  olsr_printf(2, "(%s) Connect from %s\n", PLUGIN_NAME, addr);
+  olsr_printf(2, "(%s) Connect from %s\n", name, addr);
 #endif /* NODEBUG */
 
   /* purge read buffer to prevent blocking on linux */
@@ -335,13 +337,13 @@ static int plugin_ipc_init(void) {
   /* Init ipc socket */
   if ((ipc_socket = socket(olsr_cnf->ip_version, SOCK_STREAM, 0)) == -1) {
 #ifndef NODEBUG
-    olsr_printf(1, "(%s) socket()=%s\n", PLUGIN_NAME, strerror(errno));
+    olsr_printf(1, "(%s) socket()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
     return 0;
   } else {
     if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
 #ifndef NODEBUG
-      olsr_printf(1, "(%s) setsockopt()=%s\n", PLUGIN_NAME, strerror(errno));
+      olsr_printf(1, "(%s) setsockopt()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -384,7 +386,7 @@ static int plugin_ipc_init(void) {
     /* bind the socket to the port number */
     if (bind(ipc_socket, &sst.in, addrlen) == -1) {
 #ifndef NODEBUG
-      olsr_printf(1, "(%s) bind()=%s\n", PLUGIN_NAME, strerror(errno));
+      olsr_printf(1, "(%s) bind()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -392,7 +394,7 @@ static int plugin_ipc_init(void) {
     /* show that we are willing to listen */
     if (listen(ipc_socket, 1) == -1) {
 #ifndef NODEBUG
-      olsr_printf(1, "(%s) listen()=%s\n", PLUGIN_NAME, strerror(errno));
+      olsr_printf(1, "(%s) listen()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
       return 0;
     }
@@ -401,7 +403,7 @@ static int plugin_ipc_init(void) {
     add_olsr_socket(ipc_socket, &ipc_action, NULL, NULL, SP_PR_READ);
 
 #ifndef NODEBUG
-    olsr_printf(2, "(%s) listening on port %d\n", PLUGIN_NAME, config->ipc_port);
+    olsr_printf(2, "(%s) listening on port %d\n", name, config->ipc_port);
 #endif /* NODEBUG */
   }
   return 1;
@@ -415,7 +417,7 @@ static int plugin_ipc_init(void) {
  */
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
   functions = plugin_functions;
-  PLUGIN_NAME = plugin_name;
+  name = plugin_name;
   config = plugin_config;
 
   /* Initial IPC value */
@@ -423,7 +425,7 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
   memset(&outbuffer, 0, sizeof(outbuffer));
 
   if ((*functions).init) {
-    (*(*functions).init)(PLUGIN_NAME);
+    (*(*functions).init)(name);
   }
 
   plugin_ipc_init();
