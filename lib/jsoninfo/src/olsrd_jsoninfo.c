@@ -396,9 +396,6 @@ static void send_info(unsigned int send_what, int the_socket) {
   int contentLengthPlaceholderStart = 0;
   int headerLength = 0;
 
-  /* global variables for tracking when to put a comma in for JSON */
-  abuf_json_reset_entry_number_and_depth();
-
   abuf_init(&abuf, 2 * 4096);
 
   if (http_headers) {
@@ -408,6 +405,8 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
+    /* global variables for tracking when to put a comma in for JSON */
+    abuf_json_reset_entry_number_and_depth();
     abuf_json_mark_output(true, &abuf);
 
     abuf_json_int(&abuf, "systemTime", time(NULL));
