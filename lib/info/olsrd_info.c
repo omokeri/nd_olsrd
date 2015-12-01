@@ -41,6 +41,7 @@
 
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "olsrd_info.h"
 #include "olsr.h"
@@ -416,13 +417,16 @@ static int plugin_ipc_init(void) {
  *function in uolsrd_plugin.c
  */
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
-  functions = plugin_functions;
+  assert(plugin_name);
+  assert(plugin_functions);
+  assert(plugin_config);
+
   name = plugin_name;
+  functions = plugin_functions;
   config = plugin_config;
 
-  /* Initial IPC value */
-  ipc_socket = -1;
   memset(&outbuffer, 0, sizeof(outbuffer));
+  ipc_socket = -1;
 
   if ((*functions).init) {
     (*(*functions).init)(name);
