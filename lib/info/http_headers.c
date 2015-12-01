@@ -41,7 +41,7 @@
 
 #include "http_headers.h"
 
-void build_http_header(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
+void http_header_build(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
   /* Status */
   abuf_appendf(abuf, "%s\r\n", status);
 
