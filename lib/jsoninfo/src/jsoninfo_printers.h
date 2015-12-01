@@ -39,37 +39,30 @@
  *
  */
 
-/*
- * Dynamic linked library for the olsr.org olsr daemon
- */
+#ifndef _OLSRD_JSONINFO_PRINTERS_H
+#define _OLSRD_JSONINFO_PRINTERS_H
 
-#ifndef _OLSRD_JSONINFO
-#define _OLSRD_JSONINFO
+#include <stdbool.h>
+#include <time.h>
 
-#include "olsr_types.h"
-#include "olsrd_plugin.h"
-#include "plugin_util.h"
+#include "common/autobuf.h"
 
-/* uncomment this to allow connections from 127.0.0.1 regardless of olsrd.conf (useful to allow externel ip/network + localhost) (ipv4 only)*/
-/* #define JSONINFO_ALLOW_LOCALHOST */
+extern struct timeval start_time;
 
-extern union olsr_ip_addr jsoninfo_accept_ip;
-extern union olsr_ip_addr jsoninfo_listen_ip;
-extern int ipc_port;
-extern int nompr;
-extern bool http_headers;
-extern int jsoninfo_ipv6_only;
+void plugin_init(const char * plugin_name);
 
-int olsrd_plugin_interface_version(void);
-int olsrd_plugin_init(void);
-void olsr_plugin_exit(void);
-void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size);
+void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop);
+void ipc_print_links(struct autobuf *abuf);
+void ipc_print_routes(struct autobuf *abuf);
+void ipc_print_topology(struct autobuf *abuf);
+void ipc_print_hna(struct autobuf *abuf);
+void ipc_print_mid(struct autobuf *abuf);
+void ipc_print_gateways(struct autobuf *abuf);
+void ipc_print_sgw(struct autobuf *abuf);
+void ipc_print_version(struct autobuf *abuf);
+void ipc_print_olsrd_conf(struct autobuf *abuf);
+void ipc_print_interfaces(struct autobuf *abuf);
+void ipc_print_config(struct autobuf *abuf);
+void ipc_print_plugins(struct autobuf *abuf);
 
-#endif /* _OLSRD_JSONINFO */
-
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+#endif /* _OLSRD_JSONINFO_PRINTERS_H */
