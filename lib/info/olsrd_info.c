@@ -410,12 +410,6 @@ static int plugin_ipc_init(void) {
   return 1;
 }
 
-/**
- *Do initialization here
- *
- *This function is called by the my_init
- *function in uolsrd_plugin.c
- */
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
   assert(plugin_name);
   assert(plugin_functions);
@@ -436,9 +430,6 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
   return 1;
 }
 
-/**
- * destructor - called at unload
- */
 void info_plugin_exit(void) {
   if (ipc_socket != -1) {
     close(ipc_socket);
