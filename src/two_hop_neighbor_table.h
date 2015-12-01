@@ -45,6 +45,7 @@
 #include "defs.h"
 #include "hashing.h"
 #include "lq_plugin.h"
+#include "olsr_types.h"
 
 #define	NB2S_COVERED 	0x1     /* node has been covered by a MPR */
 
