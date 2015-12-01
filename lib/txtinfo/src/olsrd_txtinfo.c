@@ -370,6 +370,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       /* print out the requested tables */
       if (strstr(requ, "/con"))
         send_what |= SIW_OLSRD_CONF;
+      else if (strstr(requ, "/all"))
+        send_what = SIW_RUNTIME_ALL;
       /* To print out neighbours only on the Freifunk Status
        * page the normal output is somewhat lengthy. The
        * header parsing is sufficient for standard wget.
@@ -379,22 +381,18 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       else {
         /* print out every combinations of requested tabled
          * 3++ letter abbreviations are matched */
-        if (strstr(requ, "/all"))
-          send_what = SIW_RUNTIME_ALL;
-        else { /*already included in /all*/
-          if (strstr(requ, "/nei"))
-            send_what |= SIW_NEIGHBORS;
-          if (strstr(requ, "/lin"))
-            send_what |= SIW_LINKS;
-          if (strstr(requ, "/rou"))
-            send_what |= SIW_ROUTES;
-          if (strstr(requ, "/hna"))
-            send_what |= SIW_HNA;
-          if (strstr(requ, "/mid"))
-            send_what |= SIW_MID;
-          if (strstr(requ, "/top"))
-            send_what |= SIW_TOPOLOGY;
-        }
+        if (strstr(requ, "/nei"))
+          send_what |= SIW_NEIGHBORS;
+        if (strstr(requ, "/lin"))
+          send_what |= SIW_LINKS;
+        if (strstr(requ, "/rou"))
+          send_what |= SIW_ROUTES;
+        if (strstr(requ, "/hna"))
+          send_what |= SIW_HNA;
+        if (strstr(requ, "/mid"))
+          send_what |= SIW_MID;
+        if (strstr(requ, "/top"))
+          send_what |= SIW_TOPOLOGY;
         if (strstr(requ, "/gat"))
           send_what |= SIW_GATEWAYS;
         if (strstr(requ, "/int"))
