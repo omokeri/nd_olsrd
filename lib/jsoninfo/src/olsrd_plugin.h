@@ -51,7 +51,7 @@
 #include "plugin_util.h"
 #include "../../info/info_types.h"
 
-extern info_plugin_config_t info_plugin_config;
+extern info_plugin_config_t config;
 
 int olsrd_plugin_interface_version(void);
 int olsrd_plugin_init(void);
