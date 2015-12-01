@@ -53,6 +53,8 @@
 #include "gateway.h"
 #include "../../info/info_types.h"
 
+extern bool vtime;
+
 bool isCommand(const char *str, unsigned int siw) {
   switch (siw) {
     case SIW_OLSRD_CONF:
@@ -152,28 +154,27 @@ void ipc_print_links(struct autobuf *abuf) {
 
   struct link_entry *my_link = NULL;
 
-#ifdef ACTIVATE_VTIME_TXTINFO
-  abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tVTime\tLQ\tNLQ\tCost\n");
-#else /* ACTIVATE_VTIME_TXTINFO */
-  abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tHyst.\tLQ\tNLQ\tCost\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
+  if (vtime)
+    abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tVTime\tLQ\tNLQ\tCost\n");
+  else
+    abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tHyst.\tLQ\tNLQ\tCost\n");
 
   /* Link set */
   OLSR_FOR_ALL_LINK_ENTRIES(my_link)
       {
-#ifdef ACTIVATE_VTIME_TXTINFO
-        int diff = (unsigned int)(my_link->link_timer->timer_clock - now_times);
+        if (vtime) {
+          int diff = (unsigned int) (my_link->link_timer->timer_clock - now_times);
 
-        abuf_appendf(abuf, "%s\t%s\t%d.%03d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
-            olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
-            diff/1000, abs(diff%1000),
-            get_link_entry_text(my_link, '\t', &lqbuffer1),
-            get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
-#else /* ACTIVATE_VTIME_TXTINFO */
-        abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
-            olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr), get_link_entry_text(my_link, '\t', &lqbuffer1),
-            get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
-#endif /* ACTIVATE_VTIME_TXTINFO */
+          abuf_appendf(abuf, "%s\t%s\t%d.%03d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
+              olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr),
+              diff / 1000, abs(diff % 1000),
+              get_link_entry_text(my_link, '\t', &lqbuffer1),
+              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+        } else {
+          abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &my_link->local_iface_addr),
+              olsr_ip_to_string(&buf2, &my_link->neighbor_iface_addr), get_link_entry_text(my_link, '\t', &lqbuffer1),
+              get_linkcost_text(my_link->linkcost, false, &lqbuffer2));
+        }
       }OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
 
   abuf_puts(abuf, "\n");
@@ -201,11 +202,10 @@ void ipc_print_routes(struct autobuf *abuf) {
 void ipc_print_topology(struct autobuf *abuf) {
   struct tc_entry *tc;
 
-#ifdef ACTIVATE_VTIME_TXTINFO
-  abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\tVTime\n");
-#else /* ACTIVATE_VTIME_TXTINFO */
-  abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
+  if (vtime)
+    abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\tVTime\n");
+  else
+    abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\n");
 
   /* Topology */
   OLSR_FOR_ALL_TC_ENTRIES(tc)
@@ -216,18 +216,18 @@ void ipc_print_topology(struct autobuf *abuf) {
               if (tc_edge->edge_inv) {
                 struct ipaddr_str dstbuf, addrbuf;
                 struct lqtextbuffer lqbuffer1, lqbuffer2;
-#ifdef ACTIVATE_VTIME_TXTINFO
-                uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
-                int diff = (int)(vt);
-                abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
-                    olsr_ip_to_string(&addrbuf, &tc->addr),
-                    get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
-                    get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
-                    diff/1000, diff%1000);
-#else /* ACTIVATE_VTIME_TXTINFO */
-                abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
-                    get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
-#endif /* ACTIVATE_VTIME_TXTINFO */
+                if (vtime) {
+                  uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
+                  int diff = (int) (vt);
+                  abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
+                      olsr_ip_to_string(&addrbuf, &tc->addr),
+                      get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
+                      get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
+                      diff / 1000, diff % 1000);
+                } else {
+                  abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
+                      get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
+                }
               }
             }OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
       }OLSR_FOR_ALL_TC_ENTRIES_END(tc);
@@ -241,11 +241,10 @@ void ipc_print_hna(struct autobuf *abuf) {
   struct hna_net *tmp_net;
   struct ipaddr_str buf, mainaddrbuf;
 
-#ifdef ACTIVATE_VTIME_TXTINFO
-  abuf_puts(abuf, "Table: HNA\nDestination\tGateway\tVTime\n");
-#else /* ACTIVATE_VTIME_TXTINFO */
-  abuf_puts(abuf, "Table: HNA\nDestination\tGateway\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
+  if (vtime)
+    abuf_puts(abuf, "Table: HNA\nDestination\tGateway\tVTime\n");
+  else
+    abuf_puts(abuf, "Table: HNA\nDestination\tGateway\n");
 
   /* Announced HNA entries */
   for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
@@ -258,16 +257,16 @@ void ipc_print_hna(struct autobuf *abuf) {
 
           /* Check all networks */
           for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
-#ifdef ACTIVATE_VTIME_TXTINFO
-            uint32_t vt = tmp_net->hna_net_timer != NULL ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
-            int diff = (int)(vt);
-            abuf_appendf(abuf, "%s/%d\t%s\t\%d.%03d\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
-                tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr),
-                diff/1000, abs(diff%1000));
-#else /* ACTIVATE_VTIME_TXTINFO */
-            abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len,
-                olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
-#endif /* ACTIVATE_VTIME_TXTINFO */
+            if (vtime) {
+              uint32_t vt = tmp_net->hna_net_timer != NULL ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
+              int diff = (int) (vt);
+              abuf_appendf(abuf, "%s/%d\t%s\t\%d.%03d\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
+                  tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr),
+                  diff / 1000, abs(diff % 1000));
+            } else {
+              abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len,
+                  olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
+            }
           }
         }OLSR_FOR_ALL_HNA_ENTRIES_END(tmp_hna);
 
@@ -279,45 +278,41 @@ void ipc_print_mid(struct autobuf *abuf) {
   unsigned short is_first;
   struct mid_entry *entry;
   struct mid_address *alias;
-#ifdef ACTIVATE_VTIME_TXTINFO
-  abuf_puts(abuf, "Table: MID\nIP address\tAlias\tVTime\n");
-#else /* ACTIVATE_VTIME_TXTINFO */
-  abuf_puts(abuf, "Table: MID\nIP address\tAliases\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
+  if (vtime)
+    abuf_puts(abuf, "Table: MID\nIP address\tAlias\tVTime\n");
+  else
+    abuf_puts(abuf, "Table: MID\nIP address\tAliases\n");
 
   /* MID */
   for (idx = 0; idx < HASHSIZE; idx++) {
     entry = mid_set[idx].next;
 
     while (entry != &mid_set[idx]) {
-#ifdef ACTIVATE_VTIME_TXTINFO
       struct ipaddr_str buf, buf2;
-#else /* ACTIVATE_VTIME_TXTINFO */
-      struct ipaddr_str buf;
-      abuf_puts(abuf, olsr_ip_to_string(&buf, &entry->main_addr));
-#endif /* ACTIVATE_VTIME_TXTINFO */
+      if (!vtime)
+        abuf_puts(abuf, olsr_ip_to_string(&buf, &entry->main_addr));
+
       alias = entry->aliases;
       is_first = 1;
 
       while (alias) {
-#ifdef ACTIVATE_VTIME_TXTINFO
-        uint32_t vt = alias->vtime - now_times;
-        int diff = (int)(vt);
+        if (vtime) {
+          uint32_t vt = alias->vtime - now_times;
+          int diff = (int) (vt);
 
-        abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
-            olsr_ip_to_string(&buf, &entry->main_addr),
-            olsr_ip_to_string(&buf2, &alias->alias),
-            diff/1000, abs(diff%1000));
-#else /* ACTIVATE_VTIME_TXTINFO */
-        abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
-#endif /* ACTIVATE_VTIME_TXTINFO */
+          abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
+              olsr_ip_to_string(&buf, &entry->main_addr),
+              olsr_ip_to_string(&buf2, &alias->alias),
+              diff / 1000, abs(diff % 1000));
+        } else {
+          abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
+        }
         alias = alias->next_alias;
         is_first = 0;
       }
       entry = entry->next;
-#ifndef ACTIVATE_VTIME_TXTINFO
-      abuf_puts(abuf, "\n");
-#endif /* ACTIVATE_VTIME_TXTINFO */
+      if (!vtime)
+        abuf_puts(abuf, "\n");
     }
   }
   abuf_puts(abuf, "\n");

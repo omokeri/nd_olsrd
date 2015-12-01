@@ -66,6 +66,7 @@ int nompr;
 bool http_headers;
 bool allow_localhost;
 int txtinfo_ipv6_only;
+bool vtime;
 
 static void my_init(void) __attribute__ ((constructor));
 static void my_fini(void) __attribute__ ((destructor));
@@ -82,6 +83,7 @@ static void my_init(void) {
   http_headers = true;
   allow_localhost = false;
   txtinfo_ipv6_only = false;
+  vtime = false;
 
   if (olsr_cnf->ip_version == AF_INET) {
     txtinfo_accept_ip.v4.s_addr = htonl(INADDR_LOOPBACK);
@@ -119,7 +121,8 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = { //
         { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &txtinfo_listen_ip }, //
         { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &http_headers }, //
         { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &allow_localhost }, //
-        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &txtinfo_ipv6_only } //
+        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &txtinfo_ipv6_only }, //
+        { .name = "vtime", .set_plugin_parameter = &set_plugin_boolean, .data = &vtime } //
     };
 
 void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size) {

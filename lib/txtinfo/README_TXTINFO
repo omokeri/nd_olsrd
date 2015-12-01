@@ -79,4 +79,7 @@ LoadPlugin "olsrd_txtinfo.so.0.1"
 
     # Set to true to only listen on IPv6 addresses when running in IPv6 mode.
     # PlParam     "ipv6only"           "false"
+
+    # Set to true to include VTime values into Link/Topology commands
+    # PlParam     "vtime"             "false"
 }
