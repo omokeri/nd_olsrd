@@ -67,13 +67,13 @@ static const char * name = NULL;
 
 static info_plugin_functions_t *functions = NULL;
 
-static info_plugin_config_t *config;
+static info_plugin_config_t *config = NULL;
 
 static int ipc_socket = -1;
 
 static info_plugin_outbuffer_t outbuffer;
 
-static struct timer_entry *writetimer_entry;
+static struct timer_entry *writetimer_entry = NULL;
 
 static void determine_action(unsigned int *send_what, char *requ) {
   if (!(*functions).is_command)
@@ -411,6 +411,8 @@ static int plugin_ipc_init(void) {
 }
 
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
+  int i;
+
   assert(plugin_name);
   assert(plugin_functions);
   assert(plugin_config);
@@ -420,6 +422,10 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
   config = plugin_config;
 
   memset(&outbuffer, 0, sizeof(outbuffer));
+  for (i = 0; i < MAX_CLIENTS; ++i) {
+    outbuffer.socket[i] = -1;
+  }
+
   ipc_socket = -1;
 
   if ((*functions).init) {
@@ -431,8 +437,23 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
 }
 
 void info_plugin_exit(void) {
+  int i;
+
   if (ipc_socket != -1) {
     close(ipc_socket);
     ipc_socket = -1;
   }
+  for (i = 0; i < MAX_CLIENTS; ++i) {
+    if (outbuffer.buffer[i]) {
+      free(outbuffer.buffer[i]);
+      outbuffer.buffer[i] = NULL;
+    }
+    outbuffer.size[i] = 0;
+    outbuffer.written[i] = 0;
+    if (outbuffer.socket[i]) {
+      close(outbuffer.socket[i]);
+      outbuffer.socket[i] = -1;
+    }
+  }
+  outbuffer.count = 0;
 }
