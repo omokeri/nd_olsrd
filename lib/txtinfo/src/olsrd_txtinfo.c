@@ -51,6 +51,7 @@
 #include "olsr.h"
 #include "scheduler.h"
 #include "../../info/http_headers.h"
+#include "../../info/info_types.h"
 #include "txtinfo_printers.h"
 
 #include "olsrd_txtinfo.h"
@@ -113,6 +114,23 @@ static int outbuffer_socket[MAX_CLIENTS];
 static int outbuffer_count = 0;
 
 static struct timer_entry *writetimer_entry;
+
+static printer_functions_t printer_functions = { //
+    //
+        .neighbors = &ipc_print_neighbors, //
+        .links = &ipc_print_links, //
+        .routes = &ipc_print_routes, //
+        .topology = &ipc_print_topology, //
+        .hna = &ipc_print_hna, //
+        .mid = &ipc_print_mid, //
+        .gateways = &ipc_print_gateways, //
+        .sgw = &ipc_print_sgw, //
+        .version = &ipc_print_version, //
+        .olsrd_conf = &ipc_print_olsrd_conf, //
+        .interfaces = &ipc_print_interfaces, //
+        .config = NULL, //
+        .plugins = NULL //
+    };
 
 static void determine_action(unsigned int *send_what, char *requ) {
   if (strstr(requ, "/con"))
@@ -419,37 +437,35 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
-    if (send_what & SIW_LINKS)
-      ipc_print_links(&abuf);
-    if (send_what & SIW_NEIGHBORS)
-      ipc_print_neighbors(&abuf, false);
-    if (send_what & SIW_TOPOLOGY)
-      ipc_print_topology(&abuf);
-    if (send_what & SIW_HNA)
-      ipc_print_hna(&abuf);
-    if (send_what & SIW_SGW)
-      ipc_print_sgw(&abuf);
-    if (send_what & SIW_MID)
-      ipc_print_mid(&abuf);
-    if (send_what & SIW_ROUTES)
-      ipc_print_routes(&abuf);
-    if (send_what & SIW_GATEWAYS)
-      ipc_print_gateways(&abuf);
-    if (send_what & SIW_CONFIG) {
-      /* not supported */
-    }
-    if (send_what & SIW_INTERFACES)
-      ipc_print_interfaces(&abuf);
-    if (send_what & SIW_2HOP)
-      ipc_print_neighbors(&abuf, true);
-    if (send_what & SIW_VERSION)
-      ipc_print_version(&abuf);
-    if (send_what & SIW_PLUGINS) {
-      /* not supported */
-    }
-  } else if (send_what & SIW_OLSRD_CONF) {
+    if ((send_what & SIW_LINKS) && printer_functions.links)
+      (*printer_functions.links)(&abuf);
+    if ((send_what & SIW_NEIGHBORS) && printer_functions.neighbors)
+      (*printer_functions.neighbors)(&abuf, false);
+    if ((send_what & SIW_TOPOLOGY) && printer_functions.topology)
+      (*printer_functions.topology)(&abuf);
+    if ((send_what & SIW_HNA) && printer_functions.hna)
+      (*printer_functions.hna)(&abuf);
+    if ((send_what & SIW_SGW) && printer_functions.sgw)
+      (*printer_functions.sgw)(&abuf);
+    if ((send_what & SIW_MID) && printer_functions.mid)
+      (*printer_functions.mid)(&abuf);
+    if ((send_what & SIW_ROUTES) && printer_functions.routes)
+      (*printer_functions.routes)(&abuf);
+    if ((send_what & SIW_GATEWAYS) && printer_functions.gateways)
+      (*printer_functions.gateways)(&abuf);
+    if ((send_what & SIW_CONFIG) && printer_functions.config)
+      (*printer_functions.config)(&abuf);
+    if ((send_what & SIW_INTERFACES) && printer_functions.interfaces)
+      (*printer_functions.interfaces)(&abuf);
+    if ((send_what & SIW_2HOP) && printer_functions.neighbors)
+      (*printer_functions.neighbors)(&abuf, true);
+    if ((send_what & SIW_VERSION) && printer_functions.version)
+      (*printer_functions.version)(&abuf);
+    if ((send_what & SIW_PLUGINS) && printer_functions.plugins)
+      (*printer_functions.plugins)(&abuf);
+  } else if ((send_what & SIW_OLSRD_CONF) && printer_functions.olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
-    ipc_print_olsrd_conf(&abuf);
+    (*printer_functions.olsrd_conf)(&abuf);
   }
 
   if (http_headers) {
