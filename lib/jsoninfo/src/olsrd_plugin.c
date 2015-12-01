@@ -75,7 +75,6 @@ static info_plugin_functions_t functions = { //
         .plugins = &ipc_print_plugins //
     };
 
-
 info_plugin_config_t config;
 char uuidfile[FILENAME_MAX];
 
@@ -145,12 +144,7 @@ int olsrd_plugin_interface_version(void) {
 
 static const struct olsrd_plugin_parameters plugin_parameters[] = { //
     //
-        { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &config.ipc_port }, //
-        { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.accept_ip }, //
-        { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, //
-        { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, //
-        { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, //
-        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }, //
+        INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS, //
         { .name = "uuidfile", .set_plugin_parameter = &set_plugin_string, .data = uuidfile, .addon = { .ui = FILENAME_MAX - 1 } } //
     };
 
