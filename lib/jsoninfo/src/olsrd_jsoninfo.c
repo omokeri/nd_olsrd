@@ -196,6 +196,15 @@ static void determine_action(unsigned int *send_what, char *requ) {
   }
 }
 
+static void plugin_init(void) {
+  /* Get start time */
+  gettimeofday(&start_time, NULL);
+
+  if (!strlen(uuidfile))
+    strscpy(uuidfile, "uuid.txt", sizeof(uuidfile));
+  read_uuid_from_file(PLUGIN_NAME, uuidfile);
+}
+
 /**
  *Do initialization here
  *
@@ -206,12 +215,7 @@ int olsrd_plugin_init(void) {
   /* Initial IPC value */
   ipc_socket = -1;
 
-  /* Get start time */
-  gettimeofday(&start_time, NULL);
-
-  if (!strlen(uuidfile))
-    strscpy(uuidfile, "uuid.txt", sizeof(uuidfile));
-  read_uuid_from_file(PLUGIN_NAME, uuidfile);
+  plugin_init();
 
   plugin_ipc_init();
   return 1;
