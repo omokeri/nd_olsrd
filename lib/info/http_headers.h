@@ -47,8 +47,8 @@
 /* Response types */
 #define HTTP_200 "HTTP/1.1 200 OK"
 
-void build_http_header(const char * plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthPlaceholderStart);
+void build_http_header(const char * plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
-void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthPlaceholderStart, int contentLength);
+void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength);
 
 #endif /* _OLSRD_INFO_COMMON_HTTP_HEADERS */

@@ -46,7 +46,7 @@
 #include "olsr.h"
 #include "scheduler.h"
 #include "ipcalc.h"
-#include "../../info/http_headers.h"
+#include "http_headers.h"
 
 #ifdef _WIN32
 #define close(x) closesocket(x)
@@ -171,13 +171,13 @@ static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
   const char *content_type = ((*printer_functions).determine_mime_type) ? (*(*printer_functions).determine_mime_type)(send_what) : "text/plain; charset=utf-8";
-  int contentLengthPlaceholderStart = 0;
+  int contentLengthIndex = 0;
   int headerLength = 0;
 
   abuf_init(&abuf, 2 * 4096);
 
   if (info_plugin_config->http_headers) {
-    build_http_header(PLUGIN_NAME, HTTP_200, content_type, &abuf, &contentLengthPlaceholderStart);
+    build_http_header(PLUGIN_NAME, HTTP_200, content_type, &abuf, &contentLengthIndex);
     headerLength = abuf.len;
   }
 
@@ -221,7 +221,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   }
 
   if (info_plugin_config->http_headers) {
-    http_header_adjust_content_length(&abuf, contentLengthPlaceholderStart, abuf.len - headerLength);
+    http_header_adjust_content_length(&abuf, contentLengthIndex, abuf.len - headerLength);
   }
 
   /* avoid a memcpy: just move the abuf.buf pointer and clear abuf */

@@ -42,7 +42,7 @@
 #ifndef _OLSRD_INFO_INFO_H
 #define _OLSRD_INFO_INFO_H
 
-#include "../../info/info_types.h"
+#include "info_types.h"
 
 int info_plugin_init(const char * plugin_name, printer_functions_t *functions, info_plugin_config_t *config);
 void info_plugin_exit(void);

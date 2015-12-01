@@ -41,7 +41,7 @@
 
 #include "http_headers.h"
 
-void build_http_header(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthPlaceholderStart) {
+void build_http_header(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
   /* Status */
   abuf_appendf(abuf, "%s\r\n", status);
 
@@ -76,7 +76,7 @@ void build_http_header(const char *plugin_name, const char *status, const char *
 
   /* Content length */
   abuf_puts(abuf, "Content-Length: ");
-  *contentLengthPlaceholderStart = abuf->len;
+  *contentLengthIndex = abuf->len;
   abuf_puts(abuf, "            "); /* 12 spaces reserved for the length (max. 1TB-1), to be filled at the end */
   abuf_puts(abuf, "\r\n");
 
@@ -89,11 +89,11 @@ void build_http_header(const char *plugin_name, const char *status, const char *
   abuf_puts(abuf, "\r\n");
 }
 
-void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthPlaceholderStart, int contentLength) {
+void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength) {
   char buf[12 + 1]; /* size must match to number of spaces used (+1 for the terminating byte) */
 
   memset(buf, 0, sizeof(buf));
   snprintf(buf, sizeof(buf), "%d", contentLength);
   buf[sizeof(buf) - 1] = '\0';
-  memcpy(&abuf->buf[contentLengthPlaceholderStart], buf, strlen(buf));
+  memcpy(&abuf->buf[contentLengthIndex], buf, strlen(buf));
 }
