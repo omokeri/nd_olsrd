@@ -103,11 +103,11 @@ typedef struct {
 #define MAX_CLIENTS 3
 
 typedef struct {
-  char *buffer[MAX_CLIENTS];
-  size_t size[MAX_CLIENTS];
-  size_t written[MAX_CLIENTS];
-  int socket[MAX_CLIENTS];
-  int count;
+    char *buffer[MAX_CLIENTS];
+    size_t size[MAX_CLIENTS];
+    size_t written[MAX_CLIENTS];
+    int socket[MAX_CLIENTS];
+    int count;
 } outbuffer_t;
 
 typedef struct {
