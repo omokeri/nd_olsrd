@@ -53,7 +53,7 @@
 #include "olsrd_jsoninfo.h"
 #include "defs.h"
 
-#define PLUGIN_NAME    "JSON info and dyn_gw plugin"
+#define PLUGIN_NAME    "OLSRD jsoninfo plugin"
 #define PLUGIN_VERSION "0.0"
 #define PLUGIN_AUTHOR   "Hans-Christoph Steiner"
 #define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
