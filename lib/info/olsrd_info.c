@@ -1,6 +1,6 @@
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004
+ * Copyright (c) 2015
  *
  * All rights reserved.
  *
