@@ -58,7 +58,7 @@ static info_plugin_config_t *info_plugin_config;
 
 static int ipc_socket = -1;
 
-static outbuffer_t outbuffer;
+static info_plugin_outbuffer_t outbuffer;
 
 static struct timer_entry *writetimer_entry;
 

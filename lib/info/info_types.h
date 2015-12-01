@@ -108,7 +108,7 @@ typedef struct {
     size_t written[MAX_CLIENTS];
     int socket[MAX_CLIENTS];
     int count;
-} outbuffer_t;
+} info_plugin_outbuffer_t;
 
 typedef struct {
     union olsr_ip_addr accept_ip;
