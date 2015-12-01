@@ -371,7 +371,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       if (strstr(requ, "/con"))
         send_what |= SIW_OLSRD_CONF;
       else if (strstr(requ, "/all"))
-        send_what = SIW_RUNTIME_ALL;
+        send_what = SIW_ALL;
       /* To print out neighbours only on the Freifunk Status
        * page the normal output is somewhat lengthy. The
        * header parsing is sufficient for standard wget.
