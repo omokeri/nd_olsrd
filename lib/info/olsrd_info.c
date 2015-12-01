@@ -53,7 +53,7 @@
 #endif /* _WIN32 */
 
 static const char * PLUGIN_NAME = NULL;
-static info_plugin_functions_t *printer_functions = NULL;
+static info_plugin_functions_t *functions = NULL;
 static info_plugin_config_t *info_plugin_config;
 
 static int ipc_socket = -1;
@@ -63,54 +63,54 @@ static outbuffer_t outbuffer;
 static struct timer_entry *writetimer_entry;
 
 static void determine_action(unsigned int *send_what, char *requ) {
-  if (!(*printer_functions).is_command)
+  if (!(*functions).is_command)
     *send_what = 0;
-  else if ((*(*printer_functions).is_command)(requ, SIW_OLSRD_CONF))
+  else if ((*(*functions).is_command)(requ, SIW_OLSRD_CONF))
     *send_what |= SIW_OLSRD_CONF;
-  else if ((*(*printer_functions).is_command)(requ, SIW_ALL))
+  else if ((*(*functions).is_command)(requ, SIW_ALL))
     *send_what = SIW_ALL;
   else {
     // these are the two overarching categories
-    if ((*(*printer_functions).is_command)(requ, SIW_RUNTIME_ALL))
+    if ((*(*functions).is_command)(requ, SIW_RUNTIME_ALL))
       *send_what |= SIW_RUNTIME_ALL;
-    if ((*(*printer_functions).is_command)(requ, SIW_STARTUP_ALL))
+    if ((*(*functions).is_command)(requ, SIW_STARTUP_ALL))
       *send_what |= SIW_STARTUP_ALL;
 
     // these are the individual sections
-    if ((*(*printer_functions).is_command)(requ, SIW_NEIGHBORS))
+    if ((*(*functions).is_command)(requ, SIW_NEIGHBORS))
       *send_what |= SIW_NEIGHBORS;
-    if ((*(*printer_functions).is_command)(requ, SIW_LINKS))
+    if ((*(*functions).is_command)(requ, SIW_LINKS))
       *send_what |= SIW_LINKS;
-    if ((*(*printer_functions).is_command)(requ, SIW_ROUTES))
+    if ((*(*functions).is_command)(requ, SIW_ROUTES))
       *send_what |= SIW_ROUTES;
-    if ((*(*printer_functions).is_command)(requ, SIW_HNA))
+    if ((*(*functions).is_command)(requ, SIW_HNA))
       *send_what |= SIW_HNA;
-    if ((*(*printer_functions).is_command)(requ, SIW_MID))
+    if ((*(*functions).is_command)(requ, SIW_MID))
       *send_what |= SIW_MID;
-    if ((*(*printer_functions).is_command)(requ, SIW_TOPOLOGY))
+    if ((*(*functions).is_command)(requ, SIW_TOPOLOGY))
       *send_what |= SIW_TOPOLOGY;
-    if ((*(*printer_functions).is_command)(requ, SIW_GATEWAYS))
+    if ((*(*functions).is_command)(requ, SIW_GATEWAYS))
       *send_what |= SIW_GATEWAYS;
-    if ((*(*printer_functions).is_command)(requ, SIW_INTERFACES))
+    if ((*(*functions).is_command)(requ, SIW_INTERFACES))
       *send_what |= SIW_INTERFACES;
-    if ((*(*printer_functions).is_command)(requ, SIW_2HOP))
+    if ((*(*functions).is_command)(requ, SIW_2HOP))
       *send_what |= SIW_2HOP;
-    if ((*(*printer_functions).is_command)(requ, SIW_SGW))
+    if ((*(*functions).is_command)(requ, SIW_SGW))
       *send_what |= SIW_SGW;
 
     // specials
-    if ((*(*printer_functions).is_command)(requ, SIW_VERSION))
+    if ((*(*functions).is_command)(requ, SIW_VERSION))
       *send_what |= SIW_VERSION;
-    if ((*(*printer_functions).is_command)(requ, SIW_CONFIG))
+    if ((*(*functions).is_command)(requ, SIW_CONFIG))
       *send_what |= SIW_CONFIG;
-    if ((*(*printer_functions).is_command)(requ, SIW_PLUGINS))
+    if ((*(*functions).is_command)(requ, SIW_PLUGINS))
       *send_what |= SIW_PLUGINS;
 
     /* To print out neighbours only on the Freifunk Status
      * page the normal output is somewhat lengthy. The
      * header parsing is sufficient for standard wget.
      */
-    if ((*(*printer_functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
+    if ((*(*functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
       *send_what = SIW_NEIGHBORS_FREIFUNK;
   }
 }
@@ -170,7 +170,7 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
-  const char *content_type = ((*printer_functions).determine_mime_type) ? (*(*printer_functions).determine_mime_type)(send_what) : "text/plain; charset=utf-8";
+  const char *content_type = ((*functions).determine_mime_type) ? (*(*functions).determine_mime_type)(send_what) : "text/plain; charset=utf-8";
   int contentLengthIndex = 0;
   int headerLength = 0;
 
@@ -183,41 +183,41 @@ static void send_info(unsigned int send_what, int the_socket) {
 
 // only add if normal format
   if (send_what & SIW_ALL) {
-    if ((*printer_functions).output_start)
-      (*(*printer_functions).output_start)(&abuf);
+    if ((*functions).output_start)
+      (*(*functions).output_start)(&abuf);
 
-    if ((send_what & SIW_LINKS) && (*printer_functions).links)
-      (*(*printer_functions).links)(&abuf);
-    if ((send_what & SIW_NEIGHBORS) && (*printer_functions).neighbors)
-      (*(*printer_functions).neighbors)(&abuf, false);
-    if ((send_what & SIW_TOPOLOGY) && (*printer_functions).topology)
-      (*(*printer_functions).topology)(&abuf);
-    if ((send_what & SIW_HNA) && (*printer_functions).hna)
-      (*(*printer_functions).hna)(&abuf);
-    if ((send_what & SIW_SGW) && (*printer_functions).sgw)
-      (*(*printer_functions).sgw)(&abuf);
-    if ((send_what & SIW_MID) && (*printer_functions).mid)
-      (*(*printer_functions).mid)(&abuf);
-    if ((send_what & SIW_ROUTES) && (*printer_functions).routes)
-      (*(*printer_functions).routes)(&abuf);
-    if ((send_what & SIW_GATEWAYS) && (*printer_functions).gateways)
-      (*(*printer_functions).gateways)(&abuf);
-    if ((send_what & SIW_CONFIG) && (*printer_functions).config)
-      (*(*printer_functions).config)(&abuf);
-    if ((send_what & SIW_INTERFACES) && (*printer_functions).interfaces)
-      (*(*printer_functions).interfaces)(&abuf);
-    if ((send_what & SIW_2HOP) && (*printer_functions).neighbors)
-      (*(*printer_functions).neighbors)(&abuf, true);
-    if ((send_what & SIW_VERSION) && (*printer_functions).version)
-      (*(*printer_functions).version)(&abuf);
-    if ((send_what & SIW_PLUGINS) && (*printer_functions).plugins)
-      (*(*printer_functions).plugins)(&abuf);
+    if ((send_what & SIW_LINKS) && (*functions).links)
+      (*(*functions).links)(&abuf);
+    if ((send_what & SIW_NEIGHBORS) && (*functions).neighbors)
+      (*(*functions).neighbors)(&abuf, false);
+    if ((send_what & SIW_TOPOLOGY) && (*functions).topology)
+      (*(*functions).topology)(&abuf);
+    if ((send_what & SIW_HNA) && (*functions).hna)
+      (*(*functions).hna)(&abuf);
+    if ((send_what & SIW_SGW) && (*functions).sgw)
+      (*(*functions).sgw)(&abuf);
+    if ((send_what & SIW_MID) && (*functions).mid)
+      (*(*functions).mid)(&abuf);
+    if ((send_what & SIW_ROUTES) && (*functions).routes)
+      (*(*functions).routes)(&abuf);
+    if ((send_what & SIW_GATEWAYS) && (*functions).gateways)
+      (*(*functions).gateways)(&abuf);
+    if ((send_what & SIW_CONFIG) && (*functions).config)
+      (*(*functions).config)(&abuf);
+    if ((send_what & SIW_INTERFACES) && (*functions).interfaces)
+      (*(*functions).interfaces)(&abuf);
+    if ((send_what & SIW_2HOP) && (*functions).neighbors)
+      (*(*functions).neighbors)(&abuf, true);
+    if ((send_what & SIW_VERSION) && (*functions).version)
+      (*(*functions).version)(&abuf);
+    if ((send_what & SIW_PLUGINS) && (*functions).plugins)
+      (*(*functions).plugins)(&abuf);
 
-    if ((*printer_functions).output_end)
-      (*(*printer_functions).output_end)(&abuf);
-  } else if ((send_what & SIW_OLSRD_CONF) && (*printer_functions).olsrd_conf) {
+    if ((*functions).output_end)
+      (*(*functions).output_end)(&abuf);
+  } else if ((send_what & SIW_OLSRD_CONF) && (*functions).olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
-    (*(*printer_functions).olsrd_conf)(&abuf);
+    (*(*functions).olsrd_conf)(&abuf);
   }
 
   if (info_plugin_config->http_headers) {
@@ -403,8 +403,8 @@ static int plugin_ipc_init(void) {
  *This function is called by the my_init
  *function in uolsrd_plugin.c
  */
-int info_plugin_init(const char * plugin_name, info_plugin_functions_t *functions, info_plugin_config_t *config) {
-  printer_functions = functions;
+int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *config) {
+  functions = plugin_functions;
   PLUGIN_NAME = plugin_name;
   info_plugin_config = config;
 
@@ -412,8 +412,8 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *function
   ipc_socket = -1;
   memset(&outbuffer, 0, sizeof(outbuffer));
 
-  if ((*printer_functions).init) {
-    (*(*printer_functions).init)(PLUGIN_NAME);
+  if ((*functions).init) {
+    (*(*functions).init)(PLUGIN_NAME);
   }
 
   plugin_ipc_init();
