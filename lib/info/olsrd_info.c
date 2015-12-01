@@ -52,6 +52,16 @@
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
 
+#define MAX_CLIENTS 3
+
+typedef struct {
+  char *buffer[MAX_CLIENTS];
+  size_t size[MAX_CLIENTS];
+  size_t written[MAX_CLIENTS];
+  int socket[MAX_CLIENTS];
+  int count;
+} info_plugin_outbuffer_t;
+
 static const char * PLUGIN_NAME = NULL;
 static info_plugin_functions_t *functions = NULL;
 static info_plugin_config_t *info_plugin_config;
