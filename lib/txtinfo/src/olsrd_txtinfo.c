@@ -190,6 +190,10 @@ static void determine_action(unsigned int *send_what, char *requ) {
   }
 }
 
+static void plugin_init(void) {
+  /* nothing to do */
+}
+
 /**
  *Do initialization here
  *
@@ -199,6 +203,8 @@ static void determine_action(unsigned int *send_what, char *requ) {
 int olsrd_plugin_init(void) {
   /* Initial IPC value */
   ipc_socket = -1;
+
+  plugin_init();
 
   plugin_ipc_init();
   return 1;
