@@ -75,7 +75,7 @@ static info_plugin_functions_t functions = { //
         .plugins = NULL //
     };
 
-info_plugin_config_t info_plugin_config;
+info_plugin_config_t config;
 bool vtime;
 
 static void my_init(void) __attribute__ ((constructor));
@@ -89,21 +89,21 @@ static void my_init(void) {
   printf("%s\n", MOD_DESC);
 
   /* defaults for parameters */
-  info_plugin_config.ipc_port = 2006;
-  info_plugin_config.http_headers = true;
-  info_plugin_config.allow_localhost = false;
-  info_plugin_config.ipv6_only = false;
+  config.ipc_port = 2006;
+  config.http_headers = true;
+  config.allow_localhost = false;
+  config.ipv6_only = false;
 
   if (olsr_cnf->ip_version == AF_INET) {
-    info_plugin_config.accept_ip.v4.s_addr = htonl(INADDR_LOOPBACK);
-    info_plugin_config.listen_ip.v4.s_addr = htonl(INADDR_ANY);
+    config.accept_ip.v4.s_addr = htonl(INADDR_LOOPBACK);
+    config.listen_ip.v4.s_addr = htonl(INADDR_ANY);
   } else {
-    info_plugin_config.accept_ip.v6 = in6addr_loopback;
-    info_plugin_config.listen_ip.v6 = in6addr_any;
+    config.accept_ip.v6 = in6addr_loopback;
+    config.listen_ip.v6 = in6addr_any;
   }
 
   /* highlite neighbours by default */
-  info_plugin_config.nompr = 0;
+  config.nompr = 0;
 
   vtime = false;
 }
@@ -128,7 +128,7 @@ static void my_fini(void) {
  *function in uolsrd_plugin.c
  */
 int olsrd_plugin_init(void) {
-  return info_plugin_init(PLUGIN_NAME, &functions, &info_plugin_config);
+  return info_plugin_init(PLUGIN_NAME, &functions, &config);
 }
 
 /**
@@ -144,12 +144,12 @@ int olsrd_plugin_interface_version(void) {
 
 static const struct olsrd_plugin_parameters plugin_parameters[] = { //
     //
-        { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &info_plugin_config.ipc_port }, //
-        { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &info_plugin_config.accept_ip }, //
-        { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &info_plugin_config.listen_ip }, //
-        { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &info_plugin_config.http_headers }, //
-        { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &info_plugin_config.allow_localhost }, //
-        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &info_plugin_config.ipv6_only }, //
+        { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &config.ipc_port }, //
+        { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.accept_ip }, //
+        { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, //
+        { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, //
+        { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, //
+        { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }, //
         { .name = "vtime", .set_plugin_parameter = &set_plugin_boolean, .data = &vtime } //
     };
 
