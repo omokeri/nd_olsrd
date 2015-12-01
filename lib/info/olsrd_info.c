@@ -413,10 +413,10 @@ static int plugin_ipc_init(void) {
  *This function is called by the my_init
  *function in uolsrd_plugin.c
  */
-int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *config) {
+int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
   functions = plugin_functions;
   PLUGIN_NAME = plugin_name;
-  info_plugin_config = config;
+  info_plugin_config = plugin_config;
 
   /* Initial IPC value */
   ipc_socket = -1;

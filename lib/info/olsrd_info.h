@@ -44,7 +44,7 @@
 
 #include "info_types.h"
 
-int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *config);
+int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config);
 void info_plugin_exit(void);
 
 #endif /* _OLSRD_LIB_INFO_OLSRD_INFO_H_ */
