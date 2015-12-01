@@ -139,6 +139,57 @@ static int outbuffer_count = 0;
 
 static struct timer_entry *writetimer_entry;
 
+static void determine_action(unsigned int *send_what, char *requ) {
+  if (strstr(requ, "/con"))
+    *send_what |= SIW_OLSRD_CONF;
+  else if (strstr(requ, "/all"))
+    *send_what = SIW_ALL;
+  else {
+    // these are the two overarching categories
+    if (strstr(requ, "/runtime"))
+      *send_what |= SIW_RUNTIME_ALL;
+    if (strstr(requ, "/startup"))
+      *send_what |= SIW_STARTUP_ALL;
+
+    // these are the individual sections
+    if (strstr(requ, "/nei"))
+      *send_what |= SIW_NEIGHBORS;
+    if (strstr(requ, "/lin"))
+      *send_what |= SIW_LINKS;
+    if (strstr(requ, "/rou"))
+      *send_what |= SIW_ROUTES;
+    if (strstr(requ, "/hna"))
+      *send_what |= SIW_HNA;
+    if (strstr(requ, "/mid"))
+      *send_what |= SIW_MID;
+    if (strstr(requ, "/top"))
+      *send_what |= SIW_TOPOLOGY;
+    if (strstr(requ, "/gat"))
+      *send_what |= SIW_GATEWAYS;
+    if (strstr(requ, "/int"))
+      *send_what |= SIW_INTERFACES;
+    if (strstr(requ, "/2ho"))
+      *send_what |= SIW_2HOP;
+    if (strstr(requ, "/sgw"))
+      *send_what |= SIW_SGW;
+
+    // specials
+    if (strstr(requ, "/ver"))
+      *send_what |= SIW_VERSION;
+    if (strstr(requ, "/config"))
+      *send_what |= SIW_CONFIG;
+    if (strstr(requ, "/plugins"))
+      *send_what |= SIW_PLUGINS;
+
+    /* To print out neighbours only on the Freifunk Status
+     * page the normal output is somewhat lengthy. The
+     * header parsing is sufficient for standard wget.
+     */
+    if (strstr(requ, "/neighbours"))
+      *send_what = SIW_NEIGHBORS | SIW_LINKS;
+  }
+}
+
 /**
  *Do initialization here
  *
@@ -310,55 +361,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
     if (0 < s) {
       requ[s] = 0;
-      /* print out the requested tables */
-      if (strstr(requ, "/con"))
-        send_what |= SIW_OLSRD_CONF;
-      else if (strstr(requ, "/all"))
-        send_what = SIW_ALL;
-      else {
-        // these are the two overarching categories
-        if (strstr(requ, "/runtime"))
-          send_what |= SIW_RUNTIME_ALL;
-        if (strstr(requ, "/startup"))
-          send_what |= SIW_STARTUP_ALL;
-
-        // these are the individual sections
-        if (strstr(requ, "/nei"))
-          send_what |= SIW_NEIGHBORS;
-        if (strstr(requ, "/lin"))
-          send_what |= SIW_LINKS;
-        if (strstr(requ, "/rou"))
-          send_what |= SIW_ROUTES;
-        if (strstr(requ, "/hna"))
-          send_what |= SIW_HNA;
-        if (strstr(requ, "/mid"))
-          send_what |= SIW_MID;
-        if (strstr(requ, "/top"))
-          send_what |= SIW_TOPOLOGY;
-        if (strstr(requ, "/gat"))
-          send_what |= SIW_GATEWAYS;
-        if (strstr(requ, "/int"))
-          send_what |= SIW_INTERFACES;
-        if (strstr(requ, "/2ho"))
-          send_what |= SIW_2HOP;
-        if (strstr(requ, "/sgw"))
-          send_what |= SIW_SGW;
-
-        // specials
-        if (strstr(requ, "/ver"))
-          send_what |= SIW_VERSION;
-        if (strstr(requ, "/config"))
-          send_what |= SIW_CONFIG;
-        if (strstr(requ, "/plugins"))
-          send_what |= SIW_PLUGINS;
-
-        /* To print out neighbours only on the Freifunk Status
-         * page the normal output is somewhat lengthy. The
-         * header parsing is sufficient for standard wget.
-         */
-        if (strstr(requ, "/neighbours"))
-          send_what = SIW_NEIGHBORS | SIW_LINKS;
-      }
+      determine_action(&send_what, requ);
     }
 
     if (!send_what)
