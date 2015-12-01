@@ -1,7 +1,7 @@
 /*
  * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004
- *
+ * Copyright (c) 2004, Andreas Tonnesen(andreto@olsr.org)
+ *                     includes code by Bruno Randolf
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,60 +39,12 @@
  *
  */
 
-/*
- * Dynamic linked library for the olsr.org olsr daemon
- */
+#ifndef _OLSRD_INFO_INFO_H
+#define _OLSRD_INFO_INFO_H
 
-#include "olsrd_txtinfo.h"
-#include "txtinfo_printers.h"
-#include "../../info/olsrd_info.h"
+#include "../../info/info_types.h"
 
-#define PLUGIN_NAME "TXTINFO"
+int info_plugin_init(const char * plugin_name, printer_functions_t *functions, info_plugin_config_t *config);
+void info_plugin_exit(void);
 
-static printer_functions_t printer_functions = { //
-    //
-        .init = NULL, //
-        .is_command = &isCommand, //
-        .determine_mime_type = NULL, //
-        .output_start = NULL, //
-        .output_end = NULL, //
-        .neighbors = &ipc_print_neighbors, //
-        .links = &ipc_print_links, //
-        .routes = &ipc_print_routes, //
-        .topology = &ipc_print_topology, //
-        .hna = &ipc_print_hna, //
-        .mid = &ipc_print_mid, //
-        .gateways = &ipc_print_gateways, //
-        .sgw = &ipc_print_sgw, //
-        .version = &ipc_print_version, //
-        .olsrd_conf = &ipc_print_olsrd_conf, //
-        .interfaces = &ipc_print_interfaces, //
-        .config = NULL, //
-        .plugins = NULL //
-    };
-
-/**
- *Do initialization here
- *
- *This function is called by the my_init
- *function in uolsrd_plugin.c
- */
-int olsrd_plugin_init(void) {
-  return info_plugin_init(PLUGIN_NAME, &printer_functions, &info_plugin_config);
-}
-
-/**
- * destructor - called at unload
- */
-void olsr_plugin_exit(void) {
-  info_plugin_exit();
-}
-
-/*
- * Local Variables:
- * mode: c
- * style: linux
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+#endif /* _OLSRD_INFO_INFO_H */
