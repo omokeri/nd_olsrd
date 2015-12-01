@@ -39,8 +39,8 @@
  *
  */
 
-#ifndef _OLSRD_INFO_TYPES_H
-#define _OLSRD_INFO_TYPES_H
+#ifndef _OLSRD_LIB_INFO_INFO_TYPES_H_
+#define _OLSRD_LIB_INFO_INFO_TYPES_H_
 
 #include <stdbool.h>
 
@@ -110,4 +110,4 @@ typedef struct {
     int ipv6_only;
 } info_plugin_config_t;
 
-#endif /* _OLSRD_INFO_TYPES_H */
+#endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */

@@ -39,8 +39,8 @@
  *
  */
 
-#ifndef _OLSRD_INFO_COMMON_HTTP_HEADERS
-#define _OLSRD_INFO_COMMON_HTTP_HEADERS
+#ifndef _OLSRD_LIB_INFO_HTTP_HEADERS_H_
+#define _OLSRD_LIB_INFO_HTTP_HEADERS_H_
 
 #include "common/autobuf.h"
 
@@ -51,4 +51,4 @@ void build_http_header(const char * plugin_name, const char *status, const char 
 
 void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength);
 
-#endif /* _OLSRD_INFO_COMMON_HTTP_HEADERS */
+#endif /* _OLSRD_LIB_INFO_HTTP_HEADERS_H_ */

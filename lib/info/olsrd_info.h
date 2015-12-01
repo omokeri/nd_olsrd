@@ -39,12 +39,12 @@
  *
  */
 
-#ifndef _OLSRD_INFO_INFO_H
-#define _OLSRD_INFO_INFO_H
+#ifndef _OLSRD_LIB_INFO_OLSRD_INFO_H_
+#define _OLSRD_LIB_INFO_OLSRD_INFO_H_
 
 #include "info_types.h"
 
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *config);
 void info_plugin_exit(void);
 
-#endif /* _OLSRD_INFO_INFO_H */
+#endif /* _OLSRD_LIB_INFO_OLSRD_INFO_H_ */
