@@ -46,8 +46,6 @@
 #ifndef LIB_JSONINFO_SRC_OLSRD_PLUGIN_H_
 #define LIB_JSONINFO_SRC_OLSRD_PLUGIN_H_
 
-#include "olsr_types.h"
-#include "olsrd_plugin.h"
 #include "plugin_util.h"
 #include "../../info/info_types.h"
 
