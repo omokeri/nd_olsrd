@@ -181,6 +181,10 @@ static void write_data(void *foo __attribute__ ((unused))) {
   }
 
   for (i = 0; i < outbuffer.count; i++) {
+    if (outbuffer.socket[i] < 0) {
+      continue;
+    }
+
     if (FD_ISSET(outbuffer.socket[i], &set)) {
       result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
       if (result > 0) {
