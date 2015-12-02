@@ -159,6 +159,10 @@ static void write_data(void *foo __attribute__ ((unused))) {
   FD_ZERO(&set);
   max = 0;
   for (i = 0; i < outbuffer.count; i++) {
+    if (outbuffer.socket[i] < 0) {
+      continue;
+    }
+
     /* And we cast here since we get a warning on Win32 */
     FD_SET((unsigned int ) (outbuffer.socket[i]), &set);
 
