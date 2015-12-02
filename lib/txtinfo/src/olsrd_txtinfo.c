@@ -75,6 +75,7 @@
 #include "lq_plugin.h"
 #include "common/autobuf.h"
 #include "gateway.h"
+#include "../../info/http_headers.h"
 
 #include "olsrd_txtinfo.h"
 #include "olsrd_plugin.h"
@@ -93,9 +94,6 @@
 #endif
 
 static int ipc_socket;
-
-/* Response types */
-#define HTTP_200 "HTTP/1.1 200 OK"
 
 /* IPC initialization function */
 static int plugin_ipc_init(void);
@@ -140,63 +138,6 @@ static int outbuffer_socket[MAX_CLIENTS];
 static int outbuffer_count = 0;
 
 static struct timer_entry *writetimer_entry;
-
-static void build_http_header(const char *status, const char *mime, struct autobuf *abuf, int *contentLengthPlaceholderStart) {
-  /* Status */
-  abuf_appendf(abuf, "%s\r\n", status);
-
-  /* Date */
-  {
-    time_t currtime;
-    char buf[128];
-
-    time(&currtime);
-    if (strftime(buf, sizeof(buf), "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", gmtime(&currtime))) {
-      abuf_puts(abuf, buf);
-    }
-  }
-
-  /* Server version */
-  abuf_puts(abuf, "Server: OLSRD "PLUGIN_NAME"\r\n");
-
-  /* connection-type */
-  abuf_puts(abuf, "Connection: close\r\n");
-
-  /* MIME type */
-  if (mime != NULL) {
-    abuf_appendf(abuf, "Content-Type: %s\r\n", mime);
-  }
-
-  /* CORS data */
-  /* No needs to be strict here, access control is based on source IP */
-  abuf_puts(abuf, "Access-Control-Allow-Origin: *\r\n");
-  abuf_puts(abuf, "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n");
-  abuf_puts(abuf, "Access-Control-Allow-Headers: Accept, Origin, X-Requested-With\r\n");
-  abuf_puts(abuf, "Access-Control-Max-Age: 1728000\r\n");
-
-  /* Content length */
-  abuf_puts(abuf, "Content-Length: ");
-  *contentLengthPlaceholderStart = abuf->len;
-  abuf_puts(abuf, "            "); /* 12 spaces reserved for the length (max. 1TB-1), to be filled at the end */
-  abuf_puts(abuf, "\r\n");
-
-  /* Cache-control
-   * No caching dynamic pages
-   */
-  abuf_puts(abuf, "Cache-Control: no-cache\r\n");
-
-  /* End header */
-  abuf_puts(abuf, "\r\n");
-}
-
-static void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthPlaceholderStart, int contentLength) {
-  char buf[12 + 1]; /* size must match to number of spaces used (+1 for the terminating byte) */
-
-  memset(buf, 0, sizeof(buf));
-  snprintf(buf, sizeof(buf), "%d", contentLength);
-  buf[sizeof(buf) - 1] = '\0';
-  memcpy(&abuf->buf[contentLengthPlaceholderStart], buf, strlen(buf));
-}
 
 /**
  *Do initialization here
@@ -874,7 +815,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_init(&abuf, 2 * 4096);
 
   if (http_headers) {
-    build_http_header(HTTP_200, content_type, &abuf, &contentLengthPlaceholderStart);
+    build_http_header(PLUGIN_NAME, HTTP_200, content_type, &abuf, &contentLengthPlaceholderStart);
     headerLength = abuf.len;
   }
 

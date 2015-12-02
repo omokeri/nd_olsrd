@@ -43,6 +43,9 @@ PLUGIN_VER =	0.1
 TOPDIR =	../..
 include $(TOPDIR)/Makefile.inc
 
+COMMONINFO = $(wildcard ../info/*.c)
+OBJS += $(COMMONINFO:%.c=%.o)
+
 default_target: $(PLUGIN_FULLNAME)
 
 $(PLUGIN_FULLNAME): $(OBJS) version-script.txt
