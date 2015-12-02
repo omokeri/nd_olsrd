@@ -118,4 +118,4 @@ typedef struct {
   { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
   { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
 
-  #endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */
+#endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */

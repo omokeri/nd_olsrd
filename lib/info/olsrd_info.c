@@ -194,7 +194,7 @@ static void send_info(unsigned int send_what, int the_socket) {
     headerLength = abuf.len;
   }
 
-// only add if normal format
+  // only add if normal format
   if (send_what & SIW_ALL) {
     if ((*functions).output_start)
       (*(*functions).output_start)(&abuf);
