@@ -61,15 +61,13 @@ static int entrynumber[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static int currentjsondepth = 0;
 
 static void abuf_json_new_indent(struct autobuf *abuf) {
-  int i = currentjsondepth;
+  if (currentjsondepth) {
+    int i = currentjsondepth;
 
-  if (!i) {
-    return;
-  }
-
-  abuf_puts(abuf, "\n");
-  while (i-- > 0) {
-    abuf_puts(abuf, "  ");
+    abuf_puts(abuf, "\n");
+    while (i-- > 0) {
+      abuf_puts(abuf, "  ");
+    }
   }
 }
 
