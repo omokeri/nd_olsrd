@@ -76,16 +76,19 @@ LoadPlugin "olsrd_jsoninfo.so.0.0"
     # will be used, others will be ignored.
     # PlParam     "listen"             "0.0.0.0"
 
+    # Set to true to prepend HTTP headers before the JSON reply
+    # PlParam     "httpheaders"        "false"
+
+    # Set to true to always allow connections from 127.0.0.1
+    # PlParam     "allowlocalhost"     "false"
+
+    # Set to true to only listen on IPv6 addresses when running in IPv6 mode.
+    # PlParam     "ipv6only"           "false"
+
     # The first line of the specified file will be read. This line will then be
     # included in the JSON reply as the value of the 'uuid' field.
     # Mainly used for debugging.
     # PlParam     "uuidfile"           "uuid.txt"
-
-    # Set to true to prepend HTTP headers before the JSON reply
-    # PlParam     "httpheaders"        "false"
-
-    # Set to true to only listen on IPv6 addresses when running in IPv6 mode.
-    # PlParam     "ipv6only"           "false"
 }
 
 

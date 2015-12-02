@@ -50,14 +50,12 @@
 #include "olsrd_plugin.h"
 #include "plugin_util.h"
 
-/* uncomment this to allow connections from 127.0.0.1 regardless of olsrd.conf (useful to allow externel ip/network + localhost) (ipv4 only)*/
-/* #define JSONINFO_ALLOW_LOCALHOST */
-
 extern union olsr_ip_addr jsoninfo_accept_ip;
 extern union olsr_ip_addr jsoninfo_listen_ip;
 extern int ipc_port;
 extern int nompr;
 extern bool http_headers;
+extern bool allow_localhost;
 extern int jsoninfo_ipv6_only;
 
 int olsrd_plugin_interface_version(void);
