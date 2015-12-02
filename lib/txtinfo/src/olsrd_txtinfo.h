@@ -39,8 +39,8 @@
  *
  */
 
-#ifndef _OLSRD_TXTINFO_PRINTERS_H
-#define _OLSRD_TXTINFO_PRINTERS_H
+#ifndef LIB_TXTINFO_SRC_OLSRD_TXTINFO_H_
+#define LIB_TXTINFO_SRC_OLSRD_TXTINFO_H_
 
 #include <stdbool.h>
 
@@ -61,4 +61,4 @@ void ipc_print_olsrd_conf(struct autobuf *abuf);
 void ipc_print_interfaces(struct autobuf *abuf);
 void ipc_print_twohop(struct autobuf *abuf);
 
-#endif /* _OLSRD_TXTINFO_PRINTERS_H */
+#endif /* LIB_TXTINFO_SRC_OLSRD_TXTINFO_H_ */
