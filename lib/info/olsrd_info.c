@@ -378,20 +378,20 @@ static int plugin_ipc_init(void) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) socket()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
-    return 0;
+    goto error_out;
   }
 
   if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) setsockopt()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
-    return 0;
+    goto error_out;
   }
 
 #if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
   if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
     perror("SO_REUSEADDR failed");
-    return 0;
+    goto error_out;
   }
 #endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
 
@@ -399,7 +399,7 @@ static int plugin_ipc_init(void) {
   if (config->ipv6_only && olsr_cnf->ip_version == AF_INET6) {
     if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
       perror("IPV6_V6ONLY failed");
-      return 0;
+      goto error_out;
     }
   }
 #endif /* defined linux && defined IPV6_V6ONLY */
@@ -430,7 +430,7 @@ static int plugin_ipc_init(void) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) bind()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
-    return 0;
+    goto error_out;
   }
 
   /* show that we are willing to listen */
@@ -438,7 +438,7 @@ static int plugin_ipc_init(void) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) listen()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
-    return 0;
+    goto error_out;
   }
 
   /* Register with olsrd */
@@ -449,6 +449,13 @@ static int plugin_ipc_init(void) {
 #endif /* NODEBUG */
 
   return 1;
+
+  error_out: //
+  if (ipc_socket >= 0) {
+    close(ipc_socket);
+    ipc_socket = -1;
+  }
+  return 0;
 }
 
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
