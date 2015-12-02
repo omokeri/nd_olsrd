@@ -58,6 +58,7 @@
 #define SIW_2HOP 0x0100
 #define SIW_SGW 0x0200
 #define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
+#define SIW_NEIGHBORS_FREIFUNK (SIW_NEIGHBORS | SIW_LINKS) /* special */
 
 /* these only change at olsrd startup */
 #define SIW_VERSION 0x0400
@@ -72,12 +73,14 @@
 #define SIW_OLSRD_CONF 0x2000
 
 typedef void (*init_plugin)(const char *plugin_name);
+typedef bool (*determine_command)(const char *str, unsigned int siw);
 typedef const char * (*mime_type)(unsigned int send_what);
 typedef void (*printer_neighbors)(struct autobuf *abuf, bool list_2hop);
 typedef void (*printer_generic)(struct autobuf *abuf);
 
 typedef struct {
     init_plugin init;
+    determine_command is_command;
     mime_type determine_mime_type;
     printer_neighbors neighbors;
     printer_generic links;

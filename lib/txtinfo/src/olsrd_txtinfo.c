@@ -87,6 +87,7 @@ static struct timer_entry *writetimer_entry;
 static printer_functions_t printer_functions = { //
     //
         .init = NULL, //
+        .is_command = &isCommand, //
         .determine_mime_type = NULL, //
         .neighbors = &ipc_print_neighbors, //
         .links = &ipc_print_links, //
@@ -104,53 +105,55 @@ static printer_functions_t printer_functions = { //
     };
 
 static void determine_action(unsigned int *send_what, char *requ) {
-  if (strstr(requ, "/con"))
+  if (!printer_functions.is_command)
+    *send_what = 0;
+  else if ((*printer_functions.is_command)(requ, SIW_OLSRD_CONF))
     *send_what |= SIW_OLSRD_CONF;
-  else if (strstr(requ, "/all"))
+  else if ((*printer_functions.is_command)(requ, SIW_ALL))
     *send_what = SIW_ALL;
   else {
     // these are the two overarching categories
-    if (strstr(requ, "/runtime"))
+    if ((*printer_functions.is_command)(requ, SIW_RUNTIME_ALL))
       *send_what |= SIW_RUNTIME_ALL;
-    if (strstr(requ, "/startup"))
+    if ((*printer_functions.is_command)(requ, SIW_STARTUP_ALL))
       *send_what |= SIW_STARTUP_ALL;
 
     // these are the individual sections
-    if (strstr(requ, "/nei"))
+    if ((*printer_functions.is_command)(requ, SIW_NEIGHBORS))
       *send_what |= SIW_NEIGHBORS;
-    if (strstr(requ, "/lin"))
+    if ((*printer_functions.is_command)(requ, SIW_LINKS))
       *send_what |= SIW_LINKS;
-    if (strstr(requ, "/rou"))
+    if ((*printer_functions.is_command)(requ, SIW_ROUTES))
       *send_what |= SIW_ROUTES;
-    if (strstr(requ, "/hna"))
+    if ((*printer_functions.is_command)(requ, SIW_HNA))
       *send_what |= SIW_HNA;
-    if (strstr(requ, "/mid"))
+    if ((*printer_functions.is_command)(requ, SIW_MID))
       *send_what |= SIW_MID;
-    if (strstr(requ, "/top"))
+    if ((*printer_functions.is_command)(requ, SIW_TOPOLOGY))
       *send_what |= SIW_TOPOLOGY;
-    if (strstr(requ, "/gat"))
+    if ((*printer_functions.is_command)(requ, SIW_GATEWAYS))
       *send_what |= SIW_GATEWAYS;
-    if (strstr(requ, "/int"))
+    if ((*printer_functions.is_command)(requ, SIW_INTERFACES))
       *send_what |= SIW_INTERFACES;
-    if (strstr(requ, "/2ho"))
+    if ((*printer_functions.is_command)(requ, SIW_2HOP))
       *send_what |= SIW_2HOP;
-    if (strstr(requ, "/sgw"))
+    if ((*printer_functions.is_command)(requ, SIW_SGW))
       *send_what |= SIW_SGW;
 
     // specials
-    if (strstr(requ, "/ver"))
+    if ((*printer_functions.is_command)(requ, SIW_VERSION))
       *send_what |= SIW_VERSION;
-    if (strstr(requ, "/config"))
+    if ((*printer_functions.is_command)(requ, SIW_CONFIG))
       *send_what |= SIW_CONFIG;
-    if (strstr(requ, "/plugins"))
+    if ((*printer_functions.is_command)(requ, SIW_PLUGINS))
       *send_what |= SIW_PLUGINS;
 
     /* To print out neighbours only on the Freifunk Status
      * page the normal output is somewhat lengthy. The
      * header parsing is sufficient for standard wget.
      */
-    if (strstr(requ, "/neighbours"))
-      *send_what = SIW_NEIGHBORS | SIW_LINKS;
+    if ((*printer_functions.is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
+      *send_what = SIW_NEIGHBORS_FREIFUNK;
   }
 }
 

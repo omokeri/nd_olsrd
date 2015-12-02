@@ -46,6 +46,8 @@
 
 #include "common/autobuf.h"
 
+bool isCommand(const char *str, unsigned int siw);
+
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop);
 void ipc_print_links(struct autobuf *abuf);
 void ipc_print_routes(struct autobuf *abuf);

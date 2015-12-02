@@ -51,6 +51,68 @@
 #include "routing_table.h"
 #include "lq_plugin.h"
 #include "gateway.h"
+#include "../../info/info_types.h"
+
+bool isCommand(const char *str, unsigned int siw) {
+  switch (siw) {
+    case SIW_OLSRD_CONF:
+      return strstr(str, "/con");
+
+    case SIW_ALL:
+      return strstr(str, "/all");
+
+    case SIW_RUNTIME_ALL:
+      return strstr(str, "/runtime");
+
+    case SIW_STARTUP_ALL:
+      return strstr(str, "/startup");
+
+    case SIW_NEIGHBORS:
+      return strstr(str, "/nei");
+
+    case SIW_LINKS:
+      return strstr(str, "/lin");
+
+    case SIW_ROUTES:
+      return strstr(str, "/rou");
+
+    case SIW_HNA:
+      return strstr(str, "/hna");
+
+    case SIW_MID:
+      return strstr(str, "/mid");
+
+    case SIW_TOPOLOGY:
+      return strstr(str, "/top");
+
+    case SIW_GATEWAYS:
+      return strstr(str, "/gat");
+
+    case SIW_INTERFACES:
+      return strstr(str, "/int");
+
+    case SIW_2HOP:
+      return strstr(str, "/2ho");
+
+    case SIW_SGW:
+      return strstr(str, "/sgw");
+
+    case SIW_VERSION:
+      return strstr(str, "/ver");
+
+    case SIW_CONFIG:
+      return strstr(str, "/config");
+
+    case SIW_PLUGINS:
+      return strstr(str, "/plugins");
+
+    case SIW_NEIGHBORS_FREIFUNK:
+      return strstr(str, "/neighbours");
+
+    default:
+      return false;
+  }
+}
 
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
