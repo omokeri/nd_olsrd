@@ -390,7 +390,7 @@ static int plugin_ipc_init(void) {
 
 #if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
   if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
-    perror("SO_REUSEADDR failed");
+    perror("SO_NOSIGPIPE failed");
     goto error_out;
   }
 #endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
