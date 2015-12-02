@@ -75,57 +75,75 @@ static info_plugin_outbuffer_t outbuffer;
 
 static struct timer_entry *writetimer_entry = NULL;
 
-static void determine_action(unsigned int *send_what, char *requ) {
+static unsigned int determine_action(char *requ) {
   if (!(*functions).is_command)
-    *send_what = 0;
-  else if ((*(*functions).is_command)(requ, SIW_OLSRD_CONF))
-    *send_what |= SIW_OLSRD_CONF;
-  else if ((*(*functions).is_command)(requ, SIW_ALL))
-    *send_what = SIW_ALL;
-  else {
-    // these are the two overarching categories
-    if ((*(*functions).is_command)(requ, SIW_RUNTIME_ALL))
-      *send_what |= SIW_RUNTIME_ALL;
-    if ((*(*functions).is_command)(requ, SIW_STARTUP_ALL))
-      *send_what |= SIW_STARTUP_ALL;
+    return 0;
 
-    // these are the individual sections
-    if ((*(*functions).is_command)(requ, SIW_NEIGHBORS))
-      *send_what |= SIW_NEIGHBORS;
-    if ((*(*functions).is_command)(requ, SIW_LINKS))
-      *send_what |= SIW_LINKS;
-    if ((*(*functions).is_command)(requ, SIW_ROUTES))
-      *send_what |= SIW_ROUTES;
-    if ((*(*functions).is_command)(requ, SIW_HNA))
-      *send_what |= SIW_HNA;
-    if ((*(*functions).is_command)(requ, SIW_MID))
-      *send_what |= SIW_MID;
-    if ((*(*functions).is_command)(requ, SIW_TOPOLOGY))
-      *send_what |= SIW_TOPOLOGY;
-    if ((*(*functions).is_command)(requ, SIW_GATEWAYS))
-      *send_what |= SIW_GATEWAYS;
-    if ((*(*functions).is_command)(requ, SIW_INTERFACES))
-      *send_what |= SIW_INTERFACES;
-    if ((*(*functions).is_command)(requ, SIW_2HOP))
-      *send_what |= SIW_2HOP;
-    if ((*(*functions).is_command)(requ, SIW_SGW))
-      *send_what |= SIW_SGW;
+  if ((*(*functions).is_command)(requ, SIW_OLSRD_CONF))
+    return SIW_OLSRD_CONF;
 
-    // specials
-    if ((*(*functions).is_command)(requ, SIW_VERSION))
-      *send_what |= SIW_VERSION;
-    if ((*(*functions).is_command)(requ, SIW_CONFIG))
-      *send_what |= SIW_CONFIG;
-    if ((*(*functions).is_command)(requ, SIW_PLUGINS))
-      *send_what |= SIW_PLUGINS;
+  if ((*(*functions).is_command)(requ, SIW_ALL))
+    return SIW_ALL;
 
-    /* To print out neighbours only on the Freifunk Status
-     * page the normal output is somewhat lengthy. The
-     * header parsing is sufficient for standard wget.
-     */
-    if ((*(*functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
-      *send_what = SIW_NEIGHBORS_FREIFUNK;
-  }
+  // these are the two overarching categories
+  if ((*(*functions).is_command)(requ, SIW_RUNTIME_ALL))
+    return SIW_RUNTIME_ALL;
+
+  if ((*(*functions).is_command)(requ, SIW_STARTUP_ALL))
+    return SIW_STARTUP_ALL;
+
+  // these are the individual sections
+
+  if ((*(*functions).is_command)(requ, SIW_NEIGHBORS))
+    return SIW_NEIGHBORS;
+
+  if ((*(*functions).is_command)(requ, SIW_LINKS))
+    return SIW_LINKS;
+
+  if ((*(*functions).is_command)(requ, SIW_ROUTES))
+    return SIW_ROUTES;
+
+  if ((*(*functions).is_command)(requ, SIW_HNA))
+    return SIW_HNA;
+
+  if ((*(*functions).is_command)(requ, SIW_MID))
+    return SIW_MID;
+
+  if ((*(*functions).is_command)(requ, SIW_TOPOLOGY))
+    return SIW_TOPOLOGY;
+
+  if ((*(*functions).is_command)(requ, SIW_GATEWAYS))
+    return SIW_GATEWAYS;
+
+  if ((*(*functions).is_command)(requ, SIW_INTERFACES))
+    return SIW_INTERFACES;
+
+  if ((*(*functions).is_command)(requ, SIW_2HOP))
+    return SIW_2HOP;
+
+  if ((*(*functions).is_command)(requ, SIW_SGW))
+    return SIW_SGW;
+
+  // specials
+
+  if ((*(*functions).is_command)(requ, SIW_VERSION))
+    return SIW_VERSION;
+
+  if ((*(*functions).is_command)(requ, SIW_CONFIG))
+    return SIW_CONFIG;
+
+  if ((*(*functions).is_command)(requ, SIW_PLUGINS))
+    return SIW_PLUGINS;
+
+  /* To print out neighbours only on the Freifunk Status
+   * page the normal output is somewhat lengthy. The
+   * header parsing is sufficient for standard wget.
+   */
+
+  if ((*(*functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
+    return SIW_NEIGHBORS_FREIFUNK;
+
+  return 0;
 }
 
 static void write_data(void *foo __attribute__ ((unused))) {
@@ -320,7 +338,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
     if (0 < s) {
       requ[s] = 0;
-      determine_action(&send_what, requ);
+      send_what = determine_action(requ);
     }
 
     if (!send_what)
