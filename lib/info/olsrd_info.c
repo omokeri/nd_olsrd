@@ -176,6 +176,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
 
   result = select(max + 1, NULL, &set, NULL, &tv);
   if (result <= 0) {
+    /* exit early if any of the sockets is not ready for writing */
     return;
   }
 
