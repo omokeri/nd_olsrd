@@ -369,9 +369,9 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 }
 
 static int plugin_ipc_init(void) {
-  union olsr_sockaddr sst;
+  union olsr_sockaddr sock_addr;
   uint32_t yes = 1;
-  socklen_t addrlen;
+  socklen_t sock_addr_len;
 
   /* Init ipc socket */
   if ((ipc_socket = socket(olsr_cnf->ip_version, SOCK_STREAM, 0)) == -1) {
@@ -403,27 +403,27 @@ static int plugin_ipc_init(void) {
     /* Bind the socket */
 
     /* complete the socket structure */
-    memset(&sst, 0, sizeof(sst));
+    memset(&sock_addr, 0, sizeof(sock_addr));
     if (olsr_cnf->ip_version == AF_INET) {
-      sst.in4.sin_family = AF_INET;
-      addrlen = sizeof(struct sockaddr_in);
+      sock_addr.in4.sin_family = AF_INET;
+      sock_addr_len = sizeof(struct sockaddr_in);
 #ifdef SIN6_LEN
-      sst.in4.sin_len = addrlen;
+      sock_addr.in4.sin_len = sock_addr_len;
 #endif /* SIN6_LEN */
-      sst.in4.sin_addr.s_addr = config->listen_ip.v4.s_addr;
-      sst.in4.sin_port = htons(config->ipc_port);
+      sock_addr.in4.sin_addr.s_addr = config->listen_ip.v4.s_addr;
+      sock_addr.in4.sin_port = htons(config->ipc_port);
     } else {
-      sst.in6.sin6_family = AF_INET6;
-      addrlen = sizeof(struct sockaddr_in6);
+      sock_addr.in6.sin6_family = AF_INET6;
+      sock_addr_len = sizeof(struct sockaddr_in6);
 #ifdef SIN6_LEN
-      sst.in6.sin6_len = addrlen;
+      sock_addr.in6.sin6_len = sock_addr_len;
 #endif /* SIN6_LEN */
-      sst.in6.sin6_addr = config->listen_ip.v6;
-      sst.in6.sin6_port = htons(config->ipc_port);
+      sock_addr.in6.sin6_addr = config->listen_ip.v6;
+      sock_addr.in6.sin6_port = htons(config->ipc_port);
     }
 
     /* bind the socket to the port number */
-    if (bind(ipc_socket, &sst.in, addrlen) == -1) {
+    if (bind(ipc_socket, &sock_addr.in, sock_addr_len) == -1) {
 #ifndef NODEBUG
       olsr_printf(1, "(%s) bind()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
