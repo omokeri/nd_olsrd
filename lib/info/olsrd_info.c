@@ -151,6 +151,11 @@ static void write_data(void *foo __attribute__ ((unused))) {
   int result, i, j, max;
   struct timeval tv;
 
+  if (outbuffer.count <= 0) {
+    /* exit early if there is nothing to send */
+    return;
+  }
+
   FD_ZERO(&set);
   max = 0;
   for (i = 0; i < outbuffer.count; i++) {
