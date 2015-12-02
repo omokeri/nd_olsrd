@@ -43,6 +43,7 @@
 #define LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "common/autobuf.h"
 
@@ -59,7 +60,7 @@ void abuf_json_mark_array_entry(bool open, struct autobuf *abuf);
 
 void abuf_json_insert_comma(struct autobuf *abuf);
 
-void abuf_json_boolean(struct autobuf *abuf, const char* key, int value);
+void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value);
 
 void abuf_json_string(struct autobuf *abuf, const char* key, const char* value);
 

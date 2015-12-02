@@ -124,7 +124,7 @@ void abuf_json_mark_array_entry(bool open, struct autobuf *abuf) {
   abuf_json_mark_object(open, false, abuf, NULL);
 }
 
-void abuf_json_boolean(struct autobuf *abuf, const char* key, int value) {
+void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value) {
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   abuf_appendf(abuf, "\"%s\": %s", key, value ? "true" : "false");
