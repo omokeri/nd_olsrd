@@ -65,9 +65,6 @@
 #define info_accept_ip txtinfo_accept_ip
 #define info_listen_ip txtinfo_listen_ip
 #define info_ipv6_only txtinfo_ipv6_only
-#ifdef TXTINFO_ALLOW_LOCALHOST
-#define INFO_ALLOW_LOCALHOST TXTINFO_ALLOW_LOCALHOST
-#endif
 
 static int ipc_socket;
 
@@ -293,15 +290,11 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     if (inet_ntop(olsr_cnf->ip_version, &pin.in4.sin_addr, addr, INET6_ADDRSTRLEN) == NULL)
       addr[0] = '\0';
     if (!ip4equal(&pin.in4.sin_addr, &info_accept_ip.v4) && info_accept_ip.v4.s_addr != INADDR_ANY) {
-#ifdef INFO_ALLOW_LOCALHOST
-      if (ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
-#endif /* INFO_ALLOW_LOCALHOST */
+      if (!allow_localhost || ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
         olsr_printf(1, "("PLUGIN_NAME") From host(%s) not allowed!\n", addr);
         close(ipc_connection);
         return;
-#ifdef INFO_ALLOW_LOCALHOST
       }
-#endif /* INFO_ALLOW_LOCALHOST */
     }
   } else {
     if (inet_ntop(olsr_cnf->ip_version, &pin.in6.sin6_addr, addr, INET6_ADDRSTRLEN) == NULL)

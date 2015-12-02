@@ -64,6 +64,7 @@ union olsr_ip_addr txtinfo_listen_ip;
 int ipc_port;
 int nompr;
 bool http_headers;
+bool allow_localhost;
 int txtinfo_ipv6_only;
 
 static void my_init(void) __attribute__ ((constructor));
@@ -79,6 +80,7 @@ static void my_init(void) {
   /* defaults for parameters */
   ipc_port = 2006;
   http_headers = true;
+  allow_localhost = false;
   txtinfo_ipv6_only = false;
 
   if (olsr_cnf->ip_version == AF_INET) {
@@ -116,6 +118,7 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = { //
         { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &txtinfo_accept_ip }, //
         { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &txtinfo_listen_ip }, //
         { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &http_headers }, //
+        { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &allow_localhost }, //
         { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &txtinfo_ipv6_only } //
     };
 

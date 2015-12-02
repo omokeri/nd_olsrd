@@ -74,6 +74,9 @@ LoadPlugin "olsrd_txtinfo.so.0.1"
     # Set to true to prepend HTTP headers before the reply
     # PlParam     "httpheaders"        "true"
 
+    # Set to true to always allow connections from 127.0.0.1
+    # PlParam     "allowlocalhost"     "false"
+
     # Set to true to only listen on IPv6 addresses when running in IPv6 mode.
     # PlParam     "ipv6only"           "false"
 }

@@ -53,14 +53,12 @@
 /* uncomment this to include VTime values into Link/Topology command */
 /* #define ACTIVATE_VTIME_TXTINFO */
 
-/* uncomment this to allow connections from 127.0.0.1 regardless of olsrd.conf (useful to allow externel ip/network + localhost) (ipv4 only)*/
-/* #define TXTINFO_ALLOW_LOCALHOST */
-
 extern union olsr_ip_addr txtinfo_accept_ip;
 extern union olsr_ip_addr txtinfo_listen_ip;
 extern int ipc_port;
 extern int nompr;
 extern bool http_headers;
+extern bool allow_localhost;
 extern int txtinfo_ipv6_only;
 
 int olsrd_plugin_interface_version(void);
