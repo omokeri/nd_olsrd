@@ -71,10 +71,12 @@
 /* this data is not normal format but olsrd.conf format */
 #define SIW_OLSRD_CONF 0x2000
 
+typedef const char * (*mime_type)(unsigned int send_what);
 typedef void (*printer_neighbors)(struct autobuf *abuf, bool list_2hop);
 typedef void (*printer_generic)(struct autobuf *abuf);
 
 typedef struct {
+    mime_type determine_mime_type;
     printer_neighbors neighbors;
     printer_generic links;
     printer_generic routes;
