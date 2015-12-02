@@ -57,7 +57,8 @@ char uuid[UUIDLEN + 1];
 /* JSON does not allow commas dangling at the end of arrays, so we need to
  * count which entry number we're at in order to make sure we don't tack a
  * dangling comma on at the end */
-static int entrynumber[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#define ENTRY_NUMBER_MAX_DEPTH 16
+static int entrynumber[ENTRY_NUMBER_MAX_DEPTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static int currentjsondepth = 0;
 
 static void abuf_json_new_indent(struct autobuf *abuf) {
@@ -84,9 +85,9 @@ void abuf_json_mark_output(bool open, struct autobuf *abuf) {
     currentjsondepth++;
     entrynumber[currentjsondepth] = 0;
   } else {
+    assert(currentjsondepth == 1);
     entrynumber[currentjsondepth] = 0;
     currentjsondepth--;
-    assert(!currentjsondepth);
     abuf_json_new_indent(abuf);
     abuf_puts(abuf, "\n}");
   }
@@ -105,10 +106,12 @@ void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const ch
     }
     entrynumber[currentjsondepth]++;
     currentjsondepth++;
+    assert(currentjsondepth < ENTRY_NUMBER_MAX_DEPTH);
     entrynumber[currentjsondepth] = 0;
   } else {
     entrynumber[currentjsondepth] = 0;
     currentjsondepth--;
+    assert(currentjsondepth >= 0);
     abuf_json_new_indent(abuf);
     abuf_appendf(abuf, "%s", array ? "]" : "}");
   }
