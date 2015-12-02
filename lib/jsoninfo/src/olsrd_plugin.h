@@ -43,8 +43,8 @@
  * Dynamic linked library for the olsr.org olsr daemon
  */
 
-#ifndef _OLSRD_JSONINFO
-#define _OLSRD_JSONINFO
+#ifndef LIB_JSONINFO_SRC_OLSRD_PLUGIN_H_
+#define LIB_JSONINFO_SRC_OLSRD_PLUGIN_H_
 
 #include "olsr_types.h"
 #include "olsrd_plugin.h"
@@ -58,7 +58,7 @@ int olsrd_plugin_init(void);
 void olsr_plugin_exit(void);
 void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size);
 
-#endif /* _OLSRD_JSONINFO */
+#endif /* LIB_JSONINFO_SRC_OLSRD_PLUGIN_H_ */
 
 /*
  * Local Variables:

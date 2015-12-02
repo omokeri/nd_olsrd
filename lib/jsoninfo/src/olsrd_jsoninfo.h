@@ -39,8 +39,8 @@
  *
  */
 
-#ifndef _OLSRD_JSONINFO_PRINTERS_H
-#define _OLSRD_JSONINFO_PRINTERS_H
+#ifndef LIB_JSONINFO_SRC_OLSRD_JSONINFO_H_
+#define LIB_JSONINFO_SRC_OLSRD_JSONINFO_H_
 
 #include <stdbool.h>
 #include <time.h>
@@ -73,4 +73,4 @@ void ipc_print_twohop(struct autobuf *abuf);
 void ipc_print_config(struct autobuf *abuf);
 void ipc_print_plugins(struct autobuf *abuf);
 
-#endif /* _OLSRD_JSONINFO_PRINTERS_H */
+#endif /* LIB_JSONINFO_SRC_OLSRD_JSONINFO_H_ */

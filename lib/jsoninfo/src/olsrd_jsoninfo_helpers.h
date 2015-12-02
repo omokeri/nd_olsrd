@@ -39,8 +39,8 @@
  *
  */
 
-#ifndef LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
-#define LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
+#ifndef LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
+#define LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
 
 #include <stdio.h>
 
@@ -73,4 +73,4 @@ void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* 
 
 int read_uuid_from_file(const char * name, const char *file);
 
-#endif /* LIB_TXTINFO_SRC_OLSRD_JSONINFO_HELPERS_H_ */
+#endif /* LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_ */
