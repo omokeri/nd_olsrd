@@ -304,10 +304,16 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
+  if (inet_ntop( //
+      olsr_cnf->ip_version, //
+      (olsr_cnf->ip_version == AF_INET) ? (void *) &sock_addr.in4.sin_addr : (void *) &sock_addr.in6.sin6_addr, //
+      addr, //
+      sizeof(addr)) == NULL) {
+    addr[0] = '\0';
+  }
+
   tv.tv_sec = tv.tv_usec = 0;
   if (olsr_cnf->ip_version == AF_INET) {
-    if (inet_ntop(olsr_cnf->ip_version, &sock_addr.in4.sin_addr, addr, INET6_ADDRSTRLEN) == NULL)
-      addr[0] = '\0';
     if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
       if (!config->allow_localhost || ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
         olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
@@ -316,8 +322,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       }
     }
   } else {
-    if (inet_ntop(olsr_cnf->ip_version, &sock_addr.in6.sin6_addr, addr, INET6_ADDRSTRLEN) == NULL)
-      addr[0] = '\0';
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
     if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6)) {
       olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
