@@ -55,6 +55,9 @@ bool isCommand(const char *str, unsigned int siw);
 
 const char * determine_mime_type(unsigned int send_what);
 
+void output_start(struct autobuf *abuf);
+void output_end(struct autobuf *abuf);
+
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop);
 void ipc_print_links(struct autobuf *abuf);
 void ipc_print_routes(struct autobuf *abuf);

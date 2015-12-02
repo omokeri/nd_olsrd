@@ -90,6 +90,8 @@ static printer_functions_t printer_functions = { //
         .init = &plugin_init, //
         .is_command = &isCommand, //
         .determine_mime_type = &determine_mime_type, //
+        .output_start = &output_start, //
+        .output_end = &output_end, //
         .neighbors = &ipc_print_neighbors, //
         .links = &ipc_print_links, //
         .routes = &ipc_print_routes, //
@@ -412,14 +414,8 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
-    /* global variables for tracking when to put a comma in for JSON */
-    abuf_json_reset_entry_number_and_depth();
-    abuf_json_mark_output(true, &abuf);
-
-    abuf_json_int(&abuf, "systemTime", time(NULL));
-    abuf_json_int(&abuf, "timeSinceStartup", now_times);
-    if (*uuid)
-      abuf_json_string(&abuf, "uuid", uuid);
+    if (printer_functions.output_start)
+      (*printer_functions.output_start)(&abuf);
 
     if ((send_what & SIW_LINKS) && printer_functions.links)
       (*printer_functions.links)(&abuf);
@@ -448,8 +444,8 @@ static void send_info(unsigned int send_what, int the_socket) {
     if ((send_what & SIW_PLUGINS) && printer_functions.plugins)
       (*printer_functions.plugins)(&abuf);
 
-    abuf_json_mark_output(false, &abuf);
-    abuf_puts(&abuf, "\n");
+    if (printer_functions.output_end)
+      (*printer_functions.output_end)(&abuf);
   } else if ((send_what & SIW_OLSRD_CONF) && printer_functions.olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
     (*printer_functions.olsrd_conf)(&abuf);

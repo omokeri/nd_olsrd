@@ -135,6 +135,22 @@ const char * determine_mime_type(unsigned int send_what) {
   return (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
 }
 
+void output_start(struct autobuf *abuf) {
+  /* global variables for tracking when to put a comma in for JSON */
+  abuf_json_reset_entry_number_and_depth();
+  abuf_json_mark_output(true, abuf);
+
+  abuf_json_int(abuf, "systemTime", time(NULL));
+  abuf_json_int(abuf, "timeSinceStartup", now_times);
+  if (*uuid)
+    abuf_json_string(abuf, "uuid", uuid);
+}
+
+void output_end(struct autobuf *abuf) {
+  abuf_json_mark_output(false, abuf);
+  abuf_puts(abuf, "\n");
+}
+
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
   struct neighbor_entry *neigh;
