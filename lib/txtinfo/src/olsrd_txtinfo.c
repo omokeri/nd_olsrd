@@ -80,13 +80,7 @@ static void ipc_action(int, void *, unsigned int);
 
 #define TXT_IPC_BUFSIZE 256
 
-#define MAX_CLIENTS 3
-
-static char *outbuffer[MAX_CLIENTS];
-static size_t outbuffer_size[MAX_CLIENTS];
-static size_t outbuffer_written[MAX_CLIENTS];
-static int outbuffer_socket[MAX_CLIENTS];
-static int outbuffer_count = 0;
+static outbuffer_t outbuffer;
 
 static struct timer_entry *writetimer_entry;
 
@@ -171,6 +165,7 @@ static void plugin_init(void) {
 int olsrd_plugin_init(void) {
   /* Initial IPC value */
   ipc_socket = -1;
+  memset(&outbuffer, 0, sizeof(outbuffer));
 
   plugin_init();
 
@@ -277,7 +272,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   socklen_t addrlen = sizeof(pin);
 
-  if (outbuffer_count >= MAX_CLIENTS) {
+  if (outbuffer.count >= MAX_CLIENTS) {
     return;
   }
 
@@ -352,12 +347,12 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 
   FD_ZERO(&set);
   max = 0;
-  for (i = 0; i < outbuffer_count; i++) {
+  for (i = 0; i < outbuffer.count; i++) {
     /* And we cast here since we get a warning on Win32 */
-    FD_SET((unsigned int )(outbuffer_socket[i]), &set);
+    FD_SET((unsigned int )(outbuffer.socket[i]), &set);
 
-    if (outbuffer_socket[i] > max) {
-      max = outbuffer_socket[i];
+    if (outbuffer.socket[i] > max) {
+      max = outbuffer.socket[i];
     }
   }
 
@@ -369,29 +364,30 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
     return;
   }
 
-  for (i = 0; i < outbuffer_count; i++) {
-    if (FD_ISSET(outbuffer_socket[i], &set)) {
-      result = send(outbuffer_socket[i], outbuffer[i] + outbuffer_written[i], outbuffer_size[i] - outbuffer_written[i], 0);
+  for (i = 0; i < outbuffer.count; i++) {
+    if (FD_ISSET(outbuffer.socket[i], &set)) {
+      result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
       if (result > 0) {
-        outbuffer_written[i] += result;
+        outbuffer.written[i] += result;
       }
 
-      if (result <= 0 || outbuffer_written[i] == outbuffer_size[i]) {
+      if (result <= 0 || outbuffer.written[i] == outbuffer.size[i]) {
         /* close this socket and cleanup*/
-        close(outbuffer_socket[i]);
-        free(outbuffer[i]);
+        close(outbuffer.socket[i]);
+        free(outbuffer.buffer[i]);
+        outbuffer.buffer[i] = NULL;
 
-        for (j = i + 1; j < outbuffer_count; j++) {
-          outbuffer[j - 1] = outbuffer[j];
-          outbuffer_size[j - 1] = outbuffer_size[j];
-          outbuffer_socket[j - 1] = outbuffer_socket[j];
-          outbuffer_written[j - 1] = outbuffer_written[j];
+        for (j = i + 1; j < outbuffer.count; j++) {
+          outbuffer.buffer[j - 1] = outbuffer.buffer[j];
+          outbuffer.size[j - 1] = outbuffer.size[j];
+          outbuffer.socket[j - 1] = outbuffer.socket[j];
+          outbuffer.written[j - 1] = outbuffer.written[j];
         }
-        outbuffer_count--;
+        outbuffer.count--;
       }
     }
   }
-  if (!outbuffer_count) {
+  if (!outbuffer.count) {
     olsr_stop_timer(writetimer_entry);
   }
 }
@@ -448,17 +444,17 @@ static void send_info(unsigned int send_what, int the_socket) {
   }
 
   /* avoid a memcpy: just move the abuf.buf pointer and clear abuf */
-  outbuffer[outbuffer_count] = abuf.buf;
-  outbuffer_size[outbuffer_count] = abuf.len;
-  outbuffer_written[outbuffer_count] = 0;
-  outbuffer_socket[outbuffer_count] = the_socket;
+  outbuffer.buffer[outbuffer.count] = abuf.buf;
+  outbuffer.size[outbuffer.count] = abuf.len;
+  outbuffer.written[outbuffer.count] = 0;
+  outbuffer.socket[outbuffer.count] = the_socket;
   abuf.buf = NULL;
   abuf.len = 0;
   abuf.size = 0;
 
-  outbuffer_count++;
+  outbuffer.count++;
 
-  if (outbuffer_count == 1) {
+  if (outbuffer.count == 1) {
     writetimer_entry = olsr_start_timer(100, 0, OLSR_TIMER_PERIODIC, &info_write_data, NULL, 0);
   }
 
