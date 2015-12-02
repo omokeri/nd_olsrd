@@ -172,7 +172,7 @@ static int get_string_from_file(const char* filename, char* buf, int len) {
 
 static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* syspath) {
   char buf[256];
-  int ret = get_string_from_file(syspath, buf, 256);
+  int ret = get_string_from_file(syspath, buf, sizeof(buf));
   if (*buf)
     abuf_json_string(abuf, key, buf);
   return ret;
@@ -180,7 +180,8 @@ static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* 
 
 void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint) {
   char filename[256];
-  snprintf(filename, 255, "/sys/class/net/%s/%s", ifname, datapoint);
+  snprintf(filename, sizeof(filename) - 1, "/sys/class/net/%s/%s", ifname, datapoint);
+  filename[sizeof(filename) - 1] = '\0';
   abuf_json_sysdata(abuf, key, filename);
 }
 #endif /* __linux__ */
