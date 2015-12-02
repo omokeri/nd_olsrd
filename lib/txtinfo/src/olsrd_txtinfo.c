@@ -116,7 +116,7 @@ bool isCommand(const char *str, unsigned int siw) {
   }
 }
 
-void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {
+static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
@@ -146,6 +146,10 @@ void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {
         }
       }OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_puts(abuf, "\n");
+}
+
+void ipc_print_neighbors(struct autobuf *abuf) {
+  ipc_print_neighbors_internal(abuf, false);
 }
 
 void ipc_print_links(struct autobuf *abuf) {
@@ -495,3 +499,6 @@ void ipc_print_interfaces(struct autobuf *abuf) {
   abuf_puts(abuf, "\n");
 }
 
+void ipc_print_twohop(struct autobuf *abuf) {
+  ipc_print_neighbors_internal(abuf, true);
+}

@@ -202,7 +202,7 @@ static void send_info(unsigned int send_what, int the_socket) {
     if ((send_what & SIW_LINKS) && (*functions).links)
       (*(*functions).links)(&abuf);
     if ((send_what & SIW_NEIGHBORS) && (*functions).neighbors)
-      (*(*functions).neighbors)(&abuf, false);
+      (*(*functions).neighbors)(&abuf);
     if ((send_what & SIW_TOPOLOGY) && (*functions).topology)
       (*(*functions).topology)(&abuf);
     if ((send_what & SIW_HNA) && (*functions).hna)
@@ -219,8 +219,8 @@ static void send_info(unsigned int send_what, int the_socket) {
       (*(*functions).config)(&abuf);
     if ((send_what & SIW_INTERFACES) && (*functions).interfaces)
       (*(*functions).interfaces)(&abuf);
-    if ((send_what & SIW_2HOP) && (*functions).neighbors)
-      (*(*functions).neighbors)(&abuf, true);
+    if ((send_what & SIW_2HOP) && (*functions).twohop)
+      (*(*functions).twohop)(&abuf);
     if ((send_what & SIW_VERSION) && (*functions).version)
       (*(*functions).version)(&abuf);
     if ((send_what & SIW_PLUGINS) && (*functions).plugins)

@@ -48,7 +48,7 @@
 
 bool isCommand(const char *str, unsigned int siw);
 
-void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop);
+void ipc_print_neighbors(struct autobuf *abuf);
 void ipc_print_links(struct autobuf *abuf);
 void ipc_print_routes(struct autobuf *abuf);
 void ipc_print_topology(struct autobuf *abuf);
@@ -59,5 +59,6 @@ void ipc_print_sgw(struct autobuf *abuf);
 void ipc_print_version(struct autobuf *abuf);
 void ipc_print_olsrd_conf(struct autobuf *abuf);
 void ipc_print_interfaces(struct autobuf *abuf);
+void ipc_print_twohop(struct autobuf *abuf);
 
 #endif /* _OLSRD_TXTINFO_PRINTERS_H */

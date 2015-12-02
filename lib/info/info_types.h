@@ -76,7 +76,6 @@ typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*determine_command)(const char *str, unsigned int siw);
 typedef const char * (*mime_type)(unsigned int send_what);
 typedef void (*output_start_end)(struct autobuf *abuf);
-typedef void (*printer_neighbors)(struct autobuf *abuf, bool list_2hop);
 typedef void (*printer_generic)(struct autobuf *abuf);
 
 typedef struct {
@@ -85,7 +84,7 @@ typedef struct {
     mime_type determine_mime_type;
     output_start_end output_start;
     output_start_end output_end;
-    printer_neighbors neighbors;
+    printer_generic neighbors;
     printer_generic links;
     printer_generic routes;
     printer_generic topology;
@@ -96,6 +95,7 @@ typedef struct {
     printer_generic version;
     printer_generic olsrd_conf;
     printer_generic interfaces;
+    printer_generic twohop;
     printer_generic config;
     printer_generic plugins;
 } info_plugin_functions_t;
