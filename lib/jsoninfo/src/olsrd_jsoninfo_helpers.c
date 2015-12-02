@@ -148,7 +148,7 @@ void abuf_json_int(struct autobuf *abuf, const char* key, long value) {
 void abuf_json_float(struct autobuf *abuf, const char* key, float value) {
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %.03f", key, (double) value);
+  abuf_appendf(abuf, "\"%s\": %f", key, (double) value);
   entrynumber[currentjsondepth]++;
 }
 
