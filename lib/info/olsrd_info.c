@@ -379,72 +379,75 @@ static int plugin_ipc_init(void) {
     olsr_printf(1, "(%s) socket()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
     return 0;
-  } else {
-    if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
-#ifndef NODEBUG
-      olsr_printf(1, "(%s) setsockopt()=%s\n", name, strerror(errno));
-#endif /* NODEBUG */
-      return 0;
-    }
-#if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
-    if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
-      perror("SO_REUSEADDR failed");
-      return 0;
-    }
-#endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
-#if defined linux && defined IPV6_V6ONLY
-    if (config->ipv6_only && olsr_cnf->ip_version == AF_INET6) {
-      if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
-        perror("IPV6_V6ONLY failed");
-        return 0;
-      }
-    }
-#endif /* defined linux && defined IPV6_V6ONLY */
-    /* Bind the socket */
-
-    /* complete the socket structure */
-    memset(&sock_addr, 0, sizeof(sock_addr));
-    if (olsr_cnf->ip_version == AF_INET) {
-      sock_addr.in4.sin_family = AF_INET;
-      sock_addr_len = sizeof(struct sockaddr_in);
-#ifdef SIN6_LEN
-      sock_addr.in4.sin_len = sock_addr_len;
-#endif /* SIN6_LEN */
-      sock_addr.in4.sin_addr.s_addr = config->listen_ip.v4.s_addr;
-      sock_addr.in4.sin_port = htons(config->ipc_port);
-    } else {
-      sock_addr.in6.sin6_family = AF_INET6;
-      sock_addr_len = sizeof(struct sockaddr_in6);
-#ifdef SIN6_LEN
-      sock_addr.in6.sin6_len = sock_addr_len;
-#endif /* SIN6_LEN */
-      sock_addr.in6.sin6_addr = config->listen_ip.v6;
-      sock_addr.in6.sin6_port = htons(config->ipc_port);
-    }
-
-    /* bind the socket to the port number */
-    if (bind(ipc_socket, &sock_addr.in, sock_addr_len) == -1) {
-#ifndef NODEBUG
-      olsr_printf(1, "(%s) bind()=%s\n", name, strerror(errno));
-#endif /* NODEBUG */
-      return 0;
-    }
-
-    /* show that we are willing to listen */
-    if (listen(ipc_socket, 1) == -1) {
-#ifndef NODEBUG
-      olsr_printf(1, "(%s) listen()=%s\n", name, strerror(errno));
-#endif /* NODEBUG */
-      return 0;
-    }
-
-    /* Register with olsrd */
-    add_olsr_socket(ipc_socket, &ipc_action, NULL, NULL, SP_PR_READ);
-
-#ifndef NODEBUG
-    olsr_printf(2, "(%s) listening on port %d\n", name, config->ipc_port);
-#endif /* NODEBUG */
   }
+
+  if (setsockopt(ipc_socket, SOL_SOCKET, SO_REUSEADDR, (char *) &yes, sizeof(yes)) < 0) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) setsockopt()=%s\n", name, strerror(errno));
+#endif /* NODEBUG */
+    return 0;
+  }
+
+#if (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE
+  if (setsockopt(ipc_socket, SOL_SOCKET, SO_NOSIGPIPE, (char *) &yes, sizeof(yes)) < 0) {
+    perror("SO_REUSEADDR failed");
+    return 0;
+  }
+#endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
+
+#if defined linux && defined IPV6_V6ONLY
+  if (config->ipv6_only && olsr_cnf->ip_version == AF_INET6) {
+    if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
+      perror("IPV6_V6ONLY failed");
+      return 0;
+    }
+  }
+#endif /* defined linux && defined IPV6_V6ONLY */
+  /* Bind the socket */
+
+  /* complete the socket structure */
+  memset(&sock_addr, 0, sizeof(sock_addr));
+  if (olsr_cnf->ip_version == AF_INET) {
+    sock_addr.in4.sin_family = AF_INET;
+    sock_addr_len = sizeof(struct sockaddr_in);
+#ifdef SIN6_LEN
+    sock_addr.in4.sin_len = sock_addr_len;
+#endif /* SIN6_LEN */
+    sock_addr.in4.sin_addr.s_addr = config->listen_ip.v4.s_addr;
+    sock_addr.in4.sin_port = htons(config->ipc_port);
+  } else {
+    sock_addr.in6.sin6_family = AF_INET6;
+    sock_addr_len = sizeof(struct sockaddr_in6);
+#ifdef SIN6_LEN
+    sock_addr.in6.sin6_len = sock_addr_len;
+#endif /* SIN6_LEN */
+    sock_addr.in6.sin6_addr = config->listen_ip.v6;
+    sock_addr.in6.sin6_port = htons(config->ipc_port);
+  }
+
+  /* bind the socket to the port number */
+  if (bind(ipc_socket, &sock_addr.in, sock_addr_len) == -1) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) bind()=%s\n", name, strerror(errno));
+#endif /* NODEBUG */
+    return 0;
+  }
+
+  /* show that we are willing to listen */
+  if (listen(ipc_socket, 1) == -1) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) listen()=%s\n", name, strerror(errno));
+#endif /* NODEBUG */
+    return 0;
+  }
+
+  /* Register with olsrd */
+  add_olsr_socket(ipc_socket, &ipc_action, NULL, NULL, SP_PR_READ);
+
+#ifndef NODEBUG
+  olsr_printf(2, "(%s) listening on port %d\n", name, config->ipc_port);
+#endif /* NODEBUG */
+
   return 1;
 }
 
