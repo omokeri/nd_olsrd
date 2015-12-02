@@ -56,10 +56,10 @@
 #define MAX_CLIENTS 3
 
 typedef struct {
+  int socket[MAX_CLIENTS];
   char *buffer[MAX_CLIENTS];
   size_t size[MAX_CLIENTS];
   size_t written[MAX_CLIENTS];
-  int socket[MAX_CLIENTS];
   int count;
 } info_plugin_outbuffer_t;
 
@@ -148,7 +148,7 @@ static unsigned int determine_action(char *requ) {
 
 static void write_data(void *foo __attribute__ ((unused))) {
   fd_set set;
-  int result, i, j, max;
+  int result, i, max;
   struct timeval tv;
 
   if (outbuffer.count <= 0) {
@@ -180,36 +180,29 @@ static void write_data(void *foo __attribute__ ((unused))) {
     return;
   }
 
-  for (i = 0; i < outbuffer.count; i++) {
+  for (i = 0; i < MAX_CLIENTS; i++) {
     if (outbuffer.socket[i] < 0) {
       continue;
     }
 
-    if (FD_ISSET(outbuffer.socket[i], &set)) {
-      result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
-      if (result > 0) {
-        outbuffer.written[i] += result;
-      }
+    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
+    if (result > 0) {
+      outbuffer.written[i] += result;
+    }
 
-      if ((result <= 0) || (outbuffer.written[i] >= outbuffer.size[i])) {
-        /* close this socket and cleanup*/
-        close(outbuffer.socket[i]);
-        outbuffer.socket[i] = -1;
-        free(outbuffer.buffer[i]);
-        outbuffer.buffer[i] = NULL;
-        outbuffer.size[i] = 0;
-        outbuffer.written[i] = 0;
+    if ((result <= 0) || (outbuffer.written[i] >= outbuffer.size[i])) {
+      /* close this socket and cleanup*/
+      close(outbuffer.socket[i]);
+      outbuffer.socket[i] = -1;
+      free(outbuffer.buffer[i]);
+      outbuffer.buffer[i] = NULL;
+      outbuffer.size[i] = 0;
+      outbuffer.written[i] = 0;
 
-        for (j = i + 1; j < outbuffer.count; j++) {
-          outbuffer.buffer[j - 1] = outbuffer.buffer[j];
-          outbuffer.size[j - 1] = outbuffer.size[j];
-          outbuffer.socket[j - 1] = outbuffer.socket[j];
-          outbuffer.written[j - 1] = outbuffer.written[j];
-        }
-        outbuffer.count--;
-      }
+      outbuffer.count--;
     }
   }
+
   if (!outbuffer.count) {
     olsr_stop_timer(writetimer_entry);
   }
