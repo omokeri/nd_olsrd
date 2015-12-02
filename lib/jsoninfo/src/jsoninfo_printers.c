@@ -70,6 +70,67 @@ void plugin_init(const char *plugin_name) {
   read_uuid_from_file(plugin_name, uuidfile);
 }
 
+bool isCommand(const char *str, unsigned int siw) {
+  switch (siw) {
+    case SIW_OLSRD_CONF:
+      return strstr(str, "/olsrd.conf");
+
+    case SIW_ALL:
+      return strstr(str, "/all");
+
+    case SIW_RUNTIME_ALL:
+      return strstr(str, "/runtime");
+
+    case SIW_STARTUP_ALL:
+      return strstr(str, "/startup");
+
+    case SIW_NEIGHBORS:
+      return strstr(str, "/neighbors");
+
+    case SIW_LINKS:
+      return strstr(str, "/links");
+
+    case SIW_ROUTES:
+      return strstr(str, "/routes");
+
+    case SIW_HNA:
+      return strstr(str, "/hna");
+
+    case SIW_MID:
+      return strstr(str, "/mid");
+
+    case SIW_TOPOLOGY:
+      return strstr(str, "/topology");
+
+    case SIW_GATEWAYS:
+      return strstr(str, "/gateways");
+
+    case SIW_INTERFACES:
+      return strstr(str, "/interfaces");
+
+    case SIW_2HOP:
+      return strstr(str, "/2hop");
+
+    case SIW_SGW:
+      return strstr(str, "/sgw");
+
+    case SIW_VERSION:
+      return strstr(str, "/version");
+
+    case SIW_CONFIG:
+      return strstr(str, "/config");
+
+    case SIW_PLUGINS:
+      return strstr(str, "/plugins");
+
+    case SIW_NEIGHBORS_FREIFUNK:
+      return strstr(str, "/neighbours");
+
+    default:
+      return false;
+  }
+}
+
 const char * determine_mime_type(unsigned int send_what) {
   return (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
 }
