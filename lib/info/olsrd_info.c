@@ -63,6 +63,8 @@ typedef struct {
   int count;
 } info_plugin_outbuffer_t;
 
+static char sink_buffer[4096];
+
 static const char * name = NULL;
 
 static info_plugin_functions_t *functions = NULL;
@@ -350,9 +352,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
     if (s == sizeof(requ) - 1) {
       /* input was much too long, just skip the rest */
-      char dummy[1024];
-
-      while (recv(ipc_connection, (void *) &dummy, sizeof(dummy), 0) == sizeof(dummy))
+      while (recv(ipc_connection, (void *) &sink_buffer, sizeof(sink_buffer), 0) == sizeof(sink_buffer))
         ;
     }
 
