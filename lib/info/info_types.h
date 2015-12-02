@@ -98,7 +98,7 @@ typedef struct {
     printer_generic interfaces;
     printer_generic config;
     printer_generic plugins;
-} printer_functions_t;
+} info_plugin_functions_t;
 
 #define MAX_CLIENTS 3
 

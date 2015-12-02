@@ -53,7 +53,7 @@
 #define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
 #define PLUGIN_INTERFACE_VERSION 5
 
-static printer_functions_t printer_functions = { //
+static info_plugin_functions_t printer_functions = { //
     //
         .init = NULL, //
         .is_command = &isCommand, //

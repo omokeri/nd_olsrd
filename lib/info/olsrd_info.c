@@ -53,7 +53,7 @@
 #endif /* _WIN32 */
 
 static const char * PLUGIN_NAME = NULL;
-static printer_functions_t *printer_functions = NULL;
+static info_plugin_functions_t *printer_functions = NULL;
 static info_plugin_config_t *info_plugin_config;
 
 static int ipc_socket = -1;
@@ -403,7 +403,7 @@ static int plugin_ipc_init(void) {
  *This function is called by the my_init
  *function in uolsrd_plugin.c
  */
-int info_plugin_init(const char * plugin_name, printer_functions_t *functions, info_plugin_config_t *config) {
+int info_plugin_init(const char * plugin_name, info_plugin_functions_t *functions, info_plugin_config_t *config) {
   printer_functions = functions;
   PLUGIN_NAME = plugin_name;
   info_plugin_config = config;
