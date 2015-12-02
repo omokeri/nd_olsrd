@@ -53,7 +53,7 @@
 #define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
 #define PLUGIN_INTERFACE_VERSION 5
 
-static info_plugin_functions_t printer_functions = { //
+static info_plugin_functions_t functions = { //
     //
         .init = &plugin_init, //
         .is_command = &isCommand, //
@@ -129,7 +129,7 @@ static void my_fini(void) {
  *function in uolsrd_plugin.c
  */
 int olsrd_plugin_init(void) {
-  return info_plugin_init(PLUGIN_NAME, &printer_functions, &info_plugin_config);
+  return info_plugin_init(PLUGIN_NAME, &functions, &info_plugin_config);
 }
 
 /**
