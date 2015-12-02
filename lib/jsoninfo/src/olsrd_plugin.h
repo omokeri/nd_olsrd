@@ -50,6 +50,7 @@
 #include "../../info/info_types.h"
 
 extern info_plugin_config_t config;
+extern char uuidfile[FILENAME_MAX];
 
 int olsrd_plugin_interface_version(void);
 int olsrd_plugin_init(void);

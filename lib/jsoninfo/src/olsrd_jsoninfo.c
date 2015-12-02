@@ -57,8 +57,6 @@
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
 
-extern char uuidfile[FILENAME_MAX];
-
 struct timeval start_time;
 
 void plugin_init(const char *plugin_name) {
