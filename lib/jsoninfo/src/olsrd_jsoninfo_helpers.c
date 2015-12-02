@@ -50,7 +50,7 @@
 #include <fcntl.h>
 #endif /* __linux__ */
 
-char uuid[UUIDLEN + 1];
+char uuid[UUIDLEN];
 
 /* JSON support functions */
 
@@ -196,11 +196,11 @@ int read_uuid_from_file(const char * name, const char *file) {
 
   f = fopen(file, "r");
   olsr_printf(1, "(%s) Reading UUID from '%s'\n", name, file);
-  if (f == NULL) {
+  if (!f) {
     olsr_printf(1, "(%s) Could not open '%s': %s\n", name, file, strerror(errno));
     return -1;
   }
-  chars = fread(uuid, 1, UUIDLEN, f);
+  chars = fread(uuid, 1, sizeof(uuid) - 1, f);
   if (chars > 0) {
     uuid[chars] = '\0'; /* null-terminate the string */
 

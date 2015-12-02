@@ -48,7 +48,7 @@
 #include "common/autobuf.h"
 
 #define UUIDLEN 256
-extern char uuid[UUIDLEN + 1];
+extern char uuid[UUIDLEN];
 
 void abuf_json_reset_entry_number_and_depth(void);
 
