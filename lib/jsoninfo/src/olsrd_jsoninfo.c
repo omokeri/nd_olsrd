@@ -58,8 +58,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <ctype.h>
-#include <libgen.h>
 #include <assert.h>
 
 #include "ipcalc.h"
@@ -77,6 +75,9 @@
 #include "lq_plugin.h"
 #include "common/autobuf.h"
 #include "gateway.h"
+
+#include <ctype.h>
+#include <libgen.h>
 #include "egressTypes.h"
 #include "olsrd_jsoninfo_helpers.h"
 
