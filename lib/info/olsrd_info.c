@@ -284,7 +284,9 @@ static void send_info(unsigned int send_what, int the_socket) {
 }
 
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
+#ifndef NODEBUG
   char addr[INET6_ADDRSTRLEN];
+#endif /* NODEBUG */
 
   union olsr_sockaddr sock_addr;
   socklen_t sock_addr_len = sizeof(sock_addr);
@@ -304,6 +306,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
+#ifndef NODEBUG
   if (inet_ntop( //
       olsr_cnf->ip_version, //
       (olsr_cnf->ip_version == AF_INET) ? (void *) &sock_addr.in4.sin_addr : (void *) &sock_addr.in6.sin6_addr, //
@@ -311,12 +314,15 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       sizeof(addr)) == NULL) {
     addr[0] = '\0';
   }
+#endif /* NODEBUG */
 
   tv.tv_sec = tv.tv_usec = 0;
   if (olsr_cnf->ip_version == AF_INET) {
     if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
       if (!config->allow_localhost || ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
+#ifndef NODEBUG
         olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
+#endif /* NODEBUG */
         close(ipc_connection);
         return;
       }
@@ -324,7 +330,9 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   } else {
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
     if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6)) {
+#ifndef NODEBUG
       olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
+#endif /* NODEBUG */
       close(ipc_connection);
       return;
     }
