@@ -41,7 +41,14 @@
 
 #include "http_headers.h"
 
+#include <assert.h>
+
 void http_header_build(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
+  assert(plugin_name);
+  assert(status);
+  assert(abuf);
+  assert(contentLengthIndex);
+
   /* Status */
   abuf_appendf(abuf, "%s\r\n", status);
 
@@ -91,6 +98,8 @@ void http_header_build(const char *plugin_name, const char *status, const char *
 
 void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength) {
   char buf[12 + 1]; /* size must match to number of spaces used (+1 for the terminating byte) */
+
+  assert(abuf);
 
   memset(buf, 0, sizeof(buf));
   snprintf(buf, sizeof(buf), "%d", contentLength);
