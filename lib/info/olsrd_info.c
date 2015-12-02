@@ -190,8 +190,11 @@ static void write_data(void *foo __attribute__ ((unused))) {
       if (result <= 0 || outbuffer.written[i] == outbuffer.size[i]) {
         /* close this socket and cleanup*/
         close(outbuffer.socket[i]);
+        outbuffer.socket[i] = -1;
         free(outbuffer.buffer[i]);
         outbuffer.buffer[i] = NULL;
+        outbuffer.size[i] = 0;
+        outbuffer.written[i] = 0;
 
         for (j = i + 1; j < outbuffer.count; j++) {
           outbuffer.buffer[j - 1] = outbuffer.buffer[j];
