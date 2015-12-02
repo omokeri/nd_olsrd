@@ -318,14 +318,13 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   tv.tv_sec = tv.tv_usec = 0;
   if (olsr_cnf->ip_version == AF_INET) {
-    if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
-      if (!config->allow_localhost || ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
+    if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && (config->accept_ip.v4.s_addr != INADDR_ANY) //
+        && (!config->allow_localhost || (ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK))) {
 #ifndef NODEBUG
-        olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
+      olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
 #endif /* NODEBUG */
-        close(ipc_connection);
-        return;
-      }
+      close(ipc_connection);
+      return;
     }
   } else {
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
