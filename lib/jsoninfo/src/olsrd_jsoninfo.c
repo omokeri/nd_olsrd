@@ -87,6 +87,7 @@ static struct timer_entry *writetimer_entry;
 
 static printer_functions_t printer_functions = { //
     //
+        .determine_mime_type = &determine_mime_type, //
         .neighbors = &ipc_print_neighbors, //
         .links = &ipc_print_links, //
         .routes = &ipc_print_routes, //
@@ -392,7 +393,7 @@ static void info_write_data(void *foo __attribute__ ((unused))) {
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
-  const char *content_type = (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
+  const char *content_type = (printer_functions.determine_mime_type) ? (*printer_functions.determine_mime_type)(send_what) : "text/plain; charset=utf-8";
   int contentLengthPlaceholderStart = 0;
   int headerLength = 0;
 

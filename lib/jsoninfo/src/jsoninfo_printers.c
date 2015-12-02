@@ -55,6 +55,7 @@
 #include "egressTypes.h"
 #include "olsrd_jsoninfo_helpers.h"
 #include "olsrd_plugin.h"
+#include "../../info/info_types.h"
 
 extern char uuidfile[FILENAME_MAX];
 
@@ -67,6 +68,10 @@ void plugin_init(const char *plugin_name) {
   if (!strlen(uuidfile))
     strscpy(uuidfile, "uuid.txt", sizeof(uuidfile));
   read_uuid_from_file(plugin_name, uuidfile);
+}
+
+const char * determine_mime_type(unsigned int send_what) {
+  return (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
 }
 
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop) {

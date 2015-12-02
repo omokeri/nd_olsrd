@@ -51,6 +51,8 @@ extern struct timeval start_time;
 
 void plugin_init(const char * plugin_name);
 
+const char * determine_mime_type(unsigned int send_what);
+
 void ipc_print_neighbors(struct autobuf *abuf, bool list_2hop);
 void ipc_print_links(struct autobuf *abuf);
 void ipc_print_routes(struct autobuf *abuf);
