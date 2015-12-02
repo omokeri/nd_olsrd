@@ -284,21 +284,20 @@ static void send_info(unsigned int send_what, int the_socket) {
 }
 
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
-  union olsr_sockaddr pin;
-
   char addr[INET6_ADDRSTRLEN];
+
+  union olsr_sockaddr sock_addr;
+  socklen_t sock_addr_len = sizeof(sock_addr);
   fd_set rfds;
   struct timeval tv;
   unsigned int send_what = 0;
-  int ipc_connection;
-
-  socklen_t addrlen = sizeof(pin);
+  int ipc_connection = -1;
 
   if (outbuffer.count >= MAX_CLIENTS) {
     return;
   }
 
-  if ((ipc_connection = accept(fd, &pin.in, &addrlen)) == -1) {
+  if ((ipc_connection = accept(fd, &sock_addr.in, &sock_addr_len)) == -1) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) accept()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
@@ -307,20 +306,20 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   tv.tv_sec = tv.tv_usec = 0;
   if (olsr_cnf->ip_version == AF_INET) {
-    if (inet_ntop(olsr_cnf->ip_version, &pin.in4.sin_addr, addr, INET6_ADDRSTRLEN) == NULL)
+    if (inet_ntop(olsr_cnf->ip_version, &sock_addr.in4.sin_addr, addr, INET6_ADDRSTRLEN) == NULL)
       addr[0] = '\0';
-    if (!ip4equal(&pin.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
-      if (!config->allow_localhost || ntohl(pin.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
+    if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && config->accept_ip.v4.s_addr != INADDR_ANY) {
+      if (!config->allow_localhost || ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK) {
         olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
         close(ipc_connection);
         return;
       }
     }
   } else {
-    if (inet_ntop(olsr_cnf->ip_version, &pin.in6.sin6_addr, addr, INET6_ADDRSTRLEN) == NULL)
+    if (inet_ntop(olsr_cnf->ip_version, &sock_addr.in6.sin6_addr, addr, INET6_ADDRSTRLEN) == NULL)
       addr[0] = '\0';
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
-    if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&pin.in6.sin6_addr, &config->accept_ip.v6)) {
+    if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6)) {
       olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
       close(ipc_connection);
       return;
