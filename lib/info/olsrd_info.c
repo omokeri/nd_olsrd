@@ -396,14 +396,12 @@ static int plugin_ipc_init(void) {
 #endif /* (defined __FreeBSD__ || defined __FreeBSD_kernel__) && defined SO_NOSIGPIPE */
 
 #if defined linux && defined IPV6_V6ONLY
-  if (config->ipv6_only && olsr_cnf->ip_version == AF_INET6) {
-    if (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0) {
-      perror("IPV6_V6ONLY failed");
-      goto error_out;
-    }
+  if (config->ipv6_only && (olsr_cnf->ip_version == AF_INET6) //
+      && (setsockopt(ipc_socket, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &yes, sizeof(yes)) < 0)) {
+    perror("IPV6_V6ONLY failed");
+    goto error_out;
   }
 #endif /* defined linux && defined IPV6_V6ONLY */
-  /* Bind the socket */
 
   /* complete the socket structure */
   memset(&sock_addr, 0, sizeof(sock_addr));
