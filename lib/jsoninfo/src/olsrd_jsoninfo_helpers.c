@@ -61,6 +61,11 @@ char uuid[UUIDLEN + 1];
 static int entrynumber[ENTRY_NUMBER_MAX_DEPTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static int currentjsondepth = 0;
 
+void abuf_json_reset_entry_number_and_depth(void) {
+  entrynumber[0] = 0;
+  currentjsondepth = 0;
+}
+
 static void abuf_json_new_indent(struct autobuf *abuf) {
   if (currentjsondepth) {
     int i = currentjsondepth;
@@ -72,9 +77,9 @@ static void abuf_json_new_indent(struct autobuf *abuf) {
   }
 }
 
-void abuf_json_reset_entry_number_and_depth(void) {
-  entrynumber[0] = 0;
-  currentjsondepth = 0;
+void abuf_json_insert_comma(struct autobuf *abuf) {
+  if (entrynumber[currentjsondepth])
+    abuf_appendf(abuf, ",");
 }
 
 void abuf_json_mark_output(bool open, struct autobuf *abuf) {
@@ -95,9 +100,7 @@ void abuf_json_mark_output(bool open, struct autobuf *abuf) {
 
 void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header) {
   if (open) {
-    if (entrynumber[currentjsondepth]) {
-      abuf_appendf(abuf, ",");
-    }
+    abuf_json_insert_comma(abuf);
     abuf_json_new_indent(abuf);
     if (header) {
       abuf_appendf(abuf, "\"%s\": %s", header, array ? "[" : "{");
@@ -119,11 +122,6 @@ void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const ch
 
 void abuf_json_mark_array_entry(bool open, struct autobuf *abuf) {
   abuf_json_mark_object(open, false, abuf, NULL);
-}
-
-void abuf_json_insert_comma(struct autobuf *abuf) {
-  if (entrynumber[currentjsondepth])
-    abuf_appendf(abuf, ",");
 }
 
 void abuf_json_boolean(struct autobuf *abuf, const char* key, int value) {
