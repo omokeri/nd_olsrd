@@ -307,11 +307,11 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   }
 
 #ifndef NODEBUG
-  if (inet_ntop( //
+  if (!inet_ntop( //
       olsr_cnf->ip_version, //
       (olsr_cnf->ip_version == AF_INET) ? (void *) &sock_addr.in4.sin_addr : (void *) &sock_addr.in6.sin6_addr, //
       addr, //
-      sizeof(addr)) == NULL) {
+      sizeof(addr))) {
     addr[0] = '\0';
   }
 #endif /* NODEBUG */
