@@ -158,6 +158,7 @@ void abuf_json_float(struct autobuf *abuf, const char* key, float value) {
 static int get_string_from_file(const char* filename, char* buf, int len) {
   int bytes = -1;
   int fd = open(filename, O_RDONLY);
+  buf[0] = '\0';
   if (fd > -1) {
     bytes = read(fd, buf, len);
     if (bytes < len)
@@ -170,10 +171,8 @@ static int get_string_from_file(const char* filename, char* buf, int len) {
 }
 
 static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* syspath) {
-  int ret = -1;
   char buf[256];
-  *buf = 0;
-  ret = get_string_from_file(syspath, buf, 256);
+  int ret = get_string_from_file(syspath, buf, 256);
   if (*buf)
     abuf_json_string(abuf, key, buf);
   return ret;
