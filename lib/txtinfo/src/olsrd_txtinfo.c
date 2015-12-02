@@ -89,6 +89,8 @@ static printer_functions_t printer_functions = { //
         .init = NULL, //
         .is_command = &isCommand, //
         .determine_mime_type = NULL, //
+        .output_start = NULL, //
+        .output_end = NULL, //
         .neighbors = &ipc_print_neighbors, //
         .links = &ipc_print_links, //
         .routes = &ipc_print_routes, //
@@ -411,6 +413,9 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
+    if (printer_functions.output_start)
+      (*printer_functions.output_start)(&abuf);
+
     if ((send_what & SIW_LINKS) && printer_functions.links)
       (*printer_functions.links)(&abuf);
     if ((send_what & SIW_NEIGHBORS) && printer_functions.neighbors)
@@ -437,6 +442,9 @@ static void send_info(unsigned int send_what, int the_socket) {
       (*printer_functions.version)(&abuf);
     if ((send_what & SIW_PLUGINS) && printer_functions.plugins)
       (*printer_functions.plugins)(&abuf);
+
+    if (printer_functions.output_end)
+      (*printer_functions.output_end)(&abuf);
   } else if ((send_what & SIW_OLSRD_CONF) && printer_functions.olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
     (*printer_functions.olsrd_conf)(&abuf);
