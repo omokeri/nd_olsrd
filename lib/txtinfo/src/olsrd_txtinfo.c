@@ -51,9 +51,8 @@
 #include "routing_table.h"
 #include "lq_plugin.h"
 #include "gateway.h"
+#include "olsrd_plugin.h"
 #include "../../info/info_types.h"
-
-extern bool vtime;
 
 bool isCommand(const char *str, unsigned int siw) {
   switch (siw) {
