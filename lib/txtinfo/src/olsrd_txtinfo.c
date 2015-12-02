@@ -39,7 +39,7 @@
  *
  */
 
-#include "txtinfo_printers.h"
+#include "olsrd_txtinfo.h"
 
 #include <unistd.h>
 

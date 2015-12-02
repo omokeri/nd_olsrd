@@ -44,7 +44,7 @@
 
 #include "olsrd_plugin.h"
 #include "../../info/olsrd_info.h"
-#include "txtinfo_printers.h"
+#include "olsrd_txtinfo.h"
 
 #define PLUGIN_NAME "TXTINFO"
 #define PLUGIN_TITLE    "OLSRD txtinfo plugin"
