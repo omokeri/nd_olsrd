@@ -39,7 +39,7 @@
  *
  */
 
-#include "jsoninfo_printers.h"
+#include "olsrd_jsoninfo.h"
 
 #include <unistd.h>
 #include <ctype.h>

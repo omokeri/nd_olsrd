@@ -44,7 +44,7 @@
 
 #include "olsrd_plugin.h"
 #include "../../info/olsrd_info.h"
-#include "jsoninfo_printers.h"
+#include "olsrd_jsoninfo.h"
 
 #define PLUGIN_NAME "JSONINFO"
 #define PLUGIN_TITLE    "OLSRD jsoninfo plugin"
