@@ -110,4 +110,14 @@ typedef struct {
   int count;
 } outbuffer_t;
 
+typedef struct {
+    union olsr_ip_addr accept_ip;
+    union olsr_ip_addr listen_ip;
+    int ipc_port;
+    int nompr;
+    bool http_headers;
+    bool allow_localhost;
+    int ipv6_only;
+} info_plugin_config_t;
+
 #endif /* _OLSRD_INFO_TYPES_H */

@@ -49,14 +49,9 @@
 #include "olsr_types.h"
 #include "olsrd_plugin.h"
 #include "plugin_util.h"
+#include "../../info/info_types.h"
 
-extern union olsr_ip_addr txtinfo_accept_ip;
-extern union olsr_ip_addr txtinfo_listen_ip;
-extern int ipc_port;
-extern int nompr;
-extern bool http_headers;
-extern bool allow_localhost;
-extern int txtinfo_ipv6_only;
+extern info_plugin_config_t info_plugin_config;
 
 int olsrd_plugin_interface_version(void);
 int olsrd_plugin_init(void);
