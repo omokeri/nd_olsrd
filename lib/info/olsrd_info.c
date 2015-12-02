@@ -350,7 +350,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     char requ[1024];
     ssize_t s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
 
-    if (s == sizeof(requ) - 1) {
+    if (s >= (ssize_t) (sizeof(requ) - 1)) {
       /* input was much too long, just skip the rest */
       while (recv(ipc_connection, (void *) &sink_buffer, sizeof(sink_buffer), 0) == sizeof(sink_buffer))
         ;
