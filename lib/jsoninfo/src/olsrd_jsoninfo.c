@@ -81,31 +81,6 @@ static void ipc_action(int, void *, unsigned int);
 
 #define TXT_IPC_BUFSIZE 256
 
-/* these provide all of the runtime status info */
-#define SIW_NEIGHBORS 0x0001
-#define SIW_LINKS 0x0002
-#define SIW_ROUTES 0x0004
-#define SIW_HNA 0x0008
-#define SIW_MID 0x0010
-#define SIW_TOPOLOGY 0x0020
-#define SIW_GATEWAYS 0x0040
-#define SIW_INTERFACES 0x0080
-#define SIW_2HOP 0x0100
-#define SIW_SGW 0x0200
-#define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
-
-/* these only change at olsrd startup */
-#define SIW_VERSION 0x0400
-#define SIW_CONFIG 0x0800
-#define SIW_PLUGINS 0x1000
-#define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
-
-/* this is everything in normal format */
-#define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
-
-/* this data is not normal format but olsrd.conf format */
-#define SIW_OLSRD_CONF 0x2000
-
 #define MAX_CLIENTS 3
 
 static char *outbuffer[MAX_CLIENTS];
