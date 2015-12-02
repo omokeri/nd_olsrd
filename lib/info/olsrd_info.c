@@ -357,7 +357,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (0 < s) {
-      requ[s] = 0;
+      requ[s] = '\0';
       send_what = determine_action(requ);
     }
 
