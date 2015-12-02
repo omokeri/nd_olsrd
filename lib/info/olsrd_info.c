@@ -328,7 +328,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
   } else {
     /* Use in6addr_any (::) in olsr.conf to allow anybody. */
-    if (!ip6equal(&in6addr_any, &config->accept_ip.v6) && !ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6)) {
+    if (!ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6) && !ip6equal(&config->accept_ip.v6, &in6addr_any)) {
 #ifndef NODEBUG
       olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
 #endif /* NODEBUG */
