@@ -42,23 +42,38 @@
  * Dynamic linked library for the olsr.org olsr daemon
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-
 #include "olsrd_plugin.h"
-#include "olsrd_txtinfo.h"
-#include "defs.h"
-#include "../../info/info_types.h"
+#include "../../info/olsrd_info.h"
+#include "txtinfo_printers.h"
 
-#define PLUGIN_NAME    "OLSRD txtinfo plugin"
+#define PLUGIN_NAME "TXTINFO"
+#define PLUGIN_TITLE    "OLSRD txtinfo plugin"
 #define PLUGIN_VERSION "0.1"
 #define PLUGIN_AUTHOR   "Lorenz Schori"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
 #define PLUGIN_INTERFACE_VERSION 5
+
+static printer_functions_t printer_functions = { //
+    //
+        .init = NULL, //
+        .is_command = &isCommand, //
+        .determine_mime_type = NULL, //
+        .output_start = NULL, //
+        .output_end = NULL, //
+        .neighbors = &ipc_print_neighbors, //
+        .links = &ipc_print_links, //
+        .routes = &ipc_print_routes, //
+        .topology = &ipc_print_topology, //
+        .hna = &ipc_print_hna, //
+        .mid = &ipc_print_mid, //
+        .gateways = &ipc_print_gateways, //
+        .sgw = &ipc_print_sgw, //
+        .version = &ipc_print_version, //
+        .olsrd_conf = &ipc_print_olsrd_conf, //
+        .interfaces = &ipc_print_interfaces, //
+        .config = NULL, //
+        .plugins = NULL //
+    };
 
 info_plugin_config_t info_plugin_config;
 bool vtime;
@@ -104,6 +119,23 @@ static void my_fini(void) {
    * should happen there - NOT HERE!
    */
   olsr_plugin_exit();
+}
+
+/**
+ *Do initialization here
+ *
+ *This function is called by the my_init
+ *function in uolsrd_plugin.c
+ */
+int olsrd_plugin_init(void) {
+  return info_plugin_init(PLUGIN_NAME, &printer_functions, &info_plugin_config);
+}
+
+/**
+ * destructor - called at unload
+ */
+void olsr_plugin_exit(void) {
+  info_plugin_exit();
 }
 
 int olsrd_plugin_interface_version(void) {
