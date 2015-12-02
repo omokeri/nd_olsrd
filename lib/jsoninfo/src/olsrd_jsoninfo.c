@@ -87,6 +87,7 @@ static struct timer_entry *writetimer_entry;
 
 static printer_functions_t printer_functions = { //
     //
+        .init = &plugin_init, //
         .determine_mime_type = &determine_mime_type, //
         .neighbors = &ipc_print_neighbors, //
         .links = &ipc_print_links, //
@@ -165,7 +166,9 @@ int olsrd_plugin_init(void) {
   ipc_socket = -1;
   memset(&outbuffer, 0, sizeof(outbuffer));
 
-  plugin_init(PLUGIN_NAME);
+  if (printer_functions.init) {
+    (*printer_functions.init)(PLUGIN_NAME);
+  }
 
   plugin_ipc_init();
   return 1;
