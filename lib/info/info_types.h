@@ -43,6 +43,8 @@
 #define _OLSRD_LIB_INFO_INFO_TYPES_H_
 
 #include <stdbool.h>
+#include <assert.h>
+#include <netinet/in.h>
 
 #include "common/autobuf.h"
 
@@ -117,5 +119,23 @@ typedef struct {
   { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
   { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
   { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
+
+static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigned short port) {
+  assert(config);
+
+  if (olsr_cnf->ip_version == AF_INET) {
+    config->accept_ip.v4.s_addr = htonl(INADDR_LOOPBACK);
+    config->listen_ip.v4.s_addr = htonl(INADDR_ANY);
+  } else {
+    config->accept_ip.v6 = in6addr_loopback;
+    config->listen_ip.v6 = in6addr_any;
+  }
+
+  config->ipc_port = port;
+  config->nompr = 0;
+  config->http_headers = true;
+  config->allow_localhost = false;
+  config->ipv6_only = false;
+}
 
 #endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */
