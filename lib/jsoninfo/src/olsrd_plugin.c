@@ -55,24 +55,24 @@
 
 static info_plugin_functions_t functions = { //
     //
-        .init = &plugin_init, //
-        .is_command = &isCommand, //
-        .determine_mime_type = &determine_mime_type, //
-        .output_start = &output_start, //
-        .output_end = &output_end, //
-        .neighbors = &ipc_print_neighbors, //
-        .links = &ipc_print_links, //
-        .routes = &ipc_print_routes, //
-        .topology = &ipc_print_topology, //
-        .hna = &ipc_print_hna, //
-        .mid = &ipc_print_mid, //
-        .gateways = &ipc_print_gateways, //
-        .sgw = &ipc_print_sgw, //
-        .version = &ipc_print_version, //
-        .olsrd_conf = &ipc_print_olsrd_conf, //
-        .interfaces = &ipc_print_interfaces, //
-        .config = &ipc_print_config, //
-        .plugins = &ipc_print_plugins //
+        .init = plugin_init, //
+        .is_command = isCommand, //
+        .determine_mime_type = determine_mime_type, //
+        .output_start = output_start, //
+        .output_end = output_end, //
+        .neighbors = ipc_print_neighbors, //
+        .links = ipc_print_links, //
+        .routes = ipc_print_routes, //
+        .topology = ipc_print_topology, //
+        .hna = ipc_print_hna, //
+        .mid = ipc_print_mid, //
+        .gateways = ipc_print_gateways, //
+        .sgw = ipc_print_sgw, //
+        .version = ipc_print_version, //
+        .olsrd_conf = ipc_print_olsrd_conf, //
+        .interfaces = ipc_print_interfaces, //
+        .config = ipc_print_config, //
+        .plugins = ipc_print_plugins //
     };
 
 info_plugin_config_t config;
