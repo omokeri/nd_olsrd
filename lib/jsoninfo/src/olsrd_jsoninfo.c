@@ -456,9 +456,9 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
         abuf_json_boolean(abuf, "IPv4", gw->ipv4);
         abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
         abuf_json_boolean(abuf, "IPv6", gw->ipv6);
-        abuf_json_string(abuf, "tunnel", node->name);
-        abuf_json_ip_address(abuf, "destination", &gw->originator);
         abuf_json_int(abuf, "cost", gw->path_cost);
+        abuf_json_ip_address(abuf, "destination", &gw->originator);
+        abuf_json_string(abuf, "tunnel", node->name);
         abuf_json_int(abuf, "tableNr", node->tableNr);
         abuf_json_int(abuf, "ruleNr", node->ruleNr);
         abuf_json_int(abuf, "bypassRuleNr", node->bypassRuleNr);
