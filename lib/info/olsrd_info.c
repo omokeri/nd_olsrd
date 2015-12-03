@@ -78,71 +78,46 @@ static info_plugin_outbuffer_t outbuffer;
 static struct timer_entry *writetimer_entry = NULL;
 
 static unsigned int determine_action(char *requ) {
+  static unsigned int SIW_ENTRIES[] = {
+  //
+      SIW_OLSRD_CONF,//
+      SIW_ALL, //
+      //
+      // these are the two overarching categories
+      SIW_RUNTIME_ALL,//
+      SIW_STARTUP_ALL, //
+      //
+      // these are the individual sections
+      SIW_NEIGHBORS,//
+      SIW_LINKS, //
+      SIW_ROUTES, //
+      SIW_HNA, //
+      SIW_MID, //
+      SIW_TOPOLOGY, //
+      SIW_GATEWAYS, //
+      SIW_INTERFACES, //
+      SIW_2HOP, //
+      SIW_SGW, //
+      //
+      // specials
+      SIW_VERSION,//
+      SIW_CONFIG, //
+      SIW_PLUGINS, //
+      //
+      // Freifunk special
+      SIW_NEIGHBORS_FREIFUNK //
+      };
+
+  unsigned int i;
+
   if (!functions->is_command)
     return 0;
 
-  if (functions->is_command(requ, SIW_OLSRD_CONF))
-    return SIW_OLSRD_CONF;
-
-  if (functions->is_command(requ, SIW_ALL))
-    return SIW_ALL;
-
-  // these are the two overarching categories
-  if (functions->is_command(requ, SIW_RUNTIME_ALL))
-    return SIW_RUNTIME_ALL;
-
-  if (functions->is_command(requ, SIW_STARTUP_ALL))
-    return SIW_STARTUP_ALL;
-
-  // these are the individual sections
-
-  if (functions->is_command(requ, SIW_NEIGHBORS))
-    return SIW_NEIGHBORS;
-
-  if (functions->is_command(requ, SIW_LINKS))
-    return SIW_LINKS;
-
-  if (functions->is_command(requ, SIW_ROUTES))
-    return SIW_ROUTES;
-
-  if (functions->is_command(requ, SIW_HNA))
-    return SIW_HNA;
-
-  if (functions->is_command(requ, SIW_MID))
-    return SIW_MID;
-
-  if (functions->is_command(requ, SIW_TOPOLOGY))
-    return SIW_TOPOLOGY;
-
-  if (functions->is_command(requ, SIW_GATEWAYS))
-    return SIW_GATEWAYS;
-
-  if (functions->is_command(requ, SIW_INTERFACES))
-    return SIW_INTERFACES;
-
-  if (functions->is_command(requ, SIW_2HOP))
-    return SIW_2HOP;
-
-  if (functions->is_command(requ, SIW_SGW))
-    return SIW_SGW;
-
-  // specials
-
-  if (functions->is_command(requ, SIW_VERSION))
-    return SIW_VERSION;
-
-  if (functions->is_command(requ, SIW_CONFIG))
-    return SIW_CONFIG;
-
-  if (functions->is_command(requ, SIW_PLUGINS))
-    return SIW_PLUGINS;
-
-  /* To print out neighbours only on the Freifunk Status
-   * page the normal output is somewhat lengthy. The
-   * header parsing is sufficient for standard wget.
-   */
-  if (functions->is_command(requ, SIW_NEIGHBORS_FREIFUNK))
-    return SIW_NEIGHBORS_FREIFUNK;
+  for (i = 0; i < (sizeof(SIW_ENTRIES) / sizeof(SIW_ENTRIES[0])); ++i) {
+    unsigned int siw = SIW_ENTRIES[i];
+    if (functions->is_command(requ, siw))
+      return siw;
+  }
 
   return 0;
 }
