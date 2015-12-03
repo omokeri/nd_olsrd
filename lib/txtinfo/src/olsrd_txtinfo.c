@@ -373,9 +373,17 @@ void ipc_print_gateways(struct autobuf *abuf) {
           v6type = NONE;
         }
 
-        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", v4, v6, olsr_ip_to_string(&buf, &gw->originator),
-            get_linkcost_text(tc->path_cost, true, &lqbuf), tc->hops, gw->uplink, gw->downlink, v4type, v6type,
-            gw->external_prefix.prefix_len == 0 ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
+        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", //
+            v4, //
+            v6, //
+            olsr_ip_to_string(&buf, &gw->originator), //
+            get_linkcost_text(tc->path_cost, true, &lqbuf), //
+            tc->hops, //
+            gw->uplink, //
+            gw->downlink, //
+            v4type, //
+            v6type, //
+            !gw->external_prefix.prefix_len ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
       }OLSR_FOR_ALL_GATEWAY_ENTRIES_END (gw)
 #endif /* __linux__ */
 }
