@@ -340,11 +340,7 @@ void ipc_print_gateways(struct autobuf *abuf) {
       {
         char v4, v6;
         const char *v4type, *v6type;
-        struct tc_entry *tc;
-
-        if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
-          continue;
-        }
+        struct tc_entry *tc = olsr_lookup_tc_entry(&gw->originator);
 
         if (gw == olsr_get_inet_gateway(false)) {
           v4 = 's';
@@ -377,8 +373,8 @@ void ipc_print_gateways(struct autobuf *abuf) {
             v4, //
             v6, //
             olsr_ip_to_string(&buf, &gw->originator), //
-            get_linkcost_text(tc->path_cost, true, &lqbuf), //
-            tc->hops, //
+            get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf), //
+            !tc ? 0 : tc->hops, //
             gw->uplink, //
             gw->downlink, //
             v4type, //
