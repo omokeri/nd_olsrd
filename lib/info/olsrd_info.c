@@ -141,7 +141,6 @@ static unsigned int determine_action(char *requ) {
    * page the normal output is somewhat lengthy. The
    * header parsing is sufficient for standard wget.
    */
-
   if ((*(*functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
     return SIW_NEIGHBORS_FREIFUNK;
 
@@ -229,30 +228,31 @@ static void send_info(unsigned int send_what, int the_socket) {
     if ((*functions).output_start)
       (*(*functions).output_start)(&abuf);
 
-    if ((send_what & SIW_LINKS) && (*functions).links)
-      (*(*functions).links)(&abuf);
     if ((send_what & SIW_NEIGHBORS) && (*functions).neighbors)
       (*(*functions).neighbors)(&abuf);
-    if ((send_what & SIW_TOPOLOGY) && (*functions).topology)
-      (*(*functions).topology)(&abuf);
-    if ((send_what & SIW_HNA) && (*functions).hna)
-      (*(*functions).hna)(&abuf);
-    if ((send_what & SIW_SGW) && (*functions).sgw)
-      (*(*functions).sgw)(&abuf);
-    if ((send_what & SIW_MID) && (*functions).mid)
-      (*(*functions).mid)(&abuf);
+    if ((send_what & SIW_LINKS) && (*functions).links)
+      (*(*functions).links)(&abuf);
     if ((send_what & SIW_ROUTES) && (*functions).routes)
       (*(*functions).routes)(&abuf);
+    if ((send_what & SIW_HNA) && (*functions).hna)
+      (*(*functions).hna)(&abuf);
+    if ((send_what & SIW_MID) && (*functions).mid)
+      (*(*functions).mid)(&abuf);
+    if ((send_what & SIW_TOPOLOGY) && (*functions).topology)
+      (*(*functions).topology)(&abuf);
     if ((send_what & SIW_GATEWAYS) && (*functions).gateways)
       (*(*functions).gateways)(&abuf);
-    if ((send_what & SIW_CONFIG) && (*functions).config)
-      (*(*functions).config)(&abuf);
     if ((send_what & SIW_INTERFACES) && (*functions).interfaces)
       (*(*functions).interfaces)(&abuf);
     if ((send_what & SIW_2HOP) && (*functions).twohop)
       (*(*functions).twohop)(&abuf);
+    if ((send_what & SIW_SGW) && (*functions).sgw)
+      (*(*functions).sgw)(&abuf);
+
     if ((send_what & SIW_VERSION) && (*functions).version)
       (*(*functions).version)(&abuf);
+    if ((send_what & SIW_CONFIG) && (*functions).config)
+      (*(*functions).config)(&abuf);
     if ((send_what & SIW_PLUGINS) && (*functions).plugins)
       (*(*functions).plugins)(&abuf);
 
