@@ -325,6 +325,9 @@ void ipc_print_gateways(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_puts(abuf, "Gateway mode is only supported in linux\n");
 #else /* __linux__ */
+  static const char *fmth = "%-6s %-45s %-15s %-6s %-9s %-9s %-7s %-4s %s\n";
+  static const char *fmtv = "%c%c%-4s %-45s %-15s %-6u %-9u %-9u %-7s %-4s %s\n";
+
   static const char IPV4[] = "ipv4";
   static const char IPV4_NAT[] = "ipv4(n)";
   static const char IPV6[] = "ipv6";
@@ -334,8 +337,9 @@ void ipc_print_gateways(struct autobuf *abuf) {
   struct gateway_entry *gw;
   struct lqtextbuffer lqbuf;
 
-  // Status IP ETX Hopcount Uplink-Speed Downlink-Speed ipv4/ipv4-nat/- ipv6/- ipv6-prefix/-
-  abuf_puts(abuf, "Table: Gateways\nStatus\tGateway IP\tETX\tHopcnt\tUplink\tDownlnk\tIPv4\tIPv6\tPrefix\n");
+  abuf_puts(abuf, "Table: Gateways\n");
+  abuf_appendf(abuf, fmth, "Status", "Gateway IP", "ETX", "Hopcnt", "Uplink", "Downlnk", "IPv4", "IPv6", "Prefix");
+
   OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
       {
         char v4, v6;
@@ -369,9 +373,10 @@ void ipc_print_gateways(struct autobuf *abuf) {
           v6type = NONE;
         }
 
-        abuf_appendf(abuf, "%c%c\t%s\t%s\t%d\t%u\t%u\t%s\t%s\t%s\n", //
+        abuf_appendf(abuf, fmtv, //
             v4, //
             v6, //
+            "", //
             olsr_ip_to_string(&buf, &gw->originator), //
             get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf), //
             !tc ? 0 : tc->hops, //
