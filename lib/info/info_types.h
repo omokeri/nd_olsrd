@@ -106,7 +106,6 @@ typedef struct {
     union olsr_ip_addr accept_ip;
     union olsr_ip_addr listen_ip;
     int ipc_port;
-    int nompr;
     bool http_headers;
     bool allow_localhost;
     int ipv6_only;
@@ -132,7 +131,6 @@ static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigne
   }
 
   config->ipc_port = port;
-  config->nompr = 0;
   config->http_headers = true;
   config->allow_localhost = false;
   config->ipv6_only = false;
