@@ -41,6 +41,7 @@
 
 #include "olsrd_jsoninfo_helpers.h"
 #include "olsr.h"
+#include "ipcalc.h"
 
 #include <stdbool.h>
 #include <assert.h>
@@ -149,6 +150,16 @@ void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   abuf_appendf(abuf, "\"%s\": %f", key, value);
+  entrynumber[currentjsondepth]++;
+}
+
+void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
+  struct ipaddr_str ipStr;
+  const char * value = olsr_ip_to_string(&ipStr, ip);
+
+  abuf_json_insert_comma(abuf);
+  abuf_json_new_indent(abuf);
+  abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
   entrynumber[currentjsondepth]++;
 }
 

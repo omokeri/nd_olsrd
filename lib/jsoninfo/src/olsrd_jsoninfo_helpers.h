@@ -68,6 +68,8 @@ void abuf_json_int(struct autobuf *abuf, const char* key, long value);
 
 void abuf_json_float(struct autobuf *abuf, const char* key, double value);
 
+void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip);
+
 #ifdef __linux__
 void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint);
 #endif /* __linux__ */
