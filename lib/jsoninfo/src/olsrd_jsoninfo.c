@@ -427,11 +427,10 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
  * @param fmtv the format for printing
  */
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
-  struct interfaceName * sgwTunnelInterfaceNames;
+  struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
 
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
 
-  sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
   if (olsr_cnf->smart_gw_active && sgwTunnelInterfaceNames) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
     int i;
