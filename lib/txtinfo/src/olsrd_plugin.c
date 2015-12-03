@@ -56,21 +56,21 @@
 static info_plugin_functions_t functions = { //
     //
         .init = NULL, //
-        .is_command = &isCommand, //
+        .is_command = isCommand, //
         .determine_mime_type = NULL, //
         .output_start = NULL, //
         .output_end = NULL, //
-        .neighbors = &ipc_print_neighbors, //
-        .links = &ipc_print_links, //
-        .routes = &ipc_print_routes, //
-        .topology = &ipc_print_topology, //
-        .hna = &ipc_print_hna, //
-        .mid = &ipc_print_mid, //
-        .gateways = &ipc_print_gateways, //
-        .sgw = &ipc_print_sgw, //
-        .version = &ipc_print_version, //
-        .olsrd_conf = &ipc_print_olsrd_conf, //
-        .interfaces = &ipc_print_interfaces, //
+        .neighbors = ipc_print_neighbors, //
+        .links = ipc_print_links, //
+        .routes = ipc_print_routes, //
+        .topology = ipc_print_topology, //
+        .hna = ipc_print_hna, //
+        .mid = ipc_print_mid, //
+        .gateways = ipc_print_gateways, //
+        .sgw = ipc_print_sgw, //
+        .version = ipc_print_version, //
+        .olsrd_conf = ipc_print_olsrd_conf, //
+        .interfaces = ipc_print_interfaces, //
         .config = NULL, //
         .plugins = NULL //
     };
