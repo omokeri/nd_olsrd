@@ -349,65 +349,63 @@ void ipc_print_mid(struct autobuf *abuf) {
   abuf_json_mark_object(false, true, abuf, NULL); // mid
 }
 
+#ifdef __linux__
+
+static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
+  abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
+
+  if (olsr_cnf->smart_gw_active) {
+    struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
+    struct gateway_entry * gw;
+    OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
+        {
+          abuf_json_mark_array_entry(true, abuf);
+          {
+            struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+            bool selectable;
+            if (!ipv6) {
+              selectable = gw->ipv4 //
+                  && ((olsr_cnf->ip_version == AF_INET) //
+                      || olsr_cnf->use_niit) //
+                  && (olsr_cnf->smart_gw_allow_nat //
+                      || !gw->ipv4nat);
+            } else {
+              selectable = gw->ipv6 //
+                  && (olsr_cnf->ip_version == AF_INET6);
+            }
+
+            abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
+            abuf_json_boolean(abuf, "selectable", selectable);
+            abuf_json_ip_address(abuf, "originator", &gw->originator);
+            abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
+            abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
+            abuf_json_int(abuf, "uplink", gw->uplink);
+            abuf_json_int(abuf, "downlink", gw->downlink);
+            abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+            abuf_json_boolean(abuf, "IPv4", gw->ipv4);
+            abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
+            abuf_json_boolean(abuf, "IPv6", gw->ipv6);
+            abuf_json_int(abuf, "cost", gw->path_cost);
+            abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
+          }
+          abuf_json_mark_array_entry(false, abuf);
+        }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
+  }
+
+  abuf_json_mark_object(false, true, abuf, NULL);
+}
+#endif /* __linux__ */
+
 void ipc_print_gateways(struct autobuf *abuf) {
 #ifndef __linux__
   abuf_json_string(abuf, "error", "Gateway mode is only supported in Linux");
 #else /* __linux__ */
+  abuf_json_mark_object(true, false, abuf, "gateways");
 
-  struct ipaddr_str buf;
-  struct gateway_entry *gw;
+  ipc_print_gateways_ipvx(abuf, false);
+  ipc_print_gateways_ipvx(abuf, true);
 
-  abuf_json_mark_object(true, true, abuf, "gateways");
-  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
-      {
-        const char *v4 = "", *v6 = "";
-        bool autoV4 = false, autoV6 = false;
-        const char *ipType = "";
-        struct tc_entry *tc;
-
-        if ((tc = olsr_lookup_tc_entry(&gw->originator)) == NULL) {
-          continue;
-        }
-
-        if (gw == olsr_get_inet_gateway(false)) {
-          v4 = "s";
-        } else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
-          v4 = "u";
-        }
-
-        if (gw == olsr_get_inet_gateway(true)) {
-          v6 = "s";
-        } else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
-          v6 = "u";
-        }
-
-        abuf_json_mark_array_entry(true, abuf);
-        if (gw->ipv4) {
-          ipType = "ipv4";
-          abuf_json_string(abuf, "ipv4Status", v4);
-        } else if (gw->ipv6) {
-          ipType = "ipv6";
-          abuf_json_string(abuf, "ipv6Status", v6);
-        }
-        abuf_json_string(abuf, "ipType", ipType);
-        abuf_json_boolean(abuf, "ipv4", gw->ipv4);
-        abuf_json_boolean(abuf, "ipv4Nat", gw->ipv4nat);
-        abuf_json_boolean(abuf, "ipv6", gw->ipv6);
-        abuf_json_boolean(abuf, "autoIpv4", autoV4);
-        abuf_json_boolean(abuf, "autoIpv6", autoV6);
-        abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf, &gw->originator));
-        if (tc->path_cost >= ROUTE_COST_BROKEN)
-          abuf_json_int(abuf, "tcPathCost", ROUTE_COST_BROKEN);
-        else
-          abuf_json_int(abuf, "tcPathCost", tc->path_cost);
-        abuf_json_int(abuf, "hopCount", tc->hops);
-        abuf_json_int(abuf, "uplinkSpeed", gw->uplink);
-        abuf_json_int(abuf, "downlinkSpeed", gw->downlink);
-        if (!gw->external_prefix.prefix_len)
-          abuf_json_string(abuf, "externalPrefix", olsr_ip_prefix_to_string(&gw->external_prefix));
-        abuf_json_mark_array_entry(false, abuf);
-      }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(false, false, abuf, NULL);
 #endif /* __linux__ */
 }
 
