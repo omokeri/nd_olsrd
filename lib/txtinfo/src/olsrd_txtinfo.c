@@ -333,9 +333,7 @@ void ipc_print_gateways(struct autobuf *abuf) {
   static const char IPV6[] = "ipv6";
   static const char NONE[] = "-";
 
-  struct ipaddr_str buf;
   struct gateway_entry *gw;
-  struct lqtextbuffer lqbuf;
 
   abuf_puts(abuf, "Table: Gateways\n");
   abuf_appendf(abuf, fmth, "Status", "Gateway IP", "ETX", "Hopcnt", "Uplink", "Downlnk", "IPv4", "IPv6", "Prefix");
@@ -344,6 +342,8 @@ void ipc_print_gateways(struct autobuf *abuf) {
       {
         char v4, v6;
         const char *v4type, *v6type;
+        struct ipaddr_str buf;
+        struct lqtextbuffer lqbuf;
         struct tc_entry *tc = olsr_lookup_tc_entry(&gw->originator);
 
         if (gw == olsr_get_inet_gateway(false)) {
