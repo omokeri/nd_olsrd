@@ -445,8 +445,20 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
       abuf_json_mark_array_entry(true, abuf);
       {
         struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+        bool selectable;
+        if (!ipv6) {
+          selectable = gw->ipv4 //
+              && ((olsr_cnf->ip_version == AF_INET) //
+                  || olsr_cnf->use_niit) //
+              && (olsr_cnf->smart_gw_allow_nat //
+                  || !gw->ipv4nat);
+        } else {
+          selectable = gw->ipv6 //
+              && (olsr_cnf->ip_version == AF_INET6);
+        }
 
         abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
+        abuf_json_boolean(abuf, "selectable", selectable);
         abuf_json_ip_address(abuf, "originator", &gw->originator);
         abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
         abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
