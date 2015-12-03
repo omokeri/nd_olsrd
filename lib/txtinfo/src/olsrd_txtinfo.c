@@ -388,12 +388,11 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
  * @param fmtv the format for printing
  */
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const char * fmtv) {
-  struct interfaceName * sgwTunnelInterfaceNames;
+  struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
 
-  abuf_appendf(abuf, "# Table: Smart Gateway IPv%s\n", ipv6 ? "6" : "4");
+  abuf_appendf(abuf, "# Table: Smart Gateway IPv%d\n", ipv6 ? 6 : 4);
   abuf_appendf(abuf, fmth, "#", "Originator", "Prefix", "Uplink", "Downlink", "PathCost", "IPv4", "IPv4-NAT", "IPv6", "Tunnel-Name", "Destination", "Cost");
 
-  sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
   if (olsr_cnf->smart_gw_active && sgwTunnelInterfaceNames) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
     int i;
@@ -410,12 +409,12 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
 
         struct ipaddr_str originatorStr;
         const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
-        struct ipaddr_str prefixIpStr;
-        const char * prefix = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
+        struct ipaddr_str prefixStr;
+        const char * prefix = olsr_ip_to_string(&prefixStr, &gw->external_prefix.prefix);
         union olsr_ip_addr netmask = { { 0 } };
         struct ipaddr_str prefixMaskStr;
         const char * prefixMASKStr;
-        char prefixAndMask[strlen(prefix) + 1 + INET_ADDRSTRLEN + 1];
+        char prefixAndMask[INET6_ADDRSTRLEN * 2];
 
         if (!ipv6) {
           prefix_to_netmask((uint8_t *) &netmask, sizeof(netmask.v4), gw->external_prefix.prefix_len);
@@ -428,7 +427,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
         abuf_appendf(abuf, fmtv, //
             (current_gw && (current_gw == gw)) ? "*" : " ", // selected
             originator, // Originator
-            prefixAndMask, // 4: Prefix IP / Prefix Mask, 6: Prefix IP / Prefix Length
+            prefixAndMask, // 4: IP/Mask, 6: IP/Length
             gw->uplink, // Uplink
             gw->downlink, // Downlink
             !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
@@ -447,7 +446,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
 
 void ipc_print_sgw(struct autobuf *abuf) {
 #ifndef __linux__
-  abuf_puts(abuf, "Gateway mode is only supported in linux\n");
+  abuf_puts(abuf, "Gateway mode is only supported in Linux\n");
 #else
 
   static const char * fmth4 = "%s%-15s %-31s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
