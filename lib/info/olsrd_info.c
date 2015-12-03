@@ -78,70 +78,70 @@ static info_plugin_outbuffer_t outbuffer;
 static struct timer_entry *writetimer_entry = NULL;
 
 static unsigned int determine_action(char *requ) {
-  if (!(*functions).is_command)
+  if (!functions->is_command)
     return 0;
 
-  if ((*(*functions).is_command)(requ, SIW_OLSRD_CONF))
+  if ((*functions->is_command)(requ, SIW_OLSRD_CONF))
     return SIW_OLSRD_CONF;
 
-  if ((*(*functions).is_command)(requ, SIW_ALL))
+  if ((*functions->is_command)(requ, SIW_ALL))
     return SIW_ALL;
 
   // these are the two overarching categories
-  if ((*(*functions).is_command)(requ, SIW_RUNTIME_ALL))
+  if ((*functions->is_command)(requ, SIW_RUNTIME_ALL))
     return SIW_RUNTIME_ALL;
 
-  if ((*(*functions).is_command)(requ, SIW_STARTUP_ALL))
+  if ((*functions->is_command)(requ, SIW_STARTUP_ALL))
     return SIW_STARTUP_ALL;
 
   // these are the individual sections
 
-  if ((*(*functions).is_command)(requ, SIW_NEIGHBORS))
+  if ((*functions->is_command)(requ, SIW_NEIGHBORS))
     return SIW_NEIGHBORS;
 
-  if ((*(*functions).is_command)(requ, SIW_LINKS))
+  if ((*functions->is_command)(requ, SIW_LINKS))
     return SIW_LINKS;
 
-  if ((*(*functions).is_command)(requ, SIW_ROUTES))
+  if ((*functions->is_command)(requ, SIW_ROUTES))
     return SIW_ROUTES;
 
-  if ((*(*functions).is_command)(requ, SIW_HNA))
+  if ((*functions->is_command)(requ, SIW_HNA))
     return SIW_HNA;
 
-  if ((*(*functions).is_command)(requ, SIW_MID))
+  if ((*functions->is_command)(requ, SIW_MID))
     return SIW_MID;
 
-  if ((*(*functions).is_command)(requ, SIW_TOPOLOGY))
+  if ((*functions->is_command)(requ, SIW_TOPOLOGY))
     return SIW_TOPOLOGY;
 
-  if ((*(*functions).is_command)(requ, SIW_GATEWAYS))
+  if ((*functions->is_command)(requ, SIW_GATEWAYS))
     return SIW_GATEWAYS;
 
-  if ((*(*functions).is_command)(requ, SIW_INTERFACES))
+  if ((*functions->is_command)(requ, SIW_INTERFACES))
     return SIW_INTERFACES;
 
-  if ((*(*functions).is_command)(requ, SIW_2HOP))
+  if ((*functions->is_command)(requ, SIW_2HOP))
     return SIW_2HOP;
 
-  if ((*(*functions).is_command)(requ, SIW_SGW))
+  if ((*functions->is_command)(requ, SIW_SGW))
     return SIW_SGW;
 
   // specials
 
-  if ((*(*functions).is_command)(requ, SIW_VERSION))
+  if ((*functions->is_command)(requ, SIW_VERSION))
     return SIW_VERSION;
 
-  if ((*(*functions).is_command)(requ, SIW_CONFIG))
+  if ((*functions->is_command)(requ, SIW_CONFIG))
     return SIW_CONFIG;
 
-  if ((*(*functions).is_command)(requ, SIW_PLUGINS))
+  if ((*functions->is_command)(requ, SIW_PLUGINS))
     return SIW_PLUGINS;
 
   /* To print out neighbours only on the Freifunk Status
    * page the normal output is somewhat lengthy. The
    * header parsing is sufficient for standard wget.
    */
-  if ((*(*functions).is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
+  if ((*functions->is_command)(requ, SIW_NEIGHBORS_FREIFUNK))
     return SIW_NEIGHBORS_FREIFUNK;
 
   return 0;
@@ -212,7 +212,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
 static void send_info(unsigned int send_what, int the_socket) {
   struct autobuf abuf;
 
-  const char *content_type = ((*functions).determine_mime_type) ? (*(*functions).determine_mime_type)(send_what) : "text/plain; charset=utf-8";
+  const char *content_type = functions->determine_mime_type ? (*functions->determine_mime_type)(send_what) : "text/plain; charset=utf-8";
   int contentLengthIndex = 0;
   int headerLength = 0;
 
@@ -225,42 +225,42 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
-    if ((*functions).output_start)
-      (*(*functions).output_start)(&abuf);
+    if (functions->output_start)
+      (*functions->output_start)(&abuf);
 
-    if ((send_what & SIW_NEIGHBORS) && (*functions).neighbors)
-      (*(*functions).neighbors)(&abuf);
-    if ((send_what & SIW_LINKS) && (*functions).links)
-      (*(*functions).links)(&abuf);
-    if ((send_what & SIW_ROUTES) && (*functions).routes)
-      (*(*functions).routes)(&abuf);
-    if ((send_what & SIW_HNA) && (*functions).hna)
-      (*(*functions).hna)(&abuf);
-    if ((send_what & SIW_MID) && (*functions).mid)
-      (*(*functions).mid)(&abuf);
-    if ((send_what & SIW_TOPOLOGY) && (*functions).topology)
-      (*(*functions).topology)(&abuf);
-    if ((send_what & SIW_GATEWAYS) && (*functions).gateways)
-      (*(*functions).gateways)(&abuf);
-    if ((send_what & SIW_INTERFACES) && (*functions).interfaces)
-      (*(*functions).interfaces)(&abuf);
-    if ((send_what & SIW_2HOP) && (*functions).twohop)
-      (*(*functions).twohop)(&abuf);
-    if ((send_what & SIW_SGW) && (*functions).sgw)
-      (*(*functions).sgw)(&abuf);
+    if ((send_what & SIW_NEIGHBORS) && functions->neighbors)
+      (*functions->neighbors)(&abuf);
+    if ((send_what & SIW_LINKS) && functions->links)
+      (*functions->links)(&abuf);
+    if ((send_what & SIW_ROUTES) && functions->routes)
+      (*functions->routes)(&abuf);
+    if ((send_what & SIW_HNA) && functions->hna)
+      (*functions->hna)(&abuf);
+    if ((send_what & SIW_MID) && functions->mid)
+      (*functions->mid)(&abuf);
+    if ((send_what & SIW_TOPOLOGY) && functions->topology)
+      (*functions->topology)(&abuf);
+    if ((send_what & SIW_GATEWAYS) && functions->gateways)
+      (*functions->gateways)(&abuf);
+    if ((send_what & SIW_INTERFACES) && functions->interfaces)
+      (*functions->interfaces)(&abuf);
+    if ((send_what & SIW_2HOP) && functions->twohop)
+      (*functions->twohop)(&abuf);
+    if ((send_what & SIW_SGW) && functions->sgw)
+      (*functions->sgw)(&abuf);
 
-    if ((send_what & SIW_VERSION) && (*functions).version)
-      (*(*functions).version)(&abuf);
-    if ((send_what & SIW_CONFIG) && (*functions).config)
-      (*(*functions).config)(&abuf);
-    if ((send_what & SIW_PLUGINS) && (*functions).plugins)
-      (*(*functions).plugins)(&abuf);
+    if ((send_what & SIW_VERSION) && functions->version)
+      (*functions->version)(&abuf);
+    if ((send_what & SIW_CONFIG) && functions->config)
+      (*functions->config)(&abuf);
+    if ((send_what & SIW_PLUGINS) && functions->plugins)
+      (*functions->plugins)(&abuf);
 
-    if ((*functions).output_end)
-      (*(*functions).output_end)(&abuf);
-  } else if ((send_what & SIW_OLSRD_CONF) && (*functions).olsrd_conf) {
+    if (functions->output_end)
+      (*functions->output_end)(&abuf);
+  } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
-    (*(*functions).olsrd_conf)(&abuf);
+    (*functions->olsrd_conf)(&abuf);
   }
 
   if (config->http_headers) {
@@ -474,8 +474,8 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
 
   ipc_socket = -1;
 
-  if ((*functions).init) {
-    (*(*functions).init)(name);
+  if (functions->init) {
+    (*functions->init)(name);
   }
 
   plugin_ipc_init();
