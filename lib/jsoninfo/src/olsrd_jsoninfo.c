@@ -374,6 +374,10 @@ static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
     struct gateway_entry * gw;
     OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
         {
+          if (!(!ipv6 && gw->ipv4) && !(ipv6 && gw->ipv6)) {
+            continue;
+          }
+
           abuf_json_mark_array_entry(true, abuf);
           {
             struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
