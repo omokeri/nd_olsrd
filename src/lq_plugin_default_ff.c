@@ -416,6 +416,7 @@ static const char *
 default_lq_print_cost_ff(olsr_linkcost cost, struct lqtextbuffer *buffer)
 {
   snprintf(buffer->buf, sizeof(buffer->buf), "%s", fpmtoa(cost));
+  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
   return buffer->buf;
 }
 

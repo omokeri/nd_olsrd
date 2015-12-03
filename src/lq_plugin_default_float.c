@@ -227,7 +227,7 @@ static const char *
 default_lq_print_cost_float(olsr_linkcost cost, struct lqtextbuffer *buffer)
 {
   snprintf(buffer->buf, sizeof(struct lqtextbuffer), "%2.3f", (double)(((float)cost) / (float)LQ_PLUGIN_LC_MULTIPLIER));
-
+  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
   return buffer->buf;
 }
 

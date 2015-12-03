@@ -239,6 +239,7 @@ static const char *
 default_lq_print_cost_fpm(olsr_linkcost cost, struct lqtextbuffer *buffer)
 {
   snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", (double)(cost) / (double)LQ_FPM_LINKCOST_MULTIPLIER);
+  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
   return buffer->buf;
 }
 
