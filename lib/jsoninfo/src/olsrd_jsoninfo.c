@@ -168,7 +168,6 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str buf1;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
-  int thop_cnt;
 
   if (!list_2hop)
     abuf_json_mark_object(true, true, abuf, "neighbors");
@@ -182,12 +181,16 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
 
         abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr));
         abuf_json_boolean(abuf, "symmetric", (neigh->status == SYM));
-        abuf_json_boolean(abuf, "multiPointRelay", neigh->is_mpr);
-        abuf_json_boolean(abuf, "multiPointRelaySelector", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) != NULL);
         abuf_json_int(abuf, "willingness", neigh->willingness);
-        thop_cnt = 0;
+        abuf_json_boolean(abuf, "isMultiPointRelay", neigh->is_mpr);
+        abuf_json_boolean(abuf, "wasMultiPointRelay", neigh->was_mpr);
+        abuf_json_boolean(abuf, "multiPointRelaySelector", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) != NULL);
+        abuf_json_boolean(abuf, "skip", neigh->skip);
+        abuf_json_int(abuf, "neighbor2nocov", neigh->neighbor_2_nocov);
+        abuf_json_int(abuf, "linkcount", neigh->linkcount);
 
         if (!list_2hop) {
+          int thop_cnt = 0;
           for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
             thop_cnt++;
           }
