@@ -6,10 +6,8 @@ Interface "wlan0"
 {
 }
 
-LoadPlugin "olsrd_httpinfo.so.0.1"
-{
-}
-
+# This is only here to be able to generate a
+# configuration file with the script
 LoadPlugin "olsrd_jsoninfo.so.0.0"
 {
 }
