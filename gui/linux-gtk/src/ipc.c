@@ -604,7 +604,7 @@ gui_itoa(int i, char *buf)
 {
   char tmp[10];
 
-  if (snprintf(buf, sizeof(tmp), "%hd", i)) {
+  if (snprintf(buf, sizeof(tmp), "%hd", (short)i)) {
     /* This shitty string needs to be converted to UTF-8 */
     snprintf(tmp, sizeof(tmp), "%s", g_locale_to_utf8(buf, -1, NULL, NULL, NULL));
     strcpy(buf, tmp);

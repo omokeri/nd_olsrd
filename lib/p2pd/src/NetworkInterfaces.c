@@ -193,7 +193,7 @@ CreateInterface(const char *ifName, struct interface_olsr *olsrIntf)
 
   /* Create socket for capturing and sending of multicast packets on
    * non-OLSR interfaces, and on OLSR-interfaces if configured. */
-  if ((olsrIntf == NULL)) {
+  if (!olsrIntf) {
     capturingSkfd = CreateCaptureSocket(ifName);
     if (capturingSkfd < 0) {
       free(newIf);
