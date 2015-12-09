@@ -96,6 +96,7 @@ struct olsr_cookie_info *def_timer_ci = NULL;
  *
  *@param signo the signal that triggered this callback
  */
+__attribute__ ((noreturn))
 static void olsr_reconfigure(int signo __attribute__ ((unused))) {
 #ifndef _WIN32
   int errNr = errno;
@@ -157,6 +158,7 @@ static void olsr_shutdown_messages(void) {
  *
  * @param signo the signal that triggered this call
  */
+__attribute__ ((noreturn))
 #ifdef _WIN32
 int __stdcall
 SignalHandler(unsigned long signo)

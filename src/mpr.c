@@ -177,7 +177,7 @@ olsr_chosen_mpr(struct neighbor_entry *one_hop_neighbor, uint16_t * two_hop_cove
 
     while (the_one_hop_list != &second_hop_entries->neighbor_2->neighbor_2_nblist) {
 
-      if ((the_one_hop_list->neighbor->status == SYM)) {
+      if (the_one_hop_list->neighbor->status == SYM) {
         if (second_hop_entries->neighbor_2->mpr_covered_count >= olsr_cnf->mpr_coverage) {
           the_one_hop_list->neighbor->neighbor_2_nocov--;
         }

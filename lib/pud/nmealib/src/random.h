@@ -6,13 +6,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #define NMEA_RANDOM_MAX INT32_MAX
 
 static inline long int nmea_random(const double min, const double max) {
   int32_t value;
   int randomFile;
-  double range = abs(max - min);
+  double range = fabs(max - min);
 
 #ifdef _WIN32
   value = random();
