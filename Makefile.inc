@@ -119,13 +119,17 @@ WARNINGS +=	-Wformat-y2k
 WARNINGS +=     -Werror=format-security
 WARNINGS +=	-Winit-self
 WARNINGS +=	-Wswitch-default
-WARNINGS +=	-Wsync-nand
 WARNINGS +=	-Wundef
+ifneq ($(CC),clang)
+WARNINGS +=	-Wsync-nand
 WARNINGS +=	-Wlogical-op
+endif
 ifneq ($(OS),android)
+ifneq ($(CC),clang)
 WARNINGS +=	-Wdouble-promotion
 WARNINGS +=	-Wjump-misses-init
 WARNINGS +=	-Wtrampolines
+endif
 endif
 WARNINGS +=	-Wunused-parameter
 # the following 2 do not work yet and need more work on it
@@ -140,14 +144,18 @@ endif
 WARNINGS +=	-Winline
 WARNINGS +=	-Wdisabled-optimization
 # WARNINGS +=	-Werror
-WARNINGS +=	-finline-functions-called-once
 WARNINGS +=	-funit-at-a-time
+ifneq ($(CC),clang)
+WARNINGS +=	-finline-functions-called-once
 WARNINGS +=	-fearly-inlining
+endif
 ifeq ($(DEBUG),0)
 WARNINGS +=	-fomit-frame-pointer
 endif
 # we have small inline functions in src/lq_route.h which should always be inlined
+ifneq ($(CC),clang)
 WARNINGS +=	-finline-limit=350
+endif
 # These tell gcc to put each function and global variable in a separate section.
 # The linker can than remove all unreferenced section. But in the olsrd binary
 # unused doesn't imply unused at all since the function may be used by plugins,
