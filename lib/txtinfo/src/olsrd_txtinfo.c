@@ -57,58 +57,58 @@
 bool isCommand(const char *str, unsigned int siw) {
   switch (siw) {
     case SIW_OLSRD_CONF:
-      return strstr(str, "/con");
+      return !strcmp(str, "/con");
 
     case SIW_ALL:
-      return strstr(str, "/all");
+      return !strcmp(str, "/all");
 
     case SIW_RUNTIME_ALL:
-      return strstr(str, "/runtime");
+      return !strcmp(str, "/runtime");
 
     case SIW_STARTUP_ALL:
-      return strstr(str, "/startup");
+      return !strcmp(str, "/startup");
 
     case SIW_NEIGHBORS:
-      return strstr(str, "/nei");
+      return !strcmp(str, "/nei");
 
     case SIW_LINKS:
-      return strstr(str, "/lin");
+      return !strcmp(str, "/lin");
 
     case SIW_ROUTES:
-      return strstr(str, "/rou");
+      return !strcmp(str, "/rou");
 
     case SIW_HNA:
-      return strstr(str, "/hna");
+      return !strcmp(str, "/hna");
 
     case SIW_MID:
-      return strstr(str, "/mid");
+      return !strcmp(str, "/mid");
 
     case SIW_TOPOLOGY:
-      return strstr(str, "/top");
+      return !strcmp(str, "/top");
 
     case SIW_GATEWAYS:
-      return strstr(str, "/gat");
+      return !strcmp(str, "/gat");
 
     case SIW_INTERFACES:
-      return strstr(str, "/int");
+      return !strcmp(str, "/int");
 
     case SIW_2HOP:
-      return strstr(str, "/2ho");
+      return !strcmp(str, "/2ho");
 
     case SIW_SGW:
-      return strstr(str, "/sgw");
+      return !strcmp(str, "/sgw");
 
     case SIW_VERSION:
-      return strstr(str, "/ver");
+      return !strcmp(str, "/ver");
 
     case SIW_CONFIG:
-      return strstr(str, "/config");
+      return !strcmp(str, "/config");
 
     case SIW_PLUGINS:
-      return strstr(str, "/plugins");
+      return !strcmp(str, "/plugins");
 
     case SIW_NEIGHBORS_FREIFUNK:
-      return strstr(str, "/neighbours");
+      return !strcmp(str, "/neighbours");
 
     default:
       return false;
