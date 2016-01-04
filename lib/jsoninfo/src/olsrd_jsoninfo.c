@@ -86,58 +86,58 @@ void plugin_init(const char *plugin_name) {
 bool isCommand(const char *str, unsigned int siw) {
   switch (siw) {
     case SIW_OLSRD_CONF:
-      return strstr(str, "/olsrd.conf");
+      return !strcmp(str, "/olsrd.conf");
 
     case SIW_ALL:
-      return strstr(str, "/all");
+      return !strcmp(str, "/all");
 
     case SIW_RUNTIME_ALL:
-      return strstr(str, "/runtime");
+      return !strcmp(str, "/runtime");
 
     case SIW_STARTUP_ALL:
-      return strstr(str, "/startup");
+      return !strcmp(str, "/startup");
 
     case SIW_NEIGHBORS:
-      return strstr(str, "/neighbors");
+      return !strcmp(str, "/neighbors");
 
     case SIW_LINKS:
-      return strstr(str, "/links");
+      return !strcmp(str, "/links");
 
     case SIW_ROUTES:
-      return strstr(str, "/routes");
+      return !strcmp(str, "/routes");
 
     case SIW_HNA:
-      return strstr(str, "/hna");
+      return !strcmp(str, "/hna");
 
     case SIW_MID:
-      return strstr(str, "/mid");
+      return !strcmp(str, "/mid");
 
     case SIW_TOPOLOGY:
-      return strstr(str, "/topology");
+      return !strcmp(str, "/topology");
 
     case SIW_GATEWAYS:
-      return strstr(str, "/gateways");
+      return !strcmp(str, "/gateways");
 
     case SIW_INTERFACES:
-      return strstr(str, "/interfaces");
+      return !strcmp(str, "/interfaces");
 
     case SIW_2HOP:
-      return strstr(str, "/2hop");
+      return !strcmp(str, "/2hop");
 
     case SIW_SGW:
-      return strstr(str, "/sgw");
+      return !strcmp(str, "/sgw");
 
     case SIW_VERSION:
-      return strstr(str, "/version");
+      return !strcmp(str, "/version");
 
     case SIW_CONFIG:
-      return strstr(str, "/config");
+      return !strcmp(str, "/config");
 
     case SIW_PLUGINS:
-      return strstr(str, "/plugins");
+      return !strcmp(str, "/plugins");
 
     case SIW_NEIGHBORS_FREIFUNK:
-      return strstr(str, "/neighbours");
+      return !strcmp(str, "/neighbours");
 
     default:
       return false;
