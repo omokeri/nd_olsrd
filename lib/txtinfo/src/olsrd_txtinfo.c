@@ -241,34 +241,33 @@ void ipc_print_topology(struct autobuf *abuf) {
 void ipc_print_hna(struct autobuf *abuf) {
   struct ip_prefix_list *hna;
   struct hna_entry *tmp_hna;
-  struct hna_net *tmp_net;
-  struct ipaddr_str buf, mainaddrbuf;
+  struct ipaddr_str prefixbuf;
+  struct ipaddr_str mainaddrbuf;
 
-  if (vtime)
+  if (vtime) {
     abuf_puts(abuf, "Table: HNA\nDestination\tGateway\tVTime\n");
-  else
+  } else {
     abuf_puts(abuf, "Table: HNA\nDestination\tGateway\n");
+  }
 
   /* Announced HNA entries */
   for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
-    abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &hna->net.prefix), hna->net.prefix_len, olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
+    abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&prefixbuf, &hna->net.prefix), hna->net.prefix_len, olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
   }
 
   /* HNA entries */
   OLSR_FOR_ALL_HNA_ENTRIES(tmp_hna)
         {
+          struct hna_net *tmp_net;
 
           /* Check all networks */
           for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
+            abuf_appendf(abuf, "%s/%d\t%s", olsr_ip_to_string(&prefixbuf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
             if (vtime) {
-              uint32_t vt = tmp_net->hna_net_timer != NULL ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
-              int diff = (int) (vt);
-              abuf_appendf(abuf, "%s/%d\t%s\t\%d.%03d\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix),
-                  tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr),
-                  diff / 1000, abs(diff % 1000));
+              uint32_t vt = tmp_net->hna_net_timer ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
+              abuf_appendf(abuf, "\t\%u.%03u\n", vt / 1000, abs(vt % 1000));
             } else {
-              abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&buf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len,
-                  olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
+              abuf_puts(abuf, "\n");
             }
           }
         }OLSR_FOR_ALL_HNA_ENTRIES_END(tmp_hna);
