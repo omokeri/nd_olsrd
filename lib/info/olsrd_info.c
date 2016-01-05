@@ -260,6 +260,23 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_free(&abuf);
 }
 
+static void stripEOLs(char * requ) {
+  char c;
+  size_t index = strlen(requ);
+
+  if (index <= 0) {
+    return;
+  }
+
+  c = requ[--index];
+  while (c == '\n' || c == '\r') {
+    index--;
+    c = requ[index];
+  }
+
+  requ[index + 1] = '\0';
+}
+
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
 #ifndef NODEBUG
   char addr[INET6_ADDRSTRLEN];
@@ -333,6 +350,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
     if (0 < s) {
       requ[s] = '\0';
+      stripEOLs(requ);
       send_what = determine_action(requ);
     }
 
