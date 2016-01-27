@@ -1,3 +1,8 @@
+Note: The txtinfo and jsoninfo plugins were 'merged' to use a common codebase.
+      As a result, command handling has become much stricter, e.g. a txtinfo
+      command '/links' will no longer work since the correct command is ( and
+      has always been) '/lin'.
+
 0.9.0.3 -------------------------------------------------------------------
 
 Alex Dunn (1):
