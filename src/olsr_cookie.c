@@ -291,7 +291,8 @@ olsr_cookie_free(struct olsr_cookie_info *ci, void *ptr)
    * Verify if there has been a memory overrun, or
    * the wrong owner is trying to free this.
    */
-  assert(!memcmp(&branding->cmb_sig, "cookie", 6) && branding->cmb_id == ci->ci_id);
+  assert(!memcmp(&branding->cmb_sig, "cookie", 6));
+  assert(branding->cmb_id == ci->ci_id);
 
   /* Kill the brand */
   memset(branding, 0, sizeof(*branding));
