@@ -42,6 +42,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <assert.h>
+#include <ctype.h>
 
 #include "olsrd_info.h"
 #include "olsr.h"
@@ -260,21 +261,81 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_free(&abuf);
 }
 
-static void stripEOLs(char * requ) {
-  char c;
-  size_t index = strlen(requ);
+static char * skipLeadingWhitespace(char * requ, size_t *len) {
+  while (isspace(*requ) && (*requ != '\0')) {
+    *len = *len - 1;
+    requ++;
+  }
+  return requ;
+}
 
-  if (index <= 0) {
-    return;
+static char * stripEOLs(char * requ, size_t *len) {
+  while (isspace(requ[*len - 1]) && (requ[*len - 1] != '\0')) {
+    *len = *len - 1;
+    requ[*len] = '\0';
+  }
+  return requ;
+}
+
+static char * cutAtFirstEOL(char * requ, size_t *len) {
+  char * s = requ;
+  size_t l = 0;
+  while (!((*s == '\n') || (*s == '\r')) && (*s != '\0')) {
+    s++;
+    l++;
+  }
+  if ((*s == '\n') || (*s == '\r')) {
+    *s = '\0';
+  }
+  *len = l;
+  return requ;
+}
+
+static char * parseRequest(char * requ, size_t *len) {
+  char * req = requ;
+
+  if (!req || !*len) {
+    return requ;
   }
 
-  c = requ[--index];
-  while (c == '\n' || c == '\r') {
-    index--;
-    c = requ[index];
+  req = skipLeadingWhitespace(req, len);
+  req = stripEOLs(req, len);
+
+  /* HTTP request: GET whitespace URI whitespace HTTP/1.1 */
+  if (*len < (3 + 1 + 1 + 1 + 8)) {
+    return req;
   }
 
-  requ[index + 1] = '\0';
+  if (strncasecmp(req, "GET", 3) || !isspace(req[3])) {
+    /* does not start with 'GET ' */
+    return req;
+  }
+
+  /* skip 'GET ' and further leading whitespace */
+  req = skipLeadingWhitespace(&req[4], len);
+  if (!*len) return req;
+
+  /* cut req at the first '\n' */
+  req = cutAtFirstEOL(req, len);
+  if (!*len) return req;
+
+  /* strip req of trailing EOL and whitespace */
+  req = stripEOLs(req, len);
+  if (*len < 9) return req;
+
+  if (!isspace(req[*len - 9]) //
+      || strncasecmp(&req[*len - 8], "HTTP/1.", 7) //
+      || ((req[*len - 1] != '1') && (req[*len - 1] != '0'))) {
+    return req;
+  }
+  *len = *len - 8;
+  req[*len] = '\0';
+  if (!*len) return req;
+
+  /* strip req of trailing EOL and whitespace */
+  req = stripEOLs(req, len);
+
+  return req;
 }
 
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
@@ -350,9 +411,10 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (0 < s) {
-      requ[s] = '\0';
-      stripEOLs(requ);
-      send_what = determine_action(requ);
+      char * req = requ;
+      req[s] = '\0';
+      req = parseRequest(req, (size_t*)&s);
+      send_what = determine_action(req);
     }
 
     if (!send_what)
