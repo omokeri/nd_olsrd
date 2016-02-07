@@ -328,6 +328,9 @@ static void olsr_segv_handler(int sig) {
     in_segv = true;
     olsr_shutdown(sig);
   }
+
+  /* safety net */
+  exit(123);
 }
 #endif /* defined(__linux__) && !defined(__ANDROID__) */
 
