@@ -44,6 +44,10 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <fcntl.h>
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <execinfo.h>
+#include <syslog.h>
+#endif /* defined(__linux__) && !defined(__ANDROID__) */
 
 #include "cfgparser/olsrd_conf.h"
 #include "ipcalc.h"
@@ -302,6 +306,30 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 #endif
   exit(exit_value);
 }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+static void olsr_segv_handler(int sig) {
+  static bool in_segv = false;
+
+  void *bt_array[64];
+  size_t bt_size;
+  size_t bt_index=0;
+  char ** bt_syms;
+
+  bt_size = backtrace(bt_array, 64);
+  bt_syms = backtrace_symbols(bt_array, bt_size);
+
+  syslog(LOG_ERR, "olsrd crashed, stack trace follows\n");
+  while (bt_index < bt_size) {
+    syslog(LOG_ERR, "%s\n", bt_syms[bt_index++]);
+  }
+
+  if (!in_segv) {
+    in_segv = true;
+    olsr_shutdown(sig);
+  }
+}
+#endif /* defined(__linux__) && !defined(__ANDROID__) */
 
 /**
  * Sets the provided configuration on all unconfigured
@@ -654,7 +682,9 @@ int main(int argc, char *argv[]) {
   signal(SIGQUIT, olsr_shutdown);
   signal(SIGILL, olsr_shutdown);
   signal(SIGABRT, olsr_shutdown);
-  //  signal(SIGSEGV, olsr_shutdown);
+#if defined(__linux__) && !defined(__ANDROID__)
+  signal(SIGSEGV, olsr_segv_handler);
+#endif  /* defined(__linux__) && !defined(__ANDROID__) */
   signal(SIGTERM, olsr_shutdown);
   signal(SIGPIPE, SIG_IGN);
   // Ignoring SIGUSR1 and SIGUSR1 by default to be able to use them in plugins
