@@ -143,11 +143,7 @@ static void netlink_process_link(struct nlmsghdr *h)
 
   if (!iface && !oif) {
     /* this is not an OLSR interface */
-    if (up) {
-      olsr_trigger_ifchange(ifi->ifi_index, NULL, IFCHG_IF_ADD);
-    } else if (!up) {
-      olsr_trigger_ifchange(ifi->ifi_index, NULL, IFCHG_IF_REMOVE);
-    }
+    olsr_trigger_ifchange(ifi->ifi_index, NULL, up ? IFCHG_IF_ADD : IFCHG_IF_REMOVE);
   }
 }
 
