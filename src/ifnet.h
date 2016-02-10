@@ -62,6 +62,18 @@ int chk_if_up(struct olsr_if *, int);
 
 int add_hemu_if(struct olsr_if *);
 
+typedef enum {
+  LINKSTATE_UNKNOWN, LINKSTATE_UP, LINKSTATE_DOWN
+} LinkState;
+
+#if defined(__linux__) && !defined(__ANDROID__)
+  LinkState getInterfaceLinkState(const char * iface);
+#else
+  static INLINE LinkState getInterfaceLinkState(__attribute__((unused)) const char * iface) {
+    return LINKSTATE_UNKNOWN;
+  }
+#endif /* defined(__linux__) && !defined(__ANDROID__) */
+
 #endif /* _OLSR_IFNET */
 
 /*

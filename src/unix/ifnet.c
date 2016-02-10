@@ -69,6 +69,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <unistd.h>
+#if defined(__linux__) && !defined(__ANDROID__)
+#include <linux/ethtool.h>
+#include <linux/sockios.h>
+#endif /* defined(__linux__) && !defined(__ANDROID__) */
 
 /**
  * Fix bug in GLIBC, see https://bugzilla.redhat.com/show_bug.cgi?id=635260
@@ -835,6 +839,44 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
 
   return 1;
 }
+
+#if defined(__linux__) && !defined(__ANDROID__)
+LinkState getInterfaceLinkState(const char * iface) {
+  LinkState r = LINKSTATE_UNKNOWN;
+  int fd;
+  struct ethtool_value edata;
+  struct ifreq ifr;
+
+  if (!iface) {
+    return r;
+  }
+
+  memset(&ifr, 0, sizeof(ifr));
+
+  fd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (fd < 0) {
+    return r;
+  }
+
+  edata.cmd = ETHTOOL_GLINK;
+  strcpy(ifr.ifr_name, iface);
+  ifr.ifr_data = (caddr_t) &edata;
+  errno = 0;
+  if (!ioctl(fd, SIOCETHTOOL, &ifr)) {
+    /* ioctl success */
+    r = edata.data ? LINKSTATE_UP : LINKSTATE_DOWN;
+  } else if (errno == EOPNOTSUPP) {
+    /* no kernel support */
+    r = LINKSTATE_UNKNOWN;
+  } else {
+    /* other error */
+    r = LINKSTATE_UNKNOWN;
+  }
+
+  close(fd);
+  return r;
+}
+#endif /* defined(__linux__) && !defined(__ANDROID__) */
 
 /*
  * Local Variables:
