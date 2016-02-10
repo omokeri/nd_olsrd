@@ -129,7 +129,7 @@ static void netlink_process_link(struct nlmsghdr *h)
 
   oif = ifaceName ? olsrif_ifwithname(ifaceName) : NULL;
 
-  if (!iface && ((ifi->ifi_flags & IFF_UP) == IFF_UP)) {
+  if (!iface && ((ifi->ifi_flags & IFF_UP) != 0)) {
     if (oif) {
       /* try to take interface up, will trigger ifchange */
       chk_if_up(oif, 3);
