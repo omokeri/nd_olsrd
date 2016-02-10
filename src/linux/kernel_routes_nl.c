@@ -118,6 +118,7 @@ static void netlink_process_link(struct nlmsghdr *h)
   struct olsr_if *oif;
   char namebuffer[IF_NAMESIZE];
   char * ifaceName = NULL;
+  bool up;
 
   iface = if_ifwithindex(ifi->ifi_index);
 
@@ -128,24 +129,23 @@ static void netlink_process_link(struct nlmsghdr *h)
   }
 
   oif = ifaceName ? olsrif_ifwithname(ifaceName) : NULL;
+  up = ((ifi->ifi_flags & IFF_UP) != 0);
 
-  if (!iface && ((ifi->ifi_flags & IFF_UP) != 0)) {
+  if (!iface && up) {
     if (oif) {
       /* try to take interface up, will trigger ifchange */
       chk_if_up(oif, 3);
     }
-  }
-  else if (iface && ((ifi->ifi_flags & IFF_UP) == 0)) {
+  } else if (iface && !up) {
     /* try to take interface down, will trigger ifchange */
     olsr_remove_interface(iface->olsr_if);
   }
 
   if (!iface && !oif) {
     /* this is not an OLSR interface */
-    if ((ifi->ifi_flags & IFF_UP) != 0) {
+    if (up) {
       olsr_trigger_ifchange(ifi->ifi_index, NULL, IFCHG_IF_ADD);
-    }
-    else if ((ifi->ifi_flags & IFF_UP) == 0){
+    } else if (!up) {
       olsr_trigger_ifchange(ifi->ifi_index, NULL, IFCHG_IF_REMOVE);
     }
   }
