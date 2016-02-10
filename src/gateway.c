@@ -24,6 +24,7 @@
 #include "gateway.h"
 #include "egressTypes.h"
 #include "egressFile.h"
+#include "ifnet.h"
 
 #include <assert.h>
 #include <linux/rtnetlink.h>
@@ -1678,6 +1679,10 @@ static bool isInterfaceUp(int if_index) {
   name = if_indextoname(if_index, nameBuf);
   if (!name) {
     /* interface doesn't exist */
+    return false;
+  }
+
+  if (getInterfaceLinkState(name) == LINKSTATE_DOWN) {
     return false;
   }
 

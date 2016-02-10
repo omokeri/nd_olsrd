@@ -167,7 +167,7 @@ chk_if_changed(struct olsr_if *iface)
    * First check if the interface is set DOWN
    */
 
-  if ((ifp->int_flags & IFF_UP) == 0) {
+  if ((getInterfaceLinkState(iface->name) == LINKSTATE_DOWN) || (ifp->int_flags & IFF_UP) == 0) {
     OLSR_PRINTF(1, "\tInterface %s not up and running - removing it...\n", iface->name);
     goto remove_interface;
   }
@@ -532,7 +532,7 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
 
   ifs.int_flags = ifr.ifr_flags;
 
-  if ( (ifs.int_flags & IFF_UP) == 0) {
+  if ((getInterfaceLinkState(iface->name) == LINKSTATE_DOWN) || ((ifs.int_flags & IFF_UP) == 0)) {
     OLSR_PRINTF(debuglvl, "\tInterface not up & running - skipping it...\n");
     return 0;
   }

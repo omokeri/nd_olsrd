@@ -51,6 +51,7 @@
 #include "../olsr.h"
 #include "../log.h"
 #include "kernel_tunnel.h"
+#include "ifnet.h"
 
 #include <net/if.h>
 
@@ -706,6 +707,10 @@ calculate_if_metric(char *ifname)
 bool olsr_if_isup(const char * dev)
 {
   struct ifreq ifr;
+
+  if (!dev || (getInterfaceLinkState(dev) == LINKSTATE_DOWN)) {
+    return false;
+  }
 
   memset(&ifr, 0, sizeof(ifr));
   strscpy(ifr.ifr_name, dev, IFNAMSIZ);

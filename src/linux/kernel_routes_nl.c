@@ -129,7 +129,7 @@ static void netlink_process_link(struct nlmsghdr *h)
   }
 
   oif = ifaceName ? olsrif_ifwithname(ifaceName) : NULL;
-  up = ((ifi->ifi_flags & IFF_UP) != 0);
+  up = (getInterfaceLinkState(ifaceName) != LINKSTATE_DOWN) && ((ifi->ifi_flags & IFF_UP) != 0);
 
   if (!iface && up) {
     if (oif) {
