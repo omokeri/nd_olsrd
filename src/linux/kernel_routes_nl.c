@@ -117,16 +117,21 @@ static void netlink_process_link(struct nlmsghdr *h)
   struct interface_olsr *iface;
   struct olsr_if *oif;
   char namebuffer[IF_NAMESIZE];
+  char * ifaceName = NULL;
 
   iface = if_ifwithindex(ifi->ifi_index);
   oif = NULL;
 
+  if (!iface) {
+    ifaceName = if_indextoname(ifi->ifi_index, namebuffer);
+  } else {
+    ifaceName = iface->int_name;
+  }
+
   if (!iface && ((ifi->ifi_flags & IFF_UP) == IFF_UP)) {
-    if (if_indextoname(ifi->ifi_index, namebuffer)) {
-      if ((oif = olsrif_ifwithname(namebuffer)) != NULL) {
-        /* try to take interface up, will trigger ifchange */
-        chk_if_up(oif, 3);
-      }
+    if (ifaceName && ((oif = olsrif_ifwithname(ifaceName)) != NULL)) {
+      /* try to take interface up, will trigger ifchange */
+      chk_if_up(oif, 3);
     }
   }
   else if (iface && ((ifi->ifi_flags & IFF_UP) == 0)) {
