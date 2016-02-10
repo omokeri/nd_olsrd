@@ -54,8 +54,6 @@
 
 #include "olsr_cfg.h"
 
-int set_flag(char *, short);
-
 void check_interface_updates(void *);
 
 int chk_if_changed(struct olsr_if *);

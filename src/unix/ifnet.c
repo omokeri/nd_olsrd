@@ -82,36 +82,6 @@
 
 static const uint8_t  zero_v6[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-int
-set_flag(char *ifname, short flag __attribute__ ((unused)))
-{
-  struct ifreq ifr;
-
-  strscpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-
-  /* Get flags */
-  if (ioctl(olsr_cnf->ioctl_s, SIOCGIFFLAGS, &ifr) < 0) {
-    fprintf(stderr, "ioctl (get interface flags)");
-    return -1;
-  }
-
-  strscpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));
-
-  //printf("Setting flags for if \"%s\"\n", ifr.ifr_name);
-
-  if (!(ifr.ifr_flags & IFF_UP)) {
-    /* Add UP */
-    ifr.ifr_flags |= (IFF_UP | IFF_RUNNING);
-    /* Set flags + UP */
-    if (ioctl(olsr_cnf->ioctl_s, SIOCSIFFLAGS, &ifr) < 0) {
-      fprintf(stderr, "ERROR(%s): %s\n", ifr.ifr_name, strerror(errno));
-      return -1;
-    }
-  }
-  return 1;
-
-}
-
 void
 check_interface_updates(void *foo __attribute__ ((unused)))
 {
