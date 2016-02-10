@@ -120,7 +120,6 @@ static void netlink_process_link(struct nlmsghdr *h)
   char * ifaceName = NULL;
 
   iface = if_ifwithindex(ifi->ifi_index);
-  oif = NULL;
 
   if (!iface) {
     ifaceName = if_indextoname(ifi->ifi_index, namebuffer);
@@ -128,8 +127,10 @@ static void netlink_process_link(struct nlmsghdr *h)
     ifaceName = iface->int_name;
   }
 
+  oif = ifaceName ? olsrif_ifwithname(ifaceName) : NULL;
+
   if (!iface && ((ifi->ifi_flags & IFF_UP) == IFF_UP)) {
-    if (ifaceName && ((oif = olsrif_ifwithname(ifaceName)) != NULL)) {
+    if (oif) {
       /* try to take interface up, will trigger ifchange */
       chk_if_up(oif, 3);
     }
