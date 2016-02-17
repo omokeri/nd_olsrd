@@ -859,17 +859,14 @@ LinkState getInterfaceLinkState(const char * iface) {
   }
 
   edata.cmd = ETHTOOL_GLINK;
-  strcpy(ifr.ifr_name, iface);
+  strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name));
   ifr.ifr_data = (caddr_t) &edata;
   errno = 0;
   if (!ioctl(fd, SIOCETHTOOL, &ifr)) {
     /* ioctl success */
     r = edata.data ? LINKSTATE_UP : LINKSTATE_DOWN;
-  } else if (errno == EOPNOTSUPP) {
-    /* no kernel support */
-    r = LINKSTATE_UNKNOWN;
   } else {
-    /* other error */
+    /* no kernel support (errno == EOPNOTSUPP) or other error */
     r = LINKSTATE_UNKNOWN;
   }
 
