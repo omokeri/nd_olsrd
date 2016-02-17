@@ -860,6 +860,7 @@ LinkState getInterfaceLinkState(const char * iface) {
 
   edata.cmd = ETHTOOL_GLINK;
   strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name));
+  ifr.ifr_name[sizeof(ifr.ifr_name) - 1] = '\0'; /* ensure string termination */
   ifr.ifr_data = (caddr_t) &edata;
   errno = 0;
   if (!ioctl(fd, SIOCETHTOOL, &ifr)) {
