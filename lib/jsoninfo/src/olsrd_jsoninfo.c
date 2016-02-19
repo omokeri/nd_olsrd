@@ -412,6 +412,24 @@ void ipc_print_mid(struct autobuf *abuf) {
 
 #ifdef __linux__
 
+static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gateway_entry * current_gw, struct gateway_entry * gw) {
+  struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+
+  abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
+  abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
+  abuf_json_ip_address(abuf, "originator", &gw->originator);
+  abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
+  abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
+  abuf_json_int(abuf, "uplink", gw->uplink);
+  abuf_json_int(abuf, "downlink", gw->downlink);
+  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+  abuf_json_boolean(abuf, "IPv4", gw->ipv4);
+  abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
+  abuf_json_boolean(abuf, "IPv6", gw->ipv6);
+  abuf_json_int(abuf, "cost", gw->path_cost);
+  abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
+}
+
 static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
 
@@ -425,23 +443,7 @@ static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
           }
 
           abuf_json_mark_array_entry(true, abuf);
-          {
-            struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
-
-            abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
-            abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
-            abuf_json_ip_address(abuf, "originator", &gw->originator);
-            abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
-            abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
-            abuf_json_int(abuf, "uplink", gw->uplink);
-            abuf_json_int(abuf, "downlink", gw->downlink);
-            abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
-            abuf_json_boolean(abuf, "IPv4", gw->ipv4);
-            abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
-            abuf_json_boolean(abuf, "IPv6", gw->ipv6);
-            abuf_json_int(abuf, "cost", gw->path_cost);
-            abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
-          }
+          ipc_print_gateway_entry(abuf, ipv6, current_gw, gw);
           abuf_json_mark_array_entry(false, abuf);
         }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
   }
@@ -495,28 +497,12 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
       }
 
       abuf_json_mark_array_entry(true, abuf);
-      {
-        struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
-
-        abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
-        abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
-        abuf_json_ip_address(abuf, "originator", &gw->originator);
-        abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
-        abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
-        abuf_json_int(abuf, "uplink", gw->uplink);
-        abuf_json_int(abuf, "downlink", gw->downlink);
-        abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
-        abuf_json_boolean(abuf, "IPv4", gw->ipv4);
-        abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
-        abuf_json_boolean(abuf, "IPv6", gw->ipv6);
-        abuf_json_int(abuf, "cost", gw->path_cost);
-        abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
-        abuf_json_ip_address(abuf, "destination", &gw->originator);
-        abuf_json_string(abuf, "tunnel", node->name);
-        abuf_json_int(abuf, "tableNr", node->tableNr);
-        abuf_json_int(abuf, "ruleNr", node->ruleNr);
-        abuf_json_int(abuf, "bypassRuleNr", node->bypassRuleNr);
-      }
+      ipc_print_gateway_entry(abuf, ipv6, current_gw, gw);
+      abuf_json_ip_address(abuf, "destination", &gw->originator);
+      abuf_json_string(abuf, "tunnel", node->name);
+      abuf_json_int(abuf, "tableNr", node->tableNr);
+      abuf_json_int(abuf, "ruleNr", node->ruleNr);
+      abuf_json_int(abuf, "bypassRuleNr", node->bypassRuleNr);
       abuf_json_mark_array_entry(false, abuf);
     }
   }
