@@ -264,7 +264,10 @@ void ipc_print_hna(struct autobuf *abuf) {
 
   /* Announced HNA entries */
   for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
-    abuf_appendf(abuf, "%s/%d\t%s\n", olsr_ip_to_string(&prefixbuf, &hna->net.prefix), hna->net.prefix_len, olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
+    abuf_appendf(abuf, "%s/%d\t%s\n",
+        olsr_ip_to_string(&prefixbuf, &hna->net.prefix),
+        hna->net.prefix_len,
+        olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr));
   }
 
   /* HNA entries */
@@ -274,7 +277,10 @@ void ipc_print_hna(struct autobuf *abuf) {
 
           /* Check all networks */
           for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
-            abuf_appendf(abuf, "%s/%d\t%s", olsr_ip_to_string(&prefixbuf, &tmp_net->hna_prefix.prefix), tmp_net->hna_prefix.prefix_len, olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
+            abuf_appendf(abuf, "%s/%d\t%s",
+                olsr_ip_to_string(&prefixbuf, &tmp_net->hna_prefix.prefix),
+                tmp_net->hna_prefix.prefix_len,
+                olsr_ip_to_string(&mainaddrbuf, &tmp_hna->A_gateway_addr));
             if (vtime) {
               uint32_t vt = tmp_net->hna_net_timer ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0;
               abuf_appendf(abuf, "\t\%u.%03u\n", vt / 1000, abs(vt % 1000));
