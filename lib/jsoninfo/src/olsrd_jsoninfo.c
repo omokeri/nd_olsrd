@@ -165,7 +165,7 @@ void output_end(struct autobuf *abuf) {
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
-  struct ipaddr_str buf1;
+  struct ipaddr_str buf1, buf2;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
 
@@ -199,7 +199,7 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
           abuf_json_mark_object(true, true, abuf, "twoHopNeighbors");
           for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
             abuf_json_mark_array_entry(true, abuf);
-            abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf1, &list_2->neighbor_2->neighbor_2_addr));
+            abuf_json_string(abuf, "ipAddress", list_2->neighbor_2 ? olsr_ip_to_string(&buf2, &list_2->neighbor_2->neighbor_2_addr) : "");
             abuf_json_mark_array_entry(false, abuf);
           }
           abuf_json_mark_object(false, true, abuf, false);
