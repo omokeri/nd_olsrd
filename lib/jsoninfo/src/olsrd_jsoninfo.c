@@ -305,9 +305,27 @@ void ipc_print_topology(struct autobuf *abuf) {
 }
 
 void ipc_print_hna(struct autobuf *abuf) {
+  struct ip_prefix_list *hna;
   struct hna_entry *tmp_hna;
 
   abuf_json_mark_object(true, true, abuf, "hna");
+
+  /* Announced HNA entries */
+  {
+    struct ipaddr_str mainaddrbuf;
+    struct ipaddr_str prefixbuf;
+
+    olsr_ip_to_string(&mainaddrbuf, &olsr_cnf->main_addr);
+
+    for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
+      abuf_json_mark_array_entry(true, abuf);
+      abuf_json_string(abuf, "gateway", mainaddrbuf.buf);
+      abuf_json_string(abuf, "destination", olsr_ip_to_string(&prefixbuf, &hna->net.prefix));
+      abuf_json_int(abuf, "genmask", hna->net.prefix_len);
+      abuf_json_int(abuf, "validityTime", 0);
+      abuf_json_mark_array_entry(false, abuf);
+    }
+  }
 
   OLSR_FOR_ALL_HNA_ENTRIES(tmp_hna)
         {
