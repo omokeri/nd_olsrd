@@ -130,15 +130,20 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   /* Neighbors */
   OLSR_FOR_ALL_NBR_ENTRIES(neigh)
       {
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr), (neigh->status == SYM) ? "YES" : "NO",
-            neigh->is_mpr ? "YES" : "NO", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO", neigh->willingness);
+        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t",
+            olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr),
+            (neigh->status == SYM) ? "YES" : "NO",
+            neigh->is_mpr ? "YES" : "NO",
+            olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO",
+            neigh->willingness);
         thop_cnt = 0;
 
         for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
-          if (list_2hop)
+          if (list_2hop) {
             abuf_appendf(abuf, "\t%s\n", olsr_ip_to_string(&buf1, &list_2->neighbor_2->neighbor_2_addr));
-          else
+          } else {
             thop_cnt++;
+          }
         }
         if (!list_2hop) {
           abuf_appendf(abuf, "%d\n", thop_cnt);
