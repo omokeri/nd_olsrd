@@ -468,6 +468,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
         abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
         abuf_json_boolean(abuf, "IPv6", gw->ipv6);
         abuf_json_int(abuf, "cost", gw->path_cost);
+        abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
         abuf_json_ip_address(abuf, "destination", &gw->originator);
         abuf_json_string(abuf, "tunnel", node->name);
         abuf_json_int(abuf, "tableNr", node->tableNr);
