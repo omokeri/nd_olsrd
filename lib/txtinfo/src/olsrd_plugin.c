@@ -71,6 +71,7 @@ static info_plugin_functions_t functions = { //
         .version = ipc_print_version, //
         .olsrd_conf = ipc_print_olsrd_conf, //
         .interfaces = ipc_print_interfaces, //
+        .twohop = ipc_print_twohop, //
         .config = NULL, //
         .plugins = NULL //
     };
