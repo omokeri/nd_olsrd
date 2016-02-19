@@ -59,6 +59,9 @@ struct olsr;
 #define OLSR_MSGHDRSZ_IPV4 12
 #define OLSR_MSGHDRSZ_IPV6 24
 
+/* must be declared here because of circular dependency through "defs.h" */
+#define INLINE inline __attribute__((always_inline))
+
 /*
  *Emission Intervals
  */
@@ -105,6 +108,26 @@ struct olsr;
 #define LOST_LINK             3
 #define HIDE_LINK             4
 #define MAX_LINK              4
+
+static INLINE const char * linkTypeToString(int type) {
+  switch (type) {
+    case ASYM_LINK:
+      return "ASYMMETRIC";
+
+    case SYM_LINK:
+      return "SYMMETRIC";
+
+    case LOST_LINK:
+      return "LOST";
+
+    case HIDE_LINK:
+      return "HIDE";
+
+    case UNSPEC_LINK:
+    default:
+      return "UNSPECIFIED";
+  }
+}
 
 /*
  *Neighbor Types
