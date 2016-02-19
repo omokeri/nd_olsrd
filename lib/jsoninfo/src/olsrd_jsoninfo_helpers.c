@@ -153,9 +153,17 @@ void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
   entrynumber[currentjsondepth]++;
 }
 
+static const char * empty = "";
+
 void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
   struct ipaddr_str ipStr;
-  const char * value = olsr_ip_to_string(&ipStr, ip);
+  const char * value;
+
+  if (!ip) {
+    value = empty;
+  } else {
+    value = olsr_ip_to_string(&ipStr, ip);
+  }
 
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
