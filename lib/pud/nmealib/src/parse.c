@@ -579,7 +579,7 @@ int nmea_parse_GPGSV(const char *s, const int len, bool has_checksum, nmeaGPGSV 
         nmea_error("GPGSV parse error: invalid sat %d id (%d)", sat_count + 1, pack->sat_data[sat_count].id);
         return 0;
       }
-      if ((pack->sat_data[sat_count].elv < -90) || (pack->sat_data[sat_count].elv > 90)) {
+      if ((pack->sat_data[sat_count].elv < -180) || (pack->sat_data[sat_count].elv > 180)) {
         nmea_error("GPGSV parse error: invalid sat %d elevation (%d)", sat_count + 1, pack->sat_data[sat_count].elv);
         return 0;
       }
