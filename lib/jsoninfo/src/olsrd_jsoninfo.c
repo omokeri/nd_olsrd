@@ -84,64 +84,85 @@ void plugin_init(const char *plugin_name) {
 }
 
 bool isCommand(const char *str, unsigned int siw) {
+  const char * cmd;
   switch (siw) {
     case SIW_OLSRD_CONF:
-      return !strcmp(str, "/olsrd.conf");
+      cmd = "/olsrd.conf";
+      break;
 
     case SIW_ALL:
-      return !strcmp(str, "/all");
+      cmd = "/all";
+      break;
 
     case SIW_RUNTIME_ALL:
-      return !strcmp(str, "/runtime");
+      cmd = "/runtime";
+      break;
 
     case SIW_STARTUP_ALL:
-      return !strcmp(str, "/startup");
+      cmd = "/startup";
+      break;
 
     case SIW_NEIGHBORS:
-      return !strcmp(str, "/neighbors");
+      cmd = "/neighbors";
+      break;
 
     case SIW_LINKS:
-      return !strcmp(str, "/links");
+      cmd = "/links";
+      break;
 
     case SIW_ROUTES:
-      return !strcmp(str, "/routes");
+      cmd = "/routes";
+      break;
 
     case SIW_HNA:
-      return !strcmp(str, "/hna");
+      cmd = "/hna";
+      break;
 
     case SIW_MID:
-      return !strcmp(str, "/mid");
+      cmd = "/mid";
+      break;
 
     case SIW_TOPOLOGY:
-      return !strcmp(str, "/topology");
+      cmd = "/topology";
+      break;
 
     case SIW_GATEWAYS:
-      return !strcmp(str, "/gateways");
+      cmd = "/gateways";
+      break;
 
     case SIW_INTERFACES:
-      return !strcmp(str, "/interfaces");
+      cmd = "/interfaces";
+      break;
 
     case SIW_2HOP:
-      return !strcmp(str, "/2hop");
+      cmd = "/2hop";
+      break;
 
     case SIW_SGW:
-      return !strcmp(str, "/sgw");
+      cmd = "/sgw";
+      break;
 
     case SIW_VERSION:
-      return !strcmp(str, "/version");
+      cmd = "/version";
+      break;
 
     case SIW_CONFIG:
-      return !strcmp(str, "/config");
+      cmd = "/config";
+      break;
 
     case SIW_PLUGINS:
-      return !strcmp(str, "/plugins");
+      cmd = "/plugins";
+      break;
 
     case SIW_NEIGHBORS_FREIFUNK:
-      return !strcmp(str, "/neighbours");
+      cmd = "/neighbours";
+      break;
 
     default:
       return false;
   }
+
+  return !strcmp(str, cmd);
 }
 
 const char * determine_mime_type(unsigned int send_what) {
