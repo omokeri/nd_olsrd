@@ -21,14 +21,14 @@ Runtime information:
 * /lin
 * /rou
 * /hna
-* /hna
+* /mid
 * /top
 * /gat
 * /int
 * /2ho
 * /sgw
 
-A special case for Freifunk, combining /neighbors and /links:
+A special case for Freifunk, combining /nei and /lin:
 * /neighbours
 
 Start-up information:
