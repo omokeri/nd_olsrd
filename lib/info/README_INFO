@@ -46,7 +46,7 @@ An info plugin is configured with the generic info plugin configuration
 parameters shown below.
 
 The port in the generic info plugin configuration is setup by the actual
-info plugin and will certainly differ from 0.
+info plugin.
 
 LoadPlugin "an_info_plugin.so.0.0"
 {
