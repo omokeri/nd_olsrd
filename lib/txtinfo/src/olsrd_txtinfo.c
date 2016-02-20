@@ -384,7 +384,7 @@ void ipc_print_mid(struct autobuf *abuf) {
 
 void ipc_print_gateways(struct autobuf *abuf) {
 #ifndef __linux__
-  abuf_puts(abuf, "Gateway mode is only supported in linux\n");
+  abuf_puts(abuf, "error: Gateway mode is only supported on Linux\n");
 #else /* __linux__ */
   static const char *fmth = "%-6s %-45s %-15s %-6s %-9s %-9s %-7s %-4s %s\n";
   static const char *fmtv = "%c%c%-4s %-45s %-15s %-6u %-9u %-9u %-7s %-4s %s\n";
@@ -524,7 +524,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
 
 void ipc_print_sgw(struct autobuf *abuf) {
 #ifndef __linux__
-  abuf_puts(abuf, "Gateway mode is only supported in Linux\n");
+  abuf_puts(abuf, "error: Gateway mode is only supported on Linux\n");
 #else
 
   static const char * fmth4 = "%s%-15s %-31s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
