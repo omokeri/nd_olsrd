@@ -239,6 +239,11 @@ static void send_info(unsigned int send_what, int the_socket) {
     functions->olsrd_conf(&abuf);
   }
 
+  if (!abuf.len) {
+    /* wget can't handle output of zero length */
+    abuf_puts(&abuf, "\n");
+  }
+
   if (config->http_headers) {
     http_header_adjust_content_length(&abuf, contentLengthIndex, abuf.len - headerLength);
   }
