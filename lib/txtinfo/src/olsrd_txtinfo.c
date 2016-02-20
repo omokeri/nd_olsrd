@@ -207,7 +207,7 @@ void ipc_print_links(struct autobuf *abuf) {
     unsigned int diffF = 0;
 
     if (vtime) {
-      unsigned int diff = (unsigned int) (my_link->link_timer->timer_clock - now_times);
+      unsigned int diff = my_link->link_timer ? (unsigned int) (my_link->link_timer->timer_clock - now_times) : 0;
       diffI = diff / 1000;
       diffF = diff % 1000;
     }
