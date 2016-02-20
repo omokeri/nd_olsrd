@@ -56,23 +56,9 @@
 #include "olsrd_jsoninfo_helpers.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
+#include "gateway_default_handler.h"
 
 struct timeval start_time;
-
-#ifdef __linux__
-static bool isGwSelectable(struct gateway_entry * gw, bool ipv6) {
-  if (!ipv6) {
-    return gw->ipv4 //
-        && ((olsr_cnf->ip_version == AF_INET) //
-            || olsr_cnf->use_niit) //
-        && (olsr_cnf->smart_gw_allow_nat //
-            || !gw->ipv4nat);
-  }
-
-  return gw->ipv6 //
-      && (olsr_cnf->ip_version == AF_INET6);
-}
-#endif /* __linux__ */
 
 void plugin_init(const char *plugin_name) {
   /* Get start time */

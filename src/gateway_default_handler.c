@@ -99,9 +99,7 @@ static void gw_default_choose_gateway(void) {
     }
 
     if (gw_def_choose_new_ipv4_gw) {
-      bool gw_eligible_v4 = gw->ipv4
-          /* && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) *//* contained in gw_def_choose_new_ipv4_gw */
-          && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat);
+      bool gw_eligible_v4 = isGwSelectable(gw, false) ;
       if (gw_eligible_v4 && gw_cost < (chosen_gw_ipv4 ? chosen_gw_ipv4->path_cost : INT64_MAX)
           && (!cost_ipv4_threshold_valid || (gw_cost < cost_ipv4_threshold))) {
         chosen_gw_ipv4 = gw;
@@ -109,8 +107,7 @@ static void gw_default_choose_gateway(void) {
     }
 
     if (gw_def_choose_new_ipv6_gw) {
-      bool gw_eligible_v6 = gw->ipv6
-          /* && olsr_cnf->ip_version == AF_INET6 *//* contained in gw_def_choose_new_ipv6_gw */;
+      bool gw_eligible_v6 = isGwSelectable(gw, true);
       if (gw_eligible_v6 && gw_cost < (chosen_gw_ipv6 ? chosen_gw_ipv6->path_cost : INT64_MAX)
           && (!cost_ipv6_threshold_valid || (gw_cost < cost_ipv6_threshold))) {
         chosen_gw_ipv6 = gw;
