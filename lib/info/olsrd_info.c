@@ -78,6 +78,8 @@ static info_plugin_outbuffer_t outbuffer;
 
 static struct timer_entry *writetimer_entry = NULL;
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 static unsigned int determine_action(char *requ) {
   static unsigned int SIW_ENTRIES[] = {
   //
@@ -114,7 +116,7 @@ static unsigned int determine_action(char *requ) {
   if (!functions->is_command)
     return 0;
 
-  for (i = 0; i < (sizeof(SIW_ENTRIES) / sizeof(SIW_ENTRIES[0])); ++i) {
+  for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES); ++i) {
     unsigned int siw = SIW_ENTRIES[i];
     if (functions->is_command(requ, siw))
       return siw;
