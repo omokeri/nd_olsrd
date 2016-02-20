@@ -167,7 +167,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
       outbuffer.written[i] += result;
     }
 
-    if ((result <= 0) || (outbuffer.written[i] >= outbuffer.size[i])) {
+    if ((result < 0) || (outbuffer.written[i] >= outbuffer.size[i])) {
       /* close this socket and cleanup*/
       close(outbuffer.socket[i]);
       outbuffer.socket[i] = -1;
