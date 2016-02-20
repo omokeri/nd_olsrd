@@ -64,8 +64,9 @@ void plugin_init(const char *plugin_name) {
   /* Get start time */
   gettimeofday(&start_time, NULL);
 
-  if (!strlen(uuidfile))
+  if (!strlen(uuidfile)) {
     strscpy(uuidfile, "uuid.txt", sizeof(uuidfile));
+  }
   read_uuid_from_file(plugin_name, uuidfile);
 }
 
@@ -162,8 +163,9 @@ void output_start(struct autobuf *abuf) {
 
   abuf_json_int(abuf, "systemTime", time(NULL));
   abuf_json_int(abuf, "timeSinceStartup", now_times);
-  if (*uuid)
+  if (*uuid) {
     abuf_json_string(abuf, "uuid", uuid);
+  }
 }
 
 void output_end(struct autobuf *abuf) {
