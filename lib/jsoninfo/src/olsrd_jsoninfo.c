@@ -153,7 +153,7 @@ bool isCommand(const char *str, unsigned int siw) {
 }
 
 const char * determine_mime_type(unsigned int send_what) {
-  return (send_what & SIW_ALL) ? "application/json; charset=utf-8" : "text/plain; charset=utf-8";
+  return (send_what & SIW_OLSRD_CONF) ? "text/plain; charset=utf-8" : "application/json; charset=utf-8";
 }
 
 void output_start(struct autobuf *abuf) {
