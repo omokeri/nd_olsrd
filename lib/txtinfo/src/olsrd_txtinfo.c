@@ -55,64 +55,85 @@
 #include "../../info/info_types.h"
 
 bool isCommand(const char *str, unsigned int siw) {
+  const char * cmd;
   switch (siw) {
     case SIW_OLSRD_CONF:
-      return !strcmp(str, "/con");
+      cmd = "/con";
+      break;
 
     case SIW_ALL:
-      return !strcmp(str, "/all");
+      cmd = "/all";
+      break;
 
     case SIW_RUNTIME_ALL:
-      return !strcmp(str, "/runtime");
+      cmd = "/runtime";
+      break;
 
     case SIW_STARTUP_ALL:
-      return !strcmp(str, "/startup");
+      cmd = "/startup";
+      break;
 
     case SIW_NEIGHBORS:
-      return !strcmp(str, "/nei");
+      cmd = "/nei";
+      break;
 
     case SIW_LINKS:
-      return !strcmp(str, "/lin");
+      cmd = "/lin";
+      break;
 
     case SIW_ROUTES:
-      return !strcmp(str, "/rou");
+      cmd = "/rou";
+      break;
 
     case SIW_HNA:
-      return !strcmp(str, "/hna");
+      cmd = "/hna";
+      break;
 
     case SIW_MID:
-      return !strcmp(str, "/mid");
+      cmd = "/mid";
+      break;
 
     case SIW_TOPOLOGY:
-      return !strcmp(str, "/top");
+      cmd = "/top";
+      break;
 
     case SIW_GATEWAYS:
-      return !strcmp(str, "/gat");
+      cmd = "/gat";
+      break;
 
     case SIW_INTERFACES:
-      return !strcmp(str, "/int");
+      cmd = "/int";
+      break;
 
     case SIW_2HOP:
-      return !strcmp(str, "/2ho");
+      cmd = "/2ho";
+      break;
 
     case SIW_SGW:
-      return !strcmp(str, "/sgw");
+      cmd = "/sgw";
+      break;
 
     case SIW_VERSION:
-      return !strcmp(str, "/ver");
+      cmd = "/ver";
+      break;
 
     case SIW_CONFIG:
-      return !strcmp(str, "/config");
+      cmd = "/config";
+      break;
 
     case SIW_PLUGINS:
-      return !strcmp(str, "/plugins");
+      cmd = "/plugins";
+      break;
 
     case SIW_NEIGHBORS_FREIFUNK:
-      return !strcmp(str, "/neighbours");
+      cmd = "/neighbours";
+      break;
 
     default:
       return false;
   }
+
+  return !strcmp(str, cmd);
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
