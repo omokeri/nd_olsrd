@@ -203,39 +203,46 @@ static void send_info(unsigned int send_what, int the_socket) {
 
   // only add if normal format
   if (send_what & SIW_ALL) {
-    if (functions->output_start)
+    typedef struct {
+      unsigned int siw;
+      printer_generic func;
+    } SiwLookupTableEntry;
+
+    SiwLookupTableEntry funcs[] = {
+      { SIW_NEIGHBORS , functions->neighbors  }, //
+      { SIW_LINKS     , functions->links      }, //
+      { SIW_ROUTES    , functions->routes     }, //
+      { SIW_HNA       , functions->hna        }, //
+      { SIW_MID       , functions->mid        }, //
+      { SIW_TOPOLOGY  , functions->topology   }, //
+      { SIW_GATEWAYS  , functions->gateways   }, //
+      { SIW_INTERFACES, functions->interfaces }, //
+      { SIW_2HOP      , functions->twohop     }, //
+      { SIW_SGW       , functions->sgw        }, //
+      //
+      { SIW_VERSION, functions->version }, //
+      { SIW_CONFIG, functions->config }, //
+      { SIW_PLUGINS, functions->plugins } //
+      };
+
+    unsigned int i;
+
+    if (functions->output_start) {
       functions->output_start(&abuf);
+    }
 
-    if ((send_what & SIW_NEIGHBORS) && functions->neighbors)
-      functions->neighbors(&abuf);
-    if ((send_what & SIW_LINKS) && functions->links)
-      functions->links(&abuf);
-    if ((send_what & SIW_ROUTES) && functions->routes)
-      functions->routes(&abuf);
-    if ((send_what & SIW_HNA) && functions->hna)
-      functions->hna(&abuf);
-    if ((send_what & SIW_MID) && functions->mid)
-      functions->mid(&abuf);
-    if ((send_what & SIW_TOPOLOGY) && functions->topology)
-      functions->topology(&abuf);
-    if ((send_what & SIW_GATEWAYS) && functions->gateways)
-      functions->gateways(&abuf);
-    if ((send_what & SIW_INTERFACES) && functions->interfaces)
-      functions->interfaces(&abuf);
-    if ((send_what & SIW_2HOP) && functions->twohop)
-      functions->twohop(&abuf);
-    if ((send_what & SIW_SGW) && functions->sgw)
-      functions->sgw(&abuf);
+    for (i = 0; i < ARRAY_SIZE(funcs); i++) {
+      if (send_what & funcs[i].siw) {
+        printer_generic func = funcs[i].func;
+        if (func) {
+          func(&abuf);
+        }
+      }
+    }
 
-    if ((send_what & SIW_VERSION) && functions->version)
-      functions->version(&abuf);
-    if ((send_what & SIW_CONFIG) && functions->config)
-      functions->config(&abuf);
-    if ((send_what & SIW_PLUGINS) && functions->plugins)
-      functions->plugins(&abuf);
-
-    if (functions->output_end)
+    if (functions->output_end) {
       functions->output_end(&abuf);
+    }
   } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
     /* this outputs the olsrd.conf text directly, not normal format */
     functions->olsrd_conf(&abuf);
