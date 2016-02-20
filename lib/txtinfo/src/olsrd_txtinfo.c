@@ -235,13 +235,15 @@ void ipc_print_routes(struct autobuf *abuf) {
     struct ipaddr_str nexthopAddr;
     struct lqtextbuffer costbuffer;
 
-    abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n",
-      olsr_ip_to_string(&dstAddr, &rt->rt_dst.prefix),
-      rt->rt_dst.prefix_len,
-      olsr_ip_to_string(&nexthopAddr, &rt->rt_best->rtp_nexthop.gateway),
-      rt->rt_best->rtp_metric.hops,
-      get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer),
-      if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+    if (rt->rt_best) {
+      abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n",
+        olsr_ip_to_string(&dstAddr, &rt->rt_dst.prefix),
+        rt->rt_dst.prefix_len,
+        olsr_ip_to_string(&nexthopAddr, &rt->rt_best->rtp_nexthop.gateway),
+        rt->rt_best->rtp_metric.hops,
+        get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer),
+        if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+    }
   } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
   abuf_puts(abuf, "\n");
 }
