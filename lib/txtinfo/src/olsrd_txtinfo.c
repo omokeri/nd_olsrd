@@ -164,7 +164,9 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
 
     for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
       if (list_2hop) {
-        abuf_appendf(abuf, "\t%s", olsr_ip_to_string(&neighAddrBuf, &list_2->neighbor_2->neighbor_2_addr));
+        if (list_2->neighbor_2) {
+          abuf_appendf(abuf, "\t%s", olsr_ip_to_string(&neighAddrBuf, &list_2->neighbor_2->neighbor_2_addr));
+        }
       } else {
         thop_cnt++;
       }
