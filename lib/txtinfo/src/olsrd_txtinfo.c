@@ -137,39 +137,44 @@ bool isCommand(const char *str, unsigned int siw) {
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
-  struct ipaddr_str buf1;
+  struct ipaddr_str neighAddrBuf;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
   int thop_cnt;
 
-  abuf_puts(abuf, "Table: Neighbors\nIP address\tSYM\tMPR\tMPRS\tWill.");
-  if (list_2hop)
-    abuf_puts(abuf, "\n\t2hop interface adrress\n");
-  else
-    abuf_puts(abuf, "\t2 Hop Neighbors\n");
+  const char * field;
+  if (list_2hop) {
+    field = "(2-hop address)+";
+  } else {
+    field = "2-hop count";
+  }
+
+  abuf_puts(abuf, "Table: Neighbors\n");
+  abuf_appendf(abuf, "IP address\tSYM\tMPR\tMPRS\tWill.\t%s\n", field);
 
   /* Neighbors */
-  OLSR_FOR_ALL_NBR_ENTRIES(neigh)
-      {
-        abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d\t",
-            olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr),
-            (neigh->status == SYM) ? "YES" : "NO",
-            neigh->is_mpr ? "YES" : "NO",
-            olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO",
-            neigh->willingness);
-        thop_cnt = 0;
+  OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
+    abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d",
+      olsr_ip_to_string(&neighAddrBuf, &neigh->neighbor_main_addr),
+      (neigh->status == SYM) ? "YES" : "NO",
+      neigh->is_mpr ? "YES" : "NO",
+      olsr_lookup_mprs_set(&neigh->neighbor_main_addr) ? "YES" : "NO",
+      neigh->willingness);
+    thop_cnt = 0;
 
-        for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
-          if (list_2hop) {
-            abuf_appendf(abuf, "\t%s\n", olsr_ip_to_string(&buf1, &list_2->neighbor_2->neighbor_2_addr));
-          } else {
-            thop_cnt++;
-          }
-        }
-        if (!list_2hop) {
-          abuf_appendf(abuf, "%d\n", thop_cnt);
-        }
-      }OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
+    for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
+      if (list_2hop) {
+        abuf_appendf(abuf, "\t%s", olsr_ip_to_string(&neighAddrBuf, &list_2->neighbor_2->neighbor_2_addr));
+      } else {
+        thop_cnt++;
+      }
+    }
+
+    if (!list_2hop) {
+      abuf_appendf(abuf, "\t%d", thop_cnt);
+    }
+    abuf_puts(abuf, "\n");
+  } OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_puts(abuf, "\n");
 }
 
