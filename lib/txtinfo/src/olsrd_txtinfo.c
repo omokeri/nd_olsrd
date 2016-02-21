@@ -251,36 +251,41 @@ void ipc_print_routes(struct autobuf *abuf) {
 void ipc_print_topology(struct autobuf *abuf) {
   struct tc_entry *tc;
 
-  if (vtime)
-    abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\tVTime\n");
-  else
-    abuf_puts(abuf, "Table: Topology\nDest. IP\tLast hop IP\tLQ\tNLQ\tCost\n");
+  const char * field;
+  if (vtime) {
+    field = "\tVTime";
+  } else {
+    field = "";
+  }
+
+  abuf_puts(abuf, "Table: Topology\n");
+  abuf_appendf(abuf, "Dest. IP\tLast hop IP\tLQ\tNLQ\tCost%s\n", field);
 
   /* Topology */
-  OLSR_FOR_ALL_TC_ENTRIES(tc)
-      {
-        struct tc_edge_entry *tc_edge;
-        OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge)
-            {
-              if (tc_edge->edge_inv) {
-                struct ipaddr_str dstbuf, addrbuf;
-                struct lqtextbuffer lqbuffer1, lqbuffer2;
-                if (vtime) {
-                  uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
-                  int diff = (int) (vt);
-                  abuf_appendf(abuf, "%s\t%s\t%s\t%s\t%d.%03d\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr),
-                      olsr_ip_to_string(&addrbuf, &tc->addr),
-                      get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1),
-                      get_linkcost_text(tc_edge->cost, false, &lqbuffer2),
-                      diff / 1000, diff % 1000);
-                } else {
-                  abuf_appendf(abuf, "%s\t%s\t%s\t%s\n", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr), olsr_ip_to_string(&addrbuf, &tc->addr),
-                      get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1), get_linkcost_text(tc_edge->cost, false, &lqbuffer2));
-                }
-              }
-            }OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
-      }OLSR_FOR_ALL_TC_ENTRIES_END(tc);
+  OLSR_FOR_ALL_TC_ENTRIES(tc) {
+    struct tc_edge_entry *tc_edge;
+    OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
+      if (tc_edge->edge_inv) {
+        struct ipaddr_str dstAddr;
+        struct ipaddr_str lastHopAddr;
+        struct lqtextbuffer lqbuffer;
+        struct lqtextbuffer costbuffer;
 
+        abuf_appendf(abuf, "%s\t%s\t%s\t%s",
+          olsr_ip_to_string(&dstAddr, &tc_edge->T_dest_addr),
+          olsr_ip_to_string(&lastHopAddr, &tc->addr),
+          get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer),
+          get_linkcost_text(tc_edge->cost, false, &costbuffer));
+
+        if (vtime) {
+          unsigned int diff = (unsigned int) (tc->validity_timer ? (tc->validity_timer->timer_clock - now_times) : 0);
+          abuf_appendf(abuf, "\t%u.%03u", diff / 1000, diff % 1000);
+        }
+
+        abuf_puts(abuf, "\n");
+      }
+    } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
+  } OLSR_FOR_ALL_TC_ENTRIES_END(tc);
   abuf_puts(abuf, "\n");
 }
 
