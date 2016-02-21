@@ -553,23 +553,38 @@ void ipc_print_olsrd_conf(struct autobuf *abuf) {
 
 void ipc_print_interfaces(struct autobuf *abuf) {
   const struct olsr_if *ifs;
-  abuf_puts(abuf, "Table: Interfaces\nName\tState\tMTU\tWLAN\tSrc-Adress\tMask\tDst-Adress\n");
+
+  abuf_puts(abuf, "Table: Interfaces\n");
+  abuf_puts(abuf, "Name\tState\tMTU\tWLAN\tSrc-Adress\tMask\tDst-Adress\n");
+
   for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
     const struct interface_olsr * const rifs = ifs->interf;
-    abuf_appendf(abuf, "%s\t", ifs->name);
+
+    abuf_appendf(abuf, "%s", ifs->name);
+
     if (!rifs) {
-      abuf_puts(abuf, "DOWN\n");
+      abuf_puts(abuf, "\tDOWN\n");
       continue;
     }
-    abuf_appendf(abuf, "UP\t%d\t%s\t", rifs->int_mtu, rifs->is_wireless ? "Yes" : "No");
+    abuf_appendf(abuf, "\tUP\t%d\t%s",
+        rifs->int_mtu,
+        rifs->is_wireless ? "Yes" : "No");
 
-    if (olsr_cnf->ip_version == AF_INET) {
-      struct ipaddr_str addrbuf, maskbuf, bcastbuf;
-      abuf_appendf(abuf, "%s\t%s\t%s\n", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr), ip4_to_string(&maskbuf, rifs->int_netmask.sin_addr),
-          ip4_to_string(&bcastbuf, rifs->int_broadaddr.sin_addr));
-    } else {
-      struct ipaddr_str addrbuf, maskbuf;
-      abuf_appendf(abuf, "%s\t\t%s\n", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr), ip6_to_string(&maskbuf, &rifs->int6_multaddr.sin6_addr));
+    {
+      struct ipaddr_str addrbuf;
+      struct ipaddr_str maskbuf;
+      struct ipaddr_str bcastbuf;
+
+      if (olsr_cnf->ip_version == AF_INET) {
+        abuf_appendf(abuf, "\t%s\t%s\t%s\n",
+            ip4_to_string(&addrbuf, rifs->int_addr.sin_addr),
+            ip4_to_string(&maskbuf, rifs->int_netmask.sin_addr),
+            ip4_to_string(&bcastbuf, rifs->int_broadaddr.sin_addr));
+      } else {
+        abuf_appendf(abuf, "\t%s\t\t%s\n",
+            ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr),
+            ip6_to_string(&bcastbuf, &rifs->int6_multaddr.sin6_addr));
+      }
     }
   }
   abuf_puts(abuf, "\n");
