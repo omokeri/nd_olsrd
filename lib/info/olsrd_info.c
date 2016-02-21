@@ -421,7 +421,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       /* input was much too long, just skip the rest */
       while (recv(ipc_connection, (void *) &sink_buffer, sizeof(sink_buffer), 0) == sizeof(sink_buffer))
         ;
-      s = 0;
+      s = -1;
     }
 
     if (0 < s) {
