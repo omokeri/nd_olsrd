@@ -471,57 +471,55 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const char * fmtv) {
   struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
 
-  abuf_appendf(abuf, "# Table: Smart Gateway IPv%d\n", ipv6 ? 6 : 4);
-  abuf_appendf(abuf, fmth, "#", "Originator", "Prefix", "Uplink", "Downlink", "PathCost", "IPv4", "IPv4-NAT", "IPv6", "Tunnel-Name", "Destination", "Cost");
+  abuf_appendf(abuf, "Table: Smart Gateway IPv%d\n", ipv6 ? 6 : 4);
+  abuf_appendf(abuf, fmth, " ", "Originator", "Prefix", "Uplink", "Downlink", "PathCost", "IPv4", "IPv4-NAT", "IPv6", "Tunnel-Name", "Destination", "Cost");
 
   if (olsr_cnf->smart_gw_active && sgwTunnelInterfaceNames) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
+
     int i;
     for (i = 0; i < olsr_cnf->smart_gw_use_count; i++) {
       struct interfaceName * node = &sgwTunnelInterfaceNames[i];
       struct gateway_entry * gw = node->gw;
 
-      if (!gw) {
-        continue;
-      }
-
-      {
+      if (gw) {
         struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
 
-        struct ipaddr_str originatorStr;
-        const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
-        struct ipaddr_str prefixStr;
-        const char * prefix = olsr_ip_to_string(&prefixStr, &gw->external_prefix.prefix);
-        union olsr_ip_addr netmask = { { 0 } };
-        struct ipaddr_str prefixMaskStr;
-        const char * prefixMASKStr;
+        struct ipaddr_str originator;
+        struct ipaddr_str prefix;
         char prefixAndMask[INET6_ADDRSTRLEN * 2];
 
+        olsr_ip_to_string(&originator, &gw->originator);
+        olsr_ip_to_string(&prefix, &gw->external_prefix.prefix);
+
         if (!ipv6) {
+          union olsr_ip_addr netmask = { { 0 } };
+          struct ipaddr_str prefixMask;
           prefix_to_netmask((uint8_t *) &netmask, sizeof(netmask.v4), gw->external_prefix.prefix_len);
-          prefixMASKStr = olsr_ip_to_string(&prefixMaskStr, &netmask);
-          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%s", prefix, prefixMASKStr);
+          olsr_ip_to_string(&prefixMask, &netmask);
+          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%s", prefix.buf, prefixMask.buf);
         } else {
-          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%d", prefix, gw->external_prefix.prefix_len);
+          snprintf(prefixAndMask, sizeof(prefixAndMask), "%s/%d", prefix.buf, gw->external_prefix.prefix_len);
         }
 
         abuf_appendf(abuf, fmtv, //
-            (current_gw && (current_gw == gw)) ? "*" : " ", // selected
-            originator, // Originator
-            prefixAndMask, // 4: IP/Mask, 6: IP/Length
-            gw->uplink, // Uplink
-            gw->downlink, // Downlink
-            !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
-            gw->ipv4 ? "Y" : "N", // IPv4
-            gw->ipv4nat ? "Y" : "N", // IPv4-NAT
-            gw->ipv6 ? "Y" : "N", // IPv6
-            node->name, // Tunnel-Name
-            originator, // Destination
-            gw->path_cost // Cost
-            );
+          (current_gw && (current_gw == gw)) ? "*" : " ", // selected
+          originator.buf, // Originator
+          prefixAndMask, // 4: IP/Mask, 6: IP/Length
+          gw->uplink, // Uplink
+          gw->downlink, // Downlink
+          !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
+          gw->ipv4 ? "Y" : "N", // IPv4
+          gw->ipv4nat ? "Y" : "N", // IPv4-NAT
+          gw->ipv6 ? "Y" : "N", // IPv6
+          node->name, // Tunnel-Name
+          originator.buf, // Destination
+          gw->path_cost // Cost
+          );
       }
     }
   }
+  abuf_puts(abuf, "\n");
 }
 #endif /* __linux__ */
 
@@ -538,10 +536,8 @@ void ipc_print_sgw(struct autobuf *abuf) {
 #endif
 
   sgw_ipvx(abuf, false, fmth4, fmtv4);
-  abuf_puts(abuf, "\n");
 #if 0
   sgw_ipvx(abuf, true, fmth6, fmtv6);
-  abuf_puts(abuf, "\n");
 #endif
 #endif /* __linux__ */
 }
