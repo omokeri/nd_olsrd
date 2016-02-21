@@ -341,44 +341,42 @@ void ipc_print_hna(struct autobuf *abuf) {
 
 void ipc_print_mid(struct autobuf *abuf) {
   int idx;
-  unsigned short is_first;
-  struct mid_entry *entry;
-  struct mid_address *alias;
-  if (vtime)
-    abuf_puts(abuf, "Table: MID\nIP address\tAlias\tVTime\n");
-  else
-    abuf_puts(abuf, "Table: MID\nIP address\tAliases\n");
+
+  const char * field;
+  if (vtime) {
+    field = ":VTime";
+  } else {
+    field = "";
+  }
+
+  abuf_puts(abuf, "Table: MID\n");
+  abuf_appendf(abuf, "IP address\t(Alias%s)+\n", field);
 
   /* MID */
   for (idx = 0; idx < HASHSIZE; idx++) {
-    entry = mid_set[idx].next;
+    struct mid_entry *entry = mid_set[idx].next;
 
-    while (entry != &mid_set[idx]) {
-      struct ipaddr_str buf, buf2;
-      if (!vtime)
-        abuf_puts(abuf, olsr_ip_to_string(&buf, &entry->main_addr));
+    while (entry && (entry != &mid_set[idx])) {
+      struct mid_address *alias = entry->aliases;
+      struct ipaddr_str ipAddr;
 
-      alias = entry->aliases;
-      is_first = 1;
+      abuf_puts(abuf, olsr_ip_to_string(&ipAddr, &entry->main_addr));
+      abuf_puts(abuf, "\t");
 
       while (alias) {
-        if (vtime) {
-          uint32_t vt = alias->vtime - now_times;
-          int diff = (int) (vt);
+        struct ipaddr_str buf2;
 
-          abuf_appendf(abuf, "%s\t%s\t%d.%03d\n",
-              olsr_ip_to_string(&buf, &entry->main_addr),
-              olsr_ip_to_string(&buf2, &alias->alias),
-              diff / 1000, abs(diff % 1000));
-        } else {
-          abuf_appendf(abuf, "%s%s", (is_first ? "\t" : ";"), olsr_ip_to_string(&buf, &alias->alias));
+        abuf_appendf(abuf, "\t%s", olsr_ip_to_string(&buf2, &alias->alias));
+
+        if (vtime) {
+          unsigned int diff = (unsigned int) (alias->vtime - now_times);
+          abuf_appendf(abuf, ":%u.%03u", diff / 1000, diff % 1000);
         }
+
         alias = alias->next_alias;
-        is_first = 0;
       }
       entry = entry->next;
-      if (!vtime)
-        abuf_puts(abuf, "\n");
+      abuf_puts(abuf, "\n");
     }
   }
   abuf_puts(abuf, "\n");
