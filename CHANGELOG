@@ -1,7 +1,14 @@
-Note: The txtinfo and jsoninfo plugins were 'merged' to use a common codebase.
-      As a result, command handling has become much stricter, e.g. a txtinfo
-      command '/links' will no longer work since the correct command is ( and
-      has always been) '/lin'.
+Note: The txtinfo and jsoninfo plugins were 'merged' to use a common
+      codebase for receiving commands and dispatching replies. Also,
+      these plugins were subjected to review and fixes. As a result:
+      - command handling has become much stricter, e.g. a txtinfo
+        command '/links' will no longer work since the correct command is
+        (and has always been) '/lin'.
+      - some fixes change the format and/or content of txtinfo and/or
+        jsoninfo output.
+      - it is very strongly advised to check your scripts and applications
+        interfacing with olsrd txtinfo and/or jsoninfo before switching
+        to this version of olsrd.
 
 0.9.0.3 -------------------------------------------------------------------
 
