@@ -53,6 +53,7 @@
 #include "gateway.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
+#include "gateway_default_handler.h"
 
 bool isCommand(const char *str, unsigned int siw) {
   const char * cmd;
@@ -395,59 +396,61 @@ void ipc_print_gateways(struct autobuf *abuf) {
   static const char NONE[] = "-";
 
   struct gateway_entry *gw;
+  struct gateway_entry *current_gw_4 = olsr_get_inet_gateway(false);
+  struct gateway_entry *current_gw_6 = olsr_get_inet_gateway(true);
 
   abuf_puts(abuf, "Table: Gateways\n");
   abuf_appendf(abuf, fmth, "Status", "Gateway IP", "ETX", "Hopcnt", "Uplink", "Downlnk", "IPv4", "IPv6", "Prefix");
 
-  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
-      {
-        char v4, v6;
-        const char *v4type, *v6type;
-        struct ipaddr_str buf;
-        struct lqtextbuffer lqbuf;
-        struct tc_entry *tc = olsr_lookup_tc_entry(&gw->originator);
+  OLSR_FOR_ALL_GATEWAY_ENTRIES(gw) {
+    char v4, v6;
+    const char *v4type, *v6type;
+    struct ipaddr_str originatorbuf;
+    struct lqtextbuffer lqbuf;
+    struct tc_entry *tc = olsr_lookup_tc_entry(&gw->originator);
 
-        if (gw == olsr_get_inet_gateway(false)) {
-          v4 = 's';
-        } else if (gw->ipv4 && (olsr_cnf->ip_version == AF_INET || olsr_cnf->use_niit) && (olsr_cnf->smart_gw_allow_nat || !gw->ipv4nat)) {
-          v4 = 'u';
-        } else {
-          v4 = '-';
-        }
+    if (current_gw_4 && (gw == current_gw_4)) {
+      v4 = 's';
+    } else if (isGwSelectable(gw, false)) {
+      v4 = 'u';
+    } else {
+      v4 = '-';
+    }
 
-        if (gw == olsr_get_inet_gateway(true)) {
-          v6 = 's';
-        } else if (gw->ipv6 && olsr_cnf->ip_version == AF_INET6) {
-          v6 = 'u';
-        } else {
-          v6 = '-';
-        }
+    if (current_gw_6 && (gw == current_gw_6)) {
+      v6 = 's';
+    } else if (isGwSelectable(gw, true)) {
+      v6 = 'u';
+    } else {
+      v6 = '-';
+    }
 
-        if (gw->ipv4) {
-          v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
-        } else {
-          v4type = NONE;
-        }
-        if (gw->ipv6) {
-          v6type = IPV6;
-        } else {
-          v6type = NONE;
-        }
+    if (gw->ipv4) {
+      v4type = gw->ipv4nat ? IPV4_NAT : IPV4;
+    } else {
+      v4type = NONE;
+    }
+    if (gw->ipv6) {
+      v6type = IPV6;
+    } else {
+      v6type = NONE;
+    }
 
-        abuf_appendf(abuf, fmtv, //
-            v4, //
-            v6, //
-            "", //
-            olsr_ip_to_string(&buf, &gw->originator), //
-            get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf), //
-            !tc ? 0 : tc->hops, //
-            gw->uplink, //
-            gw->downlink, //
-            v4type, //
-            v6type, //
-            !gw->external_prefix.prefix_len ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
-      }OLSR_FOR_ALL_GATEWAY_ENTRIES_END (gw)
+    abuf_appendf(abuf, fmtv, //
+      v4, //
+      v6, //
+      "", //
+      olsr_ip_to_string(&originatorbuf, &gw->originator), //
+      get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf), //
+      !tc ? 0 : tc->hops, //
+      gw->uplink, //
+      gw->downlink, //
+      v4type, //
+      v6type, //
+      !gw->external_prefix.prefix_len ? NONE : olsr_ip_prefix_to_string(&gw->external_prefix));
+  } OLSR_FOR_ALL_GATEWAY_ENTRIES_END (gw)
 #endif /* __linux__ */
+  abuf_puts(abuf, "\n");
 }
 
 #ifdef __linux__
