@@ -187,39 +187,39 @@ void ipc_print_neighbors(struct autobuf *abuf) {
 void ipc_print_links(struct autobuf *abuf) {
   struct link_entry *my_link;
 
+  const char * field;
   if (vtime) {
-    abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tVTime\tLQ\tNLQ\tCost\n");
+    field = "VTime";
   } else {
-    abuf_puts(abuf, "Table: Links\nLocal IP\tRemote IP\tHyst.\tLQ\tNLQ\tCost\n");
+    field = "Hyst.";
   }
 
+  abuf_puts(abuf, "Table: Links\n");
+  abuf_appendf(abuf, "Local IP\tRemote IP\t%s\tLQ\tNLQ\tCost\n", field);
+
   /* Link set */
-  OLSR_FOR_ALL_LINK_ENTRIES(my_link)
-      {
-        struct ipaddr_str localAddr;
-        struct ipaddr_str remoteAddr;
-        struct lqtextbuffer lqbuffer;
-        struct lqtextbuffer costbuffer;
+  OLSR_FOR_ALL_LINK_ENTRIES(my_link) {
+    struct ipaddr_str localAddr;
+    struct ipaddr_str remoteAddr;
+    struct lqtextbuffer lqbuffer;
+    struct lqtextbuffer costbuffer;
+    unsigned int diffI = 0;
+    unsigned int diffF = 0;
 
-        if (vtime) {
-          int diff = (unsigned int) (my_link->link_timer->timer_clock - now_times);
+    if (vtime) {
+      unsigned int diff = (unsigned int) (my_link->link_timer->timer_clock - now_times);
+      diffI = diff / 1000;
+      diffF = diff % 1000;
+    }
 
-          abuf_appendf(abuf, "%s\t%s\t%d.%03d\t%s\t%s\t\n",
-              olsr_ip_to_string(&localAddr, &my_link->local_iface_addr),
-              olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr),
-              diff / 1000,
-              abs(diff % 1000),
-              get_link_entry_text(my_link, '\t', &lqbuffer),
-              get_linkcost_text(my_link->linkcost, false, &costbuffer));
-        } else {
-          abuf_appendf(abuf, "%s\t%s\t0.00\t%s\t%s\t\n",
-              olsr_ip_to_string(&localAddr, &my_link->local_iface_addr),
-              olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr),
-              get_link_entry_text(my_link, '\t', &lqbuffer),
-              get_linkcost_text(my_link->linkcost, false, &costbuffer));
-        }
-      }OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
-
+    abuf_appendf(abuf, "%s\t%s\t%u.%03u\t%s\t%s\n",
+      olsr_ip_to_string(&localAddr, &my_link->local_iface_addr),
+      olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr),
+      diffI,
+      diffF,
+      get_link_entry_text(my_link, '\t', &lqbuffer),
+      get_linkcost_text(my_link->linkcost, false, &costbuffer));
+  } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
   abuf_puts(abuf, "\n");
 }
 
