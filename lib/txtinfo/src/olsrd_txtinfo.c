@@ -224,22 +224,26 @@ void ipc_print_links(struct autobuf *abuf) {
 }
 
 void ipc_print_routes(struct autobuf *abuf) {
-  struct ipaddr_str buf1, buf2;
   struct rt_entry *rt;
-  struct lqtextbuffer lqbuffer;
 
-  abuf_puts(abuf, "Table: Routes\nDestination\tGateway IP\tMetric\tETX\tInterface\n");
+  abuf_puts(abuf, "Table: Routes\n");
+  abuf_puts(abuf, "Destination\tGateway IP\tMetric\tETX\tInterface\n");
 
   /* Walk the route table */
-  OLSR_FOR_ALL_RT_ENTRIES(rt)
-      {
-        abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n", olsr_ip_to_string(&buf1, &rt->rt_dst.prefix), rt->rt_dst.prefix_len,
-            olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway), rt->rt_best->rtp_metric.hops,
-            get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuffer), if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
-      }OLSR_FOR_ALL_RT_ENTRIES_END(rt);
+  OLSR_FOR_ALL_RT_ENTRIES(rt) {
+    struct ipaddr_str dstAddr;
+    struct ipaddr_str nexthopAddr;
+    struct lqtextbuffer costbuffer;
 
+    abuf_appendf(abuf, "%s/%d\t%s\t%d\t%s\t%s\t\n",
+      olsr_ip_to_string(&dstAddr, &rt->rt_dst.prefix),
+      rt->rt_dst.prefix_len,
+      olsr_ip_to_string(&nexthopAddr, &rt->rt_best->rtp_nexthop.gateway),
+      rt->rt_best->rtp_metric.hops,
+      get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer),
+      if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+  } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
   abuf_puts(abuf, "\n");
-
 }
 
 void ipc_print_topology(struct autobuf *abuf) {
