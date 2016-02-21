@@ -56,6 +56,7 @@
 #include "olsrd_jsoninfo_helpers.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
+#include "../../info/http_headers.h"
 #include "gateway_default_handler.h"
 
 struct timeval start_time;
@@ -171,6 +172,29 @@ void output_start(struct autobuf *abuf) {
 void output_end(struct autobuf *abuf) {
   abuf_json_mark_output(false, abuf);
   abuf_puts(abuf, "\n");
+}
+
+void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
+  char buf[1024];
+
+  if (http_headers || (status == INFO_HTTP_OK)) {
+    return;
+  }
+
+  output_start(abuf);
+
+  switch (status) {
+    case INFO_HTTP_NOTFOUND:
+      snprintf(buf, sizeof(buf) - 1, "Invalid request '%s'", req);
+      buf[sizeof(buf) - 1] = '\0';
+      abuf_json_string(abuf, "error", buf);
+      break;
+
+    default:
+      break;
+  }
+
+  output_end(abuf);
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {

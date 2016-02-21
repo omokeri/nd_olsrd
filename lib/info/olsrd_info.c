@@ -187,7 +187,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
   }
 }
 
-static void send_info(const char * req __attribute__((unused)), unsigned int send_what, int the_socket, unsigned int status) {
+static void send_info(const char * req, unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
 
   const char *content_type = functions->determine_mime_type ? functions->determine_mime_type(send_what) : "text/plain; charset=utf-8";
@@ -201,56 +201,66 @@ static void send_info(const char * req __attribute__((unused)), unsigned int sen
     headerLength = abuf.len;
   }
 
-  // only add if normal format
-  if (send_what & SIW_ALL) {
-    typedef struct {
-      unsigned int siw;
-      printer_generic func;
-    } SiwLookupTableEntry;
+  if (status == INFO_HTTP_OK) {
+    /* OK */
 
-    SiwLookupTableEntry funcs[] = {
-      { SIW_NEIGHBORS , functions->neighbors  }, //
-      { SIW_LINKS     , functions->links      }, //
-      { SIW_ROUTES    , functions->routes     }, //
-      { SIW_HNA       , functions->hna        }, //
-      { SIW_MID       , functions->mid        }, //
-      { SIW_TOPOLOGY  , functions->topology   }, //
-      { SIW_GATEWAYS  , functions->gateways   }, //
-      { SIW_INTERFACES, functions->interfaces }, //
-      { SIW_2HOP      , functions->twohop     }, //
-      { SIW_SGW       , functions->sgw        }, //
-      //
-      { SIW_VERSION, functions->version }, //
-      { SIW_CONFIG, functions->config }, //
-      { SIW_PLUGINS, functions->plugins } //
-      };
+    // only add if normal format
+    if (send_what & SIW_ALL) {
+      typedef struct {
+        unsigned int siw;
+        printer_generic func;
+      } SiwLookupTableEntry;
 
-    unsigned int i;
+      SiwLookupTableEntry funcs[] = {
+        { SIW_NEIGHBORS , functions->neighbors  }, //
+        { SIW_LINKS     , functions->links      }, //
+        { SIW_ROUTES    , functions->routes     }, //
+        { SIW_HNA       , functions->hna        }, //
+        { SIW_MID       , functions->mid        }, //
+        { SIW_TOPOLOGY  , functions->topology   }, //
+        { SIW_GATEWAYS  , functions->gateways   }, //
+        { SIW_INTERFACES, functions->interfaces }, //
+        { SIW_2HOP      , functions->twohop     }, //
+        { SIW_SGW       , functions->sgw        }, //
+        //
+        { SIW_VERSION, functions->version }, //
+        { SIW_CONFIG, functions->config }, //
+        { SIW_PLUGINS, functions->plugins } //
+        };
 
-    if (functions->output_start) {
-      functions->output_start(&abuf);
-    }
+      unsigned int i;
 
-    for (i = 0; i < ARRAY_SIZE(funcs); i++) {
-      if (send_what & funcs[i].siw) {
-        printer_generic func = funcs[i].func;
-        if (func) {
-          func(&abuf);
+      if (functions->output_start) {
+        functions->output_start(&abuf);
+      }
+
+      for (i = 0; i < ARRAY_SIZE(funcs); i++) {
+        if (send_what & funcs[i].siw) {
+          printer_generic func = funcs[i].func;
+          if (func) {
+            func(&abuf);
+          }
         }
       }
+
+      if (functions->output_end) {
+        functions->output_end(&abuf);
+      }
+    } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
+      /* this outputs the olsrd.conf text directly, not normal format */
+      functions->olsrd_conf(&abuf);
     }
 
-    if (functions->output_end) {
-      functions->output_end(&abuf);
+    if (!abuf.len) {
+      /* wget can't handle output of zero length */
+      abuf_puts(&abuf, "\n");
     }
-  } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
-    /* this outputs the olsrd.conf text directly, not normal format */
-    functions->olsrd_conf(&abuf);
   }
 
-  if (!abuf.len) {
-    /* wget can't handle output of zero length */
-    abuf_puts(&abuf, "\n");
+  if (status != INFO_HTTP_OK) {
+    if (functions->output_error) {
+      functions->output_error(&abuf, status, req, config->http_headers);
+    }
   }
 
   if (config->http_headers) {
@@ -439,7 +449,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (!send_what) {
-      send_what = SIW_ALL;
+      http_status = INFO_HTTP_NOTFOUND;
     }
   }
 

@@ -48,6 +48,7 @@
 
 /* Response types */
 #define INFO_HTTP_OK             (200)
+#define INFO_HTTP_NOTFOUND       (404)
 
 void http_header_build(const char * plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
@@ -55,6 +56,9 @@ void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIn
 
 static INLINE const char * httpStatusToReply(unsigned int status) {
   switch (status) {
+    case INFO_HTTP_NOTFOUND:
+      return INFO_HTTP_VERSION " 404 Not Found";
+
     case INFO_HTTP_OK:
     default:
       return INFO_HTTP_VERSION " 200 OK";

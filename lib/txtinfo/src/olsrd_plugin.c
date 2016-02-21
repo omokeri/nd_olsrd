@@ -60,6 +60,7 @@ static info_plugin_functions_t functions = { //
         .determine_mime_type = NULL, //
         .output_start = NULL, //
         .output_end = NULL, //
+        .output_error = output_error, //
         .neighbors = ipc_print_neighbors, //
         .links = ipc_print_links, //
         .routes = ipc_print_routes, //

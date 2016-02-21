@@ -57,6 +57,7 @@ const char * determine_mime_type(unsigned int send_what);
 
 void output_start(struct autobuf *abuf);
 void output_end(struct autobuf *abuf);
+void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers);
 
 void ipc_print_neighbors(struct autobuf *abuf);
 void ipc_print_links(struct autobuf *abuf);

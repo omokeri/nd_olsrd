@@ -53,6 +53,7 @@
 #include "gateway.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
+#include "../../info/http_headers.h"
 #include "gateway_default_handler.h"
 
 bool isCommand(const char *str, unsigned int siw) {
@@ -179,6 +180,22 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
     abuf_puts(abuf, "\n");
   } OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_puts(abuf, "\n");
+}
+
+void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
+  if (http_headers) {
+    return;
+  }
+
+  switch (status) {
+    case INFO_HTTP_NOTFOUND:
+      abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
+      break;
+
+    case INFO_HTTP_OK:
+    default:
+      return;
+  }
 }
 
 void ipc_print_neighbors(struct autobuf *abuf) {

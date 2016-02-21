@@ -47,6 +47,7 @@
 #include "common/autobuf.h"
 
 bool isCommand(const char *str, unsigned int siw);
+void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers);
 
 void ipc_print_neighbors(struct autobuf *abuf);
 void ipc_print_links(struct autobuf *abuf);
