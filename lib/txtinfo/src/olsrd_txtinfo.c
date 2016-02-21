@@ -121,11 +121,11 @@ bool isCommand(const char *str, unsigned int siw) {
 
     case SIW_CONFIG:
       cmd = "/config";
-      break;
+      return false; /* not implemented */
 
     case SIW_PLUGINS:
       cmd = "/plugins";
-      break;
+      return false; /* not implemented */
 
     case SIW_NEIGHBORS_FREIFUNK:
       cmd = "/neighbours";
