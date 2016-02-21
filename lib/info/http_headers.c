@@ -43,14 +43,13 @@
 
 #include <assert.h>
 
-void http_header_build(const char *plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
+void http_header_build(const char *plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
   assert(plugin_name);
-  assert(status);
   assert(abuf);
   assert(contentLengthIndex);
 
   /* Status */
-  abuf_appendf(abuf, "%s\r\n", status);
+  abuf_appendf(abuf, "%s\r\n", httpStatusToReply(status));
 
   /* Date */
   {

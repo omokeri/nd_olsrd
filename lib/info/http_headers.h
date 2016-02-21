@@ -44,11 +44,21 @@
 
 #include "common/autobuf.h"
 
-/* Response types */
-#define INFO_HTTP_OK "HTTP/1.1 200 OK"
+#define INFO_HTTP_VERSION "HTTP/1.1"
 
-void http_header_build(const char * plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
+/* Response types */
+#define INFO_HTTP_OK             (200)
+
+void http_header_build(const char * plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
 void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength);
+
+static INLINE const char * httpStatusToReply(unsigned int status) {
+  switch (status) {
+    case INFO_HTTP_OK:
+    default:
+      return INFO_HTTP_VERSION " 200 OK";
+  }
+}
 
 #endif /* _OLSRD_LIB_INFO_HTTP_HEADERS_H_ */

@@ -187,7 +187,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
   }
 }
 
-static void send_info(unsigned int send_what, int the_socket) {
+static void send_info(const char * req __attribute__((unused)), unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
 
   const char *content_type = functions->determine_mime_type ? functions->determine_mime_type(send_what) : "text/plain; charset=utf-8";
@@ -197,7 +197,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_init(&abuf, 2 * 4096);
 
   if (config->http_headers) {
-    http_header_build(name, INFO_HTTP_OK, content_type, &abuf, &contentLengthIndex);
+    http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
     headerLength = abuf.len;
   }
 
@@ -357,6 +357,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   char addr[INET6_ADDRSTRLEN];
 #endif /* NODEBUG */
 
+  char * req = NULL;
+  unsigned int http_status = INFO_HTTP_OK;
   union olsr_sockaddr sock_addr;
   socklen_t sock_addr_len = sizeof(sock_addr);
   fd_set rfds;
@@ -425,7 +427,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
 
     if (0 <= s) {
-      char * req = requ;
+      req = requ;
       req[s] = '\0';
       req = parseRequest(req, (size_t*)&s);
       if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
@@ -441,7 +443,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     }
   }
 
-  send_info(send_what, ipc_connection);
+  send_info(req ? req : "", send_what, ipc_connection, http_status);
 }
 
 static int plugin_ipc_init(void) {
