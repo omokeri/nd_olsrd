@@ -428,11 +428,17 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       char * req = requ;
       req[s] = '\0';
       req = parseRequest(req, (size_t*)&s);
-      send_what = determine_action(req);
+      if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
+        /* empty or '/' */
+        send_what = SIW_ALL;
+      } else {
+        send_what = determine_action(req);
+      }
     }
 
-    if (!send_what)
+    if (!send_what) {
       send_what = SIW_ALL;
+    }
   }
 
   send_info(send_what, ipc_connection);
