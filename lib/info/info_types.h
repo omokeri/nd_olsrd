@@ -78,6 +78,7 @@ typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*command_matcher)(const char *str, unsigned int siw);
 typedef const char * (*mime_type)(unsigned int send_what);
 typedef void (*output_start_end)(struct autobuf *abuf);
+typedef void (*printer_error)(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers);
 typedef void (*printer_generic)(struct autobuf *abuf);
 
 typedef struct {
@@ -86,6 +87,7 @@ typedef struct {
     mime_type determine_mime_type;
     output_start_end output_start;
     output_start_end output_end;
+    printer_error output_error;
     printer_generic neighbors;
     printer_generic links;
     printer_generic routes;
