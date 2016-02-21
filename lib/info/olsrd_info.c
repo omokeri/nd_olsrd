@@ -424,7 +424,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       s = -1;
     }
 
-    if (0 < s) {
+    if (0 <= s) {
       char * req = requ;
       req[s] = '\0';
       req = parseRequest(req, (size_t*)&s);
