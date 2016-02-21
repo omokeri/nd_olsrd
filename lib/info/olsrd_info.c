@@ -189,6 +189,7 @@ static void write_data(void *foo __attribute__ ((unused))) {
 
 static void send_info(const char * req, unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
+  unsigned int outputLength = 0;
 
   const char *content_type = functions->determine_mime_type ? functions->determine_mime_type(send_what) : "text/plain; charset=utf-8";
   int contentLengthIndex = 0;
@@ -229,10 +230,13 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
         };
 
       unsigned int i;
+      unsigned int preLength;
 
       if (functions->output_start) {
         functions->output_start(&abuf);
       }
+
+      preLength = abuf.len;
 
       for (i = 0; i < ARRAY_SIZE(funcs); i++) {
         if (send_what & funcs[i].siw) {
@@ -243,23 +247,35 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
         }
       }
 
+      outputLength = abuf.len - preLength;
+
       if (functions->output_end) {
         functions->output_end(&abuf);
       }
     } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
       /* this outputs the olsrd.conf text directly, not normal format */
+      unsigned int preLength = abuf.len;
       functions->olsrd_conf(&abuf);
+      outputLength = abuf.len - preLength;
     }
 
-    if (!abuf.len) {
-      /* wget can't handle output of zero length */
-      abuf_puts(&abuf, "\n");
+    if (!abuf.len || !outputLength) {
+      status = INFO_HTTP_NOCONTENT;
+      abuf.buf[0] = '\0';
+      abuf.len = 0;
+      if (config->http_headers) {
+        http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
+        headerLength = abuf.len;
+      }
     }
   }
 
   if (status != INFO_HTTP_OK) {
     if (functions->output_error) {
       functions->output_error(&abuf, status, req, config->http_headers);
+    } else if (status == INFO_HTTP_NOCONTENT) {
+      /* wget can't handle output of zero length */
+      abuf_puts(&abuf, "\n");
     }
   }
 

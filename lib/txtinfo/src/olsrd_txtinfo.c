@@ -192,6 +192,11 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
       abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
       break;
 
+    case INFO_HTTP_NOCONTENT:
+      /* wget can't handle output of zero length */
+      abuf_puts(abuf, "\n");
+      break;
+
     case INFO_HTTP_OK:
     default:
       return;

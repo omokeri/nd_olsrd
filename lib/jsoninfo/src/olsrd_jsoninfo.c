@@ -190,6 +190,10 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
       abuf_json_string(abuf, "error", buf);
       break;
 
+    case INFO_HTTP_NOCONTENT:
+      abuf_json_string(abuf, "error", "no content");
+      break;
+
     default:
       break;
   }
