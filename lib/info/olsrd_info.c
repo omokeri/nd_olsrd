@@ -197,7 +197,7 @@ static void send_info(unsigned int send_what, int the_socket) {
   abuf_init(&abuf, 2 * 4096);
 
   if (config->http_headers) {
-    http_header_build(name, HTTP_200, content_type, &abuf, &contentLengthIndex);
+    http_header_build(name, INFO_HTTP_OK, content_type, &abuf, &contentLengthIndex);
     headerLength = abuf.len;
   }
 

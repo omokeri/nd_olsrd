@@ -45,7 +45,7 @@
 #include "common/autobuf.h"
 
 /* Response types */
-#define HTTP_200 "HTTP/1.1 200 OK"
+#define INFO_HTTP_OK "HTTP/1.1 200 OK"
 
 void http_header_build(const char * plugin_name, const char *status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
