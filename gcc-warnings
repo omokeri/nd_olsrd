@@ -33,6 +33,14 @@ parsetest() {
             opt="${error#*\"}"
             opt="${opt%\"*}"
             ;;
+        *:\ unrecognized\ *option\ \‘*)
+            opt="${error#*\‘}"
+            opt="${opt%\‘*}"
+            ;;
+        *:\ unrecognized\ *option\ \'*)
+            opt="${error#*\'}"
+            opt="${opt%\'*}"
+            ;;
         *:\ unrecognized\ *option\ \`*)
             opt="${error#*\`}"
             opt="${opt%\'*}"
@@ -41,7 +49,7 @@ parsetest() {
             ;;
        esac
        # if we come here, we have in $opt the option to remove. and
-       # we remove all instances. And we save agoinst leading "-"
+       # we remove all instances. And we save against leading "-"
        NEW_OPTS=""
        for o in $OPTS; do
            case "$o" in
