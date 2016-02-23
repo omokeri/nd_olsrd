@@ -112,6 +112,7 @@ WARNINGS += -Wcast-qual
 WARNINGS += -Wdeclaration-after-statement
 WARNINGS += -Wdisabled-optimization
 WARNINGS += -Wdouble-promotion
+WARNINGS += -Wduplicated-cond
 WARNINGS += -Wendif-labels
 WARNINGS += -Werror=format-security
 WARNINGS += -Wextra
@@ -122,24 +123,30 @@ WARNINGS += -Winit-self
 WARNINGS += -Winline
 WARNINGS += -Wjump-misses-init
 WARNINGS += -Wlogical-op
+WARNINGS += -Wmisleading-indentation
 WARNINGS += -Wmissing-declarations
 WARNINGS += -Wmissing-format-attribute
 WARNINGS += -Wmissing-noreturn
 WARNINGS += -Wmissing-prototypes
 WARNINGS += -Wno-deprecated-declarations
 WARNINGS += -Wno-multichar
+WARNINGS += -Wnull-dereference
 WARNINGS += -Wold-style-definition
 WARNINGS += -Wpointer-arith
 WARNINGS += -Wsequence-point
 WARNINGS += -Wshadow
+WARNINGS += -Wshift-negative-value
+WARNINGS += -Wshift-overflow
 WARNINGS += -Wsign-compare
 WARNINGS += -Wstrict-prototypes
 WARNINGS += -Wswitch-default
 WARNINGS += -Wsync-nand
+WARNINGS += -Wtautological-compare
 WARNINGS += -Wtrampolines
 WARNINGS += -Wundef
 WARNINGS += -Wunused-parameter
 WARNINGS += -Wwrite-strings
+
 
 # we have small inline functions in src/lq_route.h which should always be inlined
 WARNINGS += -finline-limit=350
