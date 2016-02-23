@@ -54,7 +54,8 @@ zplugin_redistribute(const char *value, void *data __attribute__ ((unused)), set
   };
   unsigned int i;
 
-  for (i = 0; i < ARRAYSIZE(zroute_types) && i < ZEBRA_ROUTE_MAX; i++) {
+  unsigned int max = MIN(ARRAYSIZE(zroute_types), ZEBRA_ROUTE_MAX);
+  for (i = 0; i < max; i++) {
     if (!strcmp(value, zroute_types[i]))
       zebra.redistribute[i] = 1;
   }
