@@ -445,14 +445,25 @@ olsr_input(int fd, void *data __attribute__ ((unused)), unsigned int flags __att
       }
       break;
     }
-    if (olsr_cnf->ip_version == AF_INET) {
-      /* IPv4 sender address */
-      void * src = &((struct sockaddr_in *)&from)->sin_addr;
-      memcpy(&from_addr.v4, src, sizeof(from_addr.v4));
-    } else {
-      /* IPv6 sender address */
-      void * src = &((struct sockaddr_in6 *)&from)->sin6_addr;
-      memcpy(&from_addr.v6, src, sizeof(from_addr.v6));
+
+    {
+      void * src;
+      void * dst;
+      size_t size;
+      if (olsr_cnf->ip_version == AF_INET) {
+        /* IPv4 sender address */
+        struct sockaddr_in * x = (struct sockaddr_in *) &from;
+        src = &x->sin_addr;
+        dst = &from_addr.v4;
+        size = sizeof(from_addr.v4);
+      } else {
+        /* IPv6 sender address */
+        struct sockaddr_in6 * x = (struct sockaddr_in6 *) &from;
+        src = &x->sin6_addr;
+        dst = &from_addr.v6;
+        size = sizeof(from_addr.v6);
+      }
+      memcpy(dst, src, size);
     }
 
 #ifdef DEBUG
