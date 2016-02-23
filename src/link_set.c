@@ -309,8 +309,8 @@ get_best_link_to_neighbor(const union olsr_ip_addr *remote)
 static void
 set_loss_link_multiplier(struct link_entry *entry)
 {
-  struct interface_olsr *inter;
-  struct olsr_if *cfg_inter;
+  struct interface_olsr *inter = NULL;
+  struct olsr_if *cfg_inter = NULL;
   struct olsr_lq_mult *mult;
   uint32_t val = 0;
   union olsr_ip_addr null_addr;
@@ -320,26 +320,29 @@ set_loss_link_multiplier(struct link_entry *entry)
   assert(entry->if_name);
   inter = if_ifwithname(entry->if_name);
 
-  /* find the interface configuration for the interface */
-  for (cfg_inter = olsr_cnf->interfaces; cfg_inter; cfg_inter = cfg_inter->next) {
-    if (cfg_inter->interf == inter) {
-      break;
+  if (!inter) {
+    /* find the interface configuration for the interface */
+    for (cfg_inter = olsr_cnf->interfaces; cfg_inter; cfg_inter = cfg_inter->next) {
+      if (cfg_inter->interf == inter) {
+        break;
+      }
     }
   }
-  assert(cfg_inter);
 
-  /* create a null address for comparison */
-  memset(&null_addr, 0, sizeof(union olsr_ip_addr));
+  if (cfg_inter) {
+    /* create a null address for comparison */
+    memset(&null_addr, 0, sizeof(union olsr_ip_addr));
 
-  /* loop through the multiplier entries */
-  for (mult = cfg_inter->cnf->lq_mult; mult != NULL; mult = mult->next) {
+    /* loop through the multiplier entries */
+    for (mult = cfg_inter->cnf->lq_mult; mult != NULL; mult = mult->next) {
 
-    /*
-     * use the default multiplier only if there isn't any entry that
-     * has a matching IP address.
-     */
-    if ((ipequal(&mult->addr, &null_addr) && val == 0) || ipequal(&mult->addr, &entry->neighbor_iface_addr)) {
-      val = mult->value;
+      /*
+       * use the default multiplier only if there isn't any entry that
+       * has a matching IP address.
+       */
+      if ((ipequal(&mult->addr, &null_addr) && val == 0) || ipequal(&mult->addr, &entry->neighbor_iface_addr)) {
+        val = mult->value;
+      }
     }
   }
 
