@@ -98,77 +98,79 @@ endif
 # add gcc warnings and optimizations if CFLAGS not set
 ifndef CFLAGS
 ifndef WARNINGS
-WARNINGS +=	-Wall
-WARNINGS +=	-Wextra
-WARNINGS +=	-Wold-style-definition
-WARNINGS +=	-Wdeclaration-after-statement
-WARNINGS +=	-Wmissing-prototypes
-WARNINGS +=	-Wstrict-prototypes
-WARNINGS +=	-Wmissing-declarations
-WARNINGS +=	-Wsign-compare
-WARNINGS +=	-Waggregate-return
-WARNINGS +=	-Wmissing-noreturn
-WARNINGS +=	-Wmissing-format-attribute
-WARNINGS +=	-Wno-multichar
-WARNINGS +=	-Wno-deprecated-declarations
-WARNINGS +=	-Wendif-labels
-WARNINGS +=	-Wwrite-strings
-WARNINGS +=	-Wbad-function-cast
-WARNINGS +=	-Wpointer-arith
-WARNINGS +=	-Wcast-qual
-WARNINGS +=	-Wshadow
-WARNINGS +=	-Wformat
-WARNINGS +=	-Wsequence-point
-WARNINGS +=	-Wcast-align
-WARNINGS +=	-Wformat-security
-WARNINGS +=	-Wformat-y2k
-WARNINGS +=     -Werror=format-security
-WARNINGS +=	-Winit-self
-WARNINGS +=	-Wswitch-default
-WARNINGS +=	-Wundef
-WARNINGS +=	-Wsync-nand
-WARNINGS +=	-Wlogical-op
-WARNINGS +=	-Wdouble-promotion
-WARNINGS +=	-Wjump-misses-init
-WARNINGS +=	-Wtrampolines
-WARNINGS +=	-Wunused-parameter
+#
+# warning flags to add if supported (sorted)
+#
+WARNINGS += -fearly-inlining
+WARNINGS += -finline-functions-called-once
+WARNINGS += -funit-at-a-time
+WARNINGS += -Waggregate-return
+WARNINGS += -Wall
+WARNINGS += -Wbad-function-cast
+WARNINGS += -Wcast-align
+WARNINGS += -Wcast-qual
+WARNINGS += -Wdeclaration-after-statement
+WARNINGS += -Wdisabled-optimization
+WARNINGS += -Wdouble-promotion
+WARNINGS += -Wendif-labels
+WARNINGS += -Werror=format-security
+WARNINGS += -Wextra
+WARNINGS += -Wformat
+WARNINGS += -Wformat-security
+WARNINGS += -Wformat-y2k
+WARNINGS += -Winit-self
+WARNINGS += -Winline
+WARNINGS += -Wjump-misses-init
+WARNINGS += -Wlogical-op
+WARNINGS += -Wmissing-declarations
+WARNINGS += -Wmissing-format-attribute
+WARNINGS += -Wmissing-noreturn
+WARNINGS += -Wmissing-prototypes
+WARNINGS += -Wno-deprecated-declarations
+WARNINGS += -Wno-multichar
+WARNINGS += -Wold-style-definition
+WARNINGS += -Wpointer-arith
+WARNINGS += -Wsequence-point
+WARNINGS += -Wshadow
+WARNINGS += -Wsign-compare
+WARNINGS += -Wstrict-prototypes
+WARNINGS += -Wswitch-default
+WARNINGS += -Wsync-nand
+WARNINGS += -Wtrampolines
+WARNINGS += -Wundef
+WARNINGS += -Wunused-parameter
+WARNINGS += -Wwrite-strings
+
+# we have small inline functions in src/lq_route.h which should always be inlined
+WARNINGS += -finline-limit=350
+
+# only in non-debug builds
+ifeq ($(DEBUG),0)
+WARNINGS += -fomit-frame-pointer
+endif
 
 # the following 2 do not work yet and need more work on it
-#WARNINGS +=	-Wconversion
-#WARNINGS +=	-Wredundant-decls
+#WARNINGS += -Wconversion
+#WARNINGS += -Wredundant-decls
+
+# Alas, htons() triggers this so we can't seriously activate it.
+#WARNINGS += -Wunreachable-code
+
+# WARNINGS += -Werror
+
+# These tell gcc to put each function and global variable in a separate section.
+# The linker can then remove all unreferenced sections. But in the olsrd binary
+# unused doesn't imply unused at all since the function may be used by plugins,
+# e.g. the ones in src/plugin_utils.c.
+# So we can use that featuer at most to identify unused functions and remove
+# them from the source by hand.
+#WARNINGS += -ffunction-sections
+#WARNINGS += -fdata-sections
 
 ifeq ($(MUDFLAP),0)
 # work around a bug in gcc-4.*
-WARNINGS +=	-Wnested-externs
+WARNINGS += -Wnested-externs
 endif
-
-# Alas, htons() triggers this so we can't seriously activate it.
-#WARNINGS +=	-Wunreachable-code
-
-WARNINGS +=	-Winline
-WARNINGS +=	-Wdisabled-optimization
-
-# WARNINGS +=	-Werror
-
-WARNINGS +=	-funit-at-a-time
-WARNINGS +=	-finline-functions-called-once
-WARNINGS +=	-fearly-inlining
-
-ifeq ($(DEBUG),0)
-WARNINGS +=	-fomit-frame-pointer
-endif
-
-# we have small inline functions in src/lq_route.h which should always be inlined
-WARNINGS +=	-finline-limit=350
-
-# These tell gcc to put each function and global variable in a separate section.
-# The linker can than remove all unreferenced section. But in the olsrd binary
-# unused doesn't imply unused at all since the function may be used by plugins,
-# e.g. the ones in src/plugin_utils.c.
-# So we can use that featuer at most to identify unused functions and remove them
-# from the source by hand.
-#WARNINGS +=	-ffunction-sections
-#WARNINGS +=	-fdata-sections
 
 WARNINGS :=	$(shell CC="$(CC)" "$(TOPDIR)/gcc-warnings" $(WARNINGS))
 endif
