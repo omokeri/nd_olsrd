@@ -688,6 +688,11 @@ static void takeDownExpensiveGateways(struct gw_list * gw_list, bool ipv4, struc
   while (gw_list->count > 1) {
     /* get the worst gateway */
     struct gw_container_entry * worst_gw = olsr_gw_list_get_worst_entry(gw_list);
+    assert(worst_gw);
+
+    if (!worst_gw) {
+      return;
+    }
 
     /* exit when it's the current gateway */
     if (worst_gw == current_gw) {
@@ -698,7 +703,7 @@ static void takeDownExpensiveGateways(struct gw_list * gw_list, bool ipv4, struc
      * exit when it (and further ones; the list is sorted on costs) has lower
      * costs than the boundary costs
      */
-    if (worst_gw->gw->path_cost < current_gw_cost_boundary) {
+    if (worst_gw->gw && (worst_gw->gw->path_cost < current_gw_cost_boundary)) {
       return;
     }
 
