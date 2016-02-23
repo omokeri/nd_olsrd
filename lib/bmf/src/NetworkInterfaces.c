@@ -1272,17 +1272,23 @@ static int CreateLocalEtherTunTap(void)
     EtherTunTapIp = ETHERTUNTAPDEFAULTIP;
   }
 
-  ((struct sockaddr_in*) ARM_NOWARN_ALIGN(&ifreq.ifr_addr))->sin_addr.s_addr = htonl(EtherTunTapIp);
+  {
+    struct sockaddr* ifra = &ifreq.ifr_addr;
+    ((struct sockaddr_in*) ARM_NOWARN_ALIGN(ifra))->sin_addr.s_addr = htonl(EtherTunTapIp);
+  }
   ioctlres = ioctl(ioctlSkfd, SIOCSIFADDR, &ifreq);
   if (ioctlres >= 0)
   {
+    struct sockaddr* ifrn = &ifreq.ifr_netmask;
+    struct sockaddr* ifrb = &ifreq.ifr_broadaddr;
+
     /* Set net mask */
-    ((struct sockaddr_in*) ARM_NOWARN_ALIGN(&ifreq.ifr_netmask))->sin_addr.s_addr = htonl(EtherTunTapIpMask);
+    ((struct sockaddr_in*) ARM_NOWARN_ALIGN(ifrn))->sin_addr.s_addr = htonl(EtherTunTapIpMask);
     ioctlres = ioctl(ioctlSkfd, SIOCSIFNETMASK, &ifreq);
     if (ioctlres >= 0)
     {
       /* Set broadcast IP */
-      ((struct sockaddr_in*) ARM_NOWARN_ALIGN(&ifreq.ifr_broadaddr))->sin_addr.s_addr = htonl(EtherTunTapIpBroadcast);
+      ((struct sockaddr_in*) ARM_NOWARN_ALIGN(ifrb))->sin_addr.s_addr = htonl(EtherTunTapIpBroadcast);
       ioctlres = ioctl(ioctlSkfd, SIOCSIFBRDADDR, &ifreq);
       if (ioctlres >= 0)
       {
@@ -1494,7 +1500,8 @@ static int CreateInterface(
     else
     {
       /* Downcast to correct sockaddr subtype */
-      newIf->intAddr.v4 = ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&ifr.ifr_addr))->sin_addr;
+      struct sockaddr* ifra = &ifr.ifr_addr;
+      newIf->intAddr.v4 = ((struct sockaddr_in *) ARM_NOWARN_ALIGN(ifra))->sin_addr;
     }
 
     /* For a non-OLSR interface, retrieve the IP broadcast address ourselves */
@@ -1510,7 +1517,8 @@ static int CreateInterface(
     else
     {
       /* Downcast to correct sockaddr subtype */
-      newIf->broadAddr.v4 = ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&ifr.ifr_broadaddr))->sin_addr;
+      struct sockaddr* ifrb = &ifr.ifr_broadaddr;
+      newIf->broadAddr.v4 = ((struct sockaddr_in *) ARM_NOWARN_ALIGN(ifrb))->sin_addr;
     }
   }
 
@@ -1623,7 +1631,10 @@ int CreateBmfNetworkInterfaces(struct interface_olsr * skipThisIntf)
     }
 
     /* ...find the OLSR interface structure, if any */
-    ipAddr.v4 =  ((struct sockaddr_in*) ARM_NOWARN_ALIGN(&ifr->ifr_addr))->sin_addr;
+    {
+      struct sockaddr* ifra = &ifr->ifr_addr;
+      ipAddr.v4 =  ((struct sockaddr_in*) ARM_NOWARN_ALIGN(ifra))->sin_addr;
+    }
     olsrIntf = if_ifwithaddr(&ipAddr);
 
     if (skipThisIntf != NULL && olsrIntf == skipThisIntf)
@@ -1941,8 +1952,12 @@ void AddMulticastRoute(void)
   ((struct sockaddr *) ARM_NOWARN_ALIGN(&kernel_route.rt_genmask))->sa_family = AF_INET;
 
   /* 224.0.0.0/4 */
-  ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&kernel_route.rt_dst))->sin_addr.s_addr = htonl(0xE0000000);
-  ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&kernel_route.rt_genmask))->sin_addr.s_addr = htonl(0xF0000000);
+  {
+    struct sockaddr* rdst = &kernel_route.rt_dst;
+    struct sockaddr* rmask = &kernel_route.rt_genmask;
+    ((struct sockaddr_in *) ARM_NOWARN_ALIGN(rdst))->sin_addr.s_addr = htonl(0xE0000000);
+    ((struct sockaddr_in *) ARM_NOWARN_ALIGN(rmask))->sin_addr.s_addr = htonl(0xF0000000);
+  }
 
   kernel_route.rt_metric = 0;
   kernel_route.rt_flags = RTF_UP;
@@ -1986,8 +2001,12 @@ void DeleteMulticastRoute(void)
     ((struct sockaddr *) ARM_NOWARN_ALIGN(&kernel_route.rt_genmask))->sa_family = AF_INET;
 
     /* 224.0.0.0/4 */
-    ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&kernel_route.rt_dst))->sin_addr.s_addr = htonl(0xE0000000);
-    ((struct sockaddr_in *) ARM_NOWARN_ALIGN(&kernel_route.rt_genmask))->sin_addr.s_addr = htonl(0xF0000000);
+    {
+      struct sockaddr* rdst = &kernel_route.rt_dst;
+      struct sockaddr* rmask = &kernel_route.rt_genmask;
+      ((struct sockaddr_in *) ARM_NOWARN_ALIGN(rdst))->sin_addr.s_addr = htonl(0xE0000000);
+      ((struct sockaddr_in *) ARM_NOWARN_ALIGN(rmask))->sin_addr.s_addr = htonl(0xF0000000);
+    }
 
     kernel_route.rt_metric = 0;
     kernel_route.rt_flags = RTF_UP;
