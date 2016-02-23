@@ -115,9 +115,7 @@ WARNINGS +=	-Wendif-labels
 WARNINGS +=	-Wwrite-strings
 WARNINGS +=	-Wbad-function-cast
 WARNINGS +=	-Wpointer-arith
-ifneq ($(OS),win32)
 WARNINGS +=	-Wcast-qual
-endif
 WARNINGS +=	-Wshadow
 WARNINGS +=	-Wformat
 WARNINGS +=	-Wsequence-point
@@ -128,42 +126,41 @@ WARNINGS +=     -Werror=format-security
 WARNINGS +=	-Winit-self
 WARNINGS +=	-Wswitch-default
 WARNINGS +=	-Wundef
-ifneq ($(CC),clang)
 WARNINGS +=	-Wsync-nand
 WARNINGS +=	-Wlogical-op
-endif
-ifneq ($(OS),android)
-ifneq ($(CC),clang)
 WARNINGS +=	-Wdouble-promotion
 WARNINGS +=	-Wjump-misses-init
 WARNINGS +=	-Wtrampolines
-endif
-endif
 WARNINGS +=	-Wunused-parameter
+
 # the following 2 do not work yet and need more work on it
 #WARNINGS +=	-Wconversion
 #WARNINGS +=	-Wredundant-decls
+
 ifeq ($(MUDFLAP),0)
 # work around a bug in gcc-4.*
 WARNINGS +=	-Wnested-externs
 endif
+
 # Alas, htons() triggers this so we can't seriously activate it.
 #WARNINGS +=	-Wunreachable-code
+
 WARNINGS +=	-Winline
 WARNINGS +=	-Wdisabled-optimization
+
 # WARNINGS +=	-Werror
+
 WARNINGS +=	-funit-at-a-time
-ifneq ($(CC),clang)
 WARNINGS +=	-finline-functions-called-once
 WARNINGS +=	-fearly-inlining
-endif
+
 ifeq ($(DEBUG),0)
 WARNINGS +=	-fomit-frame-pointer
 endif
+
 # we have small inline functions in src/lq_route.h which should always be inlined
-ifneq ($(CC),clang)
 WARNINGS +=	-finline-limit=350
-endif
+
 # These tell gcc to put each function and global variable in a separate section.
 # The linker can than remove all unreferenced section. But in the olsrd binary
 # unused doesn't imply unused at all since the function may be used by plugins,
@@ -172,6 +169,7 @@ endif
 # from the source by hand.
 #WARNINGS +=	-ffunction-sections
 #WARNINGS +=	-fdata-sections
+
 WARNINGS :=	$(shell CC="$(CC)" "$(TOPDIR)/gcc-warnings" $(WARNINGS))
 endif
 CFLAGS +=	$(WARNINGS)
