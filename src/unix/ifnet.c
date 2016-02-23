@@ -266,21 +266,25 @@ chk_if_changed(struct olsr_if *iface)
     OLSR_PRINTF(3, "\tAddress:%s\n", sockaddr4_to_string(&buf, &ifr.ifr_addr));
 #endif /* DEBUG */
 
-    if (memcmp
-        (&((struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifp->int_addr))->sin_addr.s_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_addr))->sin_addr.s_addr,
-         olsr_cnf->ipsize) != 0) {
-      /* New address */
-      OLSR_PRINTF(1, "IPv4 address changed for %s\n", ifr.ifr_name);
-      OLSR_PRINTF(1, "\tOld:%s\n", ip4_to_string(&buf, ifp->int_addr.sin_addr));
-      OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, &ifr.ifr_addr));
+    {
+      struct sockaddr_in* ifpa = &ifp->int_addr;
+      struct sockaddr* ifra = &ifr.ifr_addr;
+      if (memcmp
+          (&((struct sockaddr_in *)ARM_NOWARN_ALIGN(ifpa))->sin_addr.s_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(ifra))->sin_addr.s_addr,
+          olsr_cnf->ipsize) != 0) {
+        /* New address */
+        OLSR_PRINTF(1, "IPv4 address changed for %s\n", ifr.ifr_name);
+        OLSR_PRINTF(1, "\tOld:%s\n", ip4_to_string(&buf, ifp->int_addr.sin_addr));
+        OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, ifra));
 
-      ifp->int_addr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_addr);
-      memcpy(&ifp->ip_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_addr))->sin_addr.s_addr, olsr_cnf->ipsize);
+        ifp->int_addr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifra);
+        memcpy(&ifp->ip_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(ifra))->sin_addr.s_addr, olsr_cnf->ipsize);
 
-      /* we have to make sure that olsrd uses the new source address of this interface */
-      olsr_remove_interface(iface); /* so we remove the interface completely */
-      chk_if_up(iface,3); /* and create it again to get new sockets,..*/
-      return 0;
+        /* we have to make sure that olsrd uses the new source address of this interface */
+        olsr_remove_interface(iface); /* so we remove the interface completely */
+        chk_if_up(iface,3); /* and create it again to get new sockets,..*/
+        return 0;
+      }
     }
 
     /* Check netmask */
@@ -292,17 +296,21 @@ chk_if_changed(struct olsr_if *iface)
     OLSR_PRINTF(3, "\tNetmask:%s\n", sockaddr4_to_string(&buf, &ifr.ifr_netmask));
 #endif /* DEBUG */
 
-    if (memcmp
-        (&((struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifp->int_netmask))->sin_addr.s_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_netmask))->sin_addr.s_addr,
-         olsr_cnf->ipsize) != 0) {
-      /* New address */
-      OLSR_PRINTF(1, "IPv4 netmask changed for %s\n", ifr.ifr_name);
-      OLSR_PRINTF(1, "\tOld:%s\n", ip4_to_string(&buf, ifp->int_netmask.sin_addr));
-      OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, &ifr.ifr_netmask));
+    {
+      struct sockaddr_in* ifpn = &ifp->int_netmask;
+      struct sockaddr* ifrn = &ifr.ifr_netmask;
+      if (memcmp
+          (&((struct sockaddr_in *)ARM_NOWARN_ALIGN(ifpn))->sin_addr.s_addr, &((struct sockaddr_in *)ARM_NOWARN_ALIGN(ifrn))->sin_addr.s_addr,
+          olsr_cnf->ipsize) != 0) {
+        /* New address */
+        OLSR_PRINTF(1, "IPv4 netmask changed for %s\n", ifr.ifr_name);
+        OLSR_PRINTF(1, "\tOld:%s\n", ip4_to_string(&buf, ifp->int_netmask.sin_addr));
+        OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, ifrn));
 
-      ifp->int_netmask = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_netmask);
+        ifp->int_netmask = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifrn);
 
-      if_changes = 1;
+        if_changes = 1;
+      }
     }
 
     if (!iface->cnf->ipv4_multicast.v4.s_addr) {
@@ -325,11 +333,12 @@ chk_if_changed(struct olsr_if *iface)
 
       if (ifp->int_broadaddr.sin_addr.s_addr != ptr->sin_addr.s_addr) {
         /* New address */
+        struct sockaddr* ifrb = &ifr.ifr_broadaddr;
         OLSR_PRINTF(1, "IPv4 broadcast changed for %s\n", ifr.ifr_name);
         OLSR_PRINTF(1, "\tOld:%s\n", ip4_to_string(&buf, ifp->int_broadaddr.sin_addr));
-        OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, &ifr.ifr_broadaddr));
+        OLSR_PRINTF(1, "\tNew:%s\n", sockaddr4_to_string(&buf, ifrb));
 
-        ifp->int_broadaddr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_broadaddr);
+        ifp->int_broadaddr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifrb);
         if_changes = 1;
       }
     }
@@ -596,12 +605,14 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
       ifs.int_addr.sin_addr = iface->cnf->ipv4_src.v4;
     }
     else {
+      struct sockaddr* ifra;
+
       if (ioctl(olsr_cnf->ioctl_s, SIOCGIFADDR, &ifr) < 0) {
         OLSR_PRINTF(debuglvl, "\tCould not get address of interface - skipping it\n");
         return 0;
       }
-
-      ifs.int_addr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_addr);
+      ifra = &ifr.ifr_addr;
+      ifs.int_addr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifra);
     }
     /* Find netmask */
     if (ioctl(olsr_cnf->ioctl_s, SIOCGIFNETMASK, &ifr) < 0) {
@@ -609,7 +620,10 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
       return 0;
     }
 
-    ifs.int_netmask = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_netmask);
+    {
+      struct sockaddr* ifrn = &ifr.ifr_netmask;
+      ifs.int_netmask = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifrn);
+    }
 
     /* Find broadcast address */
     if (iface->cnf->ipv4_multicast.v4.s_addr) {
@@ -617,12 +631,14 @@ chk_if_up(struct olsr_if *iface, int debuglvl __attribute__ ((unused)))
       memcpy(&((struct sockaddr_in *)&ifs.int_broadaddr)->sin_addr.s_addr, &iface->cnf->ipv4_multicast.v4, sizeof(uint32_t));
     } else {
       /* Autodetect */
+      struct sockaddr* ifrb;
       if (ioctl(olsr_cnf->ioctl_s, SIOCGIFBRDADDR, &ifr) < 0) {
         olsr_syslog(OLSR_LOG_ERR, "%s: ioctl (get broadaddr)", ifr.ifr_name);
         return 0;
       }
 
-      ifs.int_broadaddr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(&ifr.ifr_broadaddr);
+      ifrb = &ifr.ifr_broadaddr;
+      ifs.int_broadaddr = *(struct sockaddr_in *)ARM_NOWARN_ALIGN(ifrb);
       if (ifs.int_broadaddr.sin_addr.s_addr == 0) {
         memset(&ifs.int_broadaddr.sin_addr, 255, 4);
       }
