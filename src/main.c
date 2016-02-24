@@ -45,7 +45,9 @@
 #include <assert.h>
 #include <fcntl.h>
 #if defined(__linux__) && !defined(__ANDROID__)
-#include <execinfo.h>
+  #ifdef __GLIBC__
+    #include <execinfo.h>
+  #endif
 #include <syslog.h>
 #endif /* defined(__linux__) && !defined(__ANDROID__) */
 
@@ -311,6 +313,7 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 static void olsr_segv_handler(int sig) {
   static bool in_segv = false;
 
+#ifdef __GLIBC__
   void *bt_array[64];
   size_t bt_size;
   size_t bt_index=0;
@@ -319,10 +322,13 @@ static void olsr_segv_handler(int sig) {
   bt_size = backtrace(bt_array, 64);
   bt_syms = backtrace_symbols(bt_array, bt_size);
 
-  syslog(LOG_ERR, "olsrd crashed, stack trace follows\n");
+  syslog(LOG_ERR, "olsrd crashed, stack trace follows");
   while (bt_index < bt_size) {
-    syslog(LOG_ERR, "%s\n", bt_syms[bt_index++]);
+    syslog(LOG_ERR, "%s", bt_syms[bt_index++]);
   }
+#else
+  syslog(LOG_ERR, "olsrd crashed (logging a stack trace is not supported on this platform)");
+#endif
 
   if (!in_segv) {
     in_segv = true;
