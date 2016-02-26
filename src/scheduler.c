@@ -592,7 +592,7 @@ olsr_init_timers(void)
    */
   timer_last_run = now_times;
 
-  /* Allocate a cookie for the block based memeory manager. */
+  /* Allocate a cookie for the block based memory manager. */
   timer_mem_cookie = olsr_alloc_cookie("timer_entry", OLSR_COOKIE_TYPE_MEMORY);
   olsr_cookie_set_memory_size(timer_mem_cookie, sizeof(struct timer_entry));
 }
