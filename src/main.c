@@ -247,6 +247,9 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 #endif /* __linux__ */
   }
 
+  /* stop and cleanup any remaining timers */
+  olsr_flush_timers();
+
   /* Closing plug-ins */
   olsr_close_plugins();
 
