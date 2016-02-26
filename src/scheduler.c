@@ -47,6 +47,7 @@
 #include "net_os.h"
 #include "mpr_selector_set.h"
 #include "olsr_random.h"
+#include "common/avl.h"
 
 #include <sys/times.h>
 
@@ -74,8 +75,44 @@ static struct list_node socket_head = { &socket_head, &socket_head };
 
 /* Prototypes */
 static void walk_timers(uint32_t *);
+static void walk_timers_cleanup(void);
 static void poll_sockets(void);
 static uint32_t calc_jitter(unsigned int rel_time, uint8_t jitter_pct, unsigned int random_val);
+static void olsr_cleanup_timer(struct timer_entry *timer);
+
+struct avl_tree timer_cleanup_tree;
+
+struct timer_cleanup_entry {
+  struct avl_node avl;
+  struct timer_entry * timer;
+};
+
+/* static inline struct timer_cleanup_entry * node2timercleanup(struct avl_node *ptr) */
+AVLNODE2STRUCT(node2timercleanup, struct timer_cleanup_entry, avl);
+
+/**
+ * Loop over all timer cleanup entries and put the iterated entry in timer
+ */
+#define OLSR_FOR_ALL_TIMERS_CLEANUP(timer) \
+{ \
+  struct avl_node *timer_avl_node, *timer_avl_node_next; \
+  for (timer_avl_node = avl_walk_first(&timer_cleanup_tree); \
+  timer_avl_node; timer_avl_node = timer_avl_node_next) { \
+	  timer_avl_node_next = avl_walk_next(timer_avl_node); \
+    timer = node2timercleanup(timer_avl_node);
+#define OLSR_FOR_ALL_TIMER_CLEANUP_END(timer) }}
+
+static int avl_comp_timer(const void *entry1, const void *entry2) {
+  if (entry1 < entry2) {
+    return -1;
+  }
+
+  if (entry1 > entry2) {
+    return 1;
+  }
+
+  return 0;
+}
 
 /*
  * A wrapper around times(2). Note, that this function has some
@@ -482,6 +519,7 @@ olsr_scheduler(void)
 
     /* Process timers */
     walk_timers(&timer_last_run);
+    walk_timers_cleanup();
 
     /* Update */
     olsr_process_changes();
@@ -495,6 +533,7 @@ olsr_scheduler(void)
 
     /* Read incoming data and handle it immediiately */
     handle_fds(next_interval);
+  walk_timers_cleanup();
 
 #ifdef _WIN32
     if (olsr_win32_end_request) {
@@ -553,6 +592,8 @@ olsr_init_timers(void)
   last_tv = first_tv;
   now_times = olsr_times();
 
+  avl_init(&timer_cleanup_tree, avl_comp_timer);
+
   for (idx = 0; idx < TIMER_WHEEL_SLOTS; idx++) {
     list_head_init(&timer_wheel[idx]);
   }
@@ -607,6 +648,10 @@ walk_timers(uint32_t * last_run)
       list_remove(timer_node);
       list_add_after(&tmp_head_node, timer_node);
       timers_walked++;
+
+      if (timer->timer_flags & OLSR_TIMER_REMOVED) {
+        continue;
+      }
 
       /* Ready to fire ? */
       if (TIMED_OUT(timer->timer_clock)) {
@@ -664,6 +709,16 @@ walk_timers(uint32_t * last_run)
   *last_run = now_times;
 }
 
+static void walk_timers_cleanup(void) {
+  struct timer_cleanup_entry * timer;
+
+  OLSR_FOR_ALL_TIMERS_CLEANUP(timer) {
+    olsr_cleanup_timer(timer->timer);
+    avl_delete(&timer_cleanup_tree, &timer->avl);
+    free(timer);
+  } OLSR_FOR_ALL_TIMER_CLEANUP_END(slot)
+}
+
 /**
  * Stop and delete all timers.
  */
@@ -681,6 +736,7 @@ olsr_flush_timers(void)
       olsr_stop_timer(list2timer(timer_head_node->next));
     }
   }
+  walk_timers_cleanup();
 }
 
 /**
@@ -828,7 +884,8 @@ void
 olsr_stop_timer(struct timer_entry *timer)
 {
   /* It's okay to get a NULL here */
-  if (!timer) {
+  if (!timer //
+      || (timer->timer_flags & OLSR_TIMER_REMOVED)) {
     return;
   }
 
@@ -838,11 +895,45 @@ olsr_stop_timer(struct timer_entry *timer)
              timer->timer_cookie->ci_name, timer, timer->timer_cb_context);
 
 
+  timer->timer_flags &= ~OLSR_TIMER_RUNNING;
+  timer->timer_flags |= OLSR_TIMER_REMOVED;
+
+  {
+    struct timer_cleanup_entry * node = olsr_malloc(sizeof(struct timer_cleanup_entry), "timer cleanup entry");
+    node->avl.key = timer;
+    node->timer = timer;
+    if (avl_insert(&timer_cleanup_tree, &node->avl, AVL_DUP_NO) == -1) {
+      /* duplicate */
+      free(node);
+    }
+  }
+}
+
+/**
+ * Clean up a timer.
+ *
+ * @param timer the timer_entry that shall be cleaned up
+ */
+static void
+olsr_cleanup_timer(struct timer_entry *timer)
+{
+  /* It's okay to get a NULL here */
+  if (!timer //
+      || !(timer->timer_flags & OLSR_TIMER_REMOVED)) {
+    return;
+  }
+
+  assert(timer->timer_cookie);     /* we want timer cookies everywhere */
+
+  OLSR_PRINTF(7, "TIMER: cleanup %s timer %p, ctx %p\n",
+             timer->timer_cookie->ci_name, timer, timer->timer_cb_context);
+
+
   /*
    * Carve out of the existing wheel_slot and free.
    */
   list_remove(&timer->timer_list);
-  timer->timer_flags &= ~OLSR_TIMER_RUNNING;
+  timer->timer_flags &= ~OLSR_TIMER_REMOVED;
   olsr_cookie_usage_decr(timer->timer_cookie->ci_id);
 
   olsr_cookie_free(timer_mem_cookie, timer);
