@@ -958,11 +958,6 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
       return -1;
     }
 
-    if (io == NULL) {
-      fprintf(stderr, "Interface %s has no configuration!\n", in->name);
-      return -1;
-    }
-
     /*merge lqmults*/
     if (mult_orig!=NULL) {
       io->orig_lq_mult_cnt=1;
