@@ -733,7 +733,9 @@ olsr_flush_timers(void)
 
     /* Kill all entries hanging off this hash bucket. */
     while (!list_is_empty(timer_head_node)) {
-      olsr_stop_timer(list2timer(timer_head_node->next));
+      struct timer_entry * t = list2timer(timer_head_node->next);
+      olsr_stop_timer(t);
+      olsr_cleanup_timer(t);
     }
   }
   walk_timers_cleanup();
