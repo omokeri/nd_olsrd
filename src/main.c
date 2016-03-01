@@ -808,6 +808,14 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   OLSR_PRINTF(1, "Scheduler stopped.\n");
 #endif /* _WIN32 */
 
+#ifdef __linux__
+  /* trigger gateway selection */
+  if (olsr_cnf->smart_gw_active) {
+    olsr_shutdown_gateways();
+    olsr_cleanup_gateways();
+  }
+#endif
+
   /* clear all links and send empty hellos/tcs */
   olsr_reset_all_links();
 
@@ -833,12 +841,6 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   olsr_delete_all_mid_entries();
 
 #ifdef __linux__
-  /* trigger gateway selection */
-  if (olsr_cnf->smart_gw_active) {
-    olsr_shutdown_gateways();
-    olsr_cleanup_gateways();
-  }
-
   /* trigger niit static route cleanup */
   if (olsr_cnf->use_niit) {
     olsr_cleanup_niit_routes();
