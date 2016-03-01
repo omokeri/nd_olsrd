@@ -178,7 +178,11 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   struct interface_olsr *ifn;
   int exit_value;
 
+#ifdef __linux__
+  OLSR_PRINTF(1, "Received signal %s - shutting down\n", strsignal(signo));
+#else
   OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
+#endif
 
   /* instruct the scheduler to stop */
   olsr_scheduler_stop();
