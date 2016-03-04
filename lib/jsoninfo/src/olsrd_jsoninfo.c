@@ -184,6 +184,9 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
   output_start(abuf);
 
   switch (status) {
+    case INFO_HTTP_OK:
+      break;
+
     case INFO_HTTP_NOTFOUND:
       snprintf(buf, sizeof(buf) - 1, "Invalid request '%s'", req);
       buf[sizeof(buf) - 1] = '\0';
@@ -195,6 +198,9 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
       break;
 
     default:
+      snprintf(buf, sizeof(buf) - 1, "Unknown status %d for request '%s'", status, req);
+      buf[sizeof(buf) - 1] = '\0';
+      abuf_json_string(abuf, "error", buf);
       break;
   }
 
