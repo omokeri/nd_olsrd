@@ -56,6 +56,19 @@
 
 #define MAX_CLIENTS 3
 
+/*
+ * There is the problem that writing to a network socket can block,
+ * and the olsrd scheduler does not care about write events.
+ *
+ * There was a case that olsrd just froze for minutes when people used
+ * jsoninfo/txtinfo with large topologies over bad WiFi.
+ *
+ * This is the solution that was chosen at that time, unwilling to
+ * rewrite the whole scheduler:
+ * A timer was added and each time it expires each non-empty buffer
+ * in this structure will try to write data into a "non-blocking"
+ * socket until all data is sent, so that no blocking occurs.
+ */
 typedef struct {
   int socket[MAX_CLIENTS];
   char *buffer[MAX_CLIENTS];
