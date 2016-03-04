@@ -183,6 +183,10 @@ static void write_data(void *fullyWritten) {
       outbuffer.written[i] += result;
     }
 
+    if ((result < 0) && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+      continue;
+    }
+
     if ((result < 0) || (outbuffer.written[i] >= outbuffer.size[i])) {
       /* close this socket and cleanup*/
       close(outbuffer.socket[i]);
