@@ -49,15 +49,16 @@
 #include "builddata.h"
 #include "neighbor_table.h"
 #include "mpr_selector_set.h"
-#include "routing_table.h"
 #include "mid_set.h"
+#include "routing_table.h"
+#include "lq_plugin.h"
 #include "gateway.h"
-#include "egressTypes.h"
-#include "olsrd_jsoninfo_helpers.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
 #include "../../info/http_headers.h"
 #include "gateway_default_handler.h"
+#include "egressTypes.h"
+#include "olsrd_jsoninfo_helpers.h"
 
 struct timeval start_time;
 
