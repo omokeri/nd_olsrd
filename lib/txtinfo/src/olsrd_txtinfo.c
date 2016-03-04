@@ -138,6 +138,30 @@ bool isCommand(const char *str, unsigned int siw) {
   return !strcmp(str, cmd);
 }
 
+void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
+  if (http_headers) {
+    return;
+  }
+
+  switch (status) {
+    case INFO_HTTP_OK:
+      break;
+
+    case INFO_HTTP_NOTFOUND:
+      abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
+      break;
+
+    case INFO_HTTP_NOCONTENT:
+      /* wget can't handle output of zero length */
+      abuf_puts(abuf, "\n");
+      break;
+
+    default:
+      abuf_appendf(abuf, "error: Unknown status %d for request '%s'\n", status, req);
+      return;
+  }
+}
+
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str neighAddrBuf;
   struct neighbor_entry *neigh;
@@ -180,30 +204,6 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
     abuf_puts(abuf, "\n");
   } OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_puts(abuf, "\n");
-}
-
-void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
-  if (http_headers) {
-    return;
-  }
-
-  switch (status) {
-    case INFO_HTTP_OK:
-      break;
-
-    case INFO_HTTP_NOTFOUND:
-      abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
-      break;
-
-    case INFO_HTTP_NOCONTENT:
-      /* wget can't handle output of zero length */
-      abuf_puts(abuf, "\n");
-      break;
-
-    default:
-      abuf_appendf(abuf, "error: Unknown status %d for request '%s'\n", status, req);
-      return;
-  }
 }
 
 void ipc_print_neighbors(struct autobuf *abuf) {
