@@ -209,48 +209,52 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
-  struct ipaddr_str buf1, buf2;
+  struct ipaddr_str neighAddrBuf;
   struct neighbor_entry *neigh;
   struct neighbor_2_list_entry *list_2;
+  int thop_cnt = 0;
 
-  if (!list_2hop)
+  if (!list_2hop) {
     abuf_json_mark_object(true, true, abuf, "neighbors");
-  else
+  } else {
     abuf_json_mark_object(true, true, abuf, "2hop");
+  }
 
   /* Neighbors */
-  OLSR_FOR_ALL_NBR_ENTRIES(neigh)
-      {
+  OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
+    abuf_json_mark_array_entry(true, abuf);
+
+    abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&neighAddrBuf, &neigh->neighbor_main_addr));
+    abuf_json_boolean(abuf, "symmetric", (neigh->status == SYM));
+    abuf_json_int(abuf, "willingness", neigh->willingness);
+    abuf_json_boolean(abuf, "isMultiPointRelay", neigh->is_mpr);
+    abuf_json_boolean(abuf, "wasMultiPointRelay", neigh->was_mpr);
+    abuf_json_boolean(abuf, "multiPointRelaySelector", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) != NULL);
+    abuf_json_boolean(abuf, "skip", neigh->skip);
+    abuf_json_int(abuf, "neighbor2nocov", neigh->neighbor_2_nocov);
+    abuf_json_int(abuf, "linkcount", neigh->linkcount);
+
+    if (list_2hop) {
+      abuf_json_mark_object(true, true, abuf, "twoHopNeighbors");
+    }
+
+    thop_cnt = 0;
+    for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
+      if (list_2hop && list_2->neighbor_2) {
         abuf_json_mark_array_entry(true, abuf);
-
-        abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf1, &neigh->neighbor_main_addr));
-        abuf_json_boolean(abuf, "symmetric", (neigh->status == SYM));
-        abuf_json_int(abuf, "willingness", neigh->willingness);
-        abuf_json_boolean(abuf, "isMultiPointRelay", neigh->is_mpr);
-        abuf_json_boolean(abuf, "wasMultiPointRelay", neigh->was_mpr);
-        abuf_json_boolean(abuf, "multiPointRelaySelector", olsr_lookup_mprs_set(&neigh->neighbor_main_addr) != NULL);
-        abuf_json_boolean(abuf, "skip", neigh->skip);
-        abuf_json_int(abuf, "neighbor2nocov", neigh->neighbor_2_nocov);
-        abuf_json_int(abuf, "linkcount", neigh->linkcount);
-
-        if (!list_2hop) {
-          int thop_cnt = 0;
-          for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
-            thop_cnt++;
-          }
-          abuf_json_int(abuf, "twoHopNeighborCount", thop_cnt);
-        } else {
-          abuf_json_mark_object(true, true, abuf, "twoHopNeighbors");
-          for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
-            abuf_json_mark_array_entry(true, abuf);
-            abuf_json_string(abuf, "ipAddress", list_2->neighbor_2 ? olsr_ip_to_string(&buf2, &list_2->neighbor_2->neighbor_2_addr) : "");
-            abuf_json_mark_array_entry(false, abuf);
-          }
-          abuf_json_mark_object(false, true, abuf, false);
-        }
-
+        abuf_json_string(abuf, "ipAddress", list_2->neighbor_2 ? olsr_ip_to_string(&neighAddrBuf, &list_2->neighbor_2->neighbor_2_addr) : "");
         abuf_json_mark_array_entry(false, abuf);
-      }OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
+      }
+      thop_cnt++;
+    }
+
+    if (list_2hop) {
+      abuf_json_mark_object(false, true, abuf, false);
+    }
+    abuf_json_int(abuf, "twoHopNeighborCount", thop_cnt);
+
+    abuf_json_mark_array_entry(false, abuf);
+  } OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
