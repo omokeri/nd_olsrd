@@ -267,51 +267,52 @@ void ipc_print_links(struct autobuf *abuf) {
 
   abuf_json_mark_object(true, true, abuf, "links");
 
-  OLSR_FOR_ALL_LINK_ENTRIES(my_link)
-      {
-        struct ipaddr_str localAddr;
-        struct ipaddr_str remoteAddr;
-        struct lqtextbuffer lqBuffer;
-        const char* lqString = get_link_entry_text(my_link, '\t', &lqBuffer);
-        char * nlqString = strrchr(lqString, '\t');
+  OLSR_FOR_ALL_LINK_ENTRIES(my_link) {
+    struct ipaddr_str localAddr;
+    struct ipaddr_str remoteAddr;
+    struct lqtextbuffer lqBuffer;
+    const char* lqString = get_link_entry_text(my_link, '\t', &lqBuffer);
+    char * nlqString = strrchr(lqString, '\t');
 
-        if (nlqString) {
-          *nlqString = '\0';
-          nlqString++;
-        }
+    if (nlqString) {
+      *nlqString = '\0';
+      nlqString++;
+    }
 
-        abuf_json_mark_array_entry(true, abuf);
+    abuf_json_mark_array_entry(true, abuf);
 
-        abuf_json_string(abuf, "localIP", olsr_ip_to_string(&localAddr, &my_link->local_iface_addr));
-        abuf_json_string(abuf, "remoteIP", olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr));
-        abuf_json_string(abuf, "olsrInterface", (my_link->inter && my_link->inter->int_name) ? my_link->inter->int_name : "");
-        abuf_json_string(abuf, "ifName", my_link->if_name ? my_link->if_name : "");
-        abuf_json_int(abuf, "validityTime", my_link->link_timer ? (long) (my_link->link_timer->timer_clock - now_times) : 0);
-        abuf_json_int(abuf, "symmetryTime", my_link->link_sym_timer ? (long) (my_link->link_sym_timer->timer_clock - now_times) : 0);
-        abuf_json_int(abuf, "asymmetryTime", my_link->ASYM_time);
-        abuf_json_int(abuf, "vtime", (long) my_link->vtime);
-        // neighbor (no need to print, can be looked up via neighbours)
-        abuf_json_string(abuf, "currentLinkStatus", linkTypeToString(lookup_link_status(my_link)));
-        abuf_json_string(abuf, "previousLinkStatus", linkTypeToString(my_link->prev_status));
+    abuf_json_string(abuf, "localIP", olsr_ip_to_string(&localAddr, &my_link->local_iface_addr));
+    abuf_json_string(abuf, "remoteIP", olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr));
+    abuf_json_string(abuf, "olsrInterface", (my_link->inter && my_link->inter->int_name) ? my_link->inter->int_name : "");
+    abuf_json_string(abuf, "ifName", my_link->if_name ? my_link->if_name : "");
+    abuf_json_int(abuf, "validityTime", my_link->link_timer ? (long) (my_link->link_timer->timer_clock - now_times) : 0);
+    abuf_json_int(abuf, "symmetryTime", my_link->link_sym_timer ? (long) (my_link->link_sym_timer->timer_clock - now_times) : 0);
+    abuf_json_int(abuf, "asymmetryTime", my_link->ASYM_time);
+    abuf_json_int(abuf, "vtime", (long) my_link->vtime);
+    // neighbor (no need to print, can be looked up via neighbours)
+    abuf_json_string(abuf, "currentLinkStatus", linkTypeToString(lookup_link_status(my_link)));
+    abuf_json_string(abuf, "previousLinkStatus", linkTypeToString(my_link->prev_status));
 
-        abuf_json_float(abuf, "linkQuality", atof(lqString));
-        abuf_json_float(abuf, "neighborLinkQuality", nlqString ? atof(nlqString) : 0.0);
-        abuf_json_boolean(abuf, "pending", my_link->L_link_pending != 0);
-        abuf_json_int(abuf, "lostLinkTime", (long) my_link->L_LOST_LINK_time);
-        abuf_json_int(abuf, "helloTime", my_link->link_hello_timer ? (long) (my_link->link_hello_timer->timer_clock - now_times) : 0);
-        abuf_json_int(abuf, "lastHelloTime", (long) my_link->last_htime);
-        abuf_json_boolean(abuf, "seqnoValid", my_link->olsr_seqno_valid);
-        abuf_json_int(abuf, "seqno", my_link->olsr_seqno);
+    abuf_json_float(abuf, "hysteresis", my_link->L_link_quality);
+    abuf_json_boolean(abuf, "pending", my_link->L_link_pending != 0);
+    abuf_json_int(abuf, "lostLinkTime", (long) my_link->L_LOST_LINK_time);
+    abuf_json_int(abuf, "helloTime", my_link->link_hello_timer ? (long) (my_link->link_hello_timer->timer_clock - now_times) : 0);
+    abuf_json_int(abuf, "lastHelloTime", (long) my_link->last_htime);
+    abuf_json_boolean(abuf, "seqnoValid", my_link->olsr_seqno_valid);
+    abuf_json_int(abuf, "seqno", my_link->olsr_seqno);
 
-        abuf_json_int(abuf, "lossHelloInterval", (long) my_link->loss_helloint);
-        abuf_json_int(abuf, "lossTime", my_link->link_loss_timer ? (long) (my_link->link_loss_timer->timer_clock - now_times) : 0);
+    abuf_json_int(abuf, "lossHelloInterval", (long) my_link->loss_helloint);
+    abuf_json_int(abuf, "lossTime", my_link->link_loss_timer ? (long) (my_link->link_loss_timer->timer_clock - now_times) : 0);
 
-        abuf_json_int(abuf, "lossMultiplier", (long) my_link->loss_link_multiplier);
+    abuf_json_int(abuf, "lossMultiplier", (long) my_link->loss_link_multiplier);
 
-        abuf_json_int(abuf, "linkCost", MIN(my_link->linkcost, LINK_COST_BROKEN));
+    abuf_json_int(abuf, "linkCost", MIN(my_link->linkcost, LINK_COST_BROKEN));
 
-        abuf_json_mark_array_entry(false, abuf);
-      }OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
+    abuf_json_float(abuf, "linkQuality", atof(lqString));
+    abuf_json_float(abuf, "neighborLinkQuality", nlqString ? atof(nlqString) : 0.0);
+
+    abuf_json_mark_array_entry(false, abuf);
+  } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
