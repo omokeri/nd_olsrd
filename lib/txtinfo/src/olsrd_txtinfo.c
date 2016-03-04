@@ -188,6 +188,9 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
   }
 
   switch (status) {
+    case INFO_HTTP_OK:
+      break;
+
     case INFO_HTTP_NOTFOUND:
       abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
       break;
@@ -197,8 +200,8 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
       abuf_puts(abuf, "\n");
       break;
 
-    case INFO_HTTP_OK:
     default:
+      abuf_appendf(abuf, "error: Unknown status %d for request '%s'\n", status, req);
       return;
   }
 }
