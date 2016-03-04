@@ -349,32 +349,56 @@ void ipc_print_topology(struct autobuf *abuf) {
   abuf_json_mark_object(true, true, abuf, "topology");
 
   /* Topology */
-  OLSR_FOR_ALL_TC_ENTRIES(tc)
-      {
-        struct tc_edge_entry *tc_edge;
-        OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge)
-            {
-              if (tc_edge->edge_inv) {
-                struct ipaddr_str dstbuf, addrbuf;
-                struct lqtextbuffer lqbuffer1;
-                uint32_t vt = tc->validity_timer != NULL ? (tc->validity_timer->timer_clock - now_times) : 0;
-                int diff = (int) (vt);
-                const char* lqs;
-                abuf_json_mark_array_entry(true, abuf);
-                abuf_json_string(abuf, "destinationIP", olsr_ip_to_string(&dstbuf, &tc_edge->T_dest_addr));
-                abuf_json_string(abuf, "lastHopIP", olsr_ip_to_string(&addrbuf, &tc->addr));
-                lqs = get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer1);
-                abuf_json_float(abuf, "linkQuality", atof(lqs));
-                abuf_json_float(abuf, "neighborLinkQuality", atof(strrchr(lqs, '\t')));
-                if (tc_edge->cost >= LINK_COST_BROKEN)
-                  abuf_json_int(abuf, "tcEdgeCost", LINK_COST_BROKEN);
-                else
-                  abuf_json_int(abuf, "tcEdgeCost", tc_edge->cost);
-                abuf_json_int(abuf, "validityTime", diff);
-                abuf_json_mark_array_entry(false, abuf);
-              }
-            }OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
-      }OLSR_FOR_ALL_TC_ENTRIES_END(tc);
+  OLSR_FOR_ALL_TC_ENTRIES(tc) {
+    struct tc_edge_entry *tc_edge;
+    OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
+      if (tc_edge->edge_inv) {
+        struct ipaddr_str dstAddr;
+        struct ipaddr_str lastHopAddr;
+        struct lqtextbuffer lqbuffer;
+
+        const char* lqString = get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer);
+        char * nlqString = strrchr(lqString, '\t');
+
+        if (nlqString) {
+          *nlqString = '\0';
+          nlqString++;
+        }
+
+        abuf_json_mark_array_entry(true, abuf);
+
+        // vertex_node
+        abuf_json_string(abuf, "lastHopIP", olsr_ip_to_string(&lastHopAddr, &tc->addr));
+        // cand_tree_node
+        abuf_json_int(abuf, "pathCost", MIN(tc->path_cost, ROUTE_COST_BROKEN));
+        // path_list_node
+        // edge_tree
+        // prefix_tree
+        // next_hop
+        // edge_gc_timer
+        abuf_json_int(abuf, "validityTime", tc->validity_timer ? (tc->validity_timer->timer_clock - now_times) : 0);
+        abuf_json_int(abuf, "refCount", tc->refcount);
+        abuf_json_int(abuf, "msgSeq", tc->msg_seq);
+        abuf_json_int(abuf, "msgHops", tc->msg_hops);
+        abuf_json_int(abuf, "hops", tc->hops);
+        abuf_json_int(abuf, "ansn", tc->ansn);
+        abuf_json_int(abuf, "tcIgnored", tc->ignored);
+
+        abuf_json_int(abuf, "errSeq", tc->err_seq);
+        abuf_json_boolean(abuf, "errSeqValid", tc->err_seq_valid);
+
+        // edge_node
+        abuf_json_string(abuf, "destinationIP", olsr_ip_to_string(&dstAddr, &tc_edge->T_dest_addr));
+        // tc
+        abuf_json_int(abuf, "tcEdgeCost", MIN(LINK_COST_BROKEN, tc_edge->cost));
+        abuf_json_int(abuf, "ansnEdge", tc_edge->ansn);
+        abuf_json_float(abuf, "linkQuality", atof(lqString));
+        abuf_json_float(abuf, "neighborLinkQuality", nlqString ? atof(nlqString) : 0.0);
+
+        abuf_json_mark_array_entry(false, abuf);
+      }
+    } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
+  } OLSR_FOR_ALL_TC_ENTRIES_END(tc);
 
   abuf_json_mark_object(false, true, abuf, NULL);
 }
