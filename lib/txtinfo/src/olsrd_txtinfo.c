@@ -139,14 +139,11 @@ bool isCommand(const char *str, unsigned int siw) {
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
-  if (http_headers) {
+  if (http_headers || (status == INFO_HTTP_OK)) {
     return;
   }
 
   switch (status) {
-    case INFO_HTTP_OK:
-      break;
-
     case INFO_HTTP_NOTFOUND:
       abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
       break;
