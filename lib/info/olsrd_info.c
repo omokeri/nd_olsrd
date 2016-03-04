@@ -317,7 +317,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
     write_data(&fullyWritten);
 
     if (!fullyWritten && (outbuffer.count == 1)) {
-      writetimer_entry = olsr_start_timer(100, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
+      writetimer_entry = olsr_start_timer(10, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
     }
   }
 
