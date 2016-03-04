@@ -317,26 +317,28 @@ void ipc_print_links(struct autobuf *abuf) {
 }
 
 void ipc_print_routes(struct autobuf *abuf) {
-  struct ipaddr_str buf1, buf2;
   struct rt_entry *rt;
 
   abuf_json_mark_object(true, true, abuf, "routes");
 
   /* Walk the route table */
-  OLSR_FOR_ALL_RT_ENTRIES(rt)
-      {
-        abuf_json_mark_array_entry(true, abuf);
-        abuf_json_string(abuf, "destination", olsr_ip_to_string(&buf1, &rt->rt_dst.prefix));
-        abuf_json_int(abuf, "genmask", rt->rt_dst.prefix_len);
-        abuf_json_string(abuf, "gateway", olsr_ip_to_string(&buf2, &rt->rt_best->rtp_nexthop.gateway));
-        abuf_json_int(abuf, "metric", rt->rt_best->rtp_metric.hops);
-        if (rt->rt_best->rtp_metric.cost >= ROUTE_COST_BROKEN)
-          abuf_json_int(abuf, "rtpMetricCost", ROUTE_COST_BROKEN);
-        else
-          abuf_json_int(abuf, "rtpMetricCost", rt->rt_best->rtp_metric.cost);
-        abuf_json_string(abuf, "networkInterface", if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
-        abuf_json_mark_array_entry(false, abuf);
-      }OLSR_FOR_ALL_RT_ENTRIES_END(rt);
+  OLSR_FOR_ALL_RT_ENTRIES(rt) {
+    struct ipaddr_str dstAddr;
+    struct ipaddr_str nexthopAddr;
+    struct lqtextbuffer costbuffer;
+
+    if (rt->rt_best) {
+      abuf_json_mark_array_entry(true, abuf);
+      abuf_json_string(abuf, "destination", olsr_ip_to_string(&dstAddr, &rt->rt_dst.prefix));
+      abuf_json_int(abuf, "genmask", rt->rt_dst.prefix_len);
+      abuf_json_string(abuf, "gateway", olsr_ip_to_string(&nexthopAddr, &rt->rt_best->rtp_nexthop.gateway));
+      abuf_json_int(abuf, "metric", rt->rt_best->rtp_metric.hops);
+      abuf_json_float(abuf, "etx", atof(get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer)));
+      abuf_json_int(abuf, "rtpMetricCost", MIN(ROUTE_COST_BROKEN, rt->rt_best->rtp_metric.cost));
+      abuf_json_string(abuf, "networkInterface", if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+      abuf_json_mark_array_entry(false, abuf);
+    }
+  } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
 
   abuf_json_mark_object(false, true, abuf, NULL);
 }
