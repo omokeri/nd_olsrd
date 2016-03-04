@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "olsrd_info.h"
 #include "olsr.h"
@@ -138,7 +139,7 @@ static unsigned int determine_action(char *requ) {
   return 0;
 }
 
-static void write_data(void *foo __attribute__ ((unused))) {
+static void write_data(void *fullyWritten) {
   fd_set set;
   int result, i, max;
   struct timeval tv;
@@ -192,6 +193,10 @@ static void write_data(void *foo __attribute__ ((unused))) {
       outbuffer.written[i] = 0;
 
       outbuffer.count--;
+      if (fullyWritten) {
+        bool * p = fullyWritten;
+        *p = true;
+      }
     }
   }
 
@@ -307,8 +312,13 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
 
   outbuffer.count++;
 
-  if (outbuffer.count == 1) {
-    writetimer_entry = olsr_start_timer(100, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
+  {
+    bool fullyWritten = false;
+    write_data(&fullyWritten);
+
+    if (!fullyWritten && (outbuffer.count == 1)) {
+      writetimer_entry = olsr_start_timer(100, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
+    }
   }
 
   abuf_free(&abuf);
