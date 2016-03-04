@@ -185,9 +185,6 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
   output_start(abuf);
 
   switch (status) {
-    case INFO_HTTP_OK:
-      break;
-
     case INFO_HTTP_NOTFOUND:
       snprintf(buf, sizeof(buf) - 1, "Invalid request '%s'", req);
       buf[sizeof(buf) - 1] = '\0';
