@@ -441,35 +441,37 @@ void ipc_print_hna(struct autobuf *abuf) {
 
 void ipc_print_mid(struct autobuf *abuf) {
   int idx;
-  struct mid_entry *entry;
-  struct mid_address *alias;
 
   abuf_json_mark_object(true, true, abuf, "mid");
 
   /* MID */
   for (idx = 0; idx < HASHSIZE; idx++) {
-    entry = mid_set[idx].next;
+    struct mid_entry * entry = mid_set[idx].next;
 
     while (entry != &mid_set[idx]) {
-      struct ipaddr_str buf, buf2;
+      struct ipaddr_str midAddr;
+
       abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf, &entry->main_addr));
+      abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&midAddr, &entry->main_addr));
+      abuf_json_int(abuf, "validityTime", entry->mid_timer ? (entry->mid_timer->timer_clock - now_times) : 0);
+      {
+        struct mid_address * alias = entry->aliases;
 
-      abuf_json_mark_object(true, true, abuf, "aliases");
-      alias = entry->aliases;
-      while (alias) {
-        uint32_t vt = alias->vtime - now_times;
-        int diff = (int) (vt);
+        abuf_json_mark_object(true, true, abuf, "aliases");
+        while (alias) {
+          struct ipaddr_str aliasAddr;
 
-        abuf_json_mark_array_entry(true, abuf);
-        abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&buf2, &alias->alias));
-        abuf_json_int(abuf, "validityTime", diff);
-        abuf_json_mark_array_entry(false, abuf);
+          abuf_json_mark_array_entry(true, abuf);
+          abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&aliasAddr, &alias->alias));
+          abuf_json_int(abuf, "validityTime", alias->vtime - now_times);
+          abuf_json_mark_array_entry(false, abuf);
 
-        alias = alias->next_alias;
+          alias = alias->next_alias;
+        }
+        abuf_json_mark_object(false, true, abuf, NULL); // aliases
       }
-      abuf_json_mark_object(false, true, abuf, NULL); // aliases
-      abuf_json_mark_array_entry(false, abuf);
+      abuf_json_mark_array_entry(false, abuf); // entry
+
       entry = entry->next;
     }
   }
