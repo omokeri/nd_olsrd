@@ -51,13 +51,13 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
-  in.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
+  in.s_addr = ((struct in_addr *)(void *)(hp->h_addr))->s_addr;
   printf("Address: %s\n", inet_ntoa(in));
 
   /* fill in the socket structure with host information */
   memset(&pin, 0, sizeof(pin));
   pin.sin_family = AF_INET;
-  pin.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
+  pin.sin_addr.s_addr = ((struct in_addr *)(void *)(hp->h_addr))->s_addr;
   pin.sin_port = htons(IPC_PORT);
 
   gtk_init(&argc, &argv);

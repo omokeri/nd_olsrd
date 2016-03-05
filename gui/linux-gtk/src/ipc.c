@@ -162,7 +162,7 @@ ipc_read(void)
           ipc_evaluate_message(msg);
 
           tmp_len = ntohs(msg->v4.olsr_msgsize);
-          msg = (union olsr_message *)&tmp[tmp_len];
+          msg = (union olsr_message *)(void *)&tmp[tmp_len];
           tmp = &tmp[tmp_len];
           if (tmp_len == 0)
             break;
@@ -181,7 +181,7 @@ ipc_read(void)
             bytes = recv(ipc_socket, (char *)&inbuf.buf[bytes], tmp_len - bytes, 0);
             //printf("\tBytes: %d Size: %d\n", bytes, ntohs(msgs->v4.olsr_packlen));
             tmp = (char *)&inbuf.olsr_msg;
-            msg = (union olsr_message *)tmp;
+            msg = (union olsr_message *)(void *)tmp;
           }
         }
         //printf("\n");
