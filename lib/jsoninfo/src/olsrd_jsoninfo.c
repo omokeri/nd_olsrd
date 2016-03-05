@@ -490,11 +490,14 @@ static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gate
   abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
   abuf_json_int(abuf, "uplink", gw->uplink);
   abuf_json_int(abuf, "downlink", gw->downlink);
-  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+  abuf_json_int(abuf, "cost", gw->path_cost);
   abuf_json_boolean(abuf, "IPv4", gw->ipv4);
   abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
   abuf_json_boolean(abuf, "IPv6", gw->ipv6);
-  abuf_json_int(abuf, "cost", gw->path_cost);
+  abuf_json_int(abuf, "expireTime", gw->expire_timer ? (gw->expire_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "cleanupTime", gw->cleanup_timer ? (gw->cleanup_timer->timer_clock - now_times) : 0);
+
+  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
   abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
 }
 
