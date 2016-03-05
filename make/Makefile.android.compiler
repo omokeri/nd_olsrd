@@ -1,0 +1,21 @@
+# Android NDK setup
+NDK_BASE ?= /opt/android-ndk
+NDK_PLATFORM_LEVEL ?= 4
+NDK_ARCH=$(shell uname -m)
+ifneq ($(NDK_ARCH),x86_64)
+NDK_ARCH=x86
+endif
+
+NDK_ABI=arm
+NDK_ABIDIR=linux-androideabi
+NDK_SYSROOT=$(NDK_BASE)/platforms/android-$(NDK_PLATFORM_LEVEL)/arch-$(NDK_ABI)
+NDK_UNAME=$(shell uname -s | tr '[A-Z]' '[a-z]')
+# if you are using NDK older than r10, you must use 4.4.3:
+#NDK_COMPILER_VERSION=4.4.3
+NDK_COMPILER_VERSION=4.8
+NDK_TOOLCHAIN=$(NDK_BASE)/toolchains/$(NDK_ABI)-$(NDK_ABIDIR)-$(NDK_COMPILER_VERSION)/prebuilt/$(NDK_UNAME)-$(NDK_ARCH)
+CROSS_COMPILE = $(NDK_TOOLCHAIN)/bin/$(NDK_ABI)-$(NDK_ABIDIR)-
+
+CC = $(CROSS_COMPILE)gcc --sysroot="$(NDK_SYSROOT)"
+LD = $(CROSS_COMPILE)ld
+AR = $(CROSS_COMPILE)ar

@@ -87,13 +87,8 @@ ifneq ($(TOPDIR),.)
 CPPFLAGS +=	-I$(TOPDIR)/src
 endif
 
-ifeq ($(OS),UNKNOWN)
-all: help
-else
-# include OS specifics
-all: default_target
-include $(TOPDIR)/make/Makefile.$(OS)
-endif
+# include OS specific compiler settings
+-include $(TOPDIR)/make/Makefile.$(OS).compiler
 
 # add gcc warnings and optimizations if CFLAGS not set
 ifndef CFLAGS
@@ -259,6 +254,14 @@ CPPFLAGS +=     -DUSE_FPM
 # search sources and headers in current dir and in src/
 SRCS +=		$(wildcard src/common/*.c src/*.c *.c)
 HDRS +=		$(wildcard src/common/*.h src/*.h *.h)
+
+ifeq ($(OS),UNKNOWN)
+all: help
+else
+# include OS specifics
+all: default_target
+include $(TOPDIR)/make/Makefile.$(OS)
+endif
 
 # one object for each source file
 OBJS +=		$(SRCS:%.c=%.o)
