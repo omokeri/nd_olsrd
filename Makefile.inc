@@ -108,7 +108,6 @@ WARNINGS += -Waggregate-return
 WARNINGS += -Wall
 WARNINGS += -Wbad-function-cast
 WARNINGS += -Wcast-align
-WARNINGS += -Wcast-qual
 WARNINGS += -Wdeclaration-after-statement
 WARNINGS += -Wdisabled-optimization
 WARNINGS += -Wendif-labels
@@ -149,6 +148,11 @@ WARNINGS += -Wlogical-op
 WARNINGS += -Wmisleading-indentation
 WARNINGS += -Wsync-nand
 WARNINGS += -Wtrampolines
+endif
+
+ifneq ($(OS),win32)
+# triggers many warnings for inet_ntop in src/win32/compat.h
+WARNINGS += -Wcast-qual
 endif
 
 # we have small inline functions in src/lq_route.h which should always be inlined
