@@ -111,8 +111,6 @@ WARNINGS += -Wcast-align
 WARNINGS += -Wcast-qual
 WARNINGS += -Wdeclaration-after-statement
 WARNINGS += -Wdisabled-optimization
-WARNINGS += -Wdouble-promotion
-WARNINGS += -Wduplicated-cond
 WARNINGS += -Wendif-labels
 WARNINGS += -Werror=format-security
 WARNINGS += -Wextra
@@ -121,9 +119,6 @@ WARNINGS += -Wformat-security
 WARNINGS += -Wformat-y2k
 WARNINGS += -Winit-self
 WARNINGS += -Winline
-WARNINGS += -Wjump-misses-init
-WARNINGS += -Wlogical-op
-WARNINGS += -Wmisleading-indentation
 WARNINGS += -Wmissing-declarations
 WARNINGS += -Wmissing-format-attribute
 WARNINGS += -Wmissing-noreturn
@@ -140,13 +135,21 @@ WARNINGS += -Wshift-overflow
 WARNINGS += -Wsign-compare
 WARNINGS += -Wstrict-prototypes
 WARNINGS += -Wswitch-default
-WARNINGS += -Wsync-nand
 WARNINGS += -Wtautological-compare
-WARNINGS += -Wtrampolines
 WARNINGS += -Wundef
 WARNINGS += -Wunused-parameter
 WARNINGS += -Wwrite-strings
 
+ifneq ($(CC),clang)
+# clang doesn't report these as errors or warnings in the gcc-warnings script
+WARNINGS += -Wdouble-promotion
+WARNINGS += -Wduplicated-cond
+WARNINGS += -Wjump-misses-init
+WARNINGS += -Wlogical-op
+WARNINGS += -Wmisleading-indentation
+WARNINGS += -Wsync-nand
+WARNINGS += -Wtrampolines
+endif
 
 # we have small inline functions in src/lq_route.h which should always be inlined
 WARNINGS += -finline-limit=350

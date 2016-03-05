@@ -27,7 +27,7 @@ EOF
 }
 
 parsetest() {
-    while read error; do 
+    while read error; do
         case "$error" in
         *:\ unrecognized\ *option\ \"*)
             opt="${error#*\"}"
@@ -45,7 +45,23 @@ parsetest() {
             opt="${error#*\`}"
             opt="${opt%\'*}"
             ;;
-        *) continue
+
+        # clang
+        *:\ unknown\ argument:\ \'*)
+            opt="${error#*\'}"
+            opt="${opt%\'*}"
+            ;;
+        *:\ unknown\ warning\ option\ \'*)
+            opt="${error#*\'}"
+            opt="${opt%\'*}"
+            ;;
+        *:\ optimization\ flag\ *\ is\ not\ supported)
+            opt="${error#*\'}"
+            opt="${opt%\'*}"
+            ;;
+
+        *)
+            continue
             ;;
        esac
        # if we come here, we have in $opt the option to remove. and
