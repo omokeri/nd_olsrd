@@ -319,6 +319,7 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 }
 
 #if defined(__linux__) && !defined(__ANDROID__)
+__attribute__((noreturn))
 static void olsr_segv_handler(int sig) {
   static bool in_segv = false;
 
