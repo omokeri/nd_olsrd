@@ -1,0 +1,301 @@
+#!/bin/bash
+
+set -e
+set -u
+
+
+################################################################################
+#
+#
+# Settings
+#
+#
+################################################################################
+
+declare LINUX_GCC=""
+
+declare NDK_BASE="/home/ferry/android/android-ndk"
+declare MINGW32_GCC="/usr/bin/i686-w64-mingw32-gcc"
+declare MINGW64_GCC="/usr/bin/x86_64-w64-mingw32-gcc"
+
+declare extra="VERBOSE=0 SANITIZE_ADDRESS=0 SANITIZE_LEAK=0 SANITIZE_UNDEFINED=0"
+
+# set to "doc" to also build doc
+declare DOC=""
+
+################################################################################
+#
+#
+# Functions
+#
+#
+################################################################################
+
+function exitPrintArguments() {
+  local -i index=1
+  while [ $# -gt 0 ]; do
+    echo "  Argument $index : \"$1\""
+    index+=1
+    shift 1
+  done
+}
+
+#
+# Trim a string: remove spaces from the beginning and end of the string
+#
+# 1=string to trim  return=trimmed string
+function stringTrim() {
+  if [ $# -ne 1 ]; then
+    echo "Expected 1 argument in $FUNCNAME, got $#"
+    if [ $# -gt 0 ]; then exitPrintArguments "$@"; fi
+    exit 1
+  fi
+
+  if [ -z "$1" ]; then
+    return
+  fi
+
+  # remove leading whitespace characters
+  local var="${1#${1%%[![:space:]]*}}"
+
+  # remove trailing whitespace characters
+  echo "${var%${var##*[![:space:]]}}"
+}
+
+#
+# Get the canonical path of a file or directory
+# This is the physical path without any links
+#
+# 1=the file or directory
+function pathCanonicalPath() {
+  if [ ${#} -ne 1 ]; then
+    echo "Expected 1 argument in $FUNCNAME, got $#"
+    if [ $# -gt 0 ]; then exitPrintArguments "$@"; fi
+    exit 1
+  fi
+
+  local src="$(stringTrim "$1")"
+
+  if [ -h "$src" ] && [ -d "$src" ]; then
+    # src is a link to a directory
+    pushd . &> /dev/null
+    cd -P "$src" &> /dev/null
+    pwd -P
+    popd &> /dev/null
+    return
+  fi
+
+  # we're not dealing with a directory here
+  while [ -h "$src" ]; do
+    # keep getting the link target while src is a link
+    src="$(ls -la "$src" | \
+           sed -r 's#^.*?[[:space:]]+->[[:space:]]+(.*)$#\1#')"
+  done
+  # src is no longer a link here
+
+  pushd . &> /dev/null
+  cd -P "$(dirname "$src")" &> /dev/null
+  echo "$(pwd -P)/$(basename "$src")"
+  popd &> /dev/null
+}
+
+
+################################################################################
+#
+#
+# Main
+#
+#
+################################################################################
+
+declare script="$(pathCanonicalPath "$0")"
+declare scriptDir="$(dirname "$script")"
+declare baseDir="$(dirname "$scriptDir")"
+cd "$baseDir"
+
+
+declare -a oses=( linux64 )
+declare -a debugs=( 1 )
+declare -i confirmrealclean=1
+declare -i realclean=0
+declare realcleanforced=""
+
+
+while [ $# -ge 1 ] && [ "${1:0:2}" = "--" ]; do
+  if [ "$1" = "--force" ]; then
+    confirmrealclean=0
+    shift 1
+  elif [ "$1" = "--clang" ]; then
+    LINUX_GCC="clang"
+    shift 1
+  fi
+done
+
+if [ $# -gt 0 ]; then
+  if [ "$1" = "all" ]; then
+    oses=( linux64 linux32 android win64 win32 )
+    debugs=( 1 0 )
+  else
+    if [ "$1" = "linux64" ] || \
+       [ "$1" = "linux32" ] || \
+       [ "$1" = "android" ] || \
+       [ "$1" = "win64"   ] || \
+       [ "$1" = "win32"   ]; then
+      oses=( $1 )
+    elif [ "$1" = "linux" ]; then
+      oses=( "linux64" "linux32" )
+      debugs=( 1 0 )
+    elif [ "$1" = "win" ]; then
+      oses=( "win64" "win32" )
+      debugs=( 1 0 )
+    else
+      echo "Supported OSes are: linux64, linux32, android, win64, win32"
+      echo "             extra: linux, win"
+      exit 1
+    fi
+  fi
+  shift 1
+fi
+
+if [ $# -gt 0 ]; then
+  if [ "$1" = "all" ]; then
+    debugs=( 1 0 )
+    else
+    debugs=( $1 )
+  fi
+  shift 1
+fi
+
+
+if [ ${#oses[*]} -gt 1 ] || [ ${#debugs[*]} -gt 1 ]; then
+  echo ""
+  echo "WARNING: forcing clean because of multiple builds"
+  echo ""
+  realclean=1
+  realcleanforced=" (FORCED)"
+fi
+
+
+if [ $realclean -ne 0 ] && [ $confirmrealclean -ne 0 ]; then
+  echo   "==========================================================="
+  echo   "=== OS        = ${oses[@]}"
+  echo   "=== Debug     = ${debugs[@]}"
+  echo   "=== Clean     = $realclean$realcleanforced"
+  if [ -n "$LINUX_GCC" ]; then
+    echo "=== Linux GCC = $LINUX_GCC"
+  fi
+  echo   "==========================================================="
+  read -n 1 -p "Press any key to continue..."
+fi
+
+
+for os in "${oses[@]}"; do
+  for debug in ${debugs[*]}; do
+    echo ""
+    echo ""
+    echo ""
+    echo "==========================================================="
+    echo "=== $os, DEBUG=$debug"
+    echo "==========================================================="
+    if [ $realclean -ne 0 ]; then
+      git clean -fdxq
+      git reset --hard -q
+      echo "== cleaned =="
+    fi
+
+    prefix=""
+    buildos="INVALID_BUILD_OS"
+    cross="INVALID_CROSS"
+    extraplugins="INVALID_EXTRA_PLUGINS"
+    extrainstallers="INVALID_EXTRA_INSTALLERS"
+    makecfgparser=1
+    tarwireformat=0
+    cc=""
+
+    if [ "$os" = "linux64" ]; then
+      prefix="prefix=/usr"
+      buildos="linux"
+      cross="M64=1"
+      extraplugins="gui"
+      extrainstallers="pud_java pud_java_install info_java"
+      makecfgparser=1
+      tarwireformat=1
+      if [ -n "$LINUX_GCC" ]; then
+        cc="CC=$LINUX_GCC"
+      fi
+    elif [ "$os" = "linux32" ]; then
+      prefix="prefix=/usr"
+      buildos="linux"
+      cross="M32=1"
+      extraplugins=""
+      extrainstallers="pud_java pud_java_install info_java"
+      makecfgparser=1
+      if [ -n "$LINUX_GCC" ]; then
+        cc="CC=$LINUX_GCC"
+      fi
+    elif [ "$os" = "android" ]; then
+      prefix=""
+      buildos="android"
+      cross=""
+      extraplugins=""
+      extrainstallers=""
+      makecfgparser=1
+      cc="NDK_BASE=$NDK_BASE"
+    elif [ "$os" = "win32" ]; then
+      prefix=""
+      buildos="win32"
+      cross=""
+      extraplugins=""
+      extrainstallers=""
+      makecfgparser=0
+      cc="CC=$MINGW32_GCC"
+    elif [ "$os" = "win64" ]; then
+      prefix=""
+      buildos="win32"
+      cross=""
+      extraplugins=""
+      extrainstallers=""
+      makecfgparser=0
+      cc="CC=$MINGW64_GCC"
+    fi
+
+
+    if [ $makecfgparser -ne 0 ] && [ $realclean -ne 0 ]; then
+      make $prefix $cc DESTDIR="$(pwd)/dist" OS="$buildos" $cross DEBUG="$debug" $extra MAKEBIN=1 cfgparser_install cfgparser_clean
+      make uberclean
+    fi
+
+    make   $prefix $cc DESTDIR="$(pwd)/dist" OS="$buildos" $cross DEBUG="$debug" $extra build_all $extraplugins install_all $extrainstallers $DOC
+
+    if [ $tarwireformat -ne 0 ]; then
+      echo ""
+      echo "==================="
+      echo "=== Creating pud wireformat tar file"
+      echo "==================="
+      tar jcvf "$(pwd)/dist/pud-wireformat.tar.bz2" lib/pud/wireformat/lib lib/pud/wireformat-java/lib
+    fi
+
+    echo ""
+    echo "==================="
+    echo "=== Installed files"
+    echo "==================="
+    find "$(pwd)/dist" -type f | sort
+
+    # make prefix=/usr                                            DESTDIR="$(pwd)/dist" OS="linux"   M64=1 DEBUG="0" $extra MAKEBIN=1 cfgparser_install cfgparser_clean
+    # make prefix=/usr                                            DESTDIR="$(pwd)/dist" OS="linux"   M32=1 DEBUG="0" $extra MAKEBIN=1 cfgparser_install cfgparser_clean
+    # make             NDK_BASE="/home/ferry/android/android-ndk" DESTDIR="$(pwd)/dist" OS="android"       DEBUG="0" $extra MAKEBIN=1 cfgparser_install cfgparser_clean
+
+    # make prefix=/usr                                            DESTDIR="$(pwd)/dist" OS="linux"   M64=1 DEBUG="0" $extra build_all gui install_all pud_java pud_java_install info_java $DOC
+    # make prefix=/usr                                            DESTDIR="$(pwd)/dist" OS="linux"   M32=1 DEBUG="0" $extra build_all gui install_all pud_java pud_java_install info_java $DOC
+    # make             NDK_BASE="/home/ferry/android/android-ndk" DESTDIR="$(pwd)/dist" OS="android"       DEBUG="0" $extra build_all     install_all                                     $DOC
+    # make             CC="/usr/bin/x86_64-w64-mingw32-gcc"       DESTDIR="$(pwd)/dist" OS="win32"         DEBUG="0" $extra build_all     install_all                                     $DOC
+    # make             CC="/usr/bin/i686-w64-mingw32-gcc"         DESTDIR="$(pwd)/dist" OS="win32"         DEBUG="0" $extra build_all     install_all                                     $DOC
+
+  done
+done
+
+if [ $realclean -ne 0 ]; then
+  git clean -fdxq
+  git reset --hard -q
+  echo "== cleaned =="
+fi

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+make DESTDIR="$(pwd)/dist/debug" OS="linux" M32=1 DEBUG="1" prefix=/usr build_all gui install_all pud_java pud_java_install
+make uberclean
+make DESTDIR="$(pwd)/dist/release" OS="linux" M32=1 DEBUG="0" prefix=/usr build_all gui install_all pud_java pud_java_install

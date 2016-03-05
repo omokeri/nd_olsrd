@@ -1,0 +1,138 @@
+#####################################################
+# OLSR.org routing daemon config file
+#####################################################
+DebugLevel                                 0
+IpVersion                                  4
+TosValue                                   16
+LinkQualityFishEye                         0
+MprCoverage                                1
+DijkstraBinaryHeap                         false
+LockFile                                   "/tmp/olsrd.lock"
+#MainIp                                     172.31.Qa.bQ
+LinkQualityAlgorithm                       "etx_ffeth"
+
+
+Interface "wlp3s0"
+{
+  HelloInterval                            2.00
+  HelloValidityTime                        20.00
+  TcInterval                               5.00
+  TcValidityTime                           30.00
+  MidInterval                              5.00
+  MidValidityTime                          50.00
+  HnaInterval                              5.00
+  HnaValidityTime                          15.00
+}
+
+Interface "eth1.2580"
+{
+  Mode                                     "ether"
+  HelloInterval                            1.00
+  HelloValidityTime                        3.00
+}
+
+SmartGateway                               yes
+SmartGatewayAlwaysRemoveServerTunnel       yes
+SmartGatewayUseCount                       8
+SmartGatewayInstanceId                     "ferry"
+SmartGatewayTakeDownPercentage             1
+SmartGatewayPolicyRoutingScript            "./ferry/sgw_policy_routing_setup.sh"
+SmartGatewayEgressInterfaces               "enp0s25" "enp0s20u1" "eth1" "ppp0"
+SmartGatewayEgressFile                     "./ferry/olsrd-sgw-egress.conf"
+SmartGatewayEgressFilePeriod               1000
+SmartGatewayStatusFile                     "./ferry/olsrd-sgw-status"
+# SmartGatewayTablesOffset                 90
+# SmartGatewayRulesOffset                  84
+# SmartGatewayAllowNAT                     yes
+SmartGatewayPeriod                         1000
+SmartGatewayStableCount                    1
+SmartGatewayThreshold                      98
+# SmartGatewayUplink                       "both"
+# SmartGatewayUplinkNAT                    yes
+# SmartGatewaySpeed                        128 1024
+# SmartGatewayPrefix                       0::/0
+
+# the next 4 parameters must be duplicated in the ahrwand configuration
+SmartGatewayDividerEtx                     4096
+SmartGatewayWeightEtx                      1
+SmartGatewayWeightExitLinkUp               1
+SmartGatewayWeightExitLinkDown             1
+
+
+Hna4
+{
+  10.0.122.0/24
+}
+
+IpcConnect
+{
+}
+
+#####################################################
+# Plugins
+#####################################################
+
+LoadPlugin "./lib/httpinfo/olsrd_httpinfo.so.0.1"
+{
+  PlParam "port"                           "8080"
+  PlParam "Net"                            "0.0.0.0 0.0.0.0"
+}
+
+LoadPlugin "./lib/txtinfo/olsrd_txtinfo.so.1.1"
+{
+  PlParam "httpheaders"                    "false"
+  PlParam "Accept"                         "127.0.0.1"
+}
+
+LoadPlugin "./lib/p2pd/olsrd_p2pd.so.0.1.0"
+{
+  PlParam "NonOlsrIf"                      "lo"
+  PlParam "P2pdTtl"                        "5"
+  PlParam "UseTTLDecrement"                "1"
+}
+
+LoadPlugin "./lib/watchdog/olsrd_watchdog.so.0.1"
+{
+  PlParam "file"                           "/tmp/olsrd.watchdog"
+  PlParam "interval"                       "5"
+}
+
+LoadPlugin "./lib/dyn_gw/olsrd_dyn_gw.so.0.5"
+{
+  PlParam "HNA"                            "0.0.0.0 0.0.0.0"
+}
+
+LoadPlugin "./lib/pud/olsrd_pud.so.3.0.0"
+{
+  PlParam "nodeId"                         "3,local.debug.oslrd.pelagic.nl"
+  #PlParam "gpsdUse"                        "true"
+  #PlParam "gpsd"                           "localhost:2947"
+  PlParam "txNonOlsrIf"                    "lo"
+  PlParam "txMcPort"                       "2240"
+  #PlParam "uplinkAddr"                     "172.20.0.1"
+  PlParam "dopMultiplier"                  "1.3"
+  PlParam "movingDistanceThreshold"        "30"
+  PlParam "movingSpeedThreshold"           "4"
+  PlParam "updateIntervalStationary"       "15"
+  PlParam "updateIntervalMoving"           "5"
+  PlParam "uplinkUpdateIntervalStationary" "45"
+  PlParam "uplinkUpdateIntervalMoving"     "10"
+  PlParam "hysteresisCountToStationary"    "10"
+
+  PlParam "uplinkAddr"                     "127.0.0.1"
+  PlParam "useLoopback"                    "true"
+
+  PlParam "positionOutputFile"             "./ferry/olsrd-pud-position"
+}
+
+LoadPlugin "./lib/jsoninfo/olsrd_jsoninfo.so.1.1"
+{
+  PlParam     "port"   "2007"
+  PlParam     "pretty" "true"
+}
+
+LoadPlugin "./lib/netjson/olsrd_netjson.so.1.1"
+{
+  PlParam     "port"   "2005"
+  PlParam     "pretty" "true"
+}

@@ -16,9 +16,6 @@
 *.sbr
 *.so.*.*
 *.swp
-/.cproject
-/.project
-/.settings
 /build-stamp
 /builddata.txt
 /configure-stamp
@@ -29,3 +26,4 @@
 /olsr_switch.exe
 /olsr-setup.exe
 /src/cfgparser/olsrd_cfgparser
+/dist/

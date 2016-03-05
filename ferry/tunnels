@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -e
+set -u
+
+declare -a tunnels=(
+  ip address show up | \
+    grep "POINTOPOINT" | \
+    grep -E 'tnl_[46]' | \
+    sed -r 's/^[[:space:]]*[[:digit:]]+[[:space:]]*:[[:space:]]+([^[:space:]:@]+)(@NONE)?:?[[:space:]]+.*$/\1/' | \
+    sort -u
+  )
+
+declare    iprulelist="$(ip rule list)"
+
+
+if [[ ${#tunnels[*]} -eq 0 ]]; then
+  exit
+fi
+
+
+echo ""
+echo "# Active tunnels:"
+echo "${tunnels[@]}"
+
+
+echo ""
+echo "# Tunnel routing table (table 224)"
+declare tunnelroutingtable="$(ip route list table 224)"
+echo "${tunnelroutingtable}"
+
+declare tunname="$(echo "${tunnelroutingtable}" | awk '{ print $3; }')"
+echo "$(ip tunnel show "${tunname}")"
+
+
+
+declare -i width=20
+declare tun=""
+for tun in "${tunnels[@]}"; do
+  declare tunnum="${tun#tnl_4}"
+  declare table="${tunnum#tnl_6}"
+  
+  echo ""
+  echo "# ${tun}"
+
+  declare tn="$(ip tunnel show "${tun}")"
+  printf "# %-${width}s : %s\n" "IP Tunnel" "${tn}"
+
+  declare rt="$(ip route show table "${table}")"
+  printf "# %-${width}s : %s\n" "IP routing table ${table}" "${rt}"
+
+  declare ipr="$(echo "${iprulelist}" | grep "${table}")"
+  printf "# %-${width}s : %s\n" "IP Rule" "${ipr}"
+done

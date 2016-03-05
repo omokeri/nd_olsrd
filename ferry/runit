@@ -1,0 +1,118 @@
+#!/bin/bash
+
+set -e
+set -u
+
+
+################################################################################
+#
+#
+# Functions
+#
+#
+################################################################################
+
+function exitPrintArguments() {
+  local -i index=1
+  while [[ ${#} -gt 0 ]]; do
+    echo "  Argument ${index} : \"${1}\""
+    index+=1
+    shift 1
+  done
+}
+
+#
+# Trim a string: remove spaces from the beginning and end of the string
+#
+# 1=string to trim  return=trimmed string
+function stringTrim() {
+  if [[ ${#} -ne 1 ]]; then
+    echo "Expected 1 argument in ${FUNCNAME}, got ${#}"
+    if [[ ${#} -gt 0 ]]; then exitPrintArguments "${@}"; fi
+    exit 1
+  fi
+
+  if [[ -z "${1}" ]]; then
+    return
+  fi
+
+  # remove leading whitespace characters
+  local var="${1#${1%%[![:space:]]*}}"
+
+  # remove trailing whitespace characters
+  echo "${var%${var##*[![:space:]]}}"
+}
+
+#
+# Get the canonical path of a file or directory
+# This is the physical path without any links
+#
+# 1=the file or directory
+function pathCanonicalPath() {
+  if [[ ${#} -ne 1 ]]; then
+    echo "Expected 1 argument in ${FUNCNAME}, got ${#}"
+    if [[ ${#} -gt 0 ]]; then exitPrintArguments "${@}"; fi
+    exit 1
+  fi
+
+  local src="$(stringTrim "${1}")"
+
+  if [[ -h "${src}" ]] && [[ -d "${src}" ]]; then
+    # src is a link to a directory
+    pushd . &> /dev/null
+    cd -P "${src}" &> /dev/null
+    pwd -P
+    popd &> /dev/null
+    return
+  fi
+
+  # we're not dealing with a directory here
+  while [[ -h "${src}" ]]; do
+    # keep getting the link target while src is a link
+    src="$(ls -la "${src}" | \
+           sed -r 's#^.*?[[:space:]]+->[[:space:]]+(.*)$#\1#')"
+  done
+  # src is no longer a link here
+
+  pushd . &> /dev/null
+  cd -P "$(dirname "${src}")" &> /dev/null
+  echo "$(pwd -P)/$(basename "${src}")"
+  popd &> /dev/null
+}
+
+
+function restorefile() {
+  chown --reference "${baseDir}" "${baseDir}/ferry/sgw_policy_routing_setup.sh"
+}
+
+
+################################################################################
+#
+#
+# Main
+#
+#
+################################################################################
+
+declare script="$(pathCanonicalPath "${0}")"
+declare scriptDir="$(dirname "${script}")"
+declare baseDir="$(dirname "${scriptDir}")"
+cd "${baseDir}"
+
+
+trap restorefile EXIT
+
+
+chown 0.0 "$(pwd)/ferry/sgw_policy_routing_setup.sh"
+
+# GDB: put 'gdb --args' after the 'LD_PRELOAD' and before the './olsrd'
+#      also set SANITIZE_ADDRESS=0 in the build script
+#
+# valgrind --track-origins=yes -v --leak-check=full --show-reachable=yes
+#
+
+LD_PRELOAD=$(pwd)/lib/pud/nmealib/lib/libnmea.so:$(pwd)/lib/pud/wireformat/lib/libOlsrdPudWireFormat.so \
+  ./olsrd -f "$(pwd)/ferry/olsrd.conf.ferry" -nofork ${*}
+
+restorefile
+trap - EXIT
