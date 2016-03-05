@@ -507,16 +507,15 @@ static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
   if (olsr_cnf->smart_gw_active) {
     struct gateway_entry * current_gw = olsr_get_inet_gateway(ipv6);
     struct gateway_entry * gw;
-    OLSR_FOR_ALL_GATEWAY_ENTRIES(gw)
-        {
-          if (!(!ipv6 && gw->ipv4) && !(ipv6 && gw->ipv6)) {
-            continue;
-          }
+    OLSR_FOR_ALL_GATEWAY_ENTRIES(gw) {
+      if (!(!ipv6 && gw->ipv4) && !(ipv6 && gw->ipv6)) {
+        continue;
+      }
 
-          abuf_json_mark_array_entry(true, abuf);
-          ipc_print_gateway_entry(abuf, ipv6, current_gw, gw);
-          abuf_json_mark_array_entry(false, abuf);
-        }OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
+      abuf_json_mark_array_entry(true, abuf);
+      ipc_print_gateway_entry(abuf, ipv6, current_gw, gw);
+      abuf_json_mark_array_entry(false, abuf);
+    } OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw)
   }
 
   abuf_json_mark_object(false, true, abuf, NULL);
