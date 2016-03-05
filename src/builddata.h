@@ -42,7 +42,12 @@
 #define _OLSR_BUILDDATA_H
 
 extern const char olsrd_version[];
+
 extern const char build_date[];
 extern const char build_host[];
+extern const char git_descriptor[];
+extern const char git_sha[];
+extern const char release_version[];
+extern const char source_hash[];
 
 #endif /* _OLSR_BUILDDATA_H */

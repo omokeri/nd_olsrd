@@ -23,15 +23,28 @@ gitSha="$(git log -1 --pretty=%h 2> /dev/null)"
 if [ -z "$gitSha" ]; then
   gitSha="0000000"
 fi
+
+gitShaFull="$(git rev-list -1 HEAD 2> /dev/null)"
+if [ -z "$gitShaFull" ]; then
+  gitShaFull="0000000000000000000000000000000000000000"
+fi
+
+gitDescriptor="$(git describe --dirty --always 2> /dev/null)"
+
 sourceHash="$(cat $(find . -name *.[ch] | grep -v -E '[/\\]?builddata.c$') | "$md5Command" | awk '{ print $1; }')"
 hostName="$(hostname)"
 buildDate="$(date +"%Y-%m-%d %H:%M:%S")"
 
 tmpBuildDataTxt="$(mktemp -t olsrd.hash_source.XXXXXXXXXX)"
 cat > "$tmpBuildDataTxt" << EOF
-const char olsrd_version[] = "olsr.org - $version-git_$gitSha-hash_$sourceHash";
-const char build_host[]    = "$hostName";
-const char build_date[]    = "$buildDate";
+const char olsrd_version[]   = "olsr.org - $version-git_$gitSha-hash_$sourceHash";
+
+const char build_date[]      = "$buildDate";
+const char build_host[]      = "$hostName";
+const char git_descriptor[]  = "$gitDescriptor";
+const char git_sha[]         = "$gitShaFull";
+const char release_version[] = "$version";
+const char source_hash[]     = "$sourceHash";
 EOF
 
 
