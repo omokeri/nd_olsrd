@@ -111,6 +111,7 @@ WARNINGS += -Wcast-align
 WARNINGS += -Wdeclaration-after-statement
 WARNINGS += -Wdisabled-optimization
 WARNINGS += -Wendif-labels
+#WARNINGS += -Werror
 WARNINGS += -Werror=format-security
 WARNINGS += -Wextra
 WARNINGS += -Wformat
@@ -169,8 +170,6 @@ endif
 
 # Alas, htons() triggers this so we can't seriously activate it.
 #WARNINGS += -Wunreachable-code
-
-# WARNINGS += -Werror
 
 # These tell gcc to put each function and global variable in a separate section.
 # The linker can then remove all unreferenced sections. But in the olsrd binary
