@@ -1740,6 +1740,7 @@ plblock: TOK_PLUGIN TOK_STRING
 plparam: TOK_PLPARAM TOK_STRING TOK_STRING
 {
   struct plugin_param *pp = malloc(sizeof(*pp));
+  char *p;
   
   if (pp == NULL) {
     fprintf(stderr, "Out of memory(ADD PP)\n");
@@ -1750,6 +1751,11 @@ plparam: TOK_PLPARAM TOK_STRING TOK_STRING
   
   pp->key = $2->string;
   pp->value = $3->string;
+
+  /* Lower-case the key */
+  for (p = pp->key; *p; p++) {
+    *p = tolower(*p);
+  }
 
   /* Queue */
   pp->next = olsr_cnf->plugins->params;
