@@ -941,31 +941,20 @@ void ipc_print_config(struct autobuf *abuf) {
 }
 
 void ipc_print_plugins(struct autobuf *abuf) {
-  struct plugin_entry *pentry;
-  struct plugin_param *pparam;
   abuf_json_mark_object(true, true, abuf, "plugins");
-  if (olsr_cnf->plugins)
-    for (pentry = olsr_cnf->plugins; pentry; pentry = pentry->next) {
-      abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "plugin", pentry->name);
-      for (pparam = pentry->params; pparam; pparam = pparam->next) {
-        int i, keylen = strlen(pparam->key);
-        char key[keylen + 1];
-        long value;
-        char valueTest[256];
-        strcpy(key, pparam->key);
-        for (i = 0; i < keylen; i++)
-          key[i] = tolower(key[i]);
+  if (olsr_cnf->plugins) {
+    struct plugin_entry *plugin;
 
-        // test if a int/long and set as such in JSON
-        value = atol(pparam->value);
-        snprintf(valueTest, 255, "%li", value);
-        if (!strcmp(valueTest, pparam->value))
-          abuf_json_int(abuf, key, value);
-        else
-          abuf_json_string(abuf, key, pparam->value);
+    for (plugin = olsr_cnf->plugins; plugin; plugin = plugin->next) {
+      struct plugin_param *param;
+
+      abuf_json_mark_array_entry(true, abuf);
+      abuf_json_string(abuf, "plugin", plugin->name);
+      for (param = plugin->params; param; param = param->next) {
+        abuf_json_string(abuf, param->key, param->value);
       }
       abuf_json_mark_array_entry(false, abuf);
     }
+  }
   abuf_json_mark_object(false, true, abuf, NULL);
 }
