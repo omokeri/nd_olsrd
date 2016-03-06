@@ -290,12 +290,12 @@ int SetBmfMechanism(
   void* data __attribute__((unused)),
   set_plugin_parameter_addon addon __attribute__((unused)))
 {
-  if (strcmp(mechanism, "Broadcast") == 0)
+  if (strcasecmp(mechanism, "Broadcast") == 0)
   {
     BmfMechanism = BM_BROADCAST;
     return 0;
   }
-  else if (strcmp(mechanism, "UnicastPromiscuous") == 0)
+  else if (strcasecmp(mechanism, "UnicastPromiscuous") == 0)
   {
     BmfMechanism = BM_UNICAST_PROMISCUOUS;
     return 0;
