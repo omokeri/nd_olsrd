@@ -599,8 +599,13 @@ void ipc_print_version(struct autobuf *abuf) {
   abuf_json_mark_object(true, false, abuf, "version");
 
   abuf_json_string(abuf, "version", olsrd_version);
+
   abuf_json_string(abuf, "date", build_date);
   abuf_json_string(abuf, "host", build_host);
+  abuf_json_string(abuf, "gitDescriptor", git_descriptor);
+  abuf_json_string(abuf, "gitSha", git_sha);
+  abuf_json_string(abuf, "releaseVersion", release_version);
+  abuf_json_string(abuf, "sourceHash", source_hash);
 
   abuf_json_mark_object(false, false, abuf, NULL);
 }
