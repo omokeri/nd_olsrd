@@ -64,7 +64,7 @@ void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value);
 
 void abuf_json_string(struct autobuf *abuf, const char* key, const char* value);
 
-void abuf_json_int(struct autobuf *abuf, const char* key, long value);
+void abuf_json_int(struct autobuf *abuf, const char* key, long long value);
 
 void abuf_json_float(struct autobuf *abuf, const char* key, double value);
 
