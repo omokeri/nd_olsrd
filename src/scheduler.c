@@ -672,7 +672,7 @@ walk_timers(uint32_t * last_run)
 
       /*
        * Dequeue and insert to a temporary list.
-       * We do this to avoid loosing our walking context when
+       * We do this to avoid losing our walking context when
        * multiple timers fire.
        */
       list_remove(timer_node);
