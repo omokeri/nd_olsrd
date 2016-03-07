@@ -208,8 +208,6 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct ipaddr_str neighAddrBuf;
   struct neighbor_entry *neigh;
-  struct neighbor_2_list_entry *list_2;
-  int thop_cnt = 0;
 
   if (!list_2hop) {
     abuf_json_mark_object(true, true, abuf, "neighbors");
@@ -219,6 +217,9 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
 
   /* Neighbors */
   OLSR_FOR_ALL_NBR_ENTRIES(neigh) {
+    struct neighbor_2_list_entry *list_2;
+    int thop_cnt = 0;
+
     abuf_json_mark_array_entry(true, abuf);
 
     abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&neighAddrBuf, &neigh->neighbor_main_addr));
@@ -617,14 +618,17 @@ void ipc_print_olsrd_conf(struct autobuf *abuf) {
 void ipc_print_interfaces(struct autobuf *abuf) {
 #ifdef __linux__
   int linklen;
-  char path[PATH_MAX], linkpath[PATH_MAX];
+  char path[PATH_MAX];
+  char linkpath[PATH_MAX];
 #endif /* __linux__ */
   char ipv6_buf[INET6_ADDRSTRLEN]; /* buffer for IPv6 inet_htop */
-  struct olsr_lq_mult *mult;
   const struct olsr_if *ifs;
+
   abuf_json_mark_object(true, true, abuf, "interfaces");
   for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
+    struct olsr_lq_mult *mult;
     const struct interface_olsr * const rifs = ifs->interf;
+
     abuf_json_mark_array_entry(true, abuf);
     abuf_json_string(abuf, "name", ifs->name);
 
@@ -663,12 +667,17 @@ void ipc_print_interfaces(struct autobuf *abuf) {
 #endif /* __linux__ */
 
       if (olsr_cnf->ip_version == AF_INET) {
-        struct ipaddr_str addrbuf, maskbuf, bcastbuf;
+        struct ipaddr_str addrbuf;
+        struct ipaddr_str maskbuf;
+        struct ipaddr_str bcastbuf;
+
         abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
         abuf_json_string(abuf, "netmask", ip4_to_string(&maskbuf, rifs->int_netmask.sin_addr));
         abuf_json_string(abuf, "broadcast", ip4_to_string(&bcastbuf, rifs->int_broadaddr.sin_addr));
       } else {
-        struct ipaddr_str addrbuf, maskbuf;
+        struct ipaddr_str addrbuf;
+        struct ipaddr_str maskbuf;
+
         abuf_json_string(abuf, "ipv6Address", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr));
         abuf_json_string(abuf, "multicast", ip6_to_string(&maskbuf, &rifs->int6_multaddr.sin6_addr));
       }
