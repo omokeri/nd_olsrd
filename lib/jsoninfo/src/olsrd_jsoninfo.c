@@ -60,6 +60,8 @@
 #include "egressTypes.h"
 #include "olsrd_jsoninfo_helpers.h"
 
+static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, struct olsr_lq_mult *mult);
+
 struct timeval start_time;
 
 void plugin_init(const char *plugin_name) {
@@ -612,7 +614,6 @@ void ipc_print_interfaces(struct autobuf *abuf) {
   char path[PATH_MAX];
   char linkpath[PATH_MAX];
 #endif /* __linux__ */
-  char ipv6_buf[INET6_ADDRSTRLEN]; /* buffer for IPv6 inet_htop */
   const struct olsr_if *ifs;
 
   abuf_json_mark_object(true, true, abuf, "interfaces");
@@ -625,10 +626,7 @@ void ipc_print_interfaces(struct autobuf *abuf) {
 
     abuf_json_mark_object(true, true, abuf, "linkQualityMultipliers");
     for (mult = ifs->cnf->lq_mult; mult != NULL ; mult = mult->next) {
-      abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "route", inet_ntop(olsr_cnf->ip_version, &mult->addr, ipv6_buf, sizeof(ipv6_buf)));
-      abuf_json_float(abuf, "multiplier", mult->value / 65535.0);
-      abuf_json_mark_array_entry(false, abuf);
+      print_link_quality_multipliers_array_entry(abuf, mult);
     }
     abuf_json_mark_object(false, true, abuf, NULL); // linkQualityMultipliers
 
