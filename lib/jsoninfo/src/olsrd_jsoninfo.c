@@ -635,7 +635,7 @@ void ipc_print_interfaces(struct autobuf *abuf) {
       abuf_json_float(abuf, "multiplier", mult->value / 65535.0);
       abuf_json_mark_array_entry(false, abuf);
     }
-    abuf_json_mark_object(false, true, abuf, NULL);
+    abuf_json_mark_object(false, true, abuf, NULL); // linkQualityMultipliers
 
     if (!rifs) {
       abuf_json_string(abuf, "state", "down");
@@ -727,7 +727,7 @@ void ipc_print_interfaces(struct autobuf *abuf) {
 #endif /* __linux__ */
     abuf_json_mark_array_entry(false, abuf);
   }
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(false, true, abuf, NULL); // interfaces
 }
 
 void ipc_print_twohop(struct autobuf *abuf) {
