@@ -246,7 +246,7 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
     }
 
     if (list_2hop) {
-      abuf_json_mark_object(false, true, abuf, false);
+      abuf_json_mark_object(false, true, abuf, NULL);
     }
     abuf_json_int(abuf, "twoHopNeighborCount", thop_cnt);
 
