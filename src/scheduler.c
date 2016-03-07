@@ -887,7 +887,7 @@ olsr_stop_timer(struct timer_entry *timer)
 {
   /* It's okay to get a NULL here */
   if (!timer //
-      || (timer->timer_flags & OLSR_TIMER_REMOVED)) {
+      || !(timer->timer_flags & OLSR_TIMER_RUNNING)) {
     return;
   }
 
