@@ -206,7 +206,6 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
 }
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
-  struct ipaddr_str neighAddrBuf;
   struct neighbor_entry *neigh;
 
   if (!list_2hop) {
@@ -222,7 +221,7 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
 
     abuf_json_mark_array_entry(true, abuf);
 
-    abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&neighAddrBuf, &neigh->neighbor_main_addr));
+    abuf_json_ip_address(abuf, "ipAddress", &neigh->neighbor_main_addr);
     abuf_json_boolean(abuf, "symmetric", (neigh->status == SYM));
     abuf_json_int(abuf, "willingness", neigh->willingness);
     abuf_json_boolean(abuf, "isMultiPointRelay", neigh->is_mpr);
@@ -240,7 +239,7 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
     for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
       if (list_2hop && list_2->neighbor_2) {
         abuf_json_mark_array_entry(true, abuf);
-        abuf_json_string(abuf, "ipAddress", list_2->neighbor_2 ? olsr_ip_to_string(&neighAddrBuf, &list_2->neighbor_2->neighbor_2_addr) : "");
+        abuf_json_ip_address(abuf, "ipAddress", list_2->neighbor_2 ? &list_2->neighbor_2->neighbor_2_addr : NULL);
         abuf_json_mark_array_entry(false, abuf);
       }
       thop_cnt++;
@@ -266,8 +265,6 @@ void ipc_print_links(struct autobuf *abuf) {
   abuf_json_mark_object(true, true, abuf, "links");
 
   OLSR_FOR_ALL_LINK_ENTRIES(my_link) {
-    struct ipaddr_str localAddr;
-    struct ipaddr_str remoteAddr;
     struct lqtextbuffer lqBuffer;
     const char* lqString = get_link_entry_text(my_link, '\t', &lqBuffer);
     char * nlqString = strrchr(lqString, '\t');
@@ -279,8 +276,8 @@ void ipc_print_links(struct autobuf *abuf) {
 
     abuf_json_mark_array_entry(true, abuf);
 
-    abuf_json_string(abuf, "localIP", olsr_ip_to_string(&localAddr, &my_link->local_iface_addr));
-    abuf_json_string(abuf, "remoteIP", olsr_ip_to_string(&remoteAddr, &my_link->neighbor_iface_addr));
+    abuf_json_ip_address(abuf, "localIP", &my_link->local_iface_addr);
+    abuf_json_ip_address(abuf, "remoteIP", &my_link->neighbor_iface_addr);
     abuf_json_string(abuf, "olsrInterface", (my_link->inter && my_link->inter->int_name) ? my_link->inter->int_name : "");
     abuf_json_string(abuf, "ifName", my_link->if_name ? my_link->if_name : "");
     abuf_json_int(abuf, "validityTime", my_link->link_timer ? (long) (my_link->link_timer->timer_clock - now_times) : 0);
@@ -321,15 +318,13 @@ void ipc_print_routes(struct autobuf *abuf) {
 
   /* Walk the route table */
   OLSR_FOR_ALL_RT_ENTRIES(rt) {
-    struct ipaddr_str dstAddr;
-    struct ipaddr_str nexthopAddr;
     struct lqtextbuffer costbuffer;
 
     if (rt->rt_best) {
       abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "destination", olsr_ip_to_string(&dstAddr, &rt->rt_dst.prefix));
+      abuf_json_ip_address(abuf, "destination", &rt->rt_dst.prefix);
       abuf_json_int(abuf, "genmask", rt->rt_dst.prefix_len);
-      abuf_json_string(abuf, "gateway", olsr_ip_to_string(&nexthopAddr, &rt->rt_best->rtp_nexthop.gateway));
+      abuf_json_ip_address(abuf, "gateway", &rt->rt_best->rtp_nexthop.gateway);
       abuf_json_int(abuf, "metric", rt->rt_best->rtp_metric.hops);
       abuf_json_float(abuf, "etx", atof(get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer)));
       abuf_json_int(abuf, "rtpMetricCost", MIN(ROUTE_COST_BROKEN, rt->rt_best->rtp_metric.cost));
@@ -351,10 +346,7 @@ void ipc_print_topology(struct autobuf *abuf) {
     struct tc_edge_entry *tc_edge;
     OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
       if (tc_edge->edge_inv) {
-        struct ipaddr_str dstAddr;
-        struct ipaddr_str lastHopAddr;
         struct lqtextbuffer lqbuffer;
-
         const char* lqString = get_tc_edge_entry_text(tc_edge, '\t', &lqbuffer);
         char * nlqString = strrchr(lqString, '\t');
 
@@ -366,7 +358,7 @@ void ipc_print_topology(struct autobuf *abuf) {
         abuf_json_mark_array_entry(true, abuf);
 
         // vertex_node
-        abuf_json_string(abuf, "lastHopIP", olsr_ip_to_string(&lastHopAddr, &tc->addr));
+        abuf_json_ip_address(abuf, "lastHopIP", &tc->addr);
         // cand_tree_node
         abuf_json_int(abuf, "pathCost", MIN(tc->path_cost, ROUTE_COST_BROKEN));
         // path_list_node
@@ -386,7 +378,7 @@ void ipc_print_topology(struct autobuf *abuf) {
         abuf_json_boolean(abuf, "errSeqValid", tc->err_seq_valid);
 
         // edge_node
-        abuf_json_string(abuf, "destinationIP", olsr_ip_to_string(&dstAddr, &tc_edge->T_dest_addr));
+        abuf_json_ip_address(abuf, "destinationIP", &tc_edge->T_dest_addr);
         // tc
         abuf_json_int(abuf, "tcEdgeCost", MIN(LINK_COST_BROKEN, tc_edge->cost));
         abuf_json_int(abuf, "ansnEdge", tc_edge->ansn);
@@ -453,20 +445,16 @@ void ipc_print_mid(struct autobuf *abuf) {
     struct mid_entry * entry = mid_set[idx].next;
 
     while (entry != &mid_set[idx]) {
-      struct ipaddr_str midAddr;
-
       abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&midAddr, &entry->main_addr));
+      abuf_json_ip_address(abuf, "ipAddress", &entry->main_addr);
       abuf_json_int(abuf, "validityTime", entry->mid_timer ? (entry->mid_timer->timer_clock - now_times) : 0);
       {
         struct mid_address * alias = entry->aliases;
 
         abuf_json_mark_object(true, true, abuf, "aliases");
         while (alias) {
-          struct ipaddr_str aliasAddr;
-
           abuf_json_mark_array_entry(true, abuf);
-          abuf_json_string(abuf, "ipAddress", olsr_ip_to_string(&aliasAddr, &alias->alias));
+          abuf_json_ip_address(abuf, "ipAddress", &alias->alias);
           abuf_json_int(abuf, "validityTime", alias->vtime - now_times);
           abuf_json_mark_array_entry(false, abuf);
 
@@ -776,8 +764,6 @@ static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_lis
 }
 
 void ipc_print_config(struct autobuf *abuf) {
-  struct ipaddr_str addrBuf;
-
   abuf_json_mark_object(true, false, abuf, "config");
 
   abuf_json_string(abuf, "configurationFile", olsr_cnf->configuration_file);
@@ -810,10 +796,6 @@ void ipc_print_config(struct autobuf *abuf) {
   // hna_entries
   {
     struct ip_prefix_list *hna;
-    struct ipaddr_str dstBuf;
-    struct ipaddr_str gwaddrbuf;
-
-    olsr_ip_to_string(&gwaddrbuf, &olsr_cnf->main_addr);
 
     abuf_json_mark_object(true, true, abuf, "hna");
 
@@ -888,12 +870,12 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(abuf, "smartGatewayUplinkKbps", olsr_cnf->smart_gw_uplink);
   abuf_json_int(abuf, "smartGatewayDownlinkKbps", olsr_cnf->smart_gw_downlink);
   abuf_json_boolean(abuf, "smartGatewayBandwidthZero", olsr_cnf->smart_gateway_bandwidth_zero);
-  abuf_json_string(abuf, "smartGatewayPrefix", olsr_ip_to_string(&addrBuf, &olsr_cnf->smart_gw_prefix.prefix));
+  abuf_json_ip_address(abuf, "smartGatewayPrefix", &olsr_cnf->smart_gw_prefix.prefix);
   abuf_json_int(abuf, "smartGatewayPrefixLength", olsr_cnf->smart_gw_prefix.prefix_len);
 
 
-  abuf_json_string(abuf, "mainIp", olsr_ip_to_string(&addrBuf, &olsr_cnf->main_addr));
-  abuf_json_string(abuf, "unicastSourceIpAddress", olsr_ip_to_string(&addrBuf, &olsr_cnf->unicast_src_ip));
+  abuf_json_ip_address(abuf, "mainIp", &olsr_cnf->main_addr);
+  abuf_json_ip_address(abuf, "unicastSourceIpAddress", &olsr_cnf->unicast_src_ip);
   abuf_json_boolean(abuf, "srcIpRoutes", olsr_cnf->use_src_ip_routes);
 
 
@@ -951,11 +933,12 @@ void ipc_print_config(struct autobuf *abuf) {
     struct if_config_options* id = olsr_cnf->interface_defaults;
     struct olsr_lq_mult *mult;
 
-    abuf_json_string(abuf, "ipv4Broadcast", inet_ntop(AF_INET, &id->ipv4_multicast.v4, addrBuf.buf, sizeof(addrBuf.buf)));
-    abuf_json_string(abuf, "ipv6Multicast", inet_ntop(AF_INET6, &id->ipv6_multicast.v6, addrBuf.buf, sizeof(addrBuf.buf)));
+    abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
+    abuf_json_ip_address(abuf, "ipv6Multicast", &id->ipv6_multicast);
 
-    abuf_json_string(abuf, "ipv4Source", inet_ntop(AF_INET, &id->ipv4_src.v4, addrBuf.buf, sizeof(addrBuf.buf)));
-    abuf_json_string(abuf, "ipv6Source", inet_ntop(AF_INET6, &id->ipv4_src.v6, addrBuf.buf, sizeof(addrBuf.buf)));
+    abuf_json_ip_address(abuf, "ipv4Source", &id->ipv4_src);
+    abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
+    abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
 
     abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
 
