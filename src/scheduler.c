@@ -726,18 +726,39 @@ void
 olsr_flush_timers(void)
 {
   struct list_node *timer_head_node;
+  struct list_node tmp_head_node;
   unsigned int wheel_slot = 0;
+
+  list_head_init(&tmp_head_node);
+
+  walk_timers_cleanup();
 
   for (wheel_slot = 0; wheel_slot < TIMER_WHEEL_SLOTS; wheel_slot++) {
     timer_head_node = &timer_wheel[wheel_slot & TIMER_WHEEL_MASK];
 
-    /* Kill all entries hanging off this hash bucket. */
+    /* stop all entries hanging off this hash bucket. */
     while (!list_is_empty(timer_head_node)) {
-      struct timer_entry * t = list2timer(timer_head_node->next);
-      olsr_stop_timer(t);
-      olsr_cleanup_timer(t);
+      /* the top element */
+      struct list_node *const timer_node = timer_head_node->next;
+      struct timer_entry *const timer = list2timer(timer_node);
+
+      /*
+       * Dequeue and insert to a temporary list.
+       * We do this to avoid losing our walking context when
+       * multiple timers fire.
+       */
+      list_remove(timer_node);
+      list_add_after(&tmp_head_node, timer_node);
+
+      olsr_stop_timer(timer);
     }
   }
+
+  /*
+   * Now merge the temporary list back to the old bucket.
+   */
+  list_merge(timer_head_node, &tmp_head_node);
+
   walk_timers_cleanup();
 }
 
