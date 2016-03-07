@@ -140,9 +140,17 @@ void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) 
 }
 
 void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
+  const char * fmt;
+
+#ifndef _WIN32
+  fmt = "\"%s\": %lld";
+#else
+  fmt = "\"%s\": %ld";
+#endif
+
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %lld", key, value);
+  abuf_appendf(abuf, fmt, key, value);
   entrynumber[currentjsondepth]++;
 }
 
