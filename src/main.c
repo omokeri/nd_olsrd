@@ -96,6 +96,25 @@ static char **olsr_argv = NULL;
 
 struct olsr_cookie_info *def_timer_ci = NULL;
 
+static void printStacktrace(const char * message) {
+#ifdef __GLIBC__
+  void *bt_array[64];
+  size_t bt_size;
+  size_t bt_index=0;
+  char ** bt_syms;
+
+  bt_size = backtrace(bt_array, 64);
+  bt_syms = backtrace_symbols(bt_array, bt_size);
+
+  olsr_syslog(OLSR_LOG_ERR, "%s", message);
+  while (bt_index < bt_size) {
+    olsr_syslog(OLSR_LOG_ERR, "%s", bt_syms[bt_index++]);
+  }
+#else
+  olsr_syslog(OLSR_LOG_ERR, "%s (logging a stack trace is not supported on this platform)", message);
+#endif
+}
+
 #ifndef _WIN32
 /**
  * Reconfigure olsrd. Currently kind of a hack...
@@ -172,6 +191,7 @@ SignalHandler(unsigned long signo)
 static void olsr_shutdown(int signo __attribute__ ((unused)))
 #endif /* _WIN32 */
 {
+  static volatile bool inShutdown = false;
 #ifndef _WIN32
   int errNr = errno;
 #endif
@@ -183,6 +203,13 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 #else
   OLSR_PRINTF(1, "Received signal %d - shutting down\n", (int)signo);
 #endif
+
+  if (inShutdown) {
+    /* already in shutdown, do not allow nested shutdown */
+    printStacktrace("nested shutdown: exiting immediately");
+    exit(olsr_cnf->exit_value);
+  }
+  inShutdown = true;
 
   /* instruct the scheduler to stop */
   olsr_scheduler_stop();
@@ -323,30 +350,17 @@ __attribute__((noreturn))
 static void olsr_segv_handler(int sig) {
   static bool in_segv = false;
 
-#ifdef __GLIBC__
-  void *bt_array[64];
-  size_t bt_size;
-  size_t bt_index=0;
-  char ** bt_syms;
-
-  bt_size = backtrace(bt_array, 64);
-  bt_syms = backtrace_symbols(bt_array, bt_size);
-
-  syslog(LOG_ERR, "olsrd crashed, stack trace follows");
-  while (bt_index < bt_size) {
-    syslog(LOG_ERR, "%s", bt_syms[bt_index++]);
-  }
-#else
-  syslog(LOG_ERR, "olsrd crashed (logging a stack trace is not supported on this platform)");
-#endif
-
   if (!in_segv) {
     in_segv = true;
+    printStacktrace("crash");
     olsr_shutdown(sig);
+
+    /* safety net */
+    exit(123);
   }
 
-  /* safety net */
-  exit(123);
+  printStacktrace("nested crash: exiting immediately");
+  exit(olsr_cnf->exit_value);
 }
 #endif /* defined(__linux__) && !defined(__ANDROID__) */
 
