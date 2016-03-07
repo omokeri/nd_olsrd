@@ -176,19 +176,20 @@ void output_end(struct autobuf *abuf) {
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
-  char buf[1024];
+  struct autobuf abufInternal;
 
   if (http_headers || (status == INFO_HTTP_OK)) {
     return;
   }
 
+  abuf_init(&abufInternal, 1024);
+
   output_start(abuf);
 
   switch (status) {
     case INFO_HTTP_NOTFOUND:
-      snprintf(buf, sizeof(buf) - 1, "Invalid request '%s'", req);
-      buf[sizeof(buf) - 1] = '\0';
-      abuf_json_string(abuf, "error", buf);
+      abuf_appendf(&abufInternal, "Invalid request '%s'", req);
+      abuf_json_string(abuf, "error", abufInternal.buf);
       break;
 
     case INFO_HTTP_NOCONTENT:
@@ -196,9 +197,8 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
       break;
 
     default:
-      snprintf(buf, sizeof(buf) - 1, "Unknown status %d for request '%s'", status, req);
-      buf[sizeof(buf) - 1] = '\0';
-      abuf_json_string(abuf, "error", buf);
+      abuf_appendf(&abufInternal, "Unknown status %d for request '%s'", status, req);
+      abuf_json_string(abuf, "error", abufInternal.buf);
       break;
   }
 
