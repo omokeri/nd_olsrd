@@ -51,6 +51,8 @@
 #include <fcntl.h>
 #endif /* __linux__ */
 
+static const char * empty = "";
+
 char uuid[UUIDLEN];
 
 /* JSON support functions */
@@ -160,8 +162,6 @@ void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
   abuf_appendf(abuf, "\"%s\": %f", key, value);
   entrynumber[currentjsondepth]++;
 }
-
-static const char * empty = "";
 
 void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
   struct ipaddr_str ipStr;
