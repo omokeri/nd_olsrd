@@ -70,6 +70,8 @@ void abuf_json_reset_entry_number_and_depth(void) {
 }
 
 static void abuf_json_new_indent(struct autobuf *abuf) {
+  assert(abuf);
+
   if (currentjsondepth) {
     int i = currentjsondepth;
 
@@ -81,11 +83,15 @@ static void abuf_json_new_indent(struct autobuf *abuf) {
 }
 
 void abuf_json_insert_comma(struct autobuf *abuf) {
+  assert(abuf);
+
   if (entrynumber[currentjsondepth])
     abuf_appendf(abuf, ",");
 }
 
 void abuf_json_mark_output(bool open, struct autobuf *abuf) {
+  assert(abuf);
+
   if (open) {
     assert(!currentjsondepth);
     abuf_json_new_indent(abuf);
@@ -102,6 +108,8 @@ void abuf_json_mark_output(bool open, struct autobuf *abuf) {
 }
 
 void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header) {
+  assert(abuf);
+
   if (open) {
     abuf_json_insert_comma(abuf);
     abuf_json_new_indent(abuf);
@@ -124,10 +132,15 @@ void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const ch
 }
 
 void abuf_json_mark_array_entry(bool open, struct autobuf *abuf) {
+  assert(abuf);
+
   abuf_json_mark_object(open, false, abuf, NULL);
 }
 
 void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value) {
+  assert(abuf);
+  assert(key);
+
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   abuf_appendf(abuf, "\"%s\": %s", key, value ? "true" : "false");
@@ -135,6 +148,9 @@ void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value) {
 }
 
 void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) {
+  assert(abuf);
+  assert(key);
+
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
@@ -143,6 +159,9 @@ void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) 
 
 void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
   const char * fmt;
+
+  assert(abuf);
+  assert(key);
 
 #ifndef _WIN32
   fmt = "\"%s\": %lld";
@@ -157,6 +176,9 @@ void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
 }
 
 void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
+  assert(abuf);
+  assert(key);
+
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   abuf_appendf(abuf, "\"%s\": %f", key, value);
@@ -166,6 +188,9 @@ void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
 void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
   struct ipaddr_str ipStr;
   const char * value;
+
+  assert(abuf);
+  assert(key);
 
   if (!ip) {
     value = empty;
@@ -184,7 +209,13 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
 #ifdef __linux__
 static int get_string_from_file(const char* filename, char* buf, int len) {
   int bytes = -1;
-  int fd = open(filename, O_RDONLY);
+  int fd;
+
+  assert(filename);
+  assert(buf);
+
+  fd = open(filename, O_RDONLY);
+
   buf[0] = '\0';
   if (fd > -1) {
     bytes = read(fd, buf, len);
@@ -199,7 +230,13 @@ static int get_string_from_file(const char* filename, char* buf, int len) {
 
 static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* syspath) {
   char buf[256];
-  int ret = get_string_from_file(syspath, buf, sizeof(buf));
+  int ret;
+
+  assert(abuf);
+  assert(key);
+  assert(syspath);
+
+  ret = get_string_from_file(syspath, buf, sizeof(buf));
   if (*buf)
     abuf_json_string(abuf, key, buf);
   return ret;
@@ -207,6 +244,12 @@ static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* 
 
 void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint) {
   char filename[256];
+
+  assert(abuf);
+  assert(key);
+  assert(ifname);
+  assert(datapoint);
+
   snprintf(filename, sizeof(filename) - 1, "/sys/class/net/%s/%s", ifname, datapoint);
   filename[sizeof(filename) - 1] = '\0';
   abuf_json_sysdata(abuf, key, filename);
@@ -218,6 +261,9 @@ int read_uuid_from_file(const char * name, const char *file) {
   char* end;
   int r = 0;
   size_t chars;
+
+  assert(name);
+  assert(file);
 
   memset(uuid, 0, sizeof(uuid));
 
