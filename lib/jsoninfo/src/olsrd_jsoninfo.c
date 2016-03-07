@@ -401,39 +401,42 @@ void ipc_print_topology(struct autobuf *abuf) {
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
+static void print_hna_array_entry(struct autobuf *abuf, union olsr_ip_addr *gw, union olsr_ip_addr *ip, uint8_t prefix_len, long long validityTime) {
+  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_ip_address(abuf, "gateway", gw);
+  abuf_json_ip_address(abuf, "destination", ip);
+  abuf_json_int(abuf, "genmask", prefix_len);
+  abuf_json_int(abuf, "validityTime", validityTime);
+  abuf_json_mark_array_entry(false, abuf);
+}
+
 void ipc_print_hna(struct autobuf *abuf) {
   struct ip_prefix_list *hna;
   struct hna_entry *tmp_hna;
-  struct ipaddr_str prefixbuf;
-  struct ipaddr_str gwaddrbuf;
-
-  olsr_ip_to_string(&gwaddrbuf, &olsr_cnf->main_addr);
 
   abuf_json_mark_object(true, true, abuf, "hna");
 
   /* Announced HNA entries */
   for (hna = olsr_cnf->hna_entries; hna != NULL ; hna = hna->next) {
-    abuf_json_mark_array_entry(true, abuf);
-    abuf_json_string(abuf, "gateway", gwaddrbuf.buf);
-    abuf_json_string(abuf, "destination", olsr_ip_to_string(&prefixbuf, &hna->net.prefix));
-    abuf_json_int(abuf, "genmask", hna->net.prefix_len);
-    abuf_json_int(abuf, "validityTime", 0);
-    abuf_json_mark_array_entry(false, abuf);
+    print_hna_array_entry( //
+        abuf, //
+        &olsr_cnf->main_addr, //
+        &hna->net.prefix, //
+        hna->net.prefix_len, //
+        0);
   }
 
   OLSR_FOR_ALL_HNA_ENTRIES(tmp_hna) {
     struct hna_net *tmp_net;
 
-    olsr_ip_to_string(&gwaddrbuf, &tmp_hna->A_gateway_addr);
-
     /* Check all networks */
     for (tmp_net = tmp_hna->networks.next; tmp_net != &tmp_hna->networks; tmp_net = tmp_net->next) {
-      abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "gateway", gwaddrbuf.buf);
-      abuf_json_string(abuf, "destination", olsr_ip_to_string(&prefixbuf, &tmp_net->hna_prefix.prefix));
-      abuf_json_int(abuf, "genmask", tmp_net->hna_prefix.prefix_len);
-      abuf_json_int(abuf, "validityTime", tmp_net->hna_net_timer ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0);
-      abuf_json_mark_array_entry(false, abuf);
+      print_hna_array_entry( //
+          abuf, //
+          &tmp_hna->A_gateway_addr, //
+          &tmp_net->hna_prefix.prefix, //
+          tmp_net->hna_prefix.prefix_len, //
+          tmp_net->hna_net_timer ? (tmp_net->hna_net_timer->timer_clock - now_times) : 0);
     }
   } OLSR_FOR_ALL_HNA_ENTRIES_END(tmp_hna);
 
