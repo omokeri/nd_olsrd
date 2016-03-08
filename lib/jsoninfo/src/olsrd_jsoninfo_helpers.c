@@ -227,56 +227,6 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
 
 /* Linux specific functions for getting system info */
 
-#ifdef __linux__
-static int get_string_from_file(const char* filename, char* buf, int len) {
-  int bytes = -1;
-  int fd;
-
-  assert(filename);
-  assert(buf);
-
-  fd = open(filename, O_RDONLY);
-
-  buf[0] = '\0';
-  if (fd > -1) {
-    bytes = read(fd, buf, len);
-    if (bytes < len)
-      buf[bytes - 1] = '\0'; // remove trailing \n
-    else
-      buf[len - 1] = '\0';
-    close(fd);
-  }
-  return bytes;
-}
-
-static int abuf_json_sysdata(struct autobuf *abuf, const char* key, const char* syspath) {
-  char buf[256];
-  int ret;
-
-  assert(abuf);
-  assert(key);
-  assert(syspath);
-
-  ret = get_string_from_file(syspath, buf, sizeof(buf));
-  if (*buf)
-    abuf_json_string(abuf, key, buf);
-  return ret;
-}
-
-void abuf_json_sys_class_net(struct autobuf *abuf, const char* key, const char* ifname, const char* datapoint) {
-  char filename[256];
-
-  assert(abuf);
-  assert(key);
-  assert(ifname);
-  assert(datapoint);
-
-  snprintf(filename, sizeof(filename) - 1, "/sys/class/net/%s/%s", ifname, datapoint);
-  filename[sizeof(filename) - 1] = '\0';
-  abuf_json_sysdata(abuf, key, filename);
-}
-#endif /* __linux__ */
-
 int read_uuid_from_file(const char * name, const char *file) {
   FILE *f;
   char* end;

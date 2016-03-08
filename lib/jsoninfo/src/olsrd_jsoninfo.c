@@ -694,12 +694,6 @@ void ipc_print_interfaces(struct autobuf *abuf) {
 
   abuf_json_mark_object(true, true, abuf, "interfaces");
   for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
-#ifdef __linux__
-    int linklen;
-    char path[PATH_MAX];
-    char linkpath[PATH_MAX];
-#endif /* __linux__ */
-
     abuf_json_mark_array_entry(true, abuf);
     abuf_json_string(abuf, "name", ifs->name);
     abuf_json_boolean(abuf, "configured", ifs->configured);
@@ -708,59 +702,6 @@ void ipc_print_interfaces(struct autobuf *abuf) {
     print_interface_olsr(abuf, "olsrInterface", ifs->interf);
     print_interface_config(abuf, "InterfaceConfiguration", ifs->cnf);
     print_interface_config(abuf, "InterfaceConfigurationDefaults", ifs->cnfi);
-
-#ifdef __linux__
-    snprintf(path, PATH_MAX, "/sys/class/net/%s/device/driver/module", ifs->name);
-    linklen = readlink(path, linkpath, PATH_MAX - 1);
-    if (linklen > 1) {
-      linkpath[linklen] = '\0';
-      abuf_json_string(abuf, "kernelModule", basename(linkpath));
-    }
-
-    abuf_json_sys_class_net(abuf, "addressLength", ifs->name, "addr_len");
-    abuf_json_sys_class_net(abuf, "carrier", ifs->name, "carrier");
-    abuf_json_sys_class_net(abuf, "dormant", ifs->name, "dormant");
-    abuf_json_sys_class_net(abuf, "features", ifs->name, "features");
-    abuf_json_sys_class_net(abuf, "flags", ifs->name, "flags");
-    abuf_json_sys_class_net(abuf, "linkMode", ifs->name, "link_mode");
-    abuf_json_sys_class_net(abuf, "macAddress", ifs->name, "address");
-    abuf_json_sys_class_net(abuf, "ethernetMTU", ifs->name, "mtu");
-    abuf_json_sys_class_net(abuf, "operationalState", ifs->name, "operstate");
-    abuf_json_sys_class_net(abuf, "txQueueLength", ifs->name, "tx_queue_len");
-    abuf_json_sys_class_net(abuf, "collisions", ifs->name, "statistics/collisions");
-    abuf_json_sys_class_net(abuf, "multicastPackets", ifs->name, "statistics/multicast");
-    abuf_json_sys_class_net(abuf, "rxBytes", ifs->name, "statistics/rx_bytes");
-    abuf_json_sys_class_net(abuf, "rxCompressed", ifs->name, "statistics/rx_compressed");
-    abuf_json_sys_class_net(abuf, "rxCrcErrors", ifs->name, "statistics/rx_crc_errors");
-    abuf_json_sys_class_net(abuf, "rxDropped", ifs->name, "statistics/rx_dropped");
-    abuf_json_sys_class_net(abuf, "rxErrors", ifs->name, "statistics/rx_errors");
-    abuf_json_sys_class_net(abuf, "rxFifoErrors", ifs->name, "statistics/rx_fifo_errors");
-    abuf_json_sys_class_net(abuf, "rxFrameErrors", ifs->name, "statistics/rx_frame_errors");
-    abuf_json_sys_class_net(abuf, "rxLengthErrors", ifs->name, "statistics/rx_length_errors");
-    abuf_json_sys_class_net(abuf, "rxMissedErrors", ifs->name, "statistics/rx_missed_errors");
-    abuf_json_sys_class_net(abuf, "rxOverErrors", ifs->name, "statistics/rx_over_errors");
-    abuf_json_sys_class_net(abuf, "rxPackets", ifs->name, "statistics/rx_packets");
-    abuf_json_sys_class_net(abuf, "txAbortedErrors", ifs->name, "statistics/tx_aborted_errors");
-    abuf_json_sys_class_net(abuf, "txBytes", ifs->name, "statistics/tx_bytes");
-    abuf_json_sys_class_net(abuf, "txCarrierErrors", ifs->name, "statistics/tx_carrier_errors");
-    abuf_json_sys_class_net(abuf, "txCompressed", ifs->name, "statistics/tx_compressed");
-    abuf_json_sys_class_net(abuf, "txDropped", ifs->name, "statistics/tx_dropped");
-    abuf_json_sys_class_net(abuf, "txErrors", ifs->name, "statistics/tx_errors");
-    abuf_json_sys_class_net(abuf, "txFifoErrors", ifs->name, "statistics/tx_fifo_errors");
-    abuf_json_sys_class_net(abuf, "txHeartbeatErrors", ifs->name, "statistics/tx_heartbeat_errors");
-    abuf_json_sys_class_net(abuf, "txPackets", ifs->name, "statistics/tx_packets");
-    abuf_json_sys_class_net(abuf, "txWindowErrors", ifs->name, "statistics/tx_window_errors");
-    abuf_json_sys_class_net(abuf, "beaconing", ifs->name, "wireless/beacon");
-    abuf_json_sys_class_net(abuf, "encryptionKey", ifs->name, "wireless/crypt");
-    abuf_json_sys_class_net(abuf, "fragmentationThreshold", ifs->name, "wireless/fragment");
-    abuf_json_sys_class_net(abuf, "signalLevel", ifs->name, "wireless/level");
-    abuf_json_sys_class_net(abuf, "linkQuality", ifs->name, "wireless/link");
-    abuf_json_sys_class_net(abuf, "misc", ifs->name, "wireless/misc");
-    abuf_json_sys_class_net(abuf, "noiseLevel", ifs->name, "wireless/noise");
-    abuf_json_sys_class_net(abuf, "nwid", ifs->name, "wireless/nwid");
-    abuf_json_sys_class_net(abuf, "wirelessRetries", ifs->name, "wireless/retries");
-    abuf_json_sys_class_net(abuf, "wirelessStatus", ifs->name, "wireless/status");
-#endif /* __linux__ */
     abuf_json_mark_array_entry(false, abuf);
   }
   abuf_json_mark_object(false, true, abuf, NULL); // interfaces
