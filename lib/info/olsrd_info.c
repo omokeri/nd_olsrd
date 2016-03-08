@@ -94,6 +94,22 @@ static struct timer_entry *writetimer_entry = NULL;
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+static char * skipMultipleSlashes(char * requ) {
+  char * r = requ;
+
+  if ((r[0] == '\0') // zero length
+      || (r[0] != '/') // does not start with a slash
+      || (r[1] != '/')) // does not have another slash
+  {
+    return r;
+  }
+
+  while (r[1] == '/') {
+    r++;
+  }
+  return r;
+}
+
 static unsigned int determine_action(char *requ) {
   static unsigned int SIW_ENTRIES[] = {
   //
@@ -492,6 +508,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       req = requ;
       req[s] = '\0';
       req = parseRequest(req, (size_t*)&s);
+      req = skipMultipleSlashes(req);
       if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
         /* empty or '/' */
         send_what = SIW_ALL;
