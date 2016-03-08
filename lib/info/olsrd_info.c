@@ -344,6 +344,14 @@ static char * stripEOLs(char * requ, size_t *len) {
   return requ;
 }
 
+static char * stripTrailingSlashes(char * requ, size_t *len) {
+  while ((requ[*len - 1] == '/') && (requ[*len - 1] != '\0')) {
+    *len = *len - 1;
+    requ[*len] = '\0';
+  }
+  return requ;
+}
+
 static char * cutAtFirstEOL(char * requ, size_t *len) {
   char * s = requ;
   size_t l = 0;
@@ -401,6 +409,7 @@ static char * parseRequest(char * requ, size_t *len) {
 
   /* strip req of trailing EOL and whitespace */
   req = stripEOLs(req, len);
+  req = stripTrailingSlashes(req, len);
 
   return req;
 }
