@@ -61,6 +61,7 @@
 #include "olsrd_jsoninfo_helpers.h"
 
 static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, struct olsr_lq_mult *mult);
+static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id);
 
 struct timeval start_time;
 
@@ -761,6 +762,37 @@ static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_lis
   abuf_json_mark_array_entry(false, abuf);
 }
 
+static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id) {
+  abuf_json_mark_object(true, false, abuf, name);
+  {
+    struct olsr_lq_mult *mult;
+
+    abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
+    abuf_json_ip_address(abuf, "ipv6Multicast", &id->ipv6_multicast);
+
+    abuf_json_ip_address(abuf, "ipv4Source", &id->ipv4_src);
+    abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
+    abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
+
+    abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
+
+    abuf_json_int(abuf, "weightValue", id->weight.value);
+    abuf_json_boolean(abuf, "weightFixed", id->weight.fixed);
+    print_msg_params(abuf, &id->hello_params, "hello");
+    print_msg_params(abuf, &id->tc_params, "tc");
+    print_msg_params(abuf, &id->mid_params, "mid");
+    print_msg_params(abuf, &id->hna_params, "hna");
+    abuf_json_mark_object(true, true, abuf, "linkQualityMultipliers");
+    for (mult = olsr_cnf->interface_defaults->lq_mult; mult != NULL ; mult = mult->next) {
+      print_link_quality_multipliers_array_entry(abuf, mult);
+    }
+    abuf_json_mark_object(false, true, abuf, NULL);
+    abuf_json_int(abuf, "linkQualityMultipliersCount", id->orig_lq_mult_cnt);
+    abuf_json_boolean(abuf, "autoDetectChanges", id->autodetect_chg);
+  }
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
 void ipc_print_config(struct autobuf *abuf) {
   abuf_json_mark_object(true, false, abuf, "config");
 
@@ -926,35 +958,7 @@ void ipc_print_config(struct autobuf *abuf) {
 
 
   // InterfaceDefaults section
-  abuf_json_mark_object(true, false, abuf, "interfaceDefaults");
-  {
-    struct if_config_options* id = olsr_cnf->interface_defaults;
-    struct olsr_lq_mult *mult;
-
-    abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
-    abuf_json_ip_address(abuf, "ipv6Multicast", &id->ipv6_multicast);
-
-    abuf_json_ip_address(abuf, "ipv4Source", &id->ipv4_src);
-    abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
-    abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
-
-    abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
-
-    abuf_json_int(abuf, "weightValue", id->weight.value);
-    abuf_json_boolean(abuf, "weightFixed", id->weight.fixed);
-    print_msg_params(abuf, &id->hello_params, "hello");
-    print_msg_params(abuf, &id->tc_params, "tc");
-    print_msg_params(abuf, &id->mid_params, "mid");
-    print_msg_params(abuf, &id->hna_params, "hna");
-    abuf_json_mark_object(true, true, abuf, "linkQualityMultipliers");
-    for (mult = olsr_cnf->interface_defaults->lq_mult; mult != NULL ; mult = mult->next) {
-      print_link_quality_multipliers_array_entry(abuf, mult);
-    }
-    abuf_json_mark_object(false, true, abuf, NULL);
-    abuf_json_int(abuf, "linkQualityMultipliersCount", id->orig_lq_mult_cnt);
-    abuf_json_boolean(abuf, "autoDetectChanges", id->autodetect_chg);
-  }
-  abuf_json_mark_object(false, false, abuf, NULL);
+  print_interface_config(abuf, "interfaceDefaults", olsr_cnf->interface_defaults);
 
 
   // Interface(s) section: use /interfaces
