@@ -46,6 +46,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <unistd.h>
+#include <math.h>
+#include <float.h>
 
 #ifdef __linux__
 #include <fcntl.h>
@@ -184,12 +186,23 @@ void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
 }
 
 void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
+  double v = value;
+  int isInf = isinf(v);
+
   assert(abuf);
   assert(key);
 
+  if (isnan(v)) {
+    v = 0.0;
+  } else if (isInf < 0) {
+    v = -DBL_MAX;
+  } else if (isInf > 0) {
+    v = DBL_MAX;
+  }
+
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": %f", key, value);
+  abuf_appendf(abuf, "\"%s\": %f", key, v);
   entrynumber[currentjsondepth]++;
 }
 
