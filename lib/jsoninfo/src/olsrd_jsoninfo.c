@@ -60,9 +60,6 @@
 #include "egressTypes.h"
 #include "olsrd_jsoninfo_helpers.h"
 
-static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, struct olsr_lq_mult *mult);
-static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id);
-
 struct timeval start_time;
 
 void plugin_init(const char *plugin_name) {
@@ -207,6 +204,178 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req, b
 
   output_end(abuf);
 }
+
+static void print_msg_params(struct autobuf *abuf, struct olsr_msg_params *params, const char * name) {
+  assert(abuf);
+  assert(params);
+  assert(name);
+
+  abuf_json_mark_object(true, false, abuf, name);
+  abuf_json_float(abuf, "emissionInterval", params->emission_interval);
+  abuf_json_float(abuf, "validityTime", params->validity_time);
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
+static void print_hna_array_entry(struct autobuf *abuf, union olsr_ip_addr *gw, union olsr_ip_addr *ip, uint8_t prefix_len, long long validityTime) {
+  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_ip_address(abuf, "gateway", gw);
+  abuf_json_ip_address(abuf, "destination", ip);
+  abuf_json_int(abuf, "genmask", prefix_len);
+  abuf_json_int(abuf, "validityTime", validityTime);
+  abuf_json_mark_array_entry(false, abuf);
+}
+
+static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, struct olsr_lq_mult *mult) {
+  assert(abuf);
+  assert(mult);
+
+  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_ip_address(abuf, "route", &mult->addr);
+  abuf_json_float(abuf, "multiplier", mult->value / 65535.0);
+  abuf_json_mark_array_entry(false, abuf);
+}
+
+static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_list *ipc_nets) {
+  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_boolean(abuf, "host", (ipc_nets->net.prefix_len == olsr_cnf->maxplen));
+  abuf_json_ip_address(abuf, "ipAddress", &ipc_nets->net.prefix);
+  abuf_json_int(abuf, "genmask", ipc_nets->net.prefix_len);
+  abuf_json_mark_array_entry(false, abuf);
+}
+
+static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id) {
+  abuf_json_mark_object(true, false, abuf, name);
+  {
+    struct olsr_lq_mult *mult;
+
+    abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
+    abuf_json_ip_address(abuf, "ipv6Multicast", &id->ipv6_multicast);
+
+    abuf_json_ip_address(abuf, "ipv4Source", &id->ipv4_src);
+    abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
+    abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
+
+    abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
+
+    abuf_json_int(abuf, "weightValue", id->weight.value);
+    abuf_json_boolean(abuf, "weightFixed", id->weight.fixed);
+    print_msg_params(abuf, &id->hello_params, "hello");
+    print_msg_params(abuf, &id->tc_params, "tc");
+    print_msg_params(abuf, &id->mid_params, "mid");
+    print_msg_params(abuf, &id->hna_params, "hna");
+    abuf_json_mark_object(true, true, abuf, "linkQualityMultipliers");
+    for (mult = olsr_cnf->interface_defaults->lq_mult; mult != NULL ; mult = mult->next) {
+      print_link_quality_multipliers_array_entry(abuf, mult);
+    }
+    abuf_json_mark_object(false, true, abuf, NULL);
+    abuf_json_int(abuf, "linkQualityMultipliersCount", id->orig_lq_mult_cnt);
+    abuf_json_boolean(abuf, "autoDetectChanges", id->autodetect_chg);
+  }
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
+static void print_interface_olsr(struct autobuf *abuf, const char * name, struct interface_olsr * rifs) {
+  struct ipaddr_str addrbuf;
+
+  abuf_json_mark_object(true, false, abuf, name);
+  if (!rifs) {
+    abuf_json_string(abuf, "state", "down");
+    abuf_json_mark_object(false, false, abuf, NULL);
+    return;
+  }
+
+  abuf_json_string(abuf, "state", "up");
+
+  abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
+  abuf_json_string(abuf, "ipv4Netmask", ip4_to_string(&addrbuf, rifs->int_netmask.sin_addr));
+  abuf_json_string(abuf, "ipv4Broadcast", ip4_to_string(&addrbuf, rifs->int_broadaddr.sin_addr));
+  abuf_json_string(abuf, "mode", OLSR_IF_MODE[rifs->mode]);
+
+  abuf_json_string(abuf, "ipv6Address", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr));
+  abuf_json_string(abuf, "ipv6Multicast", ip6_to_string(&addrbuf, &rifs->int6_multaddr.sin6_addr));
+
+  abuf_json_ip_address(abuf, "ipAddress", &rifs->ip_addr);
+  abuf_json_boolean(abuf, "emulatedInterface", rifs->is_hcif);
+
+  abuf_json_int(abuf, "olsrSocket", rifs->olsr_socket);
+  abuf_json_int(abuf, "sendSocket", rifs->send_socket);
+
+  abuf_json_int(abuf, "metric", rifs->int_metric);
+  abuf_json_int(abuf, "mtu", rifs->int_mtu);
+  abuf_json_int(abuf, "flags", rifs->int_flags);
+  abuf_json_int(abuf, "index", rifs->if_index);
+  abuf_json_boolean(abuf, "wireless", rifs->is_wireless);
+  abuf_json_string(abuf, "name", rifs->int_name);
+  abuf_json_int(abuf, "seqNum", rifs->olsr_seqnum);
+
+
+  abuf_json_int(abuf, "helloTime", rifs->hello_gen_timer ? (long) (rifs->hello_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "hnaTime", rifs->hna_gen_timer ? (long) (rifs->hna_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "midTime", rifs->mid_gen_timer ? (long) (rifs->mid_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "tcTime", rifs->tc_gen_timer ? (long) (rifs->tc_gen_timer->timer_clock - now_times) : 0);
+
+#ifdef __linux__
+
+
+
+
+  abuf_json_boolean(abuf, "icmpRedirectBackup", rifs->nic_state.redirect);
+
+
+  abuf_json_boolean(abuf, "spoofFilterBackup", rifs->nic_state.spoof);
+
+#endif /* __linux__ */
+
+  abuf_json_int(abuf, "helloEmissionInterval", rifs->hello_etime);
+  abuf_json_mark_object(true, false, abuf, "validityTimes");
+  abuf_json_int(abuf, "hello", me_to_reltime(rifs->valtimes.hello));
+  abuf_json_int(abuf, "tc", me_to_reltime(rifs->valtimes.tc));
+  abuf_json_int(abuf, "mid", me_to_reltime(rifs->valtimes.mid));
+  abuf_json_int(abuf, "hna", me_to_reltime(rifs->valtimes.hna));
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_int(abuf, "forwardingTimeout", rifs->fwdtimer);
+
+
+  abuf_json_int(abuf, "sgwZeroBwTimeout", rifs->sgw_sgw_zero_bw_timeout);
+
+
+  // netbuf
+
+
+  // gen_properties
+
+
+  abuf_json_int(abuf, "ttlIndex", rifs->ttl_index);
+
+
+  abuf_json_boolean(abuf, "immediateSendTc", rifs->immediate_send_tc);
+
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
+#ifdef __linux__
+static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gateway_entry * current_gw, struct gateway_entry * gw) {
+  struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+
+  abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
+  abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
+  abuf_json_ip_address(abuf, "originator", &gw->originator);
+  abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
+  abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
+  abuf_json_int(abuf, "uplink", gw->uplink);
+  abuf_json_int(abuf, "downlink", gw->downlink);
+  abuf_json_int(abuf, "cost", gw->path_cost);
+  abuf_json_boolean(abuf, "IPv4", gw->ipv4);
+  abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
+  abuf_json_boolean(abuf, "IPv6", gw->ipv6);
+  abuf_json_int(abuf, "expireTime", gw->expire_timer ? (gw->expire_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "cleanupTime", gw->cleanup_timer ? (gw->cleanup_timer->timer_clock - now_times) : 0);
+
+  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+  abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
+}
+#endif /* __linux__ */
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct neighbor_entry *neigh;
@@ -396,15 +565,6 @@ void ipc_print_topology(struct autobuf *abuf) {
   abuf_json_mark_object(false, true, abuf, NULL);
 }
 
-static void print_hna_array_entry(struct autobuf *abuf, union olsr_ip_addr *gw, union olsr_ip_addr *ip, uint8_t prefix_len, long long validityTime) {
-  abuf_json_mark_array_entry(true, abuf);
-  abuf_json_ip_address(abuf, "gateway", gw);
-  abuf_json_ip_address(abuf, "destination", ip);
-  abuf_json_int(abuf, "genmask", prefix_len);
-  abuf_json_int(abuf, "validityTime", validityTime);
-  abuf_json_mark_array_entry(false, abuf);
-}
-
 void ipc_print_hna(struct autobuf *abuf) {
   struct ip_prefix_list *hna;
   struct hna_entry *tmp_hna;
@@ -474,27 +634,6 @@ void ipc_print_mid(struct autobuf *abuf) {
 }
 
 #ifdef __linux__
-
-static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gateway_entry * current_gw, struct gateway_entry * gw) {
-  struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
-
-  abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
-  abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
-  abuf_json_ip_address(abuf, "originator", &gw->originator);
-  abuf_json_ip_address(abuf, "prefix", &gw->external_prefix.prefix);
-  abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
-  abuf_json_int(abuf, "uplink", gw->uplink);
-  abuf_json_int(abuf, "downlink", gw->downlink);
-  abuf_json_int(abuf, "cost", gw->path_cost);
-  abuf_json_boolean(abuf, "IPv4", gw->ipv4);
-  abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
-  abuf_json_boolean(abuf, "IPv6", gw->ipv6);
-  abuf_json_int(abuf, "expireTime", gw->expire_timer ? (gw->expire_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "cleanupTime", gw->cleanup_timer ? (gw->cleanup_timer->timer_clock - now_times) : 0);
-
-  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
-  abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
-}
 
 static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
@@ -609,86 +748,6 @@ void ipc_print_olsrd_conf(struct autobuf *abuf) {
   olsrd_write_cnf_autobuf(abuf, olsr_cnf);
 }
 
-static void print_interface_olsr(struct autobuf *abuf, const char * name, struct interface_olsr * rifs) {
-  struct ipaddr_str addrbuf;
-
-  abuf_json_mark_object(true, false, abuf, name);
-  if (!rifs) {
-    abuf_json_string(abuf, "state", "down");
-    abuf_json_mark_object(false, false, abuf, NULL);
-    return;
-  }
-
-  abuf_json_string(abuf, "state", "up");
-
-  abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
-  abuf_json_string(abuf, "ipv4Netmask", ip4_to_string(&addrbuf, rifs->int_netmask.sin_addr));
-  abuf_json_string(abuf, "ipv4Broadcast", ip4_to_string(&addrbuf, rifs->int_broadaddr.sin_addr));
-  abuf_json_string(abuf, "mode", OLSR_IF_MODE[rifs->mode]);
-
-  abuf_json_string(abuf, "ipv6Address", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr));
-  abuf_json_string(abuf, "ipv6Multicast", ip6_to_string(&addrbuf, &rifs->int6_multaddr.sin6_addr));
-
-  abuf_json_ip_address(abuf, "ipAddress", &rifs->ip_addr);
-  abuf_json_boolean(abuf, "emulatedInterface", rifs->is_hcif);
-
-  abuf_json_int(abuf, "olsrSocket", rifs->olsr_socket);
-  abuf_json_int(abuf, "sendSocket", rifs->send_socket);
-
-  abuf_json_int(abuf, "metric", rifs->int_metric);
-  abuf_json_int(abuf, "mtu", rifs->int_mtu);
-  abuf_json_int(abuf, "flags", rifs->int_flags);
-  abuf_json_int(abuf, "index", rifs->if_index);
-  abuf_json_boolean(abuf, "wireless", rifs->is_wireless);
-  abuf_json_string(abuf, "name", rifs->int_name);
-  abuf_json_int(abuf, "seqNum", rifs->olsr_seqnum);
-
-
-  abuf_json_int(abuf, "helloTime", rifs->hello_gen_timer ? (long) (rifs->hello_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "hnaTime", rifs->hna_gen_timer ? (long) (rifs->hna_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "midTime", rifs->mid_gen_timer ? (long) (rifs->mid_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "tcTime", rifs->tc_gen_timer ? (long) (rifs->tc_gen_timer->timer_clock - now_times) : 0);
-
-#ifdef __linux__
-
-
-
-
-  abuf_json_boolean(abuf, "icmpRedirectBackup", rifs->nic_state.redirect);
-
-
-  abuf_json_boolean(abuf, "spoofFilterBackup", rifs->nic_state.spoof);
-
-#endif /* __linux__ */
-
-  abuf_json_int(abuf, "helloEmissionInterval", rifs->hello_etime);
-  abuf_json_mark_object(true, false, abuf, "validityTimes");
-  abuf_json_int(abuf, "hello", me_to_reltime(rifs->valtimes.hello));
-  abuf_json_int(abuf, "tc", me_to_reltime(rifs->valtimes.tc));
-  abuf_json_int(abuf, "mid", me_to_reltime(rifs->valtimes.mid));
-  abuf_json_int(abuf, "hna", me_to_reltime(rifs->valtimes.hna));
-  abuf_json_mark_object(false, false, abuf, NULL);
-
-  abuf_json_int(abuf, "forwardingTimeout", rifs->fwdtimer);
-
-
-  abuf_json_int(abuf, "sgwZeroBwTimeout", rifs->sgw_sgw_zero_bw_timeout);
-
-
-  // netbuf
-
-
-  // gen_properties
-
-
-  abuf_json_int(abuf, "ttlIndex", rifs->ttl_index);
-
-
-  abuf_json_boolean(abuf, "immediateSendTc", rifs->immediate_send_tc);
-
-  abuf_json_mark_object(false, false, abuf, NULL);
-}
-
 void ipc_print_interfaces(struct autobuf *abuf) {
   struct olsr_if *ifs;
 
@@ -709,66 +768,6 @@ void ipc_print_interfaces(struct autobuf *abuf) {
 
 void ipc_print_twohop(struct autobuf *abuf) {
   ipc_print_neighbors_internal(abuf, true);
-}
-
-static void print_msg_params(struct autobuf *abuf, struct olsr_msg_params *params, const char * name) {
-  assert(abuf);
-  assert(params);
-  assert(name);
-
-  abuf_json_mark_object(true, false, abuf, name);
-  abuf_json_float(abuf, "emissionInterval", params->emission_interval);
-  abuf_json_float(abuf, "validityTime", params->validity_time);
-  abuf_json_mark_object(false, false, abuf, NULL);
-}
-
-static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, struct olsr_lq_mult *mult) {
-  assert(abuf);
-  assert(mult);
-
-  abuf_json_mark_array_entry(true, abuf);
-  abuf_json_ip_address(abuf, "route", &mult->addr);
-  abuf_json_float(abuf, "multiplier", mult->value / 65535.0);
-  abuf_json_mark_array_entry(false, abuf);
-}
-
-static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_list *ipc_nets) {
-  abuf_json_mark_array_entry(true, abuf);
-  abuf_json_boolean(abuf, "host", (ipc_nets->net.prefix_len == olsr_cnf->maxplen));
-  abuf_json_ip_address(abuf, "ipAddress", &ipc_nets->net.prefix);
-  abuf_json_int(abuf, "genmask", ipc_nets->net.prefix_len);
-  abuf_json_mark_array_entry(false, abuf);
-}
-
-static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id) {
-  abuf_json_mark_object(true, false, abuf, name);
-  {
-    struct olsr_lq_mult *mult;
-
-    abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
-    abuf_json_ip_address(abuf, "ipv6Multicast", &id->ipv6_multicast);
-
-    abuf_json_ip_address(abuf, "ipv4Source", &id->ipv4_src);
-    abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
-    abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
-
-    abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
-
-    abuf_json_int(abuf, "weightValue", id->weight.value);
-    abuf_json_boolean(abuf, "weightFixed", id->weight.fixed);
-    print_msg_params(abuf, &id->hello_params, "hello");
-    print_msg_params(abuf, &id->tc_params, "tc");
-    print_msg_params(abuf, &id->mid_params, "mid");
-    print_msg_params(abuf, &id->hna_params, "hna");
-    abuf_json_mark_object(true, true, abuf, "linkQualityMultipliers");
-    for (mult = olsr_cnf->interface_defaults->lq_mult; mult != NULL ; mult = mult->next) {
-      print_link_quality_multipliers_array_entry(abuf, mult);
-    }
-    abuf_json_mark_object(false, true, abuf, NULL);
-    abuf_json_int(abuf, "linkQualityMultipliersCount", id->orig_lq_mult_cnt);
-    abuf_json_boolean(abuf, "autoDetectChanges", id->autodetect_chg);
-  }
-  abuf_json_mark_object(false, false, abuf, NULL);
 }
 
 void ipc_print_config(struct autobuf *abuf) {
