@@ -55,6 +55,7 @@
 
 static info_plugin_functions_t functions = { //
     //
+        .supportsCompositeCommands = true, //
         .init = plugin_init, //
         .is_command = isCommand, //
         .determine_mime_type = determine_mime_type, //

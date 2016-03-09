@@ -110,7 +110,7 @@ static char * skipMultipleSlashes(char * requ) {
   return r;
 }
 
-static unsigned int determine_action(char *requ) {
+static unsigned int determine_single_action(char *requ) {
   static unsigned int SIW_ENTRIES[] = {
   //
       SIW_OLSRD_CONF,//
@@ -153,6 +153,70 @@ static unsigned int determine_action(char *requ) {
   }
 
   return 0;
+}
+
+static unsigned int determine_action(char *requ) {
+  if (!functions->is_command) {
+    return 0;
+  }
+
+  if (!requ || (requ[0] == '\0')) {
+    /* no more text */
+    return 0;
+  }
+
+  /* requ is guaranteed to be at least 1 character long */
+
+  if (!functions->supportsCompositeCommands) {
+    /* no support for composite commands */
+    return determine_single_action(requ);
+  }
+
+  /* composite commands */
+
+  {
+    unsigned int action = 0;
+
+    char * requestSegment = requ;
+    while (requestSegment) {
+      requestSegment = skipMultipleSlashes(requestSegment);
+      if (requestSegment[0] == '\0') {
+        /* there is no more text */
+        requestSegment = NULL;
+        continue;
+      }
+
+      /* there is more text */
+
+      {
+        unsigned int r = 0;
+        char * requestSegmentTail = strchr(&requestSegment[1], '/');
+
+        if (!requestSegmentTail) {
+          /* there isn't another slash, process everything that is left */
+          r = determine_single_action(requestSegment);
+        } else {
+          /* there is another slash, process everything before the slash */
+          char savedCharacter = *requestSegmentTail;
+          *requestSegmentTail = '\0';
+          r = determine_single_action(requestSegment);
+          *requestSegmentTail = savedCharacter;
+        }
+
+        if (!r) {
+          /* not found */
+          return 0;
+        }
+
+        action |= r;
+
+        /* process everything that is left in the next iteration */
+        requestSegment = requestSegmentTail;
+      }
+    }
+
+    return action;
+  }
 }
 
 static void write_data(void *fullyWritten) {

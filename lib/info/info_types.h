@@ -82,6 +82,7 @@ typedef void (*printer_error)(struct autobuf *abuf, unsigned int status, const c
 typedef void (*printer_generic)(struct autobuf *abuf);
 
 typedef struct {
+    bool supportsCompositeCommands;
     init_plugin init;
     command_matcher is_command;
     mime_type determine_mime_type;
