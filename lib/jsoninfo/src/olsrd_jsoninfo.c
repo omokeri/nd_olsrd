@@ -217,6 +217,8 @@ static void print_msg_params(struct autobuf *abuf, struct olsr_msg_params *param
 }
 
 static void print_hna_array_entry(struct autobuf *abuf, union olsr_ip_addr *gw, union olsr_ip_addr *ip, uint8_t prefix_len, long long validityTime) {
+  assert(abuf);
+
   abuf_json_mark_array_entry(true, abuf);
   abuf_json_ip_address(abuf, "gateway", gw);
   abuf_json_ip_address(abuf, "destination", ip);
@@ -236,6 +238,9 @@ static void print_link_quality_multipliers_array_entry(struct autobuf *abuf, str
 }
 
 static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_list *ipc_nets) {
+  assert(abuf);
+  assert(ipc_nets);
+
   abuf_json_mark_array_entry(true, abuf);
   abuf_json_boolean(abuf, "host", (ipc_nets->net.prefix_len == olsr_cnf->maxplen));
   abuf_json_ip_address(abuf, "ipAddress", &ipc_nets->net.prefix);
@@ -244,6 +249,9 @@ static void print_ipc_net_array_entry(struct autobuf *abuf, struct ip_prefix_lis
 }
 
 static void print_interface_config(struct autobuf *abuf, const char * name, struct if_config_options* id) {
+  assert(abuf);
+  assert(name);
+
   abuf_json_mark_object(true, false, abuf, name);
   {
     struct olsr_lq_mult *mult;
@@ -276,6 +284,9 @@ static void print_interface_config(struct autobuf *abuf, const char * name, stru
 
 static void print_interface_olsr(struct autobuf *abuf, const char * name, struct interface_olsr * rifs) {
   struct ipaddr_str addrbuf;
+
+  assert(abuf);
+  assert(name);
 
   abuf_json_mark_object(true, false, abuf, name);
   if (!rifs) {
@@ -356,7 +367,12 @@ static void print_interface_olsr(struct autobuf *abuf, const char * name, struct
 
 #ifdef __linux__
 static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gateway_entry * current_gw, struct gateway_entry * gw) {
-  struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
+  struct tc_entry* tc;
+
+  assert(abuf);
+  assert(gw);
+
+  tc = olsr_lookup_tc_entry(&gw->originator);
 
   abuf_json_boolean(abuf, "selected", current_gw && (current_gw == gw));
   abuf_json_boolean(abuf, "selectable", isGwSelectable(gw, ipv6));
@@ -379,6 +395,8 @@ static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gate
 
 static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
   struct neighbor_entry *neigh;
+
+  assert(abuf);
 
   if (!list_2hop) {
     abuf_json_mark_object(true, true, abuf, "neighbors");
@@ -636,6 +654,8 @@ void ipc_print_mid(struct autobuf *abuf) {
 #ifdef __linux__
 
 static void ipc_print_gateways_ipvx(struct autobuf *abuf, bool ipv6) {
+  assert(abuf);
+
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
 
   if (olsr_cnf->smart_gw_active) {
@@ -686,7 +706,11 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
  * @param fmtv the format for printing
  */
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
-  struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
+  struct interfaceName * sgwTunnelInterfaceNames;
+
+  assert(abuf);
+
+  sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
 
   abuf_json_mark_object(true, true, abuf, ipv6 ? "ipv6" : "ipv4");
 
