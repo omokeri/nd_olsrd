@@ -263,7 +263,7 @@ static void print_interface_config(struct autobuf *abuf, const char * name, stru
     abuf_json_ip_address(abuf, "ipv6Source", &id->ipv6_src.prefix);
     abuf_json_int(abuf, "ipv6SourcePrefixLength", id->ipv6_src.prefix_len);
 
-    abuf_json_string(abuf, "mode", OLSR_IF_MODE[id->mode]);
+    abuf_json_string(abuf, "mode", ((id->mode < IF_MODE_MESH) || (id->mode >= IF_MODE_CNT)) ? "" : OLSR_IF_MODE[id->mode]);
 
     abuf_json_int(abuf, "weightValue", id->weight.value);
     abuf_json_boolean(abuf, "weightFixed", id->weight.fixed);
@@ -300,7 +300,7 @@ static void print_interface_olsr(struct autobuf *abuf, const char * name, struct
   abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
   abuf_json_string(abuf, "ipv4Netmask", ip4_to_string(&addrbuf, rifs->int_netmask.sin_addr));
   abuf_json_string(abuf, "ipv4Broadcast", ip4_to_string(&addrbuf, rifs->int_broadaddr.sin_addr));
-  abuf_json_string(abuf, "mode", OLSR_IF_MODE[rifs->mode]);
+  abuf_json_string(abuf, "mode", ((rifs->mode < IF_MODE_MESH) || (rifs->mode >= IF_MODE_CNT)) ? "" : OLSR_IF_MODE[rifs->mode]);
 
   abuf_json_string(abuf, "ipv6Address", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr));
   abuf_json_string(abuf, "ipv6Multicast", ip6_to_string(&addrbuf, &rifs->int6_multaddr.sin6_addr));
@@ -818,7 +818,7 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_boolean(abuf, "willingnessAuto", olsr_cnf->willingness_auto);
   // ipc_connections: later
   abuf_json_boolean(abuf, "useHysteresis", olsr_cnf->use_hysteresis);
-  abuf_json_string(abuf, "fibMetric", FIB_METRIC_TXT[olsr_cnf->fib_metric]);
+  abuf_json_string(abuf, "fibMetric", ((olsr_cnf->fib_metric < FIBM_FLAT) || (olsr_cnf->fib_metric >= FIBM_CNT)) ? "" : FIB_METRIC_TXT[olsr_cnf->fib_metric]);
   abuf_json_string(abuf, "fibMetricDefault", FIB_METRIC_TXT[olsr_cnf->fib_metric_default]);
   abuf_json_float(abuf, "hystScaling", olsr_cnf->hysteresis_param.scaling);
   abuf_json_float(abuf, "hystThrLow", olsr_cnf->hysteresis_param.thr_low);
@@ -897,7 +897,7 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(abuf, "smartGatewayWeightEtx", olsr_cnf->smart_gw_weight_etx);
   abuf_json_int(abuf, "smartGatewayDividerEtx", olsr_cnf->smart_gw_divider_etx);
   abuf_json_int(abuf, "smartGatewayMaxCostMaxEtx", olsr_cnf->smart_gw_path_max_cost_etx_max);
-  abuf_json_string(abuf, "smartGatewayUplink", GW_UPLINK_TXT[olsr_cnf->smart_gw_type]);
+  abuf_json_string(abuf, "smartGatewayUplink", ((olsr_cnf->smart_gw_type < GW_UPLINK_NONE) || (olsr_cnf->smart_gw_type >= GW_UPLINK_CNT)) ? "" : GW_UPLINK_TXT[olsr_cnf->smart_gw_type]);
   abuf_json_int(abuf, "smartGatewayUplinkKbps", olsr_cnf->smart_gw_uplink);
   abuf_json_int(abuf, "smartGatewayDownlinkKbps", olsr_cnf->smart_gw_downlink);
   abuf_json_boolean(abuf, "smartGatewayBandwidthZero", olsr_cnf->smart_gateway_bandwidth_zero);
