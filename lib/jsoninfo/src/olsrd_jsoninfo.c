@@ -253,7 +253,7 @@ static void print_interface_config(struct autobuf *abuf, const char * name, stru
   assert(name);
 
   abuf_json_mark_object(true, false, abuf, name);
-  {
+  if (id) {
     struct olsr_lq_mult *mult;
 
     abuf_json_ip_address(abuf, "ipv4Broadcast", &id->ipv4_multicast);
