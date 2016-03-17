@@ -428,7 +428,7 @@ static void ipc_print_neighbors_internal(struct autobuf *abuf, bool list_2hop) {
     thop_cnt = 0;
     for (list_2 = neigh->neighbor_2_list.next; list_2 != &neigh->neighbor_2_list; list_2 = list_2->next) {
       if (list_2hop && list_2->neighbor_2) {
-        abuf_json_ip_address(abuf, NULL, list_2->neighbor_2 ? &list_2->neighbor_2->neighbor_2_addr : NULL);
+        abuf_json_ip_address(abuf, NULL, &list_2->neighbor_2->neighbor_2_addr);
       }
       thop_cnt++;
     }
