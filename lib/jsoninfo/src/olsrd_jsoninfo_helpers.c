@@ -211,7 +211,7 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
   const char * value;
 
   assert(abuf);
-  assert(key);
+  assert(key || ip);
 
   if (!ip) {
     value = empty;
@@ -221,7 +221,11 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
 
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
+  if (!key) {
+    abuf_appendf(abuf, "\"%s\"", value);
+  } else {
+    abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
+  }
   entrynumber[currentjsondepth]++;
 }
 
