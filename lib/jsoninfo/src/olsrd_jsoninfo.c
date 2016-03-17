@@ -1004,14 +1004,11 @@ void ipc_print_plugins(struct autobuf *abuf) {
       abuf_json_mark_array_entry(true, abuf);
       abuf_json_string(abuf, "plugin", plugin->name);
 
-      abuf_json_mark_object(true, true, abuf, "parameters");
+      abuf_json_mark_object(true, false, abuf, "parameters");
       for (param = plugin->params; param; param = param->next) {
-        abuf_json_mark_array_entry(true, abuf);
-        abuf_json_string(abuf, "name", param->key);
-        abuf_json_string(abuf, "value", param->value);
-        abuf_json_mark_array_entry(false, abuf);
+        abuf_json_string(abuf, param->key, param->value);
       }
-      abuf_json_mark_object(false, true, abuf, NULL);
+      abuf_json_mark_object(false, false, abuf, NULL);
 
       abuf_json_mark_array_entry(false, abuf);
     }
