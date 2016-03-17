@@ -627,8 +627,12 @@ void ipc_print_mid(struct autobuf *abuf) {
 
     while (entry != &mid_set[idx]) {
       abuf_json_mark_array_entry(true, abuf);
+
+      abuf_json_mark_object(true, false, abuf, "main");
       abuf_json_ip_address(abuf, "ipAddress", &entry->main_addr);
       abuf_json_int(abuf, "validityTime", entry->mid_timer ? (entry->mid_timer->timer_clock - now_times) : 0);
+      abuf_json_mark_object(false, false, abuf, NULL); // main
+
       {
         struct mid_address * alias = entry->aliases;
 
