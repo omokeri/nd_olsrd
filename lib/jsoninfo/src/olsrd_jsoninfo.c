@@ -283,8 +283,6 @@ static void print_interface_config(struct autobuf *abuf, const char * name, stru
 }
 
 static void print_interface_olsr(struct autobuf *abuf, const char * name, struct interface_olsr * rifs) {
-  struct ipaddr_str addrbuf;
-
   assert(abuf);
   assert(name);
 
@@ -295,13 +293,13 @@ static void print_interface_olsr(struct autobuf *abuf, const char * name, struct
     return;
   }
 
-  abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
-  abuf_json_string(abuf, "ipv4Netmask", ip4_to_string(&addrbuf, rifs->int_netmask.sin_addr));
-  abuf_json_string(abuf, "ipv4Broadcast", ip4_to_string(&addrbuf, rifs->int_broadaddr.sin_addr));
+  abuf_json_ip_address46(abuf, "ipv4Address", &rifs->int_addr.sin_addr, AF_INET);
+  abuf_json_ip_address46(abuf, "ipv4Netmask", &rifs->int_netmask.sin_addr, AF_INET);
+  abuf_json_ip_address46(abuf, "ipv4Broadcast", &rifs->int_broadaddr.sin_addr, AF_INET);
   abuf_json_string(abuf, "mode", ((rifs->mode < IF_MODE_MESH) || (rifs->mode >= IF_MODE_CNT)) ? "" : OLSR_IF_MODE[rifs->mode]);
 
-  abuf_json_string(abuf, "ipv6Address", ip6_to_string(&addrbuf, &rifs->int6_addr.sin6_addr));
-  abuf_json_string(abuf, "ipv6Multicast", ip6_to_string(&addrbuf, &rifs->int6_multaddr.sin6_addr));
+  abuf_json_ip_address46(abuf, "ipv6Address", &rifs->int6_addr.sin6_addr, AF_INET6);
+  abuf_json_ip_address46(abuf, "ipv6Multicast", &rifs->int6_multaddr.sin6_addr, AF_INET6);
 
   abuf_json_ip_address(abuf, "ipAddress", &rifs->ip_addr);
   abuf_json_boolean(abuf, "emulatedInterface", rifs->is_hcif);
