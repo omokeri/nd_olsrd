@@ -229,6 +229,31 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
   entrynumber[currentjsondepth]++;
 }
 
+void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int af) {
+  struct ipaddr_str ipStr;
+  const char * value;
+
+  assert(abuf);
+  assert(key || ip);
+
+  if (!ip) {
+    value = empty;
+  } else if (af == AF_INET) {
+    value = ip4_to_string(&ipStr, *((const struct in_addr*) ip));
+  } else {
+    value = ip6_to_string(&ipStr, (const struct in6_addr * const ) ip);
+  }
+
+  abuf_json_insert_comma(abuf);
+  abuf_json_new_indent(abuf);
+  if (!key) {
+    abuf_appendf(abuf, "\"%s\"", value);
+  } else {
+    abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
+  }
+  entrynumber[currentjsondepth]++;
+}
+
 /* Linux specific functions for getting system info */
 
 int read_uuid_from_file(const char * name, const char *file) {
