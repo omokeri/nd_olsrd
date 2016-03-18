@@ -51,7 +51,7 @@ extern struct timeval start_time;
 
 void plugin_init(const char * plugin_name);
 
-bool isCommand(const char *str, unsigned int siw);
+bool isCommand(const char *str, unsigned long long siw);
 
 const char * determine_mime_type(unsigned int send_what);
 

@@ -111,7 +111,7 @@ static char * skipMultipleSlashes(char * requ) {
 }
 
 static unsigned int determine_single_action(char *requ) {
-  static unsigned int SIW_ENTRIES[] = {
+  static unsigned long long SIW_ENTRIES[] = {
   //
       SIW_OLSRD_CONF,//
       SIW_ALL, //
@@ -147,7 +147,7 @@ static unsigned int determine_single_action(char *requ) {
     return 0;
 
   for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES); ++i) {
-    unsigned int siw = SIW_ENTRIES[i];
+    unsigned long long siw = SIW_ENTRIES[i];
     if (functions->is_command(requ, siw))
       return siw;
   }

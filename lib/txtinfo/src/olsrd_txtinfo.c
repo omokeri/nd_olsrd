@@ -56,7 +56,7 @@
 #include "../../info/http_headers.h"
 #include "gateway_default_handler.h"
 
-bool isCommand(const char *str, unsigned int siw) {
+bool isCommand(const char *str, unsigned long long siw) {
   const char * cmd;
   switch (siw) {
     case SIW_OLSRD_CONF:

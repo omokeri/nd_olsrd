@@ -72,7 +72,7 @@ void plugin_init(const char *plugin_name) {
   read_uuid_from_file(plugin_name, uuidfile);
 }
 
-bool isCommand(const char *str, unsigned int siw) {
+bool isCommand(const char *str, unsigned long long siw) {
   const char * cmd;
   switch (siw) {
     case SIW_OLSRD_CONF:
