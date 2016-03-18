@@ -153,7 +153,7 @@ void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) 
   const char * val;
 
   assert(abuf);
-  assert(key);
+  assert(key || value);
 
   if (!value) {
     val = empty;
@@ -163,7 +163,11 @@ void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) 
 
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
-  abuf_appendf(abuf, "\"%s\": \"%s\"", key, val);
+  if (!key) {
+    abuf_appendf(abuf, "\"%s\"", value);
+  } else {
+    abuf_appendf(abuf, "\"%s\": \"%s\"", key, val);
+  }
   entrynumber[currentjsondepth]++;
 }
 
