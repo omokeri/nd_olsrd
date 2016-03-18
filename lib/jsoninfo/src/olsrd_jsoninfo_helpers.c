@@ -254,8 +254,6 @@ void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int
   entrynumber[currentjsondepth]++;
 }
 
-/* Linux specific functions for getting system info */
-
 int read_uuid_from_file(const char * name, const char *file) {
   FILE *f;
   char* end;
