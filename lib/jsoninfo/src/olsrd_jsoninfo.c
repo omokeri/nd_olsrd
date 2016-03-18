@@ -289,13 +289,11 @@ static void print_interface_olsr(struct autobuf *abuf, const char * name, struct
   assert(name);
 
   abuf_json_mark_object(true, false, abuf, name);
+  abuf_json_boolean(abuf, "up", rifs != NULL);
   if (!rifs) {
-    abuf_json_string(abuf, "state", "down");
     abuf_json_mark_object(false, false, abuf, NULL);
     return;
   }
-
-  abuf_json_string(abuf, "state", "up");
 
   abuf_json_string(abuf, "ipv4Address", ip4_to_string(&addrbuf, rifs->int_addr.sin_addr));
   abuf_json_string(abuf, "ipv4Netmask", ip4_to_string(&addrbuf, rifs->int_netmask.sin_addr));
