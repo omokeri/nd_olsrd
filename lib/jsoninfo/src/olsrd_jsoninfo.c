@@ -316,10 +316,12 @@ static void print_interface_olsr(struct autobuf *abuf, const char * name, struct
   abuf_json_int(abuf, "seqNum", rifs->olsr_seqnum);
 
 
-  abuf_json_int(abuf, "helloTime", rifs->hello_gen_timer ? (long) (rifs->hello_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "hnaTime", rifs->hna_gen_timer ? (long) (rifs->hna_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "midTime", rifs->mid_gen_timer ? (long) (rifs->mid_gen_timer->timer_clock - now_times) : 0);
-  abuf_json_int(abuf, "tcTime", rifs->tc_gen_timer ? (long) (rifs->tc_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_mark_object(true, false, abuf, "messageTimes");
+  abuf_json_int(abuf, "hello", rifs->hello_gen_timer ? (long) (rifs->hello_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "tc", rifs->tc_gen_timer ? (long) (rifs->tc_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "mid", rifs->mid_gen_timer ? (long) (rifs->mid_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_int(abuf, "hna", rifs->hna_gen_timer ? (long) (rifs->hna_gen_timer->timer_clock - now_times) : 0);
+  abuf_json_mark_object(false, false, abuf, NULL);
 
 #ifdef __linux__
 
