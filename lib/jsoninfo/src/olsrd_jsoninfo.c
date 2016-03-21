@@ -803,26 +803,43 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_boolean(abuf, "noFork", olsr_cnf->no_fork);
   abuf_json_string(abuf, "pidFile", olsr_cnf->pidfile);
   abuf_json_boolean(abuf, "hostEmulation", olsr_cnf->host_emul);
-  abuf_json_int(abuf, "ipVersion", olsr_cnf->ip_version);
+  abuf_json_int(abuf, "ipVersion", (olsr_cnf->ip_version == AF_INET) ? 4 : 6);
   abuf_json_boolean(abuf, "allowNoInt", olsr_cnf->allow_no_interfaces);
   abuf_json_int(abuf, "tosValue", olsr_cnf->tos);
+
   abuf_json_int(abuf, "rtProto", olsr_cnf->rt_proto);
-  abuf_json_int(abuf, "rtTable", olsr_cnf->rt_table);
-  abuf_json_int(abuf, "rtTableDefault", olsr_cnf->rt_table_default);
-  abuf_json_int(abuf, "rtTableTunnel", olsr_cnf->rt_table_tunnel);
-  abuf_json_int(abuf, "rtTablePriority", olsr_cnf->rt_table_pri);
-  abuf_json_int(abuf, "rtTableTunnelPriority", olsr_cnf->rt_table_tunnel_pri);
-  abuf_json_int(abuf, "rtTableDefauiltOlsrPriority", olsr_cnf->rt_table_defaultolsr_pri);
-  abuf_json_int(abuf, "rtTableDefaultPriority", olsr_cnf->rt_table_default_pri);
+  abuf_json_mark_object(true, false, abuf, "rtTable");
+  abuf_json_int(abuf, "main", olsr_cnf->rt_table);
+  abuf_json_int(abuf, "default", olsr_cnf->rt_table_default);
+  abuf_json_int(abuf, "tunnel", olsr_cnf->rt_table_tunnel);
+  abuf_json_int(abuf, "priority", olsr_cnf->rt_table_pri);
+  abuf_json_int(abuf, "tunnelPriority", olsr_cnf->rt_table_tunnel_pri);
+  abuf_json_int(abuf, "defauiltOlsrPriority", olsr_cnf->rt_table_defaultolsr_pri);
+  abuf_json_int(abuf, "defaultPriority", olsr_cnf->rt_table_default_pri);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_mark_object(true, false, abuf, "willingness");
   abuf_json_int(abuf, "willingness", olsr_cnf->willingness);
-  abuf_json_boolean(abuf, "willingnessAuto", olsr_cnf->willingness_auto);
+  abuf_json_boolean(abuf, "auto", olsr_cnf->willingness_auto);
+  abuf_json_float(abuf, "updateInterval", olsr_cnf->will_int);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+
   // ipc_connections: later
-  abuf_json_boolean(abuf, "useHysteresis", olsr_cnf->use_hysteresis);
-  abuf_json_string(abuf, "fibMetric", ((olsr_cnf->fib_metric < FIBM_FLAT) || (olsr_cnf->fib_metric >= FIBM_CNT)) ? "" : FIB_METRIC_TXT[olsr_cnf->fib_metric]);
-  abuf_json_string(abuf, "fibMetricDefault", FIB_METRIC_TXT[olsr_cnf->fib_metric_default]);
-  abuf_json_float(abuf, "hystScaling", olsr_cnf->hysteresis_param.scaling);
-  abuf_json_float(abuf, "hystThrLow", olsr_cnf->hysteresis_param.thr_low);
-  abuf_json_float(abuf, "hystThrHigh", olsr_cnf->hysteresis_param.thr_high);
+
+  abuf_json_mark_object(true, false, abuf, "fib");
+  abuf_json_string(abuf, "metric", ((olsr_cnf->fib_metric < FIBM_FLAT) || (olsr_cnf->fib_metric >= FIBM_CNT)) ? "" : FIB_METRIC_TXT[olsr_cnf->fib_metric]);
+  abuf_json_string(abuf, "metricDefault", FIB_METRIC_TXT[olsr_cnf->fib_metric_default]);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+
+  abuf_json_mark_object(true, false, abuf, "hysteresis");
+  abuf_json_boolean(abuf, "enabled", olsr_cnf->use_hysteresis);
+  abuf_json_float(abuf, "scaling", olsr_cnf->hysteresis_param.scaling);
+  abuf_json_float(abuf, "thresholdLow", olsr_cnf->hysteresis_param.thr_low);
+  abuf_json_float(abuf, "thresholdHigh", olsr_cnf->hysteresis_param.thr_high);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
   // plugins: later
   // hna_entries
   {
@@ -849,10 +866,14 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_boolean(abuf, "clearScreen", olsr_cnf->clear_screen);
   abuf_json_int(abuf, "tcRedundancy", olsr_cnf->tc_redundancy);
   abuf_json_int(abuf, "mprCoverage", olsr_cnf->mpr_coverage);
-  abuf_json_int(abuf, "linkQualityLevel", olsr_cnf->lq_level);
-  abuf_json_boolean(abuf, "linkQualityFishEye", olsr_cnf->lq_fish);
-  abuf_json_float(abuf, "linkQualityAging", olsr_cnf->lq_aging);
-  abuf_json_string(abuf, "linkQualityAlgorithm", olsr_cnf->lq_algorithm);
+
+
+  abuf_json_mark_object(true, false, abuf, "linkQuality");
+  abuf_json_int(abuf, "level", olsr_cnf->lq_level);
+  abuf_json_boolean(abuf, "fishEye", olsr_cnf->lq_fish);
+  abuf_json_float(abuf, "aging", olsr_cnf->lq_aging);
+  abuf_json_string(abuf, "algorithm", olsr_cnf->lq_algorithm);
+  abuf_json_mark_object(false, false, abuf, NULL);
 
   abuf_json_float(abuf, "minTCVTime", olsr_cnf->min_tc_vtime);
 
@@ -861,48 +882,62 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_string(abuf, "lockFile", olsr_cnf->lock_file);
   abuf_json_boolean(abuf, "useNiit", olsr_cnf->use_niit);
 
-  abuf_json_boolean(abuf, "smartGateway", olsr_cnf->smart_gw_active);
-  abuf_json_boolean(abuf, "smartGatewayAlwaysRemoveServerTunnel", olsr_cnf->smart_gw_always_remove_server_tunnel);
-  abuf_json_boolean(abuf, "smartGatewayAllowNAT", olsr_cnf->smart_gw_allow_nat);
-  abuf_json_boolean(abuf, "smartGatewayUplinkNAT", olsr_cnf->smart_gw_uplink_nat);
-  abuf_json_int(abuf, "smartGatewayUseCount", olsr_cnf->smart_gw_use_count);
-  abuf_json_int(abuf, "smartGatewayTakeDownPercentage", olsr_cnf->smart_gw_takedown_percentage);
-  abuf_json_string(abuf, "smartGatewayInstanceId", olsr_cnf->smart_gw_instance_id);
-  abuf_json_string(abuf, "smartGatewayPolicyRoutingScript", olsr_cnf->smart_gw_policyrouting_script);
+  abuf_json_mark_object(true, false, abuf, "smartGateway");
+  abuf_json_boolean(abuf, "enabled", olsr_cnf->smart_gw_active);
+  abuf_json_boolean(abuf, "alwaysRemoveServerTunnel", olsr_cnf->smart_gw_always_remove_server_tunnel);
+  abuf_json_boolean(abuf, "allowNAT", olsr_cnf->smart_gw_allow_nat);
+  abuf_json_boolean(abuf, "uplinkNAT", olsr_cnf->smart_gw_uplink_nat);
+  abuf_json_int(abuf, "useCount", olsr_cnf->smart_gw_use_count);
+  abuf_json_int(abuf, "takeDownPercentage", olsr_cnf->smart_gw_takedown_percentage);
+  abuf_json_string(abuf, "instanceId", olsr_cnf->smart_gw_instance_id);
+  abuf_json_string(abuf, "policyRoutingScript", olsr_cnf->smart_gw_policyrouting_script);
+
+  abuf_json_mark_object(true, false, abuf, "egress");
   // smart_gw_egress_interfaces
   {
     struct sgw_egress_if * egressif = olsr_cnf->smart_gw_egress_interfaces;
 
-    abuf_json_mark_object(true, true, abuf, "smartGatewayEgressInterfaces");
+    abuf_json_mark_object(true, true, abuf, "interfaces");
     while (egressif) {
-      abuf_json_mark_array_entry(true, abuf);
-      abuf_json_string(abuf, "interface", egressif->name);
-      abuf_json_mark_array_entry(false, abuf);
-
+      abuf_json_string(abuf, NULL, egressif->name);
       egressif = egressif->next;
     }
     abuf_json_mark_object(false, true, abuf, NULL);
   }
-  abuf_json_int(abuf, "smartGatewayEgressInterfacesCount", olsr_cnf->smart_gw_egress_interfaces_count);
-  abuf_json_string(abuf, "smartGatewayEgressFile", olsr_cnf->smart_gw_egress_file);
-  abuf_json_int(abuf, "smartGatewayEgressFilePeriod", olsr_cnf->smart_gw_egress_file_period);
-  abuf_json_string(abuf, "smartGatewayStatusFile", olsr_cnf->smart_gw_status_file);
-  abuf_json_int(abuf, "smartGatewayTablesOffset", olsr_cnf->smart_gw_offset_tables);
-  abuf_json_int(abuf, "smartGatewayRulesOffset", olsr_cnf->smart_gw_offset_rules);
-  abuf_json_int(abuf, "smartGatewayPeriod", olsr_cnf->smart_gw_period);
-  abuf_json_int(abuf, "smartGatewayStableCount", olsr_cnf->smart_gw_stablecount);
-  abuf_json_int(abuf, "smartGatewayThreshold", olsr_cnf->smart_gw_thresh);
-  abuf_json_int(abuf, "smartGatewayWeightExitLinkUp", olsr_cnf->smart_gw_weight_exitlink_up);
-  abuf_json_int(abuf, "smartGatewayWeightExitLinkDown", olsr_cnf->smart_gw_weight_exitlink_down);
-  abuf_json_int(abuf, "smartGatewayWeightEtx", olsr_cnf->smart_gw_weight_etx);
-  abuf_json_int(abuf, "smartGatewayDividerEtx", olsr_cnf->smart_gw_divider_etx);
-  abuf_json_int(abuf, "smartGatewayMaxCostMaxEtx", olsr_cnf->smart_gw_path_max_cost_etx_max);
-  abuf_json_string(abuf, "smartGatewayUplink", ((olsr_cnf->smart_gw_type < GW_UPLINK_NONE) || (olsr_cnf->smart_gw_type >= GW_UPLINK_CNT)) ? "" : GW_UPLINK_TXT[olsr_cnf->smart_gw_type]);
-  abuf_json_int(abuf, "smartGatewayUplinkKbps", olsr_cnf->smart_gw_uplink);
-  abuf_json_int(abuf, "smartGatewayDownlinkKbps", olsr_cnf->smart_gw_downlink);
-  abuf_json_boolean(abuf, "smartGatewayBandwidthZero", olsr_cnf->smart_gateway_bandwidth_zero);
-  abuf_json_ip_address(abuf, "smartGatewayPrefix", &olsr_cnf->smart_gw_prefix.prefix);
-  abuf_json_int(abuf, "smartGatewayPrefixLength", olsr_cnf->smart_gw_prefix.prefix_len);
+  abuf_json_int(abuf, "interfacesCount", olsr_cnf->smart_gw_egress_interfaces_count);
+  abuf_json_string(abuf, "file", olsr_cnf->smart_gw_egress_file);
+  abuf_json_int(abuf, "filePeriod", olsr_cnf->smart_gw_egress_file_period);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_string(abuf, "statusFile", olsr_cnf->smart_gw_status_file);
+  abuf_json_int(abuf, "tablesOffset", olsr_cnf->smart_gw_offset_tables);
+  abuf_json_int(abuf, "rulesOffset", olsr_cnf->smart_gw_offset_rules);
+  abuf_json_int(abuf, "period", olsr_cnf->smart_gw_period);
+  abuf_json_int(abuf, "stableCount", olsr_cnf->smart_gw_stablecount);
+  abuf_json_int(abuf, "threshold", olsr_cnf->smart_gw_thresh);
+
+  abuf_json_mark_object(true, false, abuf, "weight");
+  abuf_json_int(abuf, "exitLinkUp", olsr_cnf->smart_gw_weight_exitlink_up);
+  abuf_json_int(abuf, "exitLinkDown", olsr_cnf->smart_gw_weight_exitlink_down);
+  abuf_json_int(abuf, "etx", olsr_cnf->smart_gw_weight_etx);
+  abuf_json_int(abuf, "dividerEtx", olsr_cnf->smart_gw_divider_etx);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_int(abuf, "maxCostMaxEtx", olsr_cnf->smart_gw_path_max_cost_etx_max);
+  abuf_json_string(abuf, "uplink", ((olsr_cnf->smart_gw_type < GW_UPLINK_NONE) || (olsr_cnf->smart_gw_type >= GW_UPLINK_CNT)) ? "" : GW_UPLINK_TXT[olsr_cnf->smart_gw_type]);
+
+  abuf_json_mark_object(true, false, abuf, "bandwidth");
+  abuf_json_int(abuf, "uplinkKbps", olsr_cnf->smart_gw_uplink);
+  abuf_json_int(abuf, "downlinkKbps", olsr_cnf->smart_gw_downlink);
+  abuf_json_boolean(abuf, "bandwidthZero", olsr_cnf->smart_gateway_bandwidth_zero);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_mark_object(true, false, abuf, "prefix");
+  abuf_json_ip_address(abuf, "prefix", &olsr_cnf->smart_gw_prefix.prefix);
+  abuf_json_int(abuf, "length", olsr_cnf->smart_gw_prefix.prefix_len);
+  abuf_json_mark_object(false, false, abuf, NULL);
+
+  abuf_json_mark_object(false, false, abuf, NULL);
 
 
   abuf_json_ip_address(abuf, "mainIp", &olsr_cnf->main_addr);
@@ -913,7 +948,6 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(abuf, "maxPrefixLength", olsr_cnf->maxplen);
   abuf_json_int(abuf, "ipSize", olsr_cnf->ipsize);
   abuf_json_boolean(abuf, "delgw", olsr_cnf->del_gws);
-  abuf_json_float(abuf, "willingnessUpdateInterval", olsr_cnf->will_int);
   abuf_json_float(abuf, "maxSendMessageJitter", olsr_cnf->max_jitter);
   abuf_json_int(abuf, "exitValue", olsr_cnf->exit_value);
   abuf_json_float(abuf, "maxTcValidTime", olsr_cnf->max_tc_vtime);
