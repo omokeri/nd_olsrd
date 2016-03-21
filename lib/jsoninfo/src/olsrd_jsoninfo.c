@@ -916,7 +916,7 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(abuf, "stableCount", olsr_cnf->smart_gw_stablecount);
   abuf_json_int(abuf, "threshold", olsr_cnf->smart_gw_thresh);
 
-  abuf_json_mark_object(true, false, abuf, "weight");
+  abuf_json_mark_object(true, false, abuf, "costsCalculation");
   abuf_json_int(abuf, "exitLinkUp", olsr_cnf->smart_gw_weight_exitlink_up);
   abuf_json_int(abuf, "exitLinkDown", olsr_cnf->smart_gw_weight_exitlink_down);
   abuf_json_int(abuf, "etx", olsr_cnf->smart_gw_weight_etx);
