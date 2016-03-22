@@ -929,7 +929,6 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_mark_object(true, false, abuf, "bandwidth");
   abuf_json_int(abuf, "uplinkKbps", olsr_cnf->smart_gw_uplink);
   abuf_json_int(abuf, "downlinkKbps", olsr_cnf->smart_gw_downlink);
-  abuf_json_boolean(abuf, "bandwidthZero", olsr_cnf->smart_gateway_bandwidth_zero);
   abuf_json_mark_object(false, false, abuf, NULL);
 
   abuf_json_mark_object(true, false, abuf, "prefix");
