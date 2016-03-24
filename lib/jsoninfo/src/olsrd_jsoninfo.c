@@ -814,7 +814,7 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(abuf, "tunnel", olsr_cnf->rt_table_tunnel);
   abuf_json_int(abuf, "priority", olsr_cnf->rt_table_pri);
   abuf_json_int(abuf, "tunnelPriority", olsr_cnf->rt_table_tunnel_pri);
-  abuf_json_int(abuf, "defauiltOlsrPriority", olsr_cnf->rt_table_defaultolsr_pri);
+  abuf_json_int(abuf, "defaultOlsrPriority", olsr_cnf->rt_table_defaultolsr_pri);
   abuf_json_int(abuf, "defaultPriority", olsr_cnf->rt_table_default_pri);
   abuf_json_mark_object(false, false, abuf, NULL);
 
