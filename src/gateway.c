@@ -2145,7 +2145,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
       fprintf(fp, fmt_values, //
           selected ? "*" : " ", //selected
           IPLOCAL, // Originator
-          MASKNONE, // Prefix
+          MASKLOCAL, // Prefix
           egress_if->bwCurrent.egressUk, // Uplink
           egress_if->bwCurrent.egressDk, // Downlink
           egress_if->bwCurrent.path_cost, // PathCost
