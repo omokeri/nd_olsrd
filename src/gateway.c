@@ -2095,10 +2095,10 @@ static void printDate(FILE * f) {
  * <pre>
  * # multi-smart-gateway status overview, generated on October 10, 2014 at 08:27:15
  *
- * #Originator Prefix      Uplink Downlink PathCost   Type   Interface Gateway     Cost
- *  127.0.0.1  127.0.0.0/8 0      0        4294967295 egress ppp0      0.0.0.0     9223372036854775807
- *  127.0.0.1  127.0.0.0/8 0      0        4294967295 egress eth1      192.168.0.1 9223372036854775807
- * *0.0.0.0    0.0.0.0/0   290    1500     1024       olsr   tnl_4094  0.0.0.0     2182002287
+ * #Originator Prefix       Uplink  Downlink  PathCost    Type    Interface  Gateway      Cost
+ *  127.0.0.1  127.0.0.0/8  0       0         4294967295  egress  ppp0       0.0.0.0      9223372036854775807
+ *  127.0.0.1  127.0.0.0/8  0       0         4294967295  egress  eth1       192.168.0.1  9223372036854775807
+ * *10.0.0.1   0.0.0.0/0    290     1500      14669       olsr    tnl_4096   10.0.0.1     287940608
  * </pre>
  *
  * @param phase the phase of the change (startup/runtime/shutdown)
