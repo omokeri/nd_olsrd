@@ -69,4 +69,6 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
 
 void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int af);
 
+void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix);
+
 #endif /* _OLSRD_LIB_INFO_JSON_HELPERS_H_ */
