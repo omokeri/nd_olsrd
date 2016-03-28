@@ -289,6 +289,37 @@ static void write_data(void *fullyWritten) {
   }
 }
 
+typedef struct {
+  unsigned int siw;
+  printer_generic func;
+} SiwLookupTableEntry;
+
+static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, SiwLookupTableEntry *funcs, unsigned int funcsSize, unsigned int *outputLength) {
+  unsigned int i;
+  unsigned int preLength;
+
+  if (functions->output_start) {
+    functions->output_start(abuf);
+  }
+
+  preLength = abuf->len;
+
+  for (i = 0; i < funcsSize; i++) {
+    if (send_what & funcs[i].siw) {
+      printer_generic func = funcs[i].func;
+      if (func) {
+        func(abuf);
+      }
+    }
+  }
+
+  *outputLength = abuf->len - preLength;
+
+  if (functions->output_end) {
+    functions->output_end(abuf);
+  }
+}
+
 static void send_info(const char * req, unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
   unsigned int outputLength = 0;
@@ -309,11 +340,6 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
 
     // only add if normal format
     if (send_what & SIW_ALL) {
-      typedef struct {
-        unsigned int siw;
-        printer_generic func;
-      } SiwLookupTableEntry;
-
       SiwLookupTableEntry funcs[] = {
         { SIW_NEIGHBORS , functions->neighbors  }, //
         { SIW_LINKS     , functions->links      }, //
@@ -331,29 +357,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
         { SIW_PLUGINS   , functions->plugins    } //
       };
 
-      unsigned int i;
-      unsigned int preLength;
-
-      if (functions->output_start) {
-        functions->output_start(&abuf);
-      }
-
-      preLength = abuf.len;
-
-      for (i = 0; i < ARRAY_SIZE(funcs); i++) {
-        if (send_what & funcs[i].siw) {
-          printer_generic func = funcs[i].func;
-          if (func) {
-            func(&abuf);
-          }
-        }
-      }
-
-      outputLength = abuf.len - preLength;
-
-      if (functions->output_end) {
-        functions->output_end(&abuf);
-      }
+      send_info_from_table(&abuf, send_what, funcs, ARRAY_SIZE(funcs), &outputLength);
     } else if ((send_what & SIW_OLSRD_CONF) && functions->olsrd_conf) {
       /* this outputs the olsrd.conf text directly, not normal format */
       unsigned int preLength = abuf.len;
