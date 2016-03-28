@@ -39,16 +39,13 @@
  *
  */
 
-#ifndef LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
-#define LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_
+#ifndef _OLSRD_LIB_INFO_JSON_HELPERS_H_
+#define _OLSRD_LIB_INFO_JSON_HELPERS_H_
 
 #include <stdio.h>
 #include <stdbool.h>
 
 #include "common/autobuf.h"
-
-#define UUIDLEN 256
-extern char uuid[UUIDLEN];
 
 void abuf_json_reset_entry_number_and_depth(void);
 
@@ -72,6 +69,4 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
 
 void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int af);
 
-int read_uuid_from_file(const char * name, const char *file);
-
-#endif /* LIB_JSONINFO_SRC_OLSRD_JSONINFO_HELPERS_H_ */
+#endif /* _OLSRD_LIB_INFO_JSON_HELPERS_H_ */

@@ -39,7 +39,7 @@
  *
  */
 
-#include "olsrd_jsoninfo_helpers.h"
+#include "info_json_helpers.h"
 #include "olsr.h"
 #include "ipcalc.h"
 
@@ -54,8 +54,6 @@
 #endif /* __linux__ */
 
 static const char * empty = "";
-
-char uuid[UUIDLEN];
 
 /* JSON support functions */
 
@@ -256,39 +254,4 @@ void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int
     abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
   }
   entrynumber[currentjsondepth]++;
-}
-
-int read_uuid_from_file(const char * name, const char *file) {
-  FILE *f;
-  char* end;
-  int r = 0;
-  size_t chars;
-
-  assert(name);
-  assert(file);
-
-  memset(uuid, 0, sizeof(uuid));
-
-  f = fopen(file, "r");
-  olsr_printf(1, "(%s) Reading UUID from '%s'\n", name, file);
-  if (!f) {
-    olsr_printf(1, "(%s) Could not open '%s': %s\n", name, file, strerror(errno));
-    return -1;
-  }
-  chars = fread(uuid, 1, sizeof(uuid) - 1, f);
-  if (chars > 0) {
-    uuid[chars] = '\0'; /* null-terminate the string */
-
-    /* we only use the first line of the file */
-    end = strchr(uuid, '\n');
-    if (end)
-      *end = 0;
-    r = 0;
-  } else {
-    olsr_printf(1, "(%s) Could not read UUID from '%s': %s\n", name, file, strerror(errno));
-    r = -1;
-  }
-
-  fclose(f);
-  return r;
 }
