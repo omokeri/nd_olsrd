@@ -49,16 +49,16 @@
 #include "common/autobuf.h"
 
 /* these provide all of the runtime status info */
-#define SIW_NEIGHBORS 0x0001ULL
-#define SIW_LINKS 0x0002ULL
-#define SIW_ROUTES 0x0004ULL
-#define SIW_HNA 0x0008ULL
-#define SIW_MID 0x0010ULL
-#define SIW_TOPOLOGY 0x0020ULL
-#define SIW_GATEWAYS 0x0040ULL
-#define SIW_INTERFACES 0x0080ULL
-#define SIW_2HOP 0x0100ULL
-#define SIW_SGW 0x0200ULL
+#define SIW_NEIGHBORS                    0x00000001ULL
+#define SIW_LINKS                        0x00000002ULL
+#define SIW_ROUTES                       0x00000004ULL
+#define SIW_HNA                          0x00000008ULL
+#define SIW_MID                          0x00000010ULL
+#define SIW_TOPOLOGY                     0x00000020ULL
+#define SIW_GATEWAYS                     0x00000040ULL
+#define SIW_INTERFACES                   0x00000080ULL
+#define SIW_2HOP                         0x00000100ULL
+#define SIW_SGW                          0x00000200ULL
 #define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
 #define SIW_NEIGHBORS_FREIFUNK (SIW_NEIGHBORS | SIW_LINKS) /* special */
 
@@ -72,7 +72,7 @@
 #define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
 
 /* this data is not normal format but olsrd.conf format */
-#define SIW_OLSRD_CONF 0x2000ULL
+#define SIW_OLSRD_CONF                   0x00002000ULL
 
 typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);

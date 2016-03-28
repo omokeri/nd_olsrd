@@ -326,10 +326,10 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
         { SIW_2HOP      , functions->twohop     }, //
         { SIW_SGW       , functions->sgw        }, //
         //
-        { SIW_VERSION, functions->version }, //
-        { SIW_CONFIG, functions->config }, //
-        { SIW_PLUGINS, functions->plugins } //
-        };
+        { SIW_VERSION   , functions->version    }, //
+        { SIW_CONFIG    , functions->config     }, //
+        { SIW_PLUGINS   , functions->plugins    } //
+      };
 
       unsigned int i;
       unsigned int preLength;
