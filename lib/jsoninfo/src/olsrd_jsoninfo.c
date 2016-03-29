@@ -783,7 +783,8 @@ static void sgw_egress_bw(struct autobuf * abuf, const char * key, struct egress
   abuf_json_int(abuf, "egressUk", bw->egressUk);
   abuf_json_int(abuf, "egressDk", bw->egressDk);
   abuf_json_int(abuf, "pathCost", bw->path_cost);
-  abuf_json_prefix(abuf, "network", &bw->network);
+  abuf_json_ip_address(abuf, "network", &bw->network.prefix);
+  abuf_json_int(abuf, "networkLength", bw->network.prefix_len);
   abuf_json_ip_address(abuf, "gateway", &bw->gateway);
   abuf_json_boolean(abuf, "networkSet", bw->networkSet);
   abuf_json_boolean(abuf, "gatewaySet", bw->gatewaySet);
@@ -810,7 +811,8 @@ static void sgw_egress_route_info(struct autobuf * abuf, const char * key, struc
   abuf_json_boolean(abuf, "blackhole", ri->route.blackhole);
   abuf_json_ip_address(abuf, "srcStore", &ri->route.srcStore);
   abuf_json_ip_address(abuf, "gwStore", &ri->route.gwStore);
-  abuf_json_prefix(abuf, "dstStore", &ri->route.dstStore);
+  abuf_json_ip_address(abuf, "dstStore", &ri->route.dstStore.prefix);
+  abuf_json_int(abuf, "dstStoreLength", ri->route.dstStore.prefix_len);
 
   abuf_json_mark_object(false, false, abuf, NULL);
 }
