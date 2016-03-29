@@ -15,6 +15,7 @@
 #include "scheduler.h"
 #include "gateway_list.h"
 #include <net/if.h>
+#include <stdbool.h>
 
 /** used to signal to olsr_delete_gateway_entry to force deletion */
 #define FORCE_DELETE_GW_ENTRY 255
@@ -215,5 +216,6 @@ struct gateway_entry *olsr_get_inet_gateway(bool ipv6);
  */
 
 void doRoutesMultiGw(bool egressChanged, bool olsrChanged, enum sgw_multi_change_phase phase);
+bool isEgressSelected(struct sgw_egress_if * egress_if);
 
 #endif /* GATEWAY_H_ */

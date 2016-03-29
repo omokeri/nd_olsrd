@@ -2089,6 +2089,10 @@ static void printDate(FILE * f) {
   fprintf(f, "%s", buffer);
 }
 
+bool isEgressSelected(struct sgw_egress_if * egress_if) {
+  return bestOverallLink.valid && !bestOverallLink.isOlsr && (bestOverallLink.link.egress == egress_if);
+}
+
 /**
  * Write multi-smart-gateway status file
  *
@@ -2140,10 +2144,9 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
     while (egress_if) {
       struct ipaddr_str gwStr;
       const char * gw = !egress_if->bwCurrent.gatewaySet ? IPNONE : olsr_ip_to_string(&gwStr, &egress_if->bwCurrent.gateway);
-      bool selected = bestOverallLink.valid && !bestOverallLink.isOlsr && (bestOverallLink.link.egress == egress_if);
 
       fprintf(fp, fmt_values, //
-          selected ? "*" : " ", //selected
+          isEgressSelected(egress_if) ? "*" : " ", //selected
           IPLOCAL, // Originator
           MASKLOCAL, // Prefix
           egress_if->bwCurrent.egressUk, // Uplink
