@@ -776,6 +776,79 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
 
   abuf_json_mark_object(false, true, abuf, NULL);
 }
+
+static void sgw_egress_bw(struct autobuf * abuf, const char * key, struct egress_if_bw * bw) {
+  abuf_json_mark_object(true, false, abuf, key);
+
+  abuf_json_int(abuf, "egressUk", bw->egressUk);
+  abuf_json_int(abuf, "egressDk", bw->egressDk);
+  abuf_json_int(abuf, "pathCost", bw->path_cost);
+  abuf_json_prefix(abuf, "network", &bw->network);
+  abuf_json_ip_address(abuf, "gateway", &bw->gateway);
+  abuf_json_boolean(abuf, "networkSet", bw->networkSet);
+  abuf_json_boolean(abuf, "gatewaySet", bw->gatewaySet);
+  abuf_json_int(abuf, "costs", bw->costs);
+
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
+static void sgw_egress_route_info(struct autobuf * abuf, const char * key, struct sgw_route_info * ri) {
+  abuf_json_mark_object(true, false, abuf, key);
+
+  abuf_json_boolean(abuf, "active", ri->active);
+  abuf_json_int(abuf, "family", ri->route.family);
+  abuf_json_int(abuf, "rtTable", ri->route.rttable);
+  abuf_json_int(abuf, "flags", ri->route.flags);
+  abuf_json_int(abuf, "scope", ri->route.scope);
+  abuf_json_int(abuf, "ifIndex", ri->route.if_index);
+  abuf_json_int(abuf, "metric", ri->route.metric);
+  abuf_json_int(abuf, "protocol", ri->route.protocol);
+  abuf_json_boolean(abuf, "srcSet", ri->route.srcSet);
+  abuf_json_boolean(abuf, "gwSet", ri->route.gwSet);
+  abuf_json_boolean(abuf, "dstSet", ri->route.dstSet);
+  abuf_json_boolean(abuf, "delSimilar", ri->route.del_similar);
+  abuf_json_boolean(abuf, "blackhole", ri->route.blackhole);
+  abuf_json_ip_address(abuf, "srcStore", &ri->route.srcStore);
+  abuf_json_ip_address(abuf, "gwStore", &ri->route.gwStore);
+  abuf_json_prefix(abuf, "dstStore", &ri->route.dstStore);
+
+  abuf_json_mark_object(false, false, abuf, NULL);
+}
+
+static void sgw_egress(struct autobuf * abuf) {
+  struct sgw_egress_if * egress_if;
+
+  abuf_json_mark_object(true, true, abuf, "egress");
+
+  egress_if = olsr_cnf->smart_gw_egress_interfaces;
+  while (egress_if) {
+    abuf_json_mark_array_entry(true, abuf);
+
+    abuf_json_boolean(abuf, "selected", isEgressSelected(egress_if));
+    abuf_json_string(abuf, "name", egress_if->name);
+    abuf_json_int(abuf, "ifIndex", egress_if->if_index);
+    abuf_json_int(abuf, "tableNr", egress_if->tableNr);
+    abuf_json_int(abuf, "ruleNr", egress_if->ruleNr);
+    abuf_json_int(abuf, "bypassRuleNr", egress_if->bypassRuleNr);
+    abuf_json_boolean(abuf, "upPrevious", egress_if->upPrevious);
+    abuf_json_boolean(abuf, "upCurrent", egress_if->upCurrent);
+    abuf_json_boolean(abuf, "upChanged", egress_if->upChanged);
+    sgw_egress_bw(abuf, "bwPrevious", &egress_if->bwPrevious);
+    sgw_egress_bw(abuf, "bwCurrent", &egress_if->bwCurrent);
+    abuf_json_boolean(abuf, "bwCostsChanged", egress_if->bwCostsChanged);
+    abuf_json_boolean(abuf, "bwNetworkChanged", egress_if->bwNetworkChanged);
+    abuf_json_boolean(abuf, "bwGatewayChanged", egress_if->bwGatewayChanged);
+    abuf_json_boolean(abuf, "bwChanged", egress_if->bwChanged);
+    sgw_egress_route_info(abuf, "networkRouteCurrent", &egress_if->networkRouteCurrent);
+    sgw_egress_route_info(abuf, "egressRouteCurrent", &egress_if->egressRouteCurrent);
+    abuf_json_boolean(abuf, "inEgressFile", egress_if->inEgressFile);
+
+    abuf_json_mark_array_entry(false, abuf);
+    egress_if = egress_if->next;
+  }
+
+  abuf_json_mark_object(false, true, abuf, NULL);
+}
 #endif /* __linux__ */
 
 void ipc_print_sgw(struct autobuf *abuf) {
@@ -784,6 +857,7 @@ void ipc_print_sgw(struct autobuf *abuf) {
 #else
   abuf_json_mark_object(true, false, abuf, "sgw");
 
+  sgw_egress(abuf);
   sgw_ipvx(abuf, false);
   sgw_ipvx(abuf, true);
 
