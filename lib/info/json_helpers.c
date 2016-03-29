@@ -258,23 +258,27 @@ void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int
 
 void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix) {
   struct ipaddr_str ipStr;
-  const char * value;
+  const char * value = empty;
+  int prefixLen = INT_MIN;
 
   assert(abuf);
   assert(key || prefix);
 
-  if (!prefix) {
-    value = empty;
-  } else {
+  if (prefix) {
     value = olsr_ip_to_string(&ipStr, &prefix->prefix);
+    prefixLen = prefix->prefix_len;
   }
 
   abuf_json_insert_comma(abuf);
   abuf_json_new_indent(abuf);
   if (!key) {
-    abuf_appendf(abuf, "\"%s/%d\"", value, prefix->prefix_len);
+    abuf_appendf(abuf, "\"%s", value);
   } else {
-    abuf_appendf(abuf, "\"%s\": \"%s/%d\"", key, value, prefix->prefix_len);
+    abuf_appendf(abuf, "\"%s\": \"%s", key, value);
   }
+  if (prefixLen != INT_MIN) {
+    abuf_appendf(abuf, "/%d", prefixLen);
+  }
+  abuf_puts(abuf, "\"");
   entrynumber[currentjsondepth]++;
 }
