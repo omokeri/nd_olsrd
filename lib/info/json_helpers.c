@@ -39,7 +39,7 @@
  *
  */
 
-#include "info_json_helpers.h"
+#include "json_helpers.h"
 #include "olsr.h"
 #include "ipcalc.h"
 
