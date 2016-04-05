@@ -346,13 +346,13 @@ info_uninstall:
 jsoninfo: info
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/jsoninfo
 
-jsoninfo_clean:
+jsoninfo_clean: info_clean
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/jsoninfo DESTDIR=$(DESTDIR) clean
 
-jsoninfo_install:
+jsoninfo_install: info_install
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/jsoninfo DESTDIR=$(DESTDIR) install
 
-jsoninfo_uninstall:
+jsoninfo_uninstall: info_uninstall
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/jsoninfo DESTDIR=$(DESTDIR) uninstall
 
 mdns:
@@ -468,13 +468,13 @@ sgwdynspeed_uninstall:
 txtinfo: info
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/txtinfo
 
-txtinfo_clean:
+txtinfo_clean: info_clean
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/txtinfo DESTDIR=$(DESTDIR) clean
 
-txtinfo_install:
+txtinfo_install: info_install
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/txtinfo DESTDIR=$(DESTDIR) install
 
-txtinfo_uninstall:
+txtinfo_uninstall: info_uninstall
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/txtinfo DESTDIR=$(DESTDIR) uninstall
 
 watchdog:
