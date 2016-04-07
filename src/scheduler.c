@@ -121,7 +121,7 @@ static int avl_comp_timer(const void *entry1, const void *entry2) {
  * in kernel/sys.c and will only return an error if the tms_buf is
  * not writeable.
  */
-static uint32_t
+uint32_t
 olsr_times(void)
 {
   struct timeval tv;

@@ -155,6 +155,7 @@ LISTNODE2STRUCT(list2socket, struct olsr_socket_entry, socket_node);
     socket = list2socket(_socket_node);
 #define OLSR_FOR_ALL_SOCKETS_END(socket) }}
 
+uint32_t olsr_times(void);
 uint32_t olsr_getTimestamp (uint32_t s);
 int32_t olsr_getTimeDue (uint32_t s);
 bool olsr_isTimedOut (uint32_t s);
