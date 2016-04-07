@@ -284,7 +284,25 @@ static void olsrd_write_if_autobuf(struct autobuf *out, struct olsrd_config *cnf
   abuf_puts(out, "}\n");
 }
 
+static struct autobuf config_cache;
+
+void olsrd_cfgfile_init(void) {
+  abuf_init(&config_cache, AUTOBUFCHUNK);
+}
+
+void olsrd_cfgfile_cleanup(void) {
+  abuf_free(&config_cache);
+}
+
 void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf) {
+  if (!config_cache.len) {
+    olsrd_write_cnf_autobuf_uncached(&config_cache, cnf);
+  }
+
+  abuf_concat(out, &config_cache);
+}
+
+void olsrd_write_cnf_autobuf_uncached(struct autobuf *out, struct olsrd_config *cnf) {
   struct ip_prefix_list *hna = cnf->hna_entries;
   struct olsr_if *interf = cnf->interfaces;
   struct plugin_entry *plugins = cnf->plugins;

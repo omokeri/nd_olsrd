@@ -260,6 +260,8 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
 
   olsr_destroy_parser();
 
+  olsrd_cfgfile_cleanup();
+
   OLSR_PRINTF(1, "Closing sockets...\n");
 
   /* front-end IPC socket */
@@ -491,6 +493,8 @@ int main(int argc, char *argv[]) {
 
   /* Setup derived configuration */
   set_derived_cnf(olsr_cnf);
+
+  olsrd_cfgfile_init();
 
   /* Print configuration */
   if (olsr_cnf->debug_level > 1) {

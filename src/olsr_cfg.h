@@ -428,7 +428,13 @@ extern "C" {
 
   void olsrd_print_cnf(struct olsrd_config *);
 
+  void olsrd_cfgfile_init(void);
+
+  void olsrd_cfgfile_cleanup(void);
+
   void olsrd_write_cnf_autobuf(struct autobuf *out, struct olsrd_config *cnf);
+
+  void olsrd_write_cnf_autobuf_uncached(struct autobuf *out, struct olsrd_config *cnf);
 
   int olsrd_write_cnf(struct olsrd_config *, const char *);
 
