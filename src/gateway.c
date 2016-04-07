@@ -2171,32 +2171,35 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
     for (i = 0; i < olsr_cnf->smart_gw_use_count; i++) {
       struct interfaceName * node = &sgwTunnelInterfaceNames[i];
       struct gateway_entry * gw = node->gw;
-      struct tc_entry* tc = !gw ? NULL : olsr_lookup_tc_entry(&gw->originator);
 
-      struct ipaddr_str originatorStr;
-      const char * originator = !gw ? IPNONE : olsr_ip_to_string(&originatorStr, &gw->originator);
-      struct ipaddr_str prefixIpStr;
-      const char * prefixIPStr = !gw ? IPNONE : olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
-      uint8_t prefix_len = !gw ? 0 : gw->external_prefix.prefix_len;
-      struct ipaddr_str tunnelGwStr;
-      const char * tunnelGw = !gw ? IPNONE : olsr_ip_to_string(&tunnelGwStr, &gw->originator);
-      bool selected = bestOverallLink.valid && bestOverallLink.isOlsr && current_gw && (current_gw == gw);
+      if (gw) {
+        struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
 
-      char prefix[strlen(prefixIPStr) + 1 + 3 + 1];
-      snprintf(prefix, sizeof(prefix), "%s/%d", prefixIPStr, prefix_len);
+        struct ipaddr_str originatorStr;
+        const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
+        struct ipaddr_str prefixIpStr;
+        const char * prefixIPStr = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
+        uint8_t prefix_len = !gw ? 0 : gw->external_prefix.prefix_len;
+        struct ipaddr_str tunnelGwStr;
+        const char * tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
+        bool selected = bestOverallLink.valid && bestOverallLink.isOlsr && current_gw && (current_gw == gw);
 
-      fprintf(fp, fmt_values, //
-          selected ? "*" : " ", // selected
-          originator, // Originator
-          !gw ? MASKNONE : prefix, // Prefix IP
-          !gw ? 0 : gw->uplink, // Uplink
-          !gw ? 0 : gw->downlink, // Downlink
-          (!gw || !tc) ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
-          "olsr", // Type
-          node->name, // Interface
-          tunnelGw, // Gateway
-          !gw ? INT64_MAX : gw->path_cost // Cost
-      );
+        char prefix[strlen(prefixIPStr) + 1 + 3 + 1];
+        snprintf(prefix, sizeof(prefix), "%s/%d", prefixIPStr, prefix_len);
+
+        fprintf(fp, fmt_values, //
+            selected ? "*" : " ", // selected
+            originator, // Originator
+            prefix, // Prefix IP
+            gw->uplink, // Uplink
+            gw->downlink, // Downlink
+            !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
+            "olsr", // Type
+            node->name, // Interface
+            tunnelGw, // Gateway
+            gw->path_cost // Cost
+        );
+      }
     }
   }
 
