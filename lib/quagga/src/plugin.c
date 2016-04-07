@@ -29,6 +29,8 @@
 #include "packet.h"
 #include "plugin.h"
 
+#include <stdbool.h>
+
 static void *my_realloc(void *, size_t, const char *);
 
 static void
@@ -104,7 +106,7 @@ zplugin_distance(const char *value, void *data __attribute__ ((unused)), set_plu
 int
 zplugin_localpref(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)))
 {
-  int b;
+  bool b;
 
   if (set_plugin_boolean(value, &b, addon))
     return 1;

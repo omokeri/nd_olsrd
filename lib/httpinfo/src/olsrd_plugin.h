@@ -54,6 +54,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "olsr_types.h"
 #include "../../../src/olsrd_plugin.h"
@@ -72,7 +73,7 @@
 #define PLUGIN_INTERFACE_VERSION 5
 
 extern int http_port;
-extern int resolve_ip_addresses;
+extern bool resolve_ip_addresses;
 
 /* Allowed hosts stuff */
 

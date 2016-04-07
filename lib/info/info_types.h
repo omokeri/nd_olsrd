@@ -54,7 +54,7 @@ typedef struct {
     int ipc_port;
     bool http_headers;
     bool allow_localhost;
-    int ipv6_only;
+    bool ipv6_only;
 } info_plugin_config_t;
 
 #define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config) \

@@ -44,6 +44,7 @@
 
 /* System includes */
 #include <netinet/in.h>         /* struct in_addr */
+#include <stdbool.h>            /* bool */
 
 /* OLSR includes */
 #include "olsr_types.h"         /* olsr_ip_addr */
@@ -116,7 +117,7 @@ struct TBmfInterface {
 extern struct TBmfInterface *BmfInterfaces;
 
 extern int my_MDNS_TTL;
-extern int my_TTL_Check;
+extern bool my_TTL_Check;
 
 extern int HighestSkfd;
 extern fd_set InputSet;

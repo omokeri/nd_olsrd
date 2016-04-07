@@ -60,7 +60,7 @@
 #include <netinet/ip.h>         /* struct ip */
 #include <netinet/udp.h>        /* SOL_UDP */
 #include <stdlib.h>             /* atoi, malloc */
-#include <strings.h>    /* strcasecmp */
+#include <strings.h>            /* strcasecmp */
 
 /* OLSRD includes */
 #include "olsr.h"               /* OLSR_PRINTF() */
@@ -79,7 +79,7 @@
 #include "plugin_util.h"
 
 int my_MDNS_TTL = 0;
-int my_TTL_Check = 1;
+bool my_TTL_Check = true;
 
 /* List of network interface objects used by BMF plugin */
 struct TBmfInterface *BmfInterfaces = NULL;

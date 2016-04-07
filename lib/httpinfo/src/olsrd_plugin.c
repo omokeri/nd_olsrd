@@ -57,7 +57,7 @@
 #include "olsrd_httpinfo.h"
 
 int http_port = 0;
-int resolve_ip_addresses = 0;
+bool resolve_ip_addresses = false;
 struct allowed_net *allowed_nets = NULL;
 union olsr_ip_addr httpinfo_listen_ip;
 
