@@ -44,6 +44,7 @@ extern set_plugin_parameter set_plugin_port;
 extern set_plugin_parameter set_plugin_ipaddress;
 extern set_plugin_parameter set_plugin_boolean;
 extern set_plugin_parameter set_plugin_int;
+extern set_plugin_parameter set_plugin_long;
 extern set_plugin_parameter set_plugin_string;
 
 #endif /* _OLSRD_PLUGIN_UTIL */

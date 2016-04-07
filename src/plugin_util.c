@@ -126,6 +126,25 @@ set_plugin_int(const char *value, void *data, set_plugin_parameter_addon addon _
 }
 
 int
+set_plugin_long(const char *value, void *data, set_plugin_parameter_addon addon __attribute__ ((unused)))
+{
+  char *endptr;
+  const long thelong = strtol(value, &endptr, 0);
+  if (*endptr != '\0' || endptr == value) {
+    OLSR_PRINTF(0, "Illegal long \"%s\"", value);
+    return 1;
+  }
+  if (data != NULL) {
+    long *v = data;
+    *v = thelong;
+    OLSR_PRINTF(1, "%s long %ld\n", "Got", thelong);
+  } else {
+    OLSR_PRINTF(0, "%s long %ld\n", "Ignored", thelong);
+  }
+  return 0;
+}
+
+int
 set_plugin_string(const char *value, void *data, set_plugin_parameter_addon addon)
 {
   if (data != NULL) {
