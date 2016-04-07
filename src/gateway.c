@@ -2179,7 +2179,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
         const char * originator = olsr_ip_to_string(&originatorStr, &gw->originator);
         struct ipaddr_str prefixIpStr;
         const char * prefixIPStr = olsr_ip_to_string(&prefixIpStr, &gw->external_prefix.prefix);
-        uint8_t prefix_len = !gw ? 0 : gw->external_prefix.prefix_len;
+        uint8_t prefix_len = gw->external_prefix.prefix_len;
         struct ipaddr_str tunnelGwStr;
         const char * tunnelGw = olsr_ip_to_string(&tunnelGwStr, &gw->originator);
         bool selected = bestOverallLink.valid && bestOverallLink.isOlsr && current_gw && (current_gw == gw);
