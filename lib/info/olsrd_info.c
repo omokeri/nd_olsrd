@@ -290,7 +290,7 @@ static void write_data(void *fullyWritten) {
 }
 
 typedef struct {
-  unsigned int siw;
+  unsigned long long siw;
   printer_generic func;
 } SiwLookupTableEntry;
 
