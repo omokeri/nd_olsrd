@@ -110,44 +110,39 @@ static char * skipMultipleSlashes(char * requ) {
   return r;
 }
 
-static unsigned int determine_single_action(char *requ) {
-  static unsigned long long SIW_ENTRIES[] = {
-  //
-      SIW_OLSRD_CONF,//
-      SIW_ALL, //
-      //
-      // these are the two overarching categories
-      SIW_RUNTIME_ALL,//
-      SIW_STARTUP_ALL, //
-      //
-      // these are the individual sections
-      SIW_NEIGHBORS,//
-      SIW_LINKS, //
-      SIW_ROUTES, //
-      SIW_HNA, //
-      SIW_MID, //
-      SIW_TOPOLOGY, //
-      SIW_GATEWAYS, //
-      SIW_INTERFACES, //
-      SIW_2HOP, //
-      SIW_SGW, //
-      //
-      // specials
-      SIW_VERSION,//
-      SIW_CONFIG, //
-      SIW_PLUGINS, //
-      //
-      // Freifunk special
-      SIW_NEIGHBORS_FREIFUNK //
-      };
+static unsigned long long SIW_ENTRIES_ALL[] = {
+//
+    SIW_NEIGHBORS,//
+    SIW_LINKS, //
+    SIW_ROUTES, //
+    SIW_HNA, //
+    SIW_MID, //
+    SIW_TOPOLOGY, //
+    SIW_GATEWAYS, //
+    SIW_INTERFACES, //
+    SIW_2HOP, //
+    SIW_SGW, //
+    SIW_RUNTIME_ALL,//
+    SIW_NEIGHBORS_FREIFUNK, //
+    //
+    SIW_VERSION,//
+    SIW_CONFIG, //
+    SIW_PLUGINS, //
+    SIW_STARTUP_ALL, //
+    //
+    SIW_ALL, //
+    //
+    SIW_OLSRD_CONF //
+    };
 
+static unsigned int determine_single_action(char *requ) {
   unsigned int i;
 
   if (!functions->is_command)
     return 0;
 
-  for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES); ++i) {
-    unsigned long long siw = SIW_ENTRIES[i];
+  for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES_ALL); ++i) {
+    unsigned long long siw = SIW_ENTRIES_ALL[i];
     if (functions->is_command(requ, siw))
       return siw;
   }
