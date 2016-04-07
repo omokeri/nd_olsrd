@@ -137,7 +137,7 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     SIW_OLSRD_CONF //
     };
 
-long cache_timeout_generic(info_plugin_config_t *plugin_config __attribute__((unused)), unsigned long long siw) {
+long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long long siw) {
   switch (siw) {
     case SIW_NEIGHBORS:
     case SIW_LINKS:
