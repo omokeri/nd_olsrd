@@ -48,6 +48,8 @@
 
 #include "common/autobuf.h"
 
+#define CACHE_TIMEOUT_DEFAULT 1000
+
 typedef struct {
     union olsr_ip_addr accept_ip;
     union olsr_ip_addr listen_ip;
@@ -55,6 +57,7 @@ typedef struct {
     bool http_headers;
     bool allow_localhost;
     bool ipv6_only;
+    long cache_timeout;
 } info_plugin_config_t;
 
 #define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config) \
@@ -63,7 +66,8 @@ typedef struct {
   { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, \
   { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
   { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
-  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
+  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only },\
+  { .name = "cachetimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.cache_timeout }
 
 /* these provide all of the runtime status info */
 #define SIW_NEIGHBORS                    0x00000001ULL
@@ -93,6 +97,7 @@ typedef struct {
 
 typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);
+typedef long (*cache_timeout_func)(info_plugin_config_t *plugin_config, unsigned long long siw);
 typedef const char * (*mime_type)(unsigned int send_what);
 typedef void (*output_start_end)(struct autobuf *abuf);
 typedef void (*printer_error)(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers);
@@ -102,6 +107,7 @@ typedef struct {
     bool supportsCompositeCommands;
     init_plugin init;
     command_matcher is_command;
+    cache_timeout_func cache_timeout;
     mime_type determine_mime_type;
     output_start_end output_start;
     output_start_end output_end;
@@ -122,6 +128,96 @@ typedef struct {
     printer_generic plugins;
 } info_plugin_functions_t;
 
+struct info_cache_entry_t {
+    long long timestamp;
+    struct autobuf buf;
+};
+
+struct info_cache_t {
+    struct info_cache_entry_t neighbors;
+    struct info_cache_entry_t links;
+    struct info_cache_entry_t routes;
+    struct info_cache_entry_t hna;
+    struct info_cache_entry_t mid;
+    struct info_cache_entry_t topology;
+    struct info_cache_entry_t gateways;
+    struct info_cache_entry_t interfaces;
+    struct info_cache_entry_t twohop;
+    struct info_cache_entry_t sgw;
+
+    struct info_cache_entry_t version;
+    struct info_cache_entry_t config;
+    struct info_cache_entry_t plugins;
+};
+
+static INLINE struct info_cache_entry_t * info_cache_get_entry(struct info_cache_t * cache, unsigned long long siw) {
+  struct info_cache_entry_t * r = NULL;
+
+  if (!cache) {
+    return r;
+  }
+
+  switch (siw) {
+    case SIW_NEIGHBORS:
+      r = &cache->neighbors;
+      break;
+
+    case SIW_LINKS:
+      r = &cache->links;
+      break;
+
+    case SIW_ROUTES:
+      r = &cache->routes;
+      break;
+
+    case SIW_HNA:
+      r = &cache->hna;
+      break;
+
+    case SIW_MID:
+      r = &cache->mid;
+      break;
+
+    case SIW_TOPOLOGY:
+      r = &cache->topology;
+      break;
+
+    case SIW_GATEWAYS:
+      r = &cache->gateways;
+      break;
+
+    case SIW_INTERFACES:
+      r = &cache->interfaces;
+      break;
+
+    case SIW_2HOP:
+      r = &cache->twohop;
+      break;
+
+    case SIW_SGW:
+      r = &cache->sgw;
+      break;
+
+    case SIW_VERSION:
+      r = &cache->version;
+      break;
+
+    case SIW_CONFIG:
+      r = &cache->config;
+      break;
+
+    case SIW_PLUGINS:
+      r = &cache->plugins;
+      break;
+
+    default:
+      /* not cached */
+      break;
+  }
+
+  return r;
+}
+
 static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigned short port) {
   assert(config);
 
@@ -137,6 +233,7 @@ static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigne
   config->http_headers = true;
   config->allow_localhost = false;
   config->ipv6_only = false;
+  config->cache_timeout = CACHE_TIMEOUT_DEFAULT;
 }
 
 #endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */

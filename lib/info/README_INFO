@@ -74,6 +74,16 @@ LoadPlugin "an_info_plugin.so.0.0"
   # Set to true to only listen on IPv6 addresses when running in IPv6 mode.
   # Default: false
   # PlParam "ipv6only"       "false"
+
+  # The time (in milliseconds) after which cached information times out.
+  # A negative value or a value of zero effectively disables caching.
+  # Caching is on by default since it provides some protection again DoS
+  # attacks, therefore it is strongly recommended to keep caching switched
+  # on by configuring a positive value here.
+  # Note: startup information (version, config and plugins) is cached forever
+  #       by default.
+  # Default: 1000
+  # PlParam "cachetimeout"       "1000"
 }
 
 

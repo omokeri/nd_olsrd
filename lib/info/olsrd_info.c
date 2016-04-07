@@ -92,6 +92,8 @@ static info_plugin_outbuffer_t outbuffer;
 
 static struct timer_entry *writetimer_entry = NULL;
 
+static struct info_cache_t info_cache;
+
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 static char * skipMultipleSlashes(char * requ) {
@@ -134,6 +136,61 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     //
     SIW_OLSRD_CONF //
     };
+
+long cache_timeout_generic(info_plugin_config_t *plugin_config __attribute__((unused)), unsigned long long siw) {
+  switch (siw) {
+    case SIW_NEIGHBORS:
+    case SIW_LINKS:
+    case SIW_ROUTES:
+    case SIW_HNA:
+    case SIW_MID:
+    case SIW_TOPOLOGY:
+    case SIW_GATEWAYS:
+    case SIW_INTERFACES:
+    case SIW_2HOP:
+    case SIW_SGW:
+      return plugin_config->cache_timeout;
+
+    case SIW_VERSION:
+    case SIW_CONFIG:
+    case SIW_PLUGINS:
+      return LONG_MAX;
+
+    default:
+      /* not cached */
+      return false;
+  }
+}
+
+static void info_plugin_cache_init(bool init) {
+  unsigned int i;
+
+  if (!functions->cache_timeout) {
+    return;
+  }
+
+  for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES_ALL); ++i) {
+    unsigned long long siw = SIW_ENTRIES_ALL[i];
+    struct info_cache_entry_t * entry;
+
+    if (functions->cache_timeout(config, siw) <= 0) {
+      continue;
+    }
+
+    entry = info_cache_get_entry(&info_cache, siw);
+    if (!entry) {
+      continue;
+    }
+
+    if (init) {
+      entry->timestamp = 0;
+      abuf_init(&entry->buf, AUTOBUFCHUNK);
+    } else {
+      abuf_free(&entry->buf);
+      entry->timestamp = 0;
+    }
+  }
+}
 
 static unsigned int determine_single_action(char *requ) {
   unsigned int i;
@@ -292,6 +349,7 @@ typedef struct {
 static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, SiwLookupTableEntry *funcs, unsigned int funcsSize, unsigned int *outputLength) {
   unsigned int i;
   unsigned int preLength;
+  cache_timeout_func cache_timeout_f = functions->cache_timeout;
 
   if (functions->output_start) {
     functions->output_start(abuf);
@@ -300,10 +358,33 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
   preLength = abuf->len;
 
   for (i = 0; i < funcsSize; i++) {
-    if (send_what & funcs[i].siw) {
+    unsigned long long siw = funcs[i].siw;
+    if (send_what & siw) {
       printer_generic func = funcs[i].func;
       if (func) {
-        func(abuf);
+        long cache_timeout = 0;
+        struct info_cache_entry_t *cache_entry = NULL;
+
+        if (cache_timeout_f) {
+          cache_timeout = cache_timeout_f(config, siw);
+          cache_entry = (cache_timeout <= 0) ? NULL : info_cache_get_entry(&info_cache, siw);
+        }
+
+        if (!cache_entry) {
+            func(abuf);
+        } else {
+          long long now = olsr_times();
+          long long age = abs(now - cache_entry->timestamp);
+          if (!cache_entry->timestamp || (age >= cache_timeout)) {
+            /* cache is never used before or cache is too old */
+            cache_entry->buf.buf[0] = '\0';
+            cache_entry->buf.len = 0;
+            cache_entry->timestamp = now;
+            func(&cache_entry->buf);
+          }
+
+          abuf_concat(abuf, &cache_entry->buf);
+        }
       }
     }
   }
@@ -698,6 +779,8 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
     functions->init(name);
   }
 
+  info_plugin_cache_init(true);
+
   plugin_ipc_init();
   return 1;
 }
@@ -722,4 +805,6 @@ void info_plugin_exit(void) {
     }
   }
   outbuffer.count = 0;
+
+  info_plugin_cache_init(false);
 }
