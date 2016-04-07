@@ -63,9 +63,9 @@
 #define SIW_NEIGHBORS_FREIFUNK (SIW_NEIGHBORS | SIW_LINKS) /* special */
 
 /* these only change at olsrd startup */
-#define SIW_VERSION 0x0400ULL
-#define SIW_CONFIG 0x0800ULL
-#define SIW_PLUGINS 0x1000ULL
+#define SIW_VERSION                      0x00000400ULL
+#define SIW_CONFIG                       0x00000800ULL
+#define SIW_PLUGINS                      0x00001000ULL
 #define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
 
 /* this is everything in normal format */
