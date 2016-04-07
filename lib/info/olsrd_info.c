@@ -78,7 +78,7 @@ typedef struct {
   int count;
 } info_plugin_outbuffer_t;
 
-static char sink_buffer[4096];
+static char sink_buffer[AUTOBUFCHUNK];
 
 static const char * name = NULL;
 
@@ -328,7 +328,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   int contentLengthIndex = 0;
   int headerLength = 0;
 
-  abuf_init(&abuf, 2 * 4096);
+  abuf_init(&abuf, 2 * AUTOBUFCHUNK);
 
   if (config->http_headers) {
     http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
