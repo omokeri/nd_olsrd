@@ -57,7 +57,7 @@ typedef struct {
     int ipv6_only;
 } info_plugin_config_t;
 
-#define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS \
+#define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config) \
   { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &config.ipc_port }, \
   { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.accept_ip }, \
   { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, \

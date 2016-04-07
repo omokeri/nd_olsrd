@@ -131,7 +131,7 @@ int olsrd_plugin_interface_version(void) {
 
 static const struct olsrd_plugin_parameters plugin_parameters[] = { //
     //
-        INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS, //
+        INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config), //
         { .name = "uuidfile", .set_plugin_parameter = &set_plugin_string, .data = uuidfile, .addon = { .ui = FILENAME_MAX - 1 } } //
     };
 
