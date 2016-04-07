@@ -172,6 +172,21 @@ abuf_puts(struct autobuf *autobuf, const char *s)
 }
 
 int
+abuf_concat(struct autobuf *autobuf, struct autobuf *s)
+{
+  int len;
+
+  if (NULL == s) return 0;
+  len = s->len;
+  if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
+    return -1;
+  }
+  strcpy(autobuf->buf + autobuf->len, s->buf);
+  autobuf->len += len;
+  return len;
+}
+
+int
 abuf_strftime(struct autobuf *autobuf, const char *format, const struct tm *tm)
 {
   int rc = strftime(autobuf->buf + autobuf->len, autobuf->size - autobuf->len, format, tm);
