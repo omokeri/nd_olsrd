@@ -48,6 +48,23 @@
 
 #include "common/autobuf.h"
 
+typedef struct {
+    union olsr_ip_addr accept_ip;
+    union olsr_ip_addr listen_ip;
+    int ipc_port;
+    bool http_headers;
+    bool allow_localhost;
+    int ipv6_only;
+} info_plugin_config_t;
+
+#define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS \
+  { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &config.ipc_port }, \
+  { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.accept_ip }, \
+  { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, \
+  { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
+  { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
+  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
+
 /* these provide all of the runtime status info */
 #define SIW_NEIGHBORS                    0x00000001ULL
 #define SIW_LINKS                        0x00000002ULL
@@ -104,23 +121,6 @@ typedef struct {
     printer_generic config;
     printer_generic plugins;
 } info_plugin_functions_t;
-
-typedef struct {
-    union olsr_ip_addr accept_ip;
-    union olsr_ip_addr listen_ip;
-    int ipc_port;
-    bool http_headers;
-    bool allow_localhost;
-    int ipv6_only;
-} info_plugin_config_t;
-
-#define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS \
-  { .name = "port", .set_plugin_parameter = &set_plugin_port, .data = &config.ipc_port }, \
-  { .name = "accept", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.accept_ip }, \
-  { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, \
-  { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
-  { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
-  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
 
 static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigned short port) {
   assert(config);
