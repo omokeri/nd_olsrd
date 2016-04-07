@@ -70,30 +70,30 @@ typedef struct {
   { .name = "cachetimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.cache_timeout }
 
 /* these provide all of the runtime status info */
-#define SIW_NEIGHBORS                    0x00000001ULL
-#define SIW_LINKS                        0x00000002ULL
-#define SIW_ROUTES                       0x00000004ULL
-#define SIW_HNA                          0x00000008ULL
-#define SIW_MID                          0x00000010ULL
-#define SIW_TOPOLOGY                     0x00000020ULL
-#define SIW_GATEWAYS                     0x00000040ULL
-#define SIW_INTERFACES                   0x00000080ULL
-#define SIW_2HOP                         0x00000100ULL
-#define SIW_SGW                          0x00000200ULL
+#define SIW_NEIGHBORS                    0x0000000000000001ULL
+#define SIW_LINKS                        0x0000000000000002ULL
+#define SIW_ROUTES                       0x0000000000000004ULL
+#define SIW_HNA                          0x0000000000000008ULL
+#define SIW_MID                          0x0000000000000010ULL
+#define SIW_TOPOLOGY                     0x0000000000000020ULL
+#define SIW_GATEWAYS                     0x0000000000000040ULL
+#define SIW_INTERFACES                   0x0000000000000080ULL
+#define SIW_2HOP                         0x0000000000000100ULL
+#define SIW_SGW                          0x0000000000000200ULL
 #define SIW_RUNTIME_ALL (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
 #define SIW_NEIGHBORS_FREIFUNK (SIW_NEIGHBORS | SIW_LINKS) /* special */
 
 /* these only change at olsrd startup */
-#define SIW_VERSION                      0x00000400ULL
-#define SIW_CONFIG                       0x00000800ULL
-#define SIW_PLUGINS                      0x00001000ULL
+#define SIW_VERSION                      0x0000000000000400ULL
+#define SIW_CONFIG                       0x0000000000000800ULL
+#define SIW_PLUGINS                      0x0000000000001000ULL
 #define SIW_STARTUP_ALL (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
 
 /* this is everything in normal format */
 #define SIW_ALL (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
 
 /* this data is not normal format but olsrd.conf format */
-#define SIW_OLSRD_CONF                   0x00002000ULL
+#define SIW_OLSRD_CONF                   0x0000000000002000ULL
 
 typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);
