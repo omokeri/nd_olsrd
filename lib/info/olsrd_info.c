@@ -138,6 +138,11 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     };
 
 long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long long siw) {
+  long timeout = plugin_config->cache_timeout;
+  if (timeout <= 0) {
+    return timeout;
+  }
+
   switch (siw) {
     case SIW_NEIGHBORS:
     case SIW_LINKS:
@@ -149,7 +154,7 @@ long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long lo
     case SIW_INTERFACES:
     case SIW_2HOP:
     case SIW_SGW:
-      return plugin_config->cache_timeout;
+      return timeout;
 
     case SIW_VERSION:
     case SIW_CONFIG:
