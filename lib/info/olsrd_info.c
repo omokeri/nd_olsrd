@@ -188,12 +188,22 @@ static void info_plugin_cache_init(bool init) {
     }
 
     if (init) {
-      entry->timestamp = 0;
-      abuf_init(&entry->buf, AUTOBUFCHUNK);
+      entry->initialised = false;
     } else {
-      abuf_free(&entry->buf);
+      if (entry->initialised) {
+        abuf_free(&entry->buf);
+        entry->initialised = false;
+      }
       entry->timestamp = 0;
     }
+  }
+}
+
+static INLINE void info_plugin_cache_init_entry(struct info_cache_entry_t * entry) {
+  if (!entry->initialised) {
+    entry->timestamp = 0;
+    abuf_init(&entry->buf, AUTOBUFCHUNK);
+    entry->initialised = true;
   }
 }
 
@@ -380,6 +390,7 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
         } else {
           long long now = olsr_times();
           long long age = abs(now - cache_entry->timestamp);
+          info_plugin_cache_init_entry(cache_entry);
           if (!cache_entry->timestamp || (age >= cache_timeout)) {
             /* cache is never used before or cache is too old */
             cache_entry->buf.buf[0] = '\0';

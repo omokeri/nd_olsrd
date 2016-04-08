@@ -129,6 +129,7 @@ typedef struct {
 } info_plugin_functions_t;
 
 struct info_cache_entry_t {
+    bool initialised;
     long long timestamp;
     struct autobuf buf;
 };
