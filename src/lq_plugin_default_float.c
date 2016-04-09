@@ -58,7 +58,6 @@ static void default_lq_deserialize_tc_lq_pair_float(const uint8_t ** curr, void 
 static void default_lq_copy_link2tc_float(void *target, void *source);
 static void default_lq_clear_float(void *target);
 static const char *default_lq_print_float(void *ptr, char separator, struct lqtextbuffer *buffer);
-static const char *default_lq_print_cost_float(olsr_linkcost cost, struct lqtextbuffer *buffer);
 static double default_lq_get_cost_scaled(olsr_linkcost cost);
 
 
@@ -83,7 +82,6 @@ struct lq_handler lq_etx_float_handler = {
 
   &default_lq_print_float,
   &default_lq_print_float,
-  &default_lq_print_cost_float,
   &default_lq_get_cost_scaled,
 
   sizeof(struct default_lq_float),
@@ -229,14 +227,6 @@ static double
 default_lq_get_cost_scaled(olsr_linkcost cost)
 {
   return ((double) cost) / LQ_PLUGIN_LC_MULTIPLIER;
-}
-
-static const char *
-default_lq_print_cost_float(olsr_linkcost cost, struct lqtextbuffer *buffer)
-{
-  snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", default_lq_get_cost_scaled(cost));
-  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
-  return buffer->buf;
 }
 
 /*

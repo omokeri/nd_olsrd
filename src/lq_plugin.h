@@ -84,7 +84,6 @@ struct lq_handler {
 
   const char *(*print_hello_lq) (void *ptr, char separator, struct lqtextbuffer * buffer);
   const char *(*print_tc_lq) (void *ptr, char separator, struct lqtextbuffer * buffer);
-  const char *(*print_cost) (olsr_linkcost cost, struct lqtextbuffer * buffer);
   double (*get_cost_scaled) (olsr_linkcost cost);
 
   size_t hello_lq_size;

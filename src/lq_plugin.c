@@ -328,7 +328,10 @@ get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer)
       return infinite;
     }
   }
-  return active_lq_handler->print_cost(cost, buffer);
+
+  snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", active_lq_handler->get_cost_scaled(cost));
+  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
+  return buffer->buf;
 }
 
 /**

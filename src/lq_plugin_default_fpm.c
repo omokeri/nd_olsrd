@@ -59,7 +59,6 @@ static void default_lq_deserialize_tc_lq_pair_fpm(const uint8_t ** curr, void *l
 static void default_lq_copy_link2tc_fpm(void *target, void *source);
 static void default_lq_clear_fpm(void *target);
 static const char *default_lq_print_fpm(void *ptr, char separator, struct lqtextbuffer *buffer);
-static const char *default_lq_print_cost_fpm(olsr_linkcost cost, struct lqtextbuffer *buffer);
 static double default_lq_get_cost_scaled(olsr_linkcost cost);
 
 
@@ -84,7 +83,6 @@ struct lq_handler lq_etx_fpm_handler = {
 
   &default_lq_print_fpm,
   &default_lq_print_fpm,
-  &default_lq_print_cost_fpm,
   &default_lq_get_cost_scaled,
 
   sizeof(struct default_lq_fpm),
@@ -241,14 +239,6 @@ static double
 default_lq_get_cost_scaled(olsr_linkcost cost)
 {
   return ((double) cost) / LQ_FPM_LINKCOST_MULTIPLIER;
-}
-
-static const char *
-default_lq_print_cost_fpm(olsr_linkcost cost, struct lqtextbuffer *buffer)
-{
-  snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", default_lq_get_cost_scaled(cost));
-  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
-  return buffer->buf;
 }
 
 /*

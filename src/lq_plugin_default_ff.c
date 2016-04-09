@@ -72,7 +72,6 @@ static void default_lq_clear_ff(void *target);
 static void default_lq_clear_ff_hello(void *target);
 
 static const char *default_lq_print_ff(void *ptr, char separator, struct lqtextbuffer *buffer);
-static const char *default_lq_print_cost_ff(olsr_linkcost cost, struct lqtextbuffer *buffer);
 static double default_lq_get_cost_scaled(olsr_linkcost cost);
 
 /* etx lq plugin (freifunk fpm version) settings */
@@ -96,7 +95,6 @@ struct lq_handler lq_etx_ff_handler = {
 
   &default_lq_print_ff,
   &default_lq_print_ff,
-  &default_lq_print_cost_ff,
   &default_lq_get_cost_scaled,
 
   sizeof(struct default_lq_ff_hello),
@@ -418,14 +416,6 @@ static double
 default_lq_get_cost_scaled(olsr_linkcost cost)
 {
   return fpmtod(cost);
-}
-
-static const char *
-default_lq_print_cost_ff(olsr_linkcost cost, struct lqtextbuffer *buffer)
-{
-  snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", default_lq_get_cost_scaled(cost));
-  buffer->buf[sizeof(buffer->buf) - 1] = '\0';
-  return buffer->buf;
 }
 
 /*
