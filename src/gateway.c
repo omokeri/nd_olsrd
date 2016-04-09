@@ -1398,11 +1398,11 @@ void olsr_trigger_gatewayloss_check(void) {
 
   if (current_ipv4_gw && current_ipv4_gw->gw) {
     struct tc_entry *tc = olsr_lookup_tc_entry(&current_ipv4_gw->gw->originator);
-    ipv4 = (tc == NULL || tc->path_cost == ROUTE_COST_BROKEN);
+    ipv4 = (tc == NULL || tc->path_cost >= ROUTE_COST_BROKEN);
   }
   if (current_ipv6_gw && current_ipv6_gw->gw) {
     struct tc_entry *tc = olsr_lookup_tc_entry(&current_ipv6_gw->gw->originator);
-    ipv6 = (tc == NULL || tc->path_cost == ROUTE_COST_BROKEN);
+    ipv6 = (tc == NULL || tc->path_cost >= ROUTE_COST_BROKEN);
   }
 
   if (ipv4 || ipv6) {
