@@ -234,7 +234,7 @@ default_lq_get_cost_scaled(olsr_linkcost cost)
 static const char *
 default_lq_print_cost_float(olsr_linkcost cost, struct lqtextbuffer *buffer)
 {
-  snprintf(buffer->buf, sizeof(struct lqtextbuffer), "%2.3f", default_lq_get_cost_scaled(cost));
+  snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", default_lq_get_cost_scaled(cost));
   buffer->buf[sizeof(buffer->buf) - 1] = '\0';
   return buffer->buf;
 }
