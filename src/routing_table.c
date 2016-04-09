@@ -298,7 +298,7 @@ olsr_insert_rt_path(struct rt_path *rtp, struct tc_entry *tc, struct link_entry 
   /*
    * no unreachable routes please.
    */
-  if (tc->path_cost == ROUTE_COST_BROKEN) {
+  if (tc->path_cost >= ROUTE_COST_BROKEN) {
     return;
   }
 
