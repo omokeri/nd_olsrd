@@ -77,6 +77,13 @@ fpmtof(fpm a)
   return r;
 }
 
+double
+fpmtod(fpm a)
+{
+  double r = fpmtod_def((sfpm) a);
+  return r;
+}
+
 fpm
 fpmadd(fpm a, fpm b)
 {

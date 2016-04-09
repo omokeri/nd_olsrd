@@ -63,6 +63,7 @@ typedef unsigned long ufpm;
 #define ftofpm_def(a) (fpm)((sfpm)((a) * FPM_NUM))
 #define fpmtoi_def(a) (int)((sfpm)(a) >> FPM_BIT)
 #define fpmtof_def(a) ((float)(sfpm)(a) / FPM_NUM)
+#define fpmtod_def(a) ((double)(sfpm)(a) / FPM_NUM)
 
 #define fpmadd_def(a, b) (fpm)((sfpm)(a) + (sfpm)(b))
 #define fpmsub_def(a, b) (fpm)((sfpm)(a) - (sfpm)(b))
@@ -86,6 +87,7 @@ typedef unsigned long ufpm;
 #define ftofpm ftofpm_def
 #define fpmtoi fpmtoi_def
 #define fpmtof fpmtof_def
+#define fpmtod fpmtod_def
 
 #define fpmadd fpmadd_def
 #define fpmsub fpmsub_def
@@ -101,6 +103,7 @@ fpm itofpm(sfpm i);
 fpm ftofpm(float f);
 int fpmtoi(fpm a);
 float fpmtof(fpm a);
+double fpmtod(fpm a);
 
 fpm fpmadd(fpm a, fpm b);
 fpm fpmsub(fpm a, fpm b);
