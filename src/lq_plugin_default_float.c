@@ -108,7 +108,7 @@ default_lq_calc_cost_float(const void *ptr)
 
   cost = (olsr_linkcost) (1.0f / (lq->lq * lq->nlq) * (float)LQ_PLUGIN_LC_MULTIPLIER);
 
-  if (cost > LINK_COST_BROKEN)
+  if (cost >= LINK_COST_BROKEN)
     return LINK_COST_BROKEN;
   if (cost == 0) {
     return 1;

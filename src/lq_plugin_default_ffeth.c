@@ -327,7 +327,7 @@ default_lq_calc_cost_ffeth(const void *ptr)
     cost /= 10;
   }
 
-  if (cost > LINK_COST_BROKEN)
+  if (cost >= LINK_COST_BROKEN)
     return LINK_COST_BROKEN;
   if (cost == 0)
     return 1;

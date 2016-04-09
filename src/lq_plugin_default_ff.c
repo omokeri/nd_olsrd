@@ -288,7 +288,7 @@ default_lq_calc_cost_ff(const void *ptr)
 
   cost = fpmidiv(itofpm(255 * 255), (int)lq->valueLq * (int)lq->valueNlq);
 
-  if (cost > LINK_COST_BROKEN)
+  if (cost >= LINK_COST_BROKEN)
     return LINK_COST_BROKEN;
   if (cost == 0)
     return 1;

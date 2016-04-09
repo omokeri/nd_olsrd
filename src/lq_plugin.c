@@ -320,7 +320,7 @@ get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer)
   static const char *infinite = "INFINITE";
 
   if (route) {
-    if (cost == ROUTE_COST_BROKEN) {
+    if (cost >= ROUTE_COST_BROKEN) {
       return infinite;
     }
   } else {
