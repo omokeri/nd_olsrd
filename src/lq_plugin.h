@@ -49,9 +49,9 @@
 #include "packet.h"
 #include "common/avl.h"
 
-#define LINK_COST_BROKEN (1<<22)
-#define ROUTE_COST_BROKEN (0xffffffff)
-#define ZERO_ROUTE_COST 0
+#define LINK_COST_BROKEN (1u<<22)
+#define ROUTE_COST_BROKEN (0xffffffffu)
+#define ZERO_ROUTE_COST 0u
 
 #define MINIMAL_USEFUL_LQ 0.1
 #define LQ_PLUGIN_RELEVANT_COSTCHANGE 16
