@@ -55,22 +55,13 @@
  * signed 64 bits number.
  */
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-  /**
-   * Structure to keep weighing factors for the gw_costs_weigh function
-   */
-  struct costs_weights {
-      uint8_t WexitU;
-      uint8_t WexitD;
-      uint8_t Wetx;
-      uint32_t Detx;
-  };
 
   /**
    * Weigh the path costs and the gateway bandwidth.
@@ -82,15 +73,13 @@ extern "C" {
    * the gateway costs are equal to path_cost.
    *
    * @param up true when the relevant interface is up
-   * @param weights the weights for the calculation
    * @param path_cost the (ETX) path cost to the gateway
-   * @param max_cost_etx_max the maximum (ETX) path cost for when path_costs is the maximum
    * to take the calculation shortcut.
    * @param exitUk the gateway exit link uplink bandwidth (in kbps)
    * @param exitDk the gateway exit link downlink bandwidth (in kbps)
    * @return the weighed path cost, INT64_MAX when up is false or when exitUk and/or exitDk are zero
    */
-  int64_t gw_costs_weigh(bool up, const struct costs_weights weights, uint32_t path_cost, uint32_t max_cost_etx_max, uint32_t exitUk, uint32_t exitDk);
+  int64_t gw_costs_weigh(bool up, uint32_t path_cost, uint32_t exitUk, uint32_t exitDk);
 
 #ifdef __cplusplus
 }

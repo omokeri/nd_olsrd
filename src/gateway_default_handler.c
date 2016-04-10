@@ -18,7 +18,6 @@ static uint32_t gw_def_stablecount;
 static bool gw_def_choose_new_ipv4_gw;
 static bool gw_def_choose_new_ipv6_gw;
 static struct timer_entry *gw_def_timer;
-static struct costs_weights gw_costs_weights;
 
 /* forward declarations */
 static void gw_default_init(void);
@@ -206,11 +205,6 @@ static void gw_default_init(void) {
   gw_def_choose_new_ipv4_gw = true;
   gw_def_choose_new_ipv6_gw = true;
   gw_def_timer = NULL;
-
-  gw_costs_weights.WexitU = olsr_cnf->smart_gw_weight_exitlink_up;
-  gw_costs_weights.WexitD = olsr_cnf->smart_gw_weight_exitlink_down;
-  gw_costs_weights.Wetx = olsr_cnf->smart_gw_weight_etx;
-  gw_costs_weights.Detx = olsr_cnf->smart_gw_divider_etx;
 }
 
 /**
@@ -264,7 +258,7 @@ static int64_t gw_default_getcosts(struct gateway_entry *gw) {
   }
 
   /* determine the path cost */
-  return gw_costs_weigh(true, gw_costs_weights, tc->path_cost, olsr_cnf->smart_gw_path_max_cost_etx_max, gw->uplink, gw->downlink);
+  return gw_costs_weigh(true, tc->path_cost, gw->uplink, gw->downlink);
 }
 
 /**
