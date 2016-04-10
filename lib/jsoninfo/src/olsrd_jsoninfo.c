@@ -53,6 +53,7 @@
 #include "routing_table.h"
 #include "lq_plugin.h"
 #include "gateway.h"
+#include "gateway_costs.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
 #include "../../info/http_headers.h"
@@ -417,7 +418,7 @@ static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gate
   abuf_json_int(abuf, "prefixLen", gw->external_prefix.prefix_len);
   abuf_json_int(abuf, "uplink", gw->uplink);
   abuf_json_int(abuf, "downlink", gw->downlink);
-  abuf_json_int(abuf, "cost", gw->path_cost);
+  abuf_json_float(abuf, "cost", get_gwcost_scaled(gw->path_cost));
   abuf_json_boolean(abuf, "IPv4", gw->ipv4);
   abuf_json_boolean(abuf, "IPv4-NAT", gw->ipv4nat);
   abuf_json_boolean(abuf, "IPv6", gw->ipv6);
@@ -786,7 +787,7 @@ static void sgw_egress_bw(struct autobuf * abuf, const char * key, struct egress
   abuf_json_ip_address(abuf, "gateway", &bw->gateway);
   abuf_json_boolean(abuf, "networkSet", bw->networkSet);
   abuf_json_boolean(abuf, "gatewaySet", bw->gatewaySet);
-  abuf_json_int(abuf, "costs", bw->costs);
+  abuf_json_float(abuf, "costs", get_gwcost_scaled(bw->costs));
 
   abuf_json_mark_object(false, false, abuf, NULL);
 }
