@@ -22,6 +22,7 @@
 #include "gateway_default_handler.h"
 #include "gateway_list.h"
 #include "gateway.h"
+#include "gateway_costs.h"
 #include "egressTypes.h"
 #include "egressFile.h"
 #include "ifnet.h"
@@ -2100,9 +2101,9 @@ bool isEgressSelected(struct sgw_egress_if * egress_if) {
  * # multi-smart-gateway status overview, generated on October 10, 2014 at 08:27:15
  *
  * #Originator Prefix       Uplink  Downlink  PathCost  Type    Interface  Gateway      Cost
- *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  ppp0       0.0.0.0      9223372036854775807
- *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  eth1       192.168.0.1  9223372036854775807
- * *10.0.0.1   0.0.0.0/0    290     1500      0.000     olsr    tnl_4096   10.0.0.1     287940608
+ *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  ppp0       0.0.0.0      INFINITE
+ *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  eth1       192.168.0.1  INFINITE
+ * *10.0.0.1   0.0.0.0/0    290     1500      0.000     olsr    tnl_4096   10.0.0.1     34.325
  * </pre>
  *
  * @param phase the phase of the change (startup/runtime/shutdown)
@@ -2110,7 +2111,7 @@ bool isEgressSelected(struct sgw_egress_if * egress_if) {
 static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
   /*                                # Origi Prefx Upln Dwnl PthC Type Intfc Gtway Cost */
   static const char * fmt_header = "%s%-15s %-18s %-9s %-9s %-8s %-6s %-16s %-15s %s\n";
-  static const char * fmt_values = "%s%-15s %-18s %-9u %-9u %-8s %-6s %-16s %-15s %lld\n";
+  static const char * fmt_values = "%s%-15s %-18s %-9u %-9u %-8s %-6s %-16s %-15s %s\n";
 
   char * fileName = olsr_cnf->smart_gw_status_file;
   FILE * fp = NULL;
@@ -2141,6 +2142,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
   /* egress interfaces */
   {
     struct lqtextbuffer lnkbuf;
+    struct gwtextbuffer gwbuf;
     struct sgw_egress_if * egress_if = olsr_cnf->smart_gw_egress_interfaces;
     while (egress_if) {
       struct ipaddr_str gwStr;
@@ -2155,7 +2157,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
           "egress", // Type
           egress_if->name, // Interface
           gw, // Gateway
-          egress_if->bwCurrent.costs // Cost
+          get_gwcost_text(egress_if->bwCurrent.costs, &gwbuf) // Cost
           );
 
       egress_if = egress_if->next;
@@ -2165,6 +2167,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
   /* olsr */
   {
     struct lqtextbuffer lnkbuf;
+    struct gwtextbuffer gwbuf;
     struct gateway_entry * current_gw = olsr_get_inet_gateway((olsr_cnf->ip_version == AF_INET) ? false : true);
     struct interfaceName * sgwTunnelInterfaceNames = (olsr_cnf->ip_version == AF_INET) ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
 
@@ -2198,7 +2201,7 @@ static void writeProgramStatusFile(enum sgw_multi_change_phase phase) {
             "olsr", // Type
             node->name, // Interface
             tunnelGw, // Gateway
-            gw->path_cost // Cost
+            get_gwcost_text(gw->path_cost, &gwbuf) // Cost
         );
       }
     }
