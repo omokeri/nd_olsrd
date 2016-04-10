@@ -759,7 +759,10 @@ void FindNeighbors(
       union olsr_ip_addr* neighborMainIp;
       struct link_entry* bestLinkToNeighbor;
       struct tc_entry* tcLastHop;
-      float currEtx;
+      olsr_linkcost currEtx;
+#ifndef NODEBUG
+      struct lqtextbuffer lqbuffer;
+#endif /* NODEBUG */
  
       /* Consider only links from the specified interface */
       if (! ipequal(&intf->intAddr, &walker->local_iface_addr))
@@ -832,10 +835,10 @@ void FindNeighbors(
       /* Compare costs to check if the candidate neighbor is best reached via 'intf' */
       OLSR_PRINTF(
         9,
-        "%s: ----> forwarding pkt to %s will cost ETX %5.2f\n",
+        "%s: ----> forwarding pkt to %s will cost ETX %s\n",
         PLUGIN_NAME_SHORT,
         olsr_ip_to_string(&buf, &walker->neighbor_iface_addr),
-        (double)currEtx);
+        get_linkcost_text(currEtx, false, &lqbuffer));
 
       /* If the candidate neighbor is best reached via another interface, then skip 
        * the candidate neighbor; the candidate neighbor has been / will be selected via that
@@ -856,7 +859,6 @@ void FindNeighbors(
         {
 #ifndef NODEBUG
           struct interface_olsr * bestIntf = if_ifwithaddr(&bestLinkToNeighbor->local_iface_addr);
-          struct lqtextbuffer lqbuffer;
 #endif /* NODEBUG */
           OLSR_PRINTF(
             9,
@@ -874,7 +876,6 @@ void FindNeighbors(
       {
 #ifndef NODEBUG
         struct ipaddr_str forwardedByBuf, niaBuf;
-        struct lqtextbuffer lqbuffer;
 #endif /* NODEBUG */
         OLSR_PRINTF(
           9,
@@ -882,7 +883,7 @@ void FindNeighbors(
           PLUGIN_NAME_SHORT,
           olsr_ip_to_string(&forwardedByBuf, forwardedBy),
           olsr_ip_to_string(&niaBuf, &walker->neighbor_iface_addr),
-          get_linkcost_text(previousLinkEtx + currEtx, true, &lqbuffer));
+          get_linkcost_text(previousLinkEtx + currEtx, false, &lqbuffer));
       }
 
       /* Check the topology table whether the 'forwardedBy' node is itself a direct
@@ -906,7 +907,6 @@ void FindNeighbors(
             {
 #ifndef NODEBUG
               struct ipaddr_str neighbor_iface_buf, forw_buf;
-              struct lqtextbuffer lqbuffer;
               olsr_ip_to_string(&neighbor_iface_buf, &walker->neighbor_iface_addr);
 #endif /* NODEBUG */
               OLSR_PRINTF(
@@ -916,7 +916,7 @@ void FindNeighbors(
                 neighbor_iface_buf.buf,
                 olsr_ip_to_string(&forw_buf, forwardedBy),
                 neighbor_iface_buf.buf,
-                get_linkcost_text(tcEtx, false, &lqbuffer));
+                get_linkcost_text(tcEtx, true, &lqbuffer));
 
               continue; /* for */
             } /* if */
