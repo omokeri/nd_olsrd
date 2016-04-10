@@ -62,6 +62,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+  struct gwtextbuffer {
+    char buf[16];
+  };
 
   /**
    * Weigh the path costs and the gateway bandwidth.
@@ -80,6 +83,10 @@ extern "C" {
    * @return the weighed path cost, INT64_MAX when up is false or when exitUk and/or exitDk are zero
    */
   int64_t gw_costs_weigh(bool up, uint32_t path_cost, uint32_t exitUk, uint32_t exitDk);
+
+  double get_gwcost_scaled(int64_t cost);
+
+  const char * get_gwcost_text(int64_t cost, struct gwtextbuffer *buffer);
 
 #ifdef __cplusplus
 }
