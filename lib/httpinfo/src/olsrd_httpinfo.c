@@ -59,6 +59,7 @@
 #include "olsr_cfg.h"
 #include "interfaces.h"
 #include "gateway.h"
+#include "gateway_costs.h"
 #include "olsr_protocol.h"
 #include "net_olsr.h"
 #include "link_set.h"
@@ -1561,6 +1562,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
     current_gw = olsr_get_inet_gateway(false);
     OLSR_FOR_ALL_GWS(&list->head, gw) {
       if (gw) {
+        struct gwtextbuffer gwbuf;
         bool is_current = (current_gw && (gw->gw == current_gw));
 
         if (is_current) {
@@ -1600,11 +1602,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
           abuf_appendf(abuf, "      <td>%s</td>\n", gw->tunnel->if_name);
           abuf_appendf(abuf, "      <td>%s</td>\n", inet_ntop(ipv6 ? AF_INET6 : AF_INET, &gw->tunnel->target, buf, sizeof(buf)));
         }
-        if (!gw->gw) {
-          abuf_puts(abuf, "      <td></td>\n");
-        } else {
-          abuf_appendf(abuf, "      <td>%lld</td>\n", (long long int)gw->gw->path_cost);
-        }
+        abuf_appendf(abuf, "      <td>%s</td>\n", get_gwcost_text(!gw->gw ? INT64_MAX : gw->gw->path_cost, &gwbuf));
         abuf_puts(abuf, "    </tr>\n");
       }
     } OLSR_FOR_ALL_GWS_END(gw);
