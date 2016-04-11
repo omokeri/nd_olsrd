@@ -127,6 +127,7 @@ void olsr_memorize_foreign_hello_lq(struct link_entry *local, struct hello_neigh
 const char *get_link_entry_text(struct link_entry *entry, char separator, struct lqtextbuffer *buffer);
 const char *get_tc_edge_entry_text(struct tc_edge_entry *entry, char separator, struct lqtextbuffer *buffer);
 const char *get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer);
+double get_linkcost_scaled(olsr_linkcost cost, bool route);
 
 void olsr_clear_hello_lq(struct link_entry */*link*/);
 void olsr_copy_hello_lq(struct lq_hello_neighbor *target, struct link_entry *source);

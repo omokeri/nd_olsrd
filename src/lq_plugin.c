@@ -58,6 +58,7 @@
 #endif
 
 #include <assert.h>
+#include <math.h>
 
 struct avl_tree lq_handler_tree;
 struct lq_handler *active_lq_handler = NULL;
@@ -332,6 +333,17 @@ get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer)
   snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", active_lq_handler->get_cost_scaled(cost));
   buffer->buf[sizeof(buffer->buf) - 1] = '\0';
   return buffer->buf;
+}
+
+double
+get_linkcost_scaled(olsr_linkcost cost, bool route)
+{
+  olsr_linkcost limit = route ? ROUTE_COST_BROKEN : LINK_COST_BROKEN;
+  if (cost >= limit) {
+    return (double) limit;
+  }
+
+  return active_lq_handler->get_cost_scaled(cost);
 }
 
 /**
