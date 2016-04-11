@@ -1577,6 +1577,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
         } else {
           struct tc_entry* tc = olsr_lookup_tc_entry(&gw->gw->originator);
           olsr_linkcost etx = ROUTE_COST_BROKEN;
+          struct lqtextbuffer lcbuf;
           if (tc) {
             etx = tc->path_cost;
           }
@@ -1585,13 +1586,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
           abuf_appendf(abuf, "      <td>%s</td>\n", olsr_ip_prefix_to_string(&gw->gw->external_prefix));
           abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->uplink);
           abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->downlink);
-
-          if (!tc || tc->path_cost == ROUTE_COST_BROKEN) {
-            abuf_appendf(abuf, "      <td>Unreachable</td>\n");
-          } else {
-            abuf_appendf(abuf, "      <td>%u</td>\n", etx);
-          }
-
+          abuf_appendf(abuf, "      <td>%s</td>\n", get_linkcost_text(etx, true, &lcbuf));
           abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4 ? "yes" : "no");
           abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4nat ? "yes" : "no");
           abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv6 ? "yes" : "no");
