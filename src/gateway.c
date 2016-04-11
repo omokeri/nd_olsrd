@@ -2218,24 +2218,25 @@ static void reportNewGateway(void) {
 
   if (!bestOverallLink.isOlsr) {
     /* best overall link is an egress interface */
+    struct lqtextbuffer lqbuf;
     struct ipaddr_str gwStr;
     const char * gw = !bestOverallLink.link.egress->bwCurrent.gatewaySet ? //
         NULL : //
         olsr_ip_to_string(&gwStr, &bestOverallLink.link.egress->bwCurrent.gateway);
-
-    olsr_syslog(OLSR_LOG_INFO, "New gateway selected: %s %s%s%swith uplink/downlink/pathcost = %u/%u/%u", //
+    olsr_syslog(OLSR_LOG_INFO, "New gateway selected: %s %s%s%swith uplink/downlink/pathcost = %u/%u/%s", //
         bestOverallLink.link.egress->name, //
         !gw ? "" : "via ", //
         !gw ? "" : gwStr.buf, //
         !gw ? "" : " ", //
         bestOverallLink.link.egress->bwCurrent.egressUk, //
         bestOverallLink.link.egress->bwCurrent.egressDk, //
-        bestOverallLink.link.egress->bwCurrent.path_cost);
+        get_linkcost_text(bestOverallLink.link.egress->bwCurrent.path_cost, true, &lqbuf));
     return;
   }
 
   /* best overall link is an olsr (tunnel) interface */
   {
+    struct lqtextbuffer lqbuf;
     struct tc_entry* tc = olsr_lookup_tc_entry(&bestOverallLink.link.olsr->originator);
 
     char ifNameBuf[IFNAMSIZ];
@@ -2244,14 +2245,14 @@ static void reportNewGateway(void) {
     struct ipaddr_str gwStr;
     const char * gw = olsr_ip_to_string(&gwStr, &bestOverallLink.link.olsr->originator);
 
-    olsr_syslog(OLSR_LOG_INFO, "New gateway selected: %s %s%s%swith uplink/downlink/pathcost = %u/%u/%u", //
+    olsr_syslog(OLSR_LOG_INFO, "New gateway selected: %s %s%s%swith uplink/downlink/pathcost = %u/%u/%s", //
         !ifName ? "none" : ifName, //
         !gw ? "" : "via ", //
         !gw ? "" : gwStr.buf, //
         !gw ? "" : " ", //
         bestOverallLink.link.olsr->uplink, //
         bestOverallLink.link.olsr->downlink, //
-        !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+        get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf));
   }
 }
 
