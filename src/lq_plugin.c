@@ -318,16 +318,9 @@ get_tc_edge_entry_text(struct tc_edge_entry *entry, char separator, struct lqtex
 const char *
 get_linkcost_text(olsr_linkcost cost, bool route, struct lqtextbuffer *buffer)
 {
-  static const char *infinite = "INFINITE";
-
-  if (route) {
-    if (cost >= ROUTE_COST_BROKEN) {
-      return infinite;
-    }
-  } else {
-    if (cost >= LINK_COST_BROKEN) {
-      return infinite;
-    }
+  olsr_linkcost limit = route ? ROUTE_COST_BROKEN : LINK_COST_BROKEN;
+  if (cost >= limit) {
+    return "INFINITE";
   }
 
   snprintf(buffer->buf, sizeof(buffer->buf), "%.3f", active_lq_handler->get_cost_scaled(cost));
