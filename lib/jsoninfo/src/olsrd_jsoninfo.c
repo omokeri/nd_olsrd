@@ -424,7 +424,7 @@ static void ipc_print_gateway_entry(struct autobuf *abuf, bool ipv6, struct gate
   abuf_json_int(abuf, "expireTime", gw->expire_timer ? (gw->expire_timer->timer_clock - now_times) : 0);
   abuf_json_int(abuf, "cleanupTime", gw->cleanup_timer ? (gw->cleanup_timer->timer_clock - now_times) : 0);
 
-  abuf_json_int(abuf, "pathcost", !tc ? ROUTE_COST_BROKEN : tc->path_cost);
+  abuf_json_float(abuf, "pathcost", get_linkcost_scaled(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true));
   abuf_json_int(abuf, "hops", !tc ? 0 : tc->hops);
 }
 #endif /* __linux__ */
@@ -525,7 +525,7 @@ void ipc_print_links(struct autobuf *abuf) {
 
     abuf_json_int(abuf, "lossMultiplier", (long) my_link->loss_link_multiplier);
 
-    abuf_json_int(abuf, "linkCost", MIN(my_link->linkcost, LINK_COST_BROKEN));
+    abuf_json_float(abuf, "linkCost", get_linkcost_scaled(my_link->linkcost, false));
 
     abuf_json_float(abuf, "linkQuality", atof(lqString));
     abuf_json_float(abuf, "neighborLinkQuality", nlqString ? atof(nlqString) : 0.0);
@@ -542,16 +542,14 @@ void ipc_print_routes(struct autobuf *abuf) {
 
   /* Walk the route table */
   OLSR_FOR_ALL_RT_ENTRIES(rt) {
-    struct lqtextbuffer costbuffer;
-
     if (rt->rt_best) {
       abuf_json_mark_array_entry(true, abuf);
       abuf_json_ip_address(abuf, "destination", &rt->rt_dst.prefix);
       abuf_json_int(abuf, "genmask", rt->rt_dst.prefix_len);
       abuf_json_ip_address(abuf, "gateway", &rt->rt_best->rtp_nexthop.gateway);
       abuf_json_int(abuf, "metric", rt->rt_best->rtp_metric.hops);
-      abuf_json_float(abuf, "etx", atof(get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &costbuffer)));
-      abuf_json_int(abuf, "rtpMetricCost", MIN(ROUTE_COST_BROKEN, rt->rt_best->rtp_metric.cost));
+      abuf_json_float(abuf, "etx", get_linkcost_scaled(rt->rt_best->rtp_metric.cost, true));
+      abuf_json_float(abuf, "rtpMetricCost", get_linkcost_scaled(rt->rt_best->rtp_metric.cost, true));
       abuf_json_string(abuf, "networkInterface", if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
       abuf_json_mark_array_entry(false, abuf);
     }
@@ -584,7 +582,7 @@ void ipc_print_topology(struct autobuf *abuf) {
         // vertex_node
         abuf_json_ip_address(abuf, "lastHopIP", &tc->addr);
         // cand_tree_node
-        abuf_json_int(abuf, "pathCost", MIN(tc->path_cost, ROUTE_COST_BROKEN));
+        abuf_json_float(abuf, "pathCost", get_linkcost_scaled(tc->path_cost, true));
         // path_list_node
         // edge_tree
         // prefix_tree
@@ -604,7 +602,7 @@ void ipc_print_topology(struct autobuf *abuf) {
         // edge_node
         abuf_json_ip_address(abuf, "destinationIP", &tc_edge->T_dest_addr);
         // tc
-        abuf_json_int(abuf, "tcEdgeCost", MIN(LINK_COST_BROKEN, tc_edge->cost));
+        abuf_json_float(abuf, "tcEdgeCost", get_linkcost_scaled(tc_edge->cost, true));
         abuf_json_int(abuf, "ansnEdge", tc_edge->ansn);
         abuf_json_float(abuf, "linkQuality", atof(lqString));
         abuf_json_float(abuf, "neighborLinkQuality", nlqString ? atof(nlqString) : 0.0);
@@ -782,7 +780,7 @@ static void sgw_egress_bw(struct autobuf * abuf, const char * key, struct egress
 
   abuf_json_int(abuf, "egressUk", bw->egressUk);
   abuf_json_int(abuf, "egressDk", bw->egressDk);
-  abuf_json_int(abuf, "pathCost", bw->path_cost);
+  abuf_json_float(abuf, "pathCost", get_linkcost_scaled(bw->path_cost, true));
   abuf_json_ip_address(abuf, "network", &bw->network.prefix);
   abuf_json_int(abuf, "networkLength", bw->network.prefix_len);
   abuf_json_ip_address(abuf, "gateway", &bw->gateway);
