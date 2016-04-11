@@ -505,6 +505,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
       struct gateway_entry * gw = node->gw;
 
       if (gw) {
+        struct lqtextbuffer lqbuf;
         struct tc_entry* tc = olsr_lookup_tc_entry(&gw->originator);
 
         struct ipaddr_str originator;
@@ -530,7 +531,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
           prefixAndMask, // 4: IP/Mask, 6: IP/Length
           gw->uplink, // Uplink
           gw->downlink, // Downlink
-          !tc ? ROUTE_COST_BROKEN : tc->path_cost, // PathCost
+          get_linkcost_text(!tc ? ROUTE_COST_BROKEN : tc->path_cost, true, &lqbuf), // PathCost
           gw->ipv4 ? "Y" : "N", // IPv4
           gw->ipv4nat ? "Y" : "N", // IPv4-NAT
           gw->ipv6 ? "Y" : "N", // IPv6
@@ -551,10 +552,10 @@ void ipc_print_sgw(struct autobuf *abuf) {
 #else
 
   static const char * fmth4 = "%s%-15s %-31s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
-  static const char * fmtv4 = "%s%-15s %-31s %-9u %-9u %-10u %-4s %-8s %-4s %-15s %-15s %lld\n";
+  static const char * fmtv4 = "%s%-15s %-31s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-15s %lld\n";
 #if 0
   static const char * fmth6 = "%s%-45s %-49s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-45s %s\n";
-  static const char * fmtv6 = "%s%-45s %-49s %-9u %-9u %-10u %-4s %-8s %-4s %-15s %-45s %lld\n";
+  static const char * fmtv6 = "%s%-45s %-49s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-45s %lld\n";
 #endif
 
   sgw_ipvx(abuf, false, fmth4, fmtv4);
