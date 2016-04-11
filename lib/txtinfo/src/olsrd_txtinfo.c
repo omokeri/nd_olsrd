@@ -51,6 +51,7 @@
 #include "routing_table.h"
 #include "lq_plugin.h"
 #include "gateway.h"
+#include "gateway_costs.h"
 #include "olsrd_plugin.h"
 #include "../../info/info_types.h"
 #include "../../info/http_headers.h"
@@ -492,6 +493,7 @@ extern struct interfaceName * sgwTunnel6InterfaceNames;
  */
 static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const char * fmtv) {
   struct interfaceName * sgwTunnelInterfaceNames = !ipv6 ? sgwTunnel4InterfaceNames : sgwTunnel6InterfaceNames;
+  struct gwtextbuffer gwbuf;
 
   abuf_appendf(abuf, "Table: Smart Gateway IPv%d\n", ipv6 ? 6 : 4);
   abuf_appendf(abuf, fmth, " ", "Originator", "Prefix", "Uplink", "Downlink", "PathCost", "IPv4", "IPv4-NAT", "IPv6", "Tunnel-Name", "Destination", "Cost");
@@ -537,7 +539,7 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6, const char * fmth, const c
           gw->ipv6 ? "Y" : "N", // IPv6
           node->name, // Tunnel-Name
           originator.buf, // Destination
-          gw->path_cost // Cost
+          get_gwcost_text(gw->path_cost, &gwbuf) // Cost
           );
       }
     }
@@ -552,10 +554,10 @@ void ipc_print_sgw(struct autobuf *abuf) {
 #else
 
   static const char * fmth4 = "%s%-15s %-31s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
-  static const char * fmtv4 = "%s%-15s %-31s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-15s %lld\n";
+  static const char * fmtv4 = "%s%-15s %-31s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-15s %s\n";
 #if 0
   static const char * fmth6 = "%s%-45s %-49s %-9s %-9s %-10s %-4s %-8s %-4s %-15s %-45s %s\n";
-  static const char * fmtv6 = "%s%-45s %-49s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-45s %lld\n";
+  static const char * fmtv6 = "%s%-45s %-49s %-9u %-9u %-10s %-4s %-8s %-4s %-15s %-45s %s\n";
 #endif
 
   sgw_ipvx(abuf, false, fmth4, fmtv4);
