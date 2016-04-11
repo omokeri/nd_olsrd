@@ -611,13 +611,6 @@ int main(int argc, char *argv[]) {
     }
   }
 
-#ifdef __linux__
-  /* startup gateway system */
-  if (olsr_cnf->smart_gw_active && olsr_startup_gateways()) {
-    olsr_exit("Cannot startup gateway tunnels", EXIT_FAILURE);
-  }
-#endif /* __linux__ */
-
   /* initialise the IPC socket */
   if ((olsr_cnf->ipc_connections > 0) && ipc_init()) {
     olsr_exit("ipc_init failure", EXIT_FAILURE);
@@ -625,6 +618,13 @@ int main(int argc, char *argv[]) {
 
   /* Initialisation of different tables to be used. */
   olsr_init_tables();
+
+#ifdef __linux__
+  /* startup gateway system */
+  if (olsr_cnf->smart_gw_active && olsr_startup_gateways()) {
+    olsr_exit("Cannot startup gateway tunnels", EXIT_FAILURE);
+  }
+#endif /* __linux__ */
 
   olsr_do_startup_sleep();
 
