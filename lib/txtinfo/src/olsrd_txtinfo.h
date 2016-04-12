@@ -46,6 +46,7 @@
 
 #include "common/autobuf.h"
 
+unsigned long long get_supported_commands_mask(void);
 bool isCommand(const char *str, unsigned long long siw);
 void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers);
 

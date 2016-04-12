@@ -57,6 +57,10 @@
 #include "../../info/http_headers.h"
 #include "gateway_default_handler.h"
 
+unsigned long long get_supported_commands_mask(void) {
+  return (SIW_ALL | SIW_OLSRD_CONF) & ~(SIW_CONFIG | SIW_PLUGINS);
+}
+
 bool isCommand(const char *str, unsigned long long siw) {
   const char * cmd;
   switch (siw) {
@@ -119,14 +123,6 @@ bool isCommand(const char *str, unsigned long long siw) {
     case SIW_VERSION:
       cmd = "/ver";
       break;
-
-    case SIW_CONFIG:
-      cmd = "/config";
-      return false; /* not implemented */
-
-    case SIW_PLUGINS:
-      cmd = "/plugins";
-      return false; /* not implemented */
 
     case SIW_NEIGHBORS_FREIFUNK:
       cmd = "/neighbours";

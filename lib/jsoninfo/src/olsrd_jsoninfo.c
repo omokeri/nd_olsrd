@@ -111,6 +111,10 @@ void plugin_init(const char *plugin_name) {
   read_uuid_from_file(plugin_name, uuidfile);
 }
 
+unsigned long long get_supported_commands_mask(void) {
+  return SIW_ALL | SIW_OLSRD_CONF;
+}
+
 bool isCommand(const char *str, unsigned long long siw) {
   const char * cmd;
   switch (siw) {

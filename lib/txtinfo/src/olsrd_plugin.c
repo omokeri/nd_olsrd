@@ -57,6 +57,7 @@ static info_plugin_functions_t functions = { //
     //
         .supportsCompositeCommands = true, //
         .init = NULL, //
+        .supported_commands_mask = get_supported_commands_mask, //
         .is_command = isCommand, //
         .cache_timeout = cache_timeout_generic, //
         .determine_mime_type = NULL, //

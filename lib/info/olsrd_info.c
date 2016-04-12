@@ -209,13 +209,14 @@ static INLINE void info_plugin_cache_init_entry(struct info_cache_entry_t * entr
 
 static unsigned int determine_single_action(char *requ) {
   unsigned int i;
+  unsigned long long siw_mask = !functions->supported_commands_mask ? SIW_EVERYTHING : functions->supported_commands_mask();
 
-  if (!functions->is_command)
+  if (!functions->is_command || !siw_mask)
     return 0;
 
   for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES_ALL); ++i) {
     unsigned long long siw = SIW_ENTRIES_ALL[i];
-    if (functions->is_command(requ, siw))
+    if ((siw & siw_mask) && functions->is_command(requ, siw))
       return siw;
   }
 

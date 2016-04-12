@@ -99,6 +99,7 @@ typedef struct {
 #define SIW_EVERYTHING                   ((1ULL << 14) - 1)
 
 typedef void (*init_plugin)(const char *plugin_name);
+typedef unsigned long long (*supported_commands_mask_func)(void);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);
 typedef long (*cache_timeout_func)(info_plugin_config_t *plugin_config, unsigned long long siw);
 typedef const char * (*mime_type)(unsigned int send_what);
@@ -109,6 +110,7 @@ typedef void (*printer_generic)(struct autobuf *abuf);
 typedef struct {
     bool supportsCompositeCommands;
     init_plugin init;
+    supported_commands_mask_func supported_commands_mask;
     command_matcher is_command;
     cache_timeout_func cache_timeout;
     mime_type determine_mime_type;
