@@ -48,11 +48,7 @@ int64_t gw_costs_weigh(bool up, uint32_t path_cost, uint32_t exitUk, uint32_t ex
 double get_gwcost_scaled(int64_t cost) {
   if (cost != INT64_MAX) {
     unsigned int shift = !olsr_cnf->smart_gw_divider_etx ? SCALING_SHIFT_CLASSIC : SCALING_SHIFT;
-
-    double integerNumber = (double) (cost >> shift);
-    double fractionNumber = (double) (cost & ((1 << shift) - 1)) / (1 << shift);
-
-    return integerNumber + fractionNumber;
+    return ((double) cost) / (1u << shift);
   }
 
   return (double)cost;
