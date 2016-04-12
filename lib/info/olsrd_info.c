@@ -364,6 +364,7 @@ typedef struct {
 static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, SiwLookupTableEntry *funcs, unsigned int funcsSize, unsigned int *outputLength) {
   unsigned int i;
   unsigned int preLength;
+  unsigned int what = send_what;
   cache_timeout_func cache_timeout_f = functions->cache_timeout;
 
   if (functions->output_start) {
@@ -372,9 +373,9 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
 
   preLength = abuf->len;
 
-  for (i = 0; i < funcsSize; i++) {
+  for (i = 0; (i < funcsSize) && what; i++) {
     unsigned long long siw = funcs[i].siw;
-    if (send_what & siw) {
+    if (what & siw) {
       printer_generic func = funcs[i].func;
       if (func) {
         long cache_timeout = 0;
@@ -403,6 +404,7 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
         }
       }
     }
+    what &= ~siw;
   }
 
   *outputLength = abuf->len - preLength;
