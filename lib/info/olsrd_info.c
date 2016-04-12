@@ -671,7 +671,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       req = skipMultipleSlashes(req);
       if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
         /* empty or '/' */
-        send_what = SIW_ALL;
+        send_what = SIW_EVERYTHING;
       } else {
         send_what = determine_action(req);
       }
