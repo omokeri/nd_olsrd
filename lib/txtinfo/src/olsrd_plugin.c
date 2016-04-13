@@ -49,8 +49,7 @@
 #define PLUGIN_NAME "TXTINFO"
 #define PLUGIN_TITLE    "OLSRD txtinfo plugin"
 #define PLUGIN_VERSION "0.1"
-#define PLUGIN_AUTHOR   "Lorenz Schori"
-#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 static info_plugin_functions_t functions = { //
