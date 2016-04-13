@@ -45,11 +45,11 @@
 #include "olsrd_plugin.h"
 #include "../../info/olsrd_info.h"
 #include "olsrd_jsoninfo.h"
+#include "olsr.h"
+#include "builddata.h"
 
-#define PLUGIN_NAME "JSONINFO"
-#define PLUGIN_TITLE    "OLSRD jsoninfo plugin"
-#define PLUGIN_VERSION "0.0"
-#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION
+#define PLUGIN_NAME              "JSONINFO"
+#define PLUGIN_TITLE             "OLSRD jsoninfo plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static info_plugin_functions_t functions = { //
@@ -90,7 +90,7 @@ static void my_fini(void) __attribute__ ((destructor));
  */
 static void my_init(void) {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_TITLE, git_descriptor);
 
   info_plugin_config_init(&config, 9090);
   memset(uuidfile, 0, sizeof(uuidfile));
