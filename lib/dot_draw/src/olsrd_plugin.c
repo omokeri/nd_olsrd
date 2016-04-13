@@ -52,9 +52,9 @@
 #include "olsr.h"
 #include "olsrd_plugin.h"
 #include "olsrd_dot_draw.h"
+#include "builddata.h"
 
-#define PLUGIN_NAME    "OLSRD dot draw plugin"
-#define MOD_DESC PLUGIN_NAME
+#define PLUGIN_NAME              "OLSRD dot_draw plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 union olsr_ip_addr ipc_accept_ip;
@@ -71,7 +71,7 @@ static void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 
   /* defaults for parameters */
   ipc_port = 2004;
