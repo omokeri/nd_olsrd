@@ -49,8 +49,7 @@
 #define PLUGIN_NAME "JSONINFO"
 #define PLUGIN_TITLE    "OLSRD jsoninfo plugin"
 #define PLUGIN_VERSION "0.0"
-#define PLUGIN_AUTHOR   "Hans-Christoph Steiner"
-#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_TITLE " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 static info_plugin_functions_t functions = { //
