@@ -41,11 +41,11 @@
 
 #include "olsrd_plugin.h"
 #include "olsrd_dyn_gw.h"
+#include "olsr.h"
+#include "builddata.h"
 #include <stdio.h>
 
-#define PLUGIN_NAME    "OLSRD dynamic gateway plugin"
-#define PLUGIN_VERSION "0.4"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define PLUGIN_NAME              "OLSRD dyn_gw plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 /**
@@ -72,7 +72,7 @@ void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 }
 
 /*
