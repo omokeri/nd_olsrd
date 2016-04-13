@@ -20,14 +20,14 @@
 #include "olsrd_plugin.h"
 #include "scheduler.h"
 #include "defs.h"
+#include "olsr.h"
+#include "builddata.h"
 
 #include "quagga.h"
 #include "plugin.h"
 #include "parse.h"
 
-#define PLUGIN_NAME    "OLSRD quagga plugin"
-#define PLUGIN_VERSION "0.2.2"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define PLUGIN_NAME              "OLSRD quagga plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static void __attribute__ ((constructor)) my_init(void);
@@ -71,6 +71,8 @@ olsrd_plugin_init(void)
 static void
 my_init(void)
 {
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 
   zebra_init();
 
