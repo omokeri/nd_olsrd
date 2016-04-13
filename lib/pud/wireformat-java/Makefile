@@ -110,7 +110,7 @@ default_target install clean:
 
 else
 
-GIT_SHA = $(shell git describe 2> /dev/null || echo "Unknown")
+GIT_SHA = $(shell git describe --dirty --always 2> /dev/null || echo "Git\ SHA\ Unknown")
 
 .PHONY: all default_target java prepare clean doc doc-clean install uninstall
 

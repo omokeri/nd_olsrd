@@ -16,10 +16,10 @@
  */
 
 /** The long plugin name */
-#define PUD_PLUGIN_NAME_LONG			"OLSRD Position Update Distribution (PUD) plugin"
+#define PUD_PLUGIN_NAME_LONG    "OLSRD pud plugin"
 
 /** The short plugin name / abbreviation */
-#define PUD_PLUGIN_ABBR					"PUD"
+#define PUD_PLUGIN_ABBR         "PUD"
 
 /*
  *  Interface
