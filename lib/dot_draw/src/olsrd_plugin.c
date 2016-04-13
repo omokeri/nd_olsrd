@@ -55,8 +55,7 @@
 
 #define PLUGIN_NAME    "OLSRD dot draw plugin"
 #define PLUGIN_VERSION "0.3"
-#define PLUGIN_AUTHOR   "Andreas Tonnesen"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 union olsr_ip_addr ipc_accept_ip;
