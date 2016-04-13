@@ -57,8 +57,12 @@
 #include "olsrd_arprefresh.h"
 #include "kernel_routes.h"
 #include "scheduler.h"
+#include "olsr.h"
+#include "builddata.h"
 
 #undef ARPREFRESH_DEBUG
+
+#define PLUGIN_TITLE             "OLSRD arprefresh plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 /****************************************************************************
@@ -209,7 +213,8 @@ static void __attribute__ ((destructor)) my_fini(void);
 static void
 my_init(void)
 {
-  printf("OLSRD arprefresh plugin by Sven-Ola\n");
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", PLUGIN_TITLE, git_descriptor);
 }
 
 /**
