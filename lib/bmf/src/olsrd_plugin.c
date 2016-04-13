@@ -46,6 +46,8 @@
 #include "plugin_util.h"
 #include "defs.h" /* olsr_u8_t, olsr_cnf */
 #include "scheduler.h" /* olsr_start_timer() */
+#include "olsr.h"
+#include "builddata.h"
 
 /* BMF includes */
 #include "Bmf.h" /* InitBmf(), CloseBmf() */
@@ -159,7 +161,7 @@ void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, 
 static void my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", MOD_DESC, git_descriptor);
 
   return;
 }
