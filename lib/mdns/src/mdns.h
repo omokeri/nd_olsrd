@@ -55,11 +55,8 @@
 #define MDNS_VALID_TIME          1800   /* seconds */
 
 /* BMF plugin data */
-#define PLUGIN_NAME "OLSRD MDNS plugin"
-#define PLUGIN_NAME_SHORT "OLSRD MDNS"
-#define PLUGIN_VERSION "1.0.1 (" __DATE__ " " __TIME__ ")"
-#define PLUGIN_COPYRIGHT "  (C) Ninux.org"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION "\n" PLUGIN_COPYRIGHT
+#define PLUGIN_NAME              "OLSRD mdns plugin"
+#define PLUGIN_NAME_SHORT        "MDNS"
 #define PLUGIN_INTERFACE_VERSION 5
 
 /* UDP-Port on which multicast packets are encapsulated */
