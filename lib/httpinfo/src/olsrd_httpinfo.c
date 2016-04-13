@@ -504,7 +504,7 @@ parse_http_request(int fd, void *data __attribute__ ((unused)), unsigned int fla
       stats.ok_hits++;
 
       abuf_appendf(&body_abuf,
-                 "</table>\n" "<div id=\"footer\">\n" "<center>\n" "(C)2005 Andreas T&oslash;nnesen<br/>\n"
+                 "</table>\n" "<div id=\"footer\">\n" "<center><br/>\n"
                  "<a href=\"http://www.olsr.org/\">http://www.olsr.org</a>\n" "</center>\n" "</div>\n" "</body>\n" "</html>\n");
 
 #ifdef NETDIRECT
@@ -634,7 +634,7 @@ build_http_header(http_header_type type, bool is_html, uint32_t msgsize, char *b
   size += strftime(&buf[size], bufsize - size, "Date: %a, %d %b %Y %H:%M:%S GMT\r\n", localtime(&currtime));
 
   /* Server version */
-  size += snprintf(&buf[size], bufsize - size, "Server: %s %s %s\r\n", PLUGIN_NAME, PLUGIN_VERSION, HTTP_VERSION);
+  size += snprintf(&buf[size], bufsize - size, "Server: %s %s\r\n", PLUGIN_NAME, HTTP_VERSION);
 
   /* connection-type */
   size += snprintf(&buf[size], bufsize - size, "Connection: closed\r\n");
@@ -1629,7 +1629,7 @@ static void
 build_about_body(struct autobuf *abuf)
 {
   abuf_appendf(abuf,
-                  "<strong>" PLUGIN_NAME " version " PLUGIN_VERSION "</strong><br/>\n" "by Andreas T&oslash;nnesen (C)2005.<br/>\n"
+                  "<strong>" PLUGIN_NAME "</strong><br/><br/>\n"
                   "Compiled "
 #ifdef ADMIN_INTERFACE
                   "<em>with experimental admin interface</em> "

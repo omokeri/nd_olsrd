@@ -66,9 +66,7 @@
 #include "mpr_selector_set.h"
 #include "routing_table.h"
 
-#define PLUGIN_NAME    "Httpinfo olsrd plugin"
-#define PLUGIN_VERSION "0.1"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define PLUGIN_NAME              "OLSRD httpinfo plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 extern int http_port;

@@ -55,6 +55,8 @@
 #endif /* _WIN32 */
 
 #include "olsrd_httpinfo.h"
+#include "olsr.h"
+#include "builddata.h"
 
 int http_port = 0;
 bool resolve_ip_addresses = false;
@@ -84,7 +86,8 @@ static void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+
   httpinfo_listen_ip.v4.s_addr = htonl(INADDR_ANY);
 }
 
