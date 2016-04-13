@@ -37,12 +37,13 @@
 
 #include "olsrd_plugin.h"
 #include "olsrd_secure.h"
+#include "olsr.h"
+#include "builddata.h"
+
 #include <stdio.h>
 #include <string.h>
 
-#define PLUGIN_NAME    "OLSRD signature plugin"
-#define PLUGIN_VERSION "0.5"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define PLUGIN_NAME              "OLSRD secure plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static void my_init(void) __attribute__ ((constructor));
@@ -66,9 +67,9 @@ static void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  /* We cannot use olsr_printf yet! */
-  printf("%s\n", MOD_DESC);
-  printf("[ENC]Accepted parameter pairs: (\"Keyfile\" <FILENAME>)\n");
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+
+  olsr_printf(0, "[ENC]Accepted parameter pairs: (\"Keyfile\" <FILENAME>)\n");
 }
 
 /**
