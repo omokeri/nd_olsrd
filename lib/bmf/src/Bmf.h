@@ -44,10 +44,10 @@
 #include "interfaces.h"   /* enum olsr_ifchg_flag */
 
 /* BMF plugin data */
-#define PLUGIN_NAME "OLSRD Basic Multicast Forwarding (BMF) plugin"
-#define PLUGIN_NAME_SHORT "OLSRD BMF"
-#define PLUGIN_COPYRIGHT "  (C) Thales Communications Huizen, Netherlands"
-#define MOD_DESC PLUGIN_NAME "\n" PLUGIN_COPYRIGHT
+#define PLUGIN_NAME              "OLSRD bmf plugin"
+#define PLUGIN_NAME_SHORT        "BMF"
+#define PLUGIN_COPYRIGHT         "  (C) Thales Communications Huizen, Netherlands"
+#define MOD_DESC PLUGIN_NAME     "\n" PLUGIN_COPYRIGHT
 #define PLUGIN_INTERFACE_VERSION 5
 
 /* UDP-Port on which multicast packets are encapsulated */
