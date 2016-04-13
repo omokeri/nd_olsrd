@@ -62,8 +62,7 @@
 
 #define PLUGIN_NAME    "OLSRD pgraph plugin"
 #define PLUGIN_VERSION "0.1"
-#define PLUGIN_AUTHOR   "Richard Gopaul"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 static union olsr_ip_addr ipc_accept_ip;
