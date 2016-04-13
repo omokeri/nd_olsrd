@@ -53,7 +53,6 @@
 
 #define PLUGIN_NAME	"OLSRD nameservice plugin"
 #define PLUGIN_VERSION	"0.3"
-#define PLUGIN_AUTHOR   "Bruno Randolf, Jens Nachtigall, Sven-Ola Tuecke"
 
 // useful to set for the freifunkfirmware to remove all
 // calls to olsr_printf by the empty statement ";"
