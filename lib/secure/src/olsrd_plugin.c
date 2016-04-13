@@ -42,8 +42,7 @@
 
 #define PLUGIN_NAME    "OLSRD signature plugin"
 #define PLUGIN_VERSION "0.5"
-#define PLUGIN_AUTHOR   "Andreas Tonnesen"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 static void my_init(void) __attribute__ ((constructor));
