@@ -59,8 +59,7 @@
 #define PLUGIN_NAME_SHORT "OLSRD MDNS"
 #define PLUGIN_VERSION "1.0.1 (" __DATE__ " " __TIME__ ")"
 #define PLUGIN_COPYRIGHT "  (C) Ninux.org"
-#define PLUGIN_AUTHOR "  Saverio Proto (zioproto@gmail.com)"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION "\n" PLUGIN_COPYRIGHT "\n" PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION "\n" PLUGIN_COPYRIGHT
 #define PLUGIN_INTERFACE_VERSION 5
 
 /* UDP-Port on which multicast packets are encapsulated */
