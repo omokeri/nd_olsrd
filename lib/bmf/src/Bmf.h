@@ -47,8 +47,7 @@
 #define PLUGIN_NAME "OLSRD Basic Multicast Forwarding (BMF) plugin"
 #define PLUGIN_NAME_SHORT "OLSRD BMF"
 #define PLUGIN_COPYRIGHT "  (C) Thales Communications Huizen, Netherlands"
-#define PLUGIN_AUTHOR "  Erik Tromp (eriktromp@users.sourceforge.net)"
-#define MOD_DESC PLUGIN_NAME "\n" PLUGIN_COPYRIGHT "\n" PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME "\n" PLUGIN_COPYRIGHT
 #define PLUGIN_INTERFACE_VERSION 5
 
 /* UDP-Port on which multicast packets are encapsulated */
