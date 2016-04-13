@@ -34,15 +34,16 @@
   * Example plugin for olsrd.org OLSR daemon
   * Only the bare minimum
   */
+#include "mini_plugin.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "../../../src/olsrd_plugin.h"
-
-#include "olsrd_plugin.h"
 #include "olsr.h"
+#include "builddata.h"
+#include "olsrd_plugin.h"
 
+#define PLUGIN_NAME              "OLSRD mini plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 /****************************************************************************
@@ -111,6 +112,9 @@ static void my_fini(void) __attribute__ ((destructor));
 static void
 my_init(void)
 {
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+
   printf("*** MINI: constructor\n");
 }
 

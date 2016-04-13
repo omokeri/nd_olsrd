@@ -34,8 +34,8 @@
  * Dynamic linked library for the olsr.org olsr daemon
  */
 
-#ifndef _OLSRD_PLUGIN_MINI
-#define _OLSRD_PLUGIN_MINI
+#ifndef _OLSRD_PLUGIN_MINI_H
+#define _OLSRD_PLUGIN_MINI_H
 
 /****************************************************************************
  *                Functions that the plugin MUST provide                    *
@@ -46,11 +46,4 @@ int olsrd_plugin_init(void);
 
 int olsrd_plugin_interface_version(void);
 
-#endif /* _OLSRD_PLUGIN_MINI */
-
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+#endif /* _OLSRD_PLUGIN_MINI_H */
