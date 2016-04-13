@@ -95,6 +95,9 @@ typedef struct {
 /* this data is not normal format but olsrd.conf format */
 #define SIW_OLSRD_CONF                   (1ULL << 13)
 
+/* everything */
+#define SIW_EVERYTHING                   ((1ULL << 14) - 1)
+
 typedef void (*init_plugin)(const char *plugin_name);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);
 typedef long (*cache_timeout_func)(info_plugin_config_t *plugin_config, unsigned long long siw);
