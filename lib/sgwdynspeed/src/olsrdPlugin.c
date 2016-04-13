@@ -5,6 +5,7 @@
 
 /* OLSRD includes */
 #include "olsr.h"
+#include "builddata.h"
 
 /* System includes */
 #include <stdbool.h>
@@ -22,13 +23,6 @@
  */
 int olsrd_plugin_init(void) {
 	bool retval = initSgwDynSpeed();
-	if (retval) {
-		olsr_printf(0, "%s\n", SGWDYNSPEED_PLUGIN_NAME_LONG
-#ifdef GIT_SHA
-				" (" GIT_SHA ")"
-#endif /* GIT_SHA */
-				);
-	}
 	return (retval ? 1 : 0);
 }
 
@@ -75,6 +69,8 @@ static void __attribute__ ((destructor)) sgwDynSpeed_fini(void);
  Shared library entrypoint for initialisation
  */
 static void sgwDynSpeed_init(void) {
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", SGWDYNSPEED_PLUGIN_NAME_LONG, git_descriptor);
 }
 
 /**

@@ -13,10 +13,10 @@
  */
 
 /** The long plugin name */
-#define SGWDYNSPEED_PLUGIN_NAME_LONG			"OLSRD Smart Gateway Dynamic Speed plugin"
+#define SGWDYNSPEED_PLUGIN_NAME_LONG  "OLSRD sgwdynspeed plugin"
 
 /** The short plugin name / abbreviation */
-#define SGWDYNSPEED_PLUGIN_ABBR					"SGWDYNSPEED"
+#define SGWDYNSPEED_PLUGIN_ABBR       "SGWDYNSPEED"
 
 /*
  *  Interface

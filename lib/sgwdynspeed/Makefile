@@ -26,8 +26,7 @@ default_target install clean:
 
 else
 
-GIT_SHA = $(shell git describe 2> /dev/null || echo "Unknown")
-CFLAGS += -DGIT_SHA=\"$(GIT_SHA)\" -DPLUGIN_VER=\"$(PLUGIN_VER)\"
+CFLAGS += -DPLUGIN_VER=\"$(PLUGIN_VER)\"
 
 .PHONY: all default_target install uninstall clean doc doc-clean java java-instal java-uninstall
 
