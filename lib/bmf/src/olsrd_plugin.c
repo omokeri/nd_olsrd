@@ -161,7 +161,7 @@ void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, 
 static void my_init(void)
 {
   /* Print plugin info to stdout */
-  olsr_printf(0, "%s (%s)\n", MOD_DESC, git_descriptor);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 
   return;
 }
