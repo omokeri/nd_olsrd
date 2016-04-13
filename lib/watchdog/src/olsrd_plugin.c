@@ -52,18 +52,42 @@
 #include "defs.h"
 #include "scheduler.h"
 #include "olsr_cookie.h"
-
+#include "builddata.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+
+#define PLUGIN_NAME              "OLSRD watchdog plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static struct olsr_cookie_info *watchdog_timer_cookie;
 
 static char watchdog_filename[FILENAME_MAX + 1] = "/tmp/olsr.watchdog";
 static int watchdog_interval = 5;
+
+
+static void my_init(void) __attribute__ ((constructor));
+static void my_fini(void) __attribute__ ((destructor));
+
+/**
+ *Constructor
+ */
+static void
+my_init(void)
+{
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+}
+
+/**
+ *Destructor
+ */
+static void
+my_fini(void)
+{
+}
 
 /**
  * Plugin interface version
