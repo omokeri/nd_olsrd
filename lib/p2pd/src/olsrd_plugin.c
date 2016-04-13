@@ -49,6 +49,8 @@
 #include "scheduler.h"          /* olsr_start_timer() */
 #include "olsr_cfg.h"           /* olsr_cnf() */
 #include "olsr_cookie.h"        /* olsr_alloc_cookie() */
+#include "olsr.h"
+#include "builddata.h"
 
 /* P2PD includes */
 #include "p2pd.h"               /* InitP2pd(), CloseP2pd() */
@@ -145,7 +147,7 @@ static void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 
   return;
 }

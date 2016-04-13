@@ -57,11 +57,10 @@
 #define P2PD_VALID_TIME           180		/* seconds */
 
 /* P2PD plugin data */
-#define PLUGIN_NAME               "OLSRD P2PD plugin"
-#define PLUGIN_NAME_SHORT         "OLSRD P2PD"
-#define PLUGIN_VERSION            "0.1.0 (" __DATE__ " " __TIME__ ")"
-#define MOD_DESC PLUGIN_NAME      " " PLUGIN_VERSION
+#define PLUGIN_NAME               "OLSRD p2pd plugin"
+#define PLUGIN_NAME_SHORT         "P2PD"
 #define PLUGIN_INTERFACE_VERSION  5
+
 #define IPHDR_FRAGMENT_MASK       0xC000
 
 /* Forward declaration of OLSR interface type */
