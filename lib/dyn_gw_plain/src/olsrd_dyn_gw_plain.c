@@ -43,6 +43,7 @@
 #include "ipcalc.h"
 #include "scheduler.h"
 #include "olsr.h"
+#include "builddata.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -53,9 +54,31 @@
 
 #define DEBUGLEV 1
 
+#define PLUGIN_NAME              "OLSRD dyn_gw_plain plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static int has_inet_gateway;
+
+static void my_init(void) __attribute__ ((constructor));
+static void my_fini(void) __attribute__ ((destructor));
+
+/**
+ *Constructor
+ */
+static void
+my_init(void)
+{
+  /* Print plugin info to stdout */
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+}
+
+/**
+ *Destructor
+ */
+static void
+my_fini(void)
+{
+}
 
 /**
  * Plugin interface version
@@ -84,8 +107,6 @@ olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *
 int
 olsrd_plugin_init(void)
 {
-  printf("OLSRD dyn_gw_plain plugin by Sven-Ola\n");
-
   gw_net.v4.s_addr = INET_NET;
   gw_netmask.v4.s_addr = INET_PREFIX;
 
