@@ -27,8 +27,7 @@
 
 #define PLUGIN_NAME    "OLSRD quagga plugin"
 #define PLUGIN_VERSION "0.2.2"
-#define PLUGIN_AUTHOR  "Immo 'FaUl' Wehrenberg"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION " by " PLUGIN_AUTHOR
+#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
 #define PLUGIN_INTERFACE_VERSION 5
 
 static void __attribute__ ((constructor)) my_init(void);
