@@ -49,6 +49,8 @@
 #include "olsrd_plugin.h"
 #include "plugin_util.h"
 #include "net_olsr.h"
+#include "olsr.h"
+#include "builddata.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -60,9 +62,7 @@
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
 
-#define PLUGIN_NAME    "OLSRD pgraph plugin"
-#define PLUGIN_VERSION "0.1"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define PLUGIN_NAME              "OLSRD pgraph plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
 static union olsr_ip_addr ipc_accept_ip;
@@ -93,7 +93,7 @@ void
 my_init(void)
 {
   /* Print plugin info to stdout */
-  printf("%s\n", MOD_DESC);
+  olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
 
   /* defaults for parameters */
   ipc_port = 2004;
