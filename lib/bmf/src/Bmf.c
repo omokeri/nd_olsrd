@@ -97,13 +97,13 @@ void BmfPError(const char* format, ...)
   /* Rely on short-circuit boolean evaluation */
   if (format == NULL || *format == '\0')
   {
-    olsr_printf(1, "%s: %s\n", PLUGIN_NAME, strErr);
+    olsr_printf(1, "%s: %s\n", PLUGIN_NAME_SHORT, strErr);
   }
   else
   {
     va_list arglist;
 
-    olsr_printf(1, "%s: ", PLUGIN_NAME);
+    olsr_printf(1, "%s: ", PLUGIN_NAME_SHORT);
 
     va_start(arglist, format);
     vsnprintf(strDesc, MAX_STR_DESC, format, arglist);
@@ -930,7 +930,7 @@ BMF_handle_captureFd(int skfd, void *data, unsigned int flags __attribute__ ((un
     olsr_printf(
       1,
       "%s: captured frame too short (%d bytes) on \"%s\"\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       nBytes,
       walker->ifName);
     return;
@@ -1012,7 +1012,7 @@ BMF_handle_listeningFd(int skfd, void *data, unsigned int flags __attribute__ ((
     sizeof(struct ip);
   if (minimumLength > BMF_BUFFER_SIZE) {
     olsr_printf(1, "%s: IP header length %u is too large\n",
-        PLUGIN_NAME, headerLength);
+        PLUGIN_NAME_SHORT, headerLength);
     return;
   }
   if (nBytes < minimumLength)
@@ -1020,7 +1020,7 @@ BMF_handle_listeningFd(int skfd, void *data, unsigned int flags __attribute__ ((
     olsr_printf(
       1,
       "%s: captured a too short encapsulation packet (%d bytes) on \"%s\"\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       nBytes,
       walker->ifName);
 
@@ -1089,7 +1089,7 @@ BMF_handle_encapsulatingFd(int skfd, void *data, unsigned int flags __attribute_
     olsr_printf(
       1,
       "%s: received a too short encapsulation packet (%d bytes) from %s on \"%s\"\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       nBytes,
       olsr_ip_to_string(&buf, &forwardedBy),
       walker->ifName);
@@ -1132,7 +1132,7 @@ BMF_handle_tuntapFd(int skfd __attribute__ ((unused)),
     olsr_printf(
       1,
       "%s: captured packet too short (%d bytes) on \"%s\"\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       nBytes,
       EtherTunTapIfName);
     return;
@@ -1168,7 +1168,7 @@ void InterfaceChange(int if_index __attribute__((unused)), struct interface_olsr
      * Thanks to Daniele Lacamera for finding and solving this bug. */
     CloseBmf();
     InitBmf(NULL);
-    olsr_printf(1, "%s: interface %s added\n", PLUGIN_NAME, interf->int_name);
+    olsr_printf(1, "%s: interface %s added\n", PLUGIN_NAME_SHORT, interf->int_name);
     break;
 
   case (IFCHG_IF_REMOVE):
@@ -1179,18 +1179,18 @@ void InterfaceChange(int if_index __attribute__((unused)), struct interface_olsr
      * interfaces. After that, BMF is re-started (InitBmf(interf)). */
     CloseBmf();
     InitBmf(interf);
-    olsr_printf(1, "%s: interface %s removed\n", PLUGIN_NAME, interf->int_name);
+    olsr_printf(1, "%s: interface %s removed\n", PLUGIN_NAME_SHORT, interf->int_name);
     break;
 
   case (IFCHG_IF_UPDATE):
-    olsr_printf(1, "%s: interface %s updated\n", PLUGIN_NAME, interf->int_name);
+    olsr_printf(1, "%s: interface %s updated\n", PLUGIN_NAME_SHORT, interf->int_name);
     break;
       
   default:
     olsr_printf(
       1,
       "%s: interface %s: error - unknown action (%d)\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       interf->int_name, action);
     break;
   }

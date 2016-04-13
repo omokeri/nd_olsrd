@@ -1665,11 +1665,11 @@ int CreateBmfNetworkInterfaces(struct interface_olsr * skipThisIntf)
 
   if (BmfInterfaces == NULL)
   {
-    olsr_printf(1, "%s: could not initialize any network interface\n", PLUGIN_NAME);
+    olsr_printf(1, "%s: could not initialize any network interface\n", PLUGIN_NAME_SHORT);
   }
   else
   {
-    olsr_printf(1, "%s: opened %d sockets\n", PLUGIN_NAME, nOpenedSockets);
+    olsr_printf(1, "%s: opened %d sockets\n", PLUGIN_NAME_SHORT, nOpenedSockets);
   }
   return 0;
 } /* CreateBmfNetworkInterfaces */
@@ -1821,7 +1821,7 @@ int AddNonOlsrBmfIf(
     olsr_printf(
       1,
       "%s: too many non-OLSR interfaces specified, maximum is %d\n",
-      PLUGIN_NAME,
+      PLUGIN_NAME_SHORT,
       MAX_NON_OLSR_IFS);
     return 1;
   }
