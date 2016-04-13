@@ -54,8 +54,7 @@
 #include "olsrd_dot_draw.h"
 
 #define PLUGIN_NAME    "OLSRD dot draw plugin"
-#define PLUGIN_VERSION "0.3"
-#define MOD_DESC PLUGIN_NAME " " PLUGIN_VERSION
+#define MOD_DESC PLUGIN_NAME
 #define PLUGIN_INTERFACE_VERSION 5
 
 union olsr_ip_addr ipc_accept_ip;
