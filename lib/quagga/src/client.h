@@ -53,9 +53,6 @@
 
 #define STATUS_CONNECTED 1
 
-/* Buffer size */
-#define BUFSIZE 1024
-
 void zclient_reconnect(void);
 int zclient_write(unsigned char *);
 unsigned char *zclient_read(ssize_t *);

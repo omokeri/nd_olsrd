@@ -57,6 +57,7 @@
 #include "olsr.h"
 #include "log.h"
 #include "routing_table.h"
+#include "common/autobuf.h"
 
 #include "common.h"
 #include "quagga.h"
@@ -200,9 +201,9 @@ zclient_read(ssize_t * size)
     /* (re)allocate buffer */
     if (*size == bufsize) {
       ssize_t start = bufsize;
-      bufsize += BUFSIZE;
+      bufsize += AUTOBUFCHUNK;
       buf = my_realloc(buf, bufsize, "grow read buffer");
-      memset(&buf[start], 0, BUFSIZE);
+      memset(&buf[start], 0, AUTOBUFCHUNK);
     }
 
     /* read from socket */
