@@ -48,6 +48,9 @@
  * Description        : common header file
  * ------------------------------------------------------------------------- */
 
+#ifndef _LIB_QUAGGA_COMMON_H_
+#define _LIB_QUAGGA_COMMON_H_
+
 #define OPTION_EXPORT 1
 #define OPTION_ROUTE_ADDITIONAL 2
 
@@ -74,6 +77,8 @@ struct zebra {
 };
 
 extern struct zebra zebra;
+
+#endif /* _LIB_QUAGGA_COMMON_H_ */
 
 /*
  * Local Variables:

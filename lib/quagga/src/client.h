@@ -43,6 +43,9 @@
  *
  */
 
+#ifndef _LIB_QUAGGA_CLIENT_H_
+#define _LIB_QUAGGA_CLIENT_H_
+
 /* -------------------------------------------------------------------------
  * File               : client.h
  * Description        : header file for client.c
@@ -56,6 +59,8 @@
 void zclient_reconnect(void);
 int zclient_write(unsigned char *);
 unsigned char *zclient_read(ssize_t *);
+
+#endif /* _LIB_QUAGGA_CLIENT_H_ */
 
 /*
  * Local Variables:

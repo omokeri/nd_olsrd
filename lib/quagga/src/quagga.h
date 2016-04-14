@@ -48,6 +48,9 @@
  * Description        : header file for quagga.c
  * ------------------------------------------------------------------------- */
 
+#ifndef _LIB_QUAGGA_QUAGGA_H_
+#define _LIB_QUAGGA_QUAGGA_H_
+
 #include "routing_table.h"
 
 /* Zebra socket */
@@ -63,6 +66,8 @@ int zebra_addroute(const struct rt_entry *);
 int zebra_delroute(const struct rt_entry *);
 void zebra_redistribute(uint16_t cmd);
 void zebra_hello(uint16_t cmd);
+
+#endif /* _LIB_QUAGGA_QUAGGA_H_ */
 
 /*
  * Local Variables:

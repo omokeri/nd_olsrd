@@ -48,7 +48,12 @@
  * Description        : header file for parse.c
  * ------------------------------------------------------------------------- */
 
+#ifndef _LIB_QUAGGA_PARSE_H_
+#define _LIB_QUAGGA_PARSE_H_
+
 void zparse(void*);
+
+#endif /* _LIB_QUAGGA_PARSE_H_ */
 
 /*
  * Local Variables:

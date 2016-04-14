@@ -48,6 +48,9 @@
  * Description        : header file for packet.c
  * ------------------------------------------------------------------------- */
 
+#ifndef _LIB_QUAGGA_PACKET_H_
+#define _LIB_QUAGGA_PACKET_H_
+
 /* Zebra packet size */
 #define ZEBRA_MAX_PACKET_SIZ		4096
 
@@ -99,6 +102,8 @@ struct zroute {
 
 unsigned char *zpacket_route(uint16_t, struct zroute *);
 unsigned char *zpacket_redistribute(uint16_t, unsigned char);
+
+#endif /* _LIB_QUAGGA_PACKET_H_ */
 
 /*
  * Local Variables:
