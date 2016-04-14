@@ -662,18 +662,23 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   FD_SET((unsigned int ) ipc_connection, &rfds); /* Win32 needs the cast here */
   if (0 <= select(ipc_connection + 1, &rfds, NULL, NULL, &tv)) {
     char requ[1024];
-    ssize_t s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
+    ssize_t s = 0;
+
+    requ[0] = '\0';
+    s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
 
     if (s >= (ssize_t) (sizeof(requ) - 1)) {
-      /* input was much too long, just skip the rest */
+      /* input was much too long, just skip it */
       while (recv(ipc_connection, (void *) &sink_buffer, sizeof(sink_buffer), 0) == sizeof(sink_buffer))
         ;
       s = -1;
+      requ[0] = '\0';
     }
 
-    if (0 <= s) {
+    if (s <= 0) {
+      requ[s] = '\0';
+
       req = requ;
-      req[s] = '\0';
       req = parseRequest(req, (size_t*)&s);
       req = skipMultipleSlashes(req);
       if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
