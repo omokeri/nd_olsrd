@@ -46,13 +46,13 @@
  */
 
 #include "olsrd_conf.h"
-#include "../defs.h"
-#include "../ipcalc.h"
-#include "../net_olsr.h"
-#include "../link_set.h"
-#include "../olsr.h"
-#include "../egressTypes.h"
-#include "../gateway.h"
+#include "defs.h"
+#include "ipcalc.h"
+#include "net_olsr.h"
+#include "link_set.h"
+#include "olsr.h"
+#include "egressTypes.h"
+#include "gateway.h"
 
 #include <stddef.h>
 #include <stdio.h>

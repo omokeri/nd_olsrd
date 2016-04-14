@@ -45,10 +45,10 @@
 
 #ifdef _WIN32
 
-#include "../defs.h"
-#include "../kernel_routes.h"
-#include "../kernel_tunnel.h"
-#include "../net_os.h"
+#include "defs.h"
+#include "kernel_routes.h"
+#include "kernel_tunnel.h"
+#include "net_os.h"
 
 int olsr_os_init_iptunnel(const char * name __attribute__((unused))) {
   return -1;

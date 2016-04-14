@@ -45,7 +45,7 @@
 
 #ifdef _WIN32
 
-#include "../log.h"
+#include "log.h"
 
 void
 olsr_openlog(const char *Id __attribute__ ((unused)))

@@ -59,9 +59,9 @@
 #include "gateway.h"
 #include "gateway_costs.h"
 #include "olsrd_plugin.h"
-#include "../../info/info_types.h"
-#include "../../info/http_headers.h"
-#include "../../info/json_helpers.h"
+#include "info/info_types.h"
+#include "info/http_headers.h"
+#include "info/json_helpers.h"
 #include "gateway_default_handler.h"
 #include "egressTypes.h"
 

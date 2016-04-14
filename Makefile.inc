@@ -125,10 +125,8 @@ SGW_POLICY_SCRIPT ?= sgw_policy_routing_setup.sh
 DOCDIR_OLSRD ?= $(DOCDIR)/$(EXENAME)
 
 
-CPPFLAGS =	-Isrc
-ifneq ($(TOPDIR),.)
-CPPFLAGS +=	-I$(TOPDIR)/src
-endif
+CPPFLAGS  = -Isrc -I$(TOPDIR)/src -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
+CPPFLAGS += -DHTTPINFO_PUD
 
 # include OS specific compiler settings
 -include $(TOPDIR)/make/Makefile.$(OS).compiler
@@ -329,10 +327,6 @@ endif
 # preserve debugging info when NOSTRIP is set
 ifneq ($(NOSTRIP),0)
 CFLAGS +=	-ggdb
-endif
-
-ifeq ($(OS),linux)
-CPPFLAGS+=-DHTTPINFO_PUD -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
 endif
 
 # a make function to quote "/" and "."

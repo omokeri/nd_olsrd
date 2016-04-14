@@ -49,7 +49,7 @@
 
 #include "olsrd_txtinfo.h"
 #include "olsrd_plugin.h"
-#include "../../info/olsrd_info.h"
+#include "info/olsrd_info.h"
 #include "olsr.h"
 #include "builddata.h"
 

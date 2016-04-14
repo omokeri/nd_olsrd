@@ -60,13 +60,10 @@ CFLAGS += -D_GNU_SOURCE
 
 
 RESOURCESDIR = ./resources
-NMEALIB_INC = $(NMEALIB_PATH)/include
 NMEALIB_LIB = $(NMEALIB_PATH)/lib
-LIBRARY_INC = $(LIBRARY_PATH)/include
 LIBRARY_LIB = $(LIBRARY_PATH)/lib
 NMEALIB_LIB_STATIC = $(NMEALIB_LIB)/lib$(NMEALIB_NAME).a
 
-CFLAGS += -I $(NMEALIB_INC) -I $(LIBRARY_INC)
 ifeq ($(PUD_NMEALIB_STATICALLY_LINKED),)
 LIBS += -L $(NMEALIB_LIB) -L $(LIBRARY_LIB) -l$(NMEALIB_NAME) -lm -l$(LIBRARY_NAME)
 else
@@ -110,10 +107,6 @@ CFLAGS += -D__POSIX_VISIBLE
 endif
 
 default_target: nmealib library $(PLUGIN_FULLNAME)
-
-# repeat from toplevel Makefile.inc, and adjust: we need the library includes
-%.d: %.c
-	$(MAKECMDPREFIX)$(filter-out $(CCACHE),$(CC)) -M $(strip $(CPPFLAGS)) -I $(NMEALIB_INC) -I $(LIBRARY_INC) "$<" | sed -e '1s/\($(call quote,$(*F))\.o\)[ :]*/$(call quote,$(*D)/\1 $@: Makefile $(TOPDIR)$(if $(TOPDIR),/)Makefile.inc) /g' >"$@"
 
 $(PLUGIN_FULLNAME): $(OBJS) version-script.txt
 ifeq ($(PUD_NMEALIB_STATICALLY_LINKED),)

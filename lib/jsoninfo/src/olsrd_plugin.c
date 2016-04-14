@@ -48,7 +48,7 @@
  */
 
 #include "olsrd_plugin.h"
-#include "../../info/olsrd_info.h"
+#include "info/olsrd_info.h"
 #include "olsrd_jsoninfo.h"
 #include "olsr.h"
 #include "builddata.h"

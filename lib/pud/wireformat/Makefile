@@ -78,14 +78,12 @@ LIBDIR_BUILD = lib
 
 INC_DIR_BASE_C = ./include
 INC_DIR_C = $(INC_DIR_BASE_C)/$(PROJECT)
-INC_DIR_OLSRD = ../../../src
 
 MODULES = nodeIdConversion wireFormat
 
 SRC_DIR_C = src
 OBJECTS_C = $(MODULES:%=$(BUILD_DIR)/%.o)
 
-INCLUDES = -I "$(INC_DIR_BASE_C)" -I "$(INC_DIR_OLSRD)"
 LIBRARIES = -lm
 
 
@@ -109,7 +107,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR_C)/%.c $(INC_DIR_C)/compiler.h
 ifeq ($(VERBOSE),0)
 	@echo "[CC] $<"
 endif
-	$(MAKECMDPREFIX)$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -c -o "$@" "$<"
+	$(MAKECMDPREFIX)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o "$@" "$<"
 
 .gitignore:
 ifeq ($(VERBOSE),0)

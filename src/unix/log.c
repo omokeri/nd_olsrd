@@ -47,8 +47,8 @@
  * System logging interface for GNU/Linux systems
  */
 
-#include "../olsr_cfg.h"
-#include "../log.h"
+#include "olsr_cfg.h"
+#include "log.h"
 #include <syslog.h>
 #include <stdarg.h>
 

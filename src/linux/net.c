@@ -50,10 +50,10 @@
 #ifdef __linux__
 #define __BSD_SOURCE 1
 
-#include "../net_os.h"
-#include "../ipcalc.h"
-#include "../olsr.h"
-#include "../log.h"
+#include "net_os.h"
+#include "ipcalc.h"
+#include "olsr.h"
+#include "log.h"
 #include "kernel_tunnel.h"
 #include "ifnet.h"
 

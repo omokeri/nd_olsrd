@@ -61,7 +61,7 @@
 #include <stdbool.h>
 
 #include "olsr_types.h"
-#include "../../../src/olsrd_plugin.h"
+#include "../../../src/olsrd_plugin.h" /* really needed with the ../../../ */
 #include "neighbor_table.h"
 #include "two_hop_neighbor_table.h"
 #include "tc_set.h"

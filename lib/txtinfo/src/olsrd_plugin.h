@@ -51,7 +51,7 @@
 #define LIB_TXTINFO_SRC_OLSRD_PLUGIN_H_
 
 #include "plugin_util.h"
-#include "../../info/info_types.h"
+#include "info/info_types.h"
 
 extern info_plugin_config_t config;
 extern bool vtime;

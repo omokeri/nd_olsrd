@@ -57,8 +57,8 @@
 #include "gateway.h"
 #include "gateway_costs.h"
 #include "olsrd_plugin.h"
-#include "../../info/info_types.h"
-#include "../../info/http_headers.h"
+#include "info/info_types.h"
+#include "info/http_headers.h"
 #include "gateway_default_handler.h"
 
 unsigned long long get_supported_commands_mask(void) {

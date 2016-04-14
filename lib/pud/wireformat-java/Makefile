@@ -127,7 +127,7 @@ endif
 
 SRC_DIR_C = src/main/c
 
-INCLUDES = -I "$(INC_DIR_WIREFORMAT)" -I "$(INC_DIR_JVM)" -I "$(INC_DIR_JVM_OS)"
+INCLUDES = -I "$(INC_DIR_JVM)" -I "$(INC_DIR_JVM_OS)"
 LIBRARIES = -L ../wireformat/lib -l$(WIREFORMAT_PROJECT)
 
 
