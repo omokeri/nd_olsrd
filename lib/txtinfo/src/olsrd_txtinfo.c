@@ -139,24 +139,18 @@ bool isCommand(const char *str, unsigned long long siw) {
   return !strcmp(str, cmd);
 }
 
-void output_error(struct autobuf *abuf, unsigned int status, const char * req, bool http_headers) {
+void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {
   if (http_headers || (status == INFO_HTTP_OK)) {
     return;
   }
 
-  switch (status) {
-    case INFO_HTTP_NOTFOUND:
-      abuf_appendf(abuf, "error: Invalid request '%s'\n", req);
-      break;
+  /* !http_headers && !INFO_HTTP_OK */
 
-    case INFO_HTTP_NOCONTENT:
-      /* wget can't handle output of zero length */
-      abuf_puts(abuf, "\n");
-      break;
-
-    default:
-      abuf_appendf(abuf, "error: Unknown status %d for request '%s'\n", status, req);
-      return;
+  if (status == INFO_HTTP_NOCONTENT) {
+    /* wget can't handle output of zero length */
+    abuf_puts(abuf, "\n");
+  } else {
+    abuf_appendf(abuf, "error: %s\n", httpStatusToReply(status));
   }
 }
 
