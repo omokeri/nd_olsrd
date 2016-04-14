@@ -53,7 +53,7 @@ void http_header_build(const char *plugin_name, unsigned int status, const char 
   assert(contentLengthIndex);
 
   /* Status */
-  abuf_appendf(abuf, "%s\r\n", httpStatusToReply(status));
+  abuf_appendf(abuf, "%s %s\r\n", INFO_HTTP_VERSION, httpStatusToReply(status));
 
   /* Date */
   {

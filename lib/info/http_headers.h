@@ -62,14 +62,14 @@ void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIn
 static INLINE const char * httpStatusToReply(unsigned int status) {
   switch (status) {
     case INFO_HTTP_NOCONTENT:
-      return INFO_HTTP_VERSION " 204 No Content";
+      return "204 No Content";
 
     case INFO_HTTP_NOTFOUND:
-      return INFO_HTTP_VERSION " 404 Not Found";
+      return "404 Not Found";
 
     case INFO_HTTP_OK:
     default:
-      return INFO_HTTP_VERSION " 200 OK";
+      return "200 OK";
   }
 }
 
