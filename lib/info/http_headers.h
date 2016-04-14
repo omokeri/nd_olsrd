@@ -51,9 +51,10 @@
 #define INFO_HTTP_VERSION "HTTP/1.1"
 
 /* Response types */
-#define INFO_HTTP_OK             (200)
-#define INFO_HTTP_NOCONTENT      (204)
-#define INFO_HTTP_NOTFOUND       (404)
+#define INFO_HTTP_OK                       (200)
+#define INFO_HTTP_NOCONTENT                (204)
+#define INFO_HTTP_NOTFOUND                 (404)
+#define INFO_HTTP_REQUEST_ENTITY_TOO_LARGE (413)
 
 void http_header_build(const char * plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
@@ -66,6 +67,9 @@ static INLINE const char * httpStatusToReply(unsigned int status) {
 
     case INFO_HTTP_NOTFOUND:
       return "404 Not Found";
+
+    case INFO_HTTP_REQUEST_ENTITY_TOO_LARGE:
+      return "413 Request Entity Too Large";
 
     case INFO_HTTP_OK:
     default:
