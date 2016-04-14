@@ -139,7 +139,13 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     //
     SIW_ALL, //
     //
-    SIW_OLSRD_CONF //
+    SIW_OLSRD_CONF, //
+    //
+    SIW_NETJSON_NETWORK_ROUTES,
+    SIW_NETJSON_NETWORK_GRAPH,
+    SIW_NETJSON_DEVICE_CONFIGURATION,
+    SIW_NETJSON_DEVICE_MONITORING,
+    SIW_NETJSON_NETWORK_COLLECTION
     };
 
 long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long long siw) {
@@ -159,6 +165,12 @@ long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long lo
     case SIW_INTERFACES:
     case SIW_2HOP:
     case SIW_SGW:
+
+    case SIW_NETJSON_NETWORK_ROUTES:
+    case SIW_NETJSON_NETWORK_GRAPH:
+    case SIW_NETJSON_DEVICE_CONFIGURATION:
+    case SIW_NETJSON_DEVICE_MONITORING:
+    case SIW_NETJSON_NETWORK_COLLECTION:
       return timeout;
 
     case SIW_VERSION:
@@ -455,6 +467,16 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
         { SIW_VERSION   , functions->version    }, //
         { SIW_CONFIG    , functions->config     }, //
         { SIW_PLUGINS   , functions->plugins    } //
+      };
+
+      send_info_from_table(&abuf, send_what, funcs, ARRAY_SIZE(funcs), &outputLength);
+    } else if (send_what & SIW_NETJSON) {
+      SiwLookupTableEntry funcs[] = {
+        { SIW_NETJSON_NETWORK_ROUTES      , functions->networkRoutes      }, //
+        { SIW_NETJSON_NETWORK_GRAPH       , functions->networkGraph       }, //
+        { SIW_NETJSON_DEVICE_CONFIGURATION, functions->deviceConfiguration}, //
+        { SIW_NETJSON_DEVICE_MONITORING   , functions->deviceMonitoring   }, //
+        { SIW_NETJSON_NETWORK_COLLECTION  , functions->networkCollection  } //
       };
 
       send_info_from_table(&abuf, send_what, funcs, ARRAY_SIZE(funcs), &outputLength);

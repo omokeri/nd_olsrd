@@ -99,8 +99,16 @@ typedef struct {
 /* this data is not normal format but olsrd.conf format */
 #define SIW_OLSRD_CONF                   (1ULL << 13)
 
+/* netjson */
+#define SIW_NETJSON_NETWORK_ROUTES       (1ULL << 14)
+#define SIW_NETJSON_NETWORK_GRAPH        (1ULL << 15)
+#define SIW_NETJSON_DEVICE_CONFIGURATION (1ULL << 16)
+#define SIW_NETJSON_DEVICE_MONITORING    (1ULL << 17)
+#define SIW_NETJSON_NETWORK_COLLECTION   (1ULL << 18)
+#define SIW_NETJSON                      (SIW_NETJSON_NETWORK_ROUTES | SIW_NETJSON_NETWORK_GRAPH | SIW_NETJSON_DEVICE_CONFIGURATION | SIW_NETJSON_DEVICE_MONITORING | SIW_NETJSON_NETWORK_COLLECTION)
+
 /* everything */
-#define SIW_EVERYTHING                   ((1ULL << 14) - 1)
+#define SIW_EVERYTHING                   ((1ULL << 19) - 1)
 
 typedef void (*init_plugin)(const char *plugin_name);
 typedef unsigned long long (*supported_commands_mask_func)(void);
@@ -135,6 +143,12 @@ typedef struct {
     printer_generic twohop;
     printer_generic config;
     printer_generic plugins;
+
+    printer_generic networkRoutes;
+    printer_generic networkGraph;
+    printer_generic deviceConfiguration;
+    printer_generic deviceMonitoring;
+    printer_generic networkCollection;
 } info_plugin_functions_t;
 
 struct info_cache_entry_t {
@@ -158,6 +172,12 @@ struct info_cache_t {
     struct info_cache_entry_t version;
     struct info_cache_entry_t config;
     struct info_cache_entry_t plugins;
+
+    struct info_cache_entry_t networkRoutes;
+    struct info_cache_entry_t networkGraph;
+    struct info_cache_entry_t deviceConfiguration;
+    struct info_cache_entry_t deviceMonitoring;
+    struct info_cache_entry_t networkCollection;
 };
 
 static INLINE struct info_cache_entry_t * info_cache_get_entry(struct info_cache_t * cache, unsigned long long siw) {
@@ -218,6 +238,26 @@ static INLINE struct info_cache_entry_t * info_cache_get_entry(struct info_cache
 
     case SIW_PLUGINS:
       r = &cache->plugins;
+      break;
+
+    case SIW_NETJSON_NETWORK_ROUTES:
+      r = &cache->networkRoutes;
+      break;
+
+    case SIW_NETJSON_NETWORK_GRAPH:
+      r = &cache->networkGraph;
+      break;
+
+    case SIW_NETJSON_DEVICE_CONFIGURATION:
+      r = &cache->deviceConfiguration;
+      break;
+
+    case SIW_NETJSON_DEVICE_MONITORING:
+      r = &cache->deviceMonitoring;
+      break;
+
+    case SIW_NETJSON_NETWORK_COLLECTION:
+      r = &cache->networkCollection;
       break;
 
     default:
