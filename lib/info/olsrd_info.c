@@ -675,7 +675,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       requ[0] = '\0';
     }
 
-    if (s <= 0) {
+    if (s >= 0) {
       requ[s] = '\0';
 
       req = requ;
