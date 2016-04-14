@@ -52,33 +52,7 @@
 #define PLUGIN_TITLE             "OLSRD txtinfo plugin"
 #define PLUGIN_INTERFACE_VERSION 5
 
-static info_plugin_functions_t functions = { //
-    //
-        .supportsCompositeCommands = true, //
-        .init = NULL, //
-        .supported_commands_mask = get_supported_commands_mask, //
-        .is_command = isCommand, //
-        .cache_timeout = cache_timeout_generic, //
-        .determine_mime_type = NULL, //
-        .output_start = NULL, //
-        .output_end = NULL, //
-        .output_error = output_error, //
-        .neighbors = ipc_print_neighbors, //
-        .links = ipc_print_links, //
-        .routes = ipc_print_routes, //
-        .topology = ipc_print_topology, //
-        .hna = ipc_print_hna, //
-        .mid = ipc_print_mid, //
-        .gateways = ipc_print_gateways, //
-        .sgw = ipc_print_sgw, //
-        .version = ipc_print_version, //
-        .olsrd_conf = ipc_print_olsrd_conf, //
-        .interfaces = ipc_print_interfaces, //
-        .twohop = ipc_print_twohop, //
-        .config = NULL, //
-        .plugins = NULL //
-    };
-
+info_plugin_functions_t functions;
 info_plugin_config_t config;
 bool vtime;
 
@@ -116,6 +90,27 @@ static void my_fini(void) {
  *function in uolsrd_plugin.c
  */
 int olsrd_plugin_init(void) {
+  memset(&functions, 0, sizeof(functions));
+
+  functions.supportsCompositeCommands = true;
+  functions.supported_commands_mask = get_supported_commands_mask;
+  functions.is_command = isCommand;
+  functions.cache_timeout = cache_timeout_generic;
+  functions.output_error = output_error;
+
+  functions.neighbors = ipc_print_neighbors;
+  functions.links = ipc_print_links;
+  functions.routes = ipc_print_routes;
+  functions.topology = ipc_print_topology;
+  functions.hna = ipc_print_hna;
+  functions.mid = ipc_print_mid;
+  functions.gateways = ipc_print_gateways;
+  functions.sgw = ipc_print_sgw;
+  functions.version = ipc_print_version;
+  functions.olsrd_conf = ipc_print_olsrd_conf;
+  functions.interfaces = ipc_print_interfaces;
+  functions.twohop = ipc_print_twohop;
+
   return info_plugin_init(PLUGIN_NAME, &functions, &config);
 }
 
