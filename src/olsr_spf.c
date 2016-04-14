@@ -1,9 +1,11 @@
-
 /*
- * The olsr.org Optimized Link-State Routing daemon(olsrd)
- * Copyright (c) 2004, Thomas Lopatic (thomas@lopatic.de)
- * IPv4 performance optimization (c) 2006, sven-ola(gmx.de)
- * SPF implementation (c) 2007, Hannes Gredler (hannes@gredler.at)
+ * The olsr.org Optimized Link-State Routing daemon (olsrd)
+ *
+ * (c) by the OLSR project
+ *
+ * See our Git repository to find out who worked on this file
+ * and thus is a copyright holder on it.
+ *
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +41,9 @@
  * to the project. For more information see the website or contact
  * the copyright holders.
  *
+ */
+
+/*
  * Implementation of Dijkstras algorithm. Initially all nodes
  * are initialized to infinite cost. First we put ourselves
  * on the heap of reachable nodes. Our heap implementation
