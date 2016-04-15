@@ -52,6 +52,7 @@
 #include "mid_set.h"
 #include "link_set.h"
 #include "neighbor_table.h"
+#include "olsr_types.h"
 
 struct node_entry {
   struct avl_node avl;

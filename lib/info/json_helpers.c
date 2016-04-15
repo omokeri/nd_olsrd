@@ -53,10 +53,6 @@
 #include <math.h>
 #include <float.h>
 
-#ifdef __linux__
-#include <fcntl.h>
-#endif /* __linux__ */
-
 static const char * empty = "";
 
 /* JSON support functions */
