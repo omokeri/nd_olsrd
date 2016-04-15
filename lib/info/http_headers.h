@@ -53,6 +53,7 @@
 /* Response types */
 #define INFO_HTTP_OK                       (200)
 #define INFO_HTTP_NOCONTENT                (204)
+#define INFO_HTTP_FORBIDDEN                (403)
 #define INFO_HTTP_NOTFOUND                 (404)
 #define INFO_HTTP_REQUEST_ENTITY_TOO_LARGE (413)
 #define INFO_HTTP_INTERNAL_SERVER_ERROR    (500)
@@ -65,6 +66,9 @@ static INLINE const char * httpStatusToReply(unsigned int status) {
   switch (status) {
     case INFO_HTTP_NOCONTENT:
       return "204 No Content";
+
+    case INFO_HTTP_FORBIDDEN:
+      return "403 Forbidden";
 
     case INFO_HTTP_NOTFOUND:
       return "404 Not Found";
