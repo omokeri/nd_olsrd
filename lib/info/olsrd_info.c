@@ -82,8 +82,6 @@ typedef struct {
   int count;
 } info_plugin_outbuffer_t;
 
-static char sink_buffer[AUTOBUFCHUNK];
-
 static const char * name = NULL;
 
 static info_plugin_functions_t *functions = NULL;
@@ -100,7 +98,7 @@ static struct info_cache_t info_cache;
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
-static char * skipMultipleSlashes(char * requ) {
+static char * skipMultipleSlashes(char * requ, size_t* len) {
   char * r = requ;
 
   if ((r[0] == '\0') // zero length
@@ -112,6 +110,9 @@ static char * skipMultipleSlashes(char * requ) {
 
   while (r[1] == '/') {
     r++;
+    if (len) {
+      *len = *len - 1;
+    }
   }
   return r;
 }
@@ -251,7 +252,7 @@ static unsigned int determine_action(char *requ) {
 
     char * requestSegment = requ;
     while (requestSegment) {
-      requestSegment = skipMultipleSlashes(requestSegment);
+      requestSegment = skipMultipleSlashes(requestSegment, NULL);
       if (requestSegment[0] == '\0') {
         /* there is no more text */
         requestSegment = NULL;
@@ -597,29 +598,59 @@ static char * parseRequest(char * requ, size_t *len) {
   return req;
 }
 
+static void drain_request(int ipc_connection) {
+  static char drain_buffer[AUTOBUFCHUNK];
+
+  /* input was much too long: read until the end for graceful connection termination
+   * because wget can't handle the premature connection termination that is allowed
+   * by the INFO_HTTP_REQUEST_ENTITY_TOO_LARGE HTTP status code
+   */
+  while (recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), 0) == sizeof(drain_buffer)) {}
+}
+
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
 #ifndef NODEBUG
   char addr[INET6_ADDRSTRLEN];
 #endif /* NODEBUG */
 
-  char * req = NULL;
-  unsigned int http_status = INFO_HTTP_OK;
+  int ipc_connection = -1;
   union olsr_sockaddr sock_addr;
   socklen_t sock_addr_len = sizeof(sock_addr);
-  fd_set rfds;
-  struct timeval tv;
+  bool hostDenied = false;
+  struct timeval timeout;
+  fd_set read_fds;
+  char req_buffer[1024];
+  char * req = req_buffer;
+  ssize_t rx_count = 0;
   unsigned int send_what = 0;
-  int ipc_connection = -1;
+  unsigned int http_status = INFO_HTTP_OK;
 
-  if (outbuffer.count >= MAX_CLIENTS) {
-    return;
-  }
-
-  if ((ipc_connection = accept(fd, &sock_addr.in, &sock_addr_len)) == -1) {
+  if ((ipc_connection = accept(fd, &sock_addr.in, &sock_addr_len)) < 0) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) accept()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
+    /* the caller will retry later */
     return;
+  }
+
+  if (outbuffer.count >= MAX_CLIENTS) {
+    /* limit the number of replies that are in-flight */
+    close(ipc_connection);
+    return;
+  }
+
+  if (olsr_cnf->ip_version == AF_INET) {
+    hostDenied = //
+        (ntohl(config->accept_ip.v4.s_addr) != INADDR_ANY) //
+        && !ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) //
+        && (!config->allow_localhost //
+            || (ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK));
+  } else {
+    hostDenied = //
+        !ip6equal(&config->accept_ip.v6, &in6addr_any) //
+        && !ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6) //
+        && (!config->allow_localhost //
+            || !ip6equal(&config->accept_ip.v6, &in6addr_loopback));
   }
 
 #ifndef NODEBUG
@@ -632,69 +663,106 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   }
 #endif /* NODEBUG */
 
-  tv.tv_sec = tv.tv_usec = 0;
-  if (olsr_cnf->ip_version == AF_INET) {
-    if (!ip4equal(&sock_addr.in4.sin_addr, &config->accept_ip.v4) && (config->accept_ip.v4.s_addr != INADDR_ANY) //
-        && (!config->allow_localhost || (ntohl(sock_addr.in4.sin_addr.s_addr) != INADDR_LOOPBACK))) {
+  if (hostDenied) {
 #ifndef NODEBUG
-      olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
+    olsr_printf(1, "(%s) Connect from host %s is not allowed!\n", name, addr);
 #endif /* NODEBUG */
-      close(ipc_connection);
-      return;
-    }
+    drain_request(ipc_connection);
+    send_info(req, send_what, ipc_connection, INFO_HTTP_FORBIDDEN);
+    return;
+  }
+
+#ifndef NODEBUG
+  olsr_printf(2, "(%s) Connect from host %s is allowed\n", name, addr);
+#endif /* NODEBUG */
+
+  timeout.tv_sec = timeout.tv_usec = 0;
+
+  FD_ZERO(&read_fds);
+#ifndef _WIN32
+  FD_SET(ipc_connection, &read_fds);
+#else
+  FD_SET((unsigned int ) ipc_connection, &read_fds);
+#endif
+
+  /* On success, select() and pselect() return the number of file descriptors
+   * contained in the three returned descriptor sets (that is, the total number
+   * of bits that are set in readfds, writefds, exceptfds) which may be zero if
+   * the timeout expires before anything interesting happens. On error, -1 is
+   * returned, and errno is set to indicate the error; the file descriptor sets
+   * are unmodified, and timeout becomes undefined.
+   */
+
+  if (select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout) < 0) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
+#endif /* NODEBUG */
+    drain_request(ipc_connection);
+    send_info(req, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    return;
+  }
+
+  *req = '\0';
+  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0); /* Win32 needs the cast here */
+
+  /* Upon successful completion, recv() shall return the length of the message
+   * in bytes. If no messages are available to be received and the peer has
+   * performed an orderly shutdown, recv() shall return 0. Otherwise, −1 shall
+   * be returned and errno set to indicate the error.
+   */
+
+  if (rx_count < 0) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) s < 0\n", name);
+#endif /* NODEBUG */
+    *req = '\0';
+    drain_request(ipc_connection);
+    send_info(req, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    return;
+  }
+
+  /* rx_count >= 0 */
+
+  if (!rx_count) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) s == 0\n", name);
+#endif /* NODEBUG */
+    *req = '\0';
+    drain_request(ipc_connection);
+    send_info(req, send_what, ipc_connection, INFO_HTTP_NOCONTENT);
+    return;
+  }
+
+  /* rx_count > 0 */
+
+  if (rx_count >= (ssize_t) sizeof(req_buffer)) {
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) s > %ld\n", name, (long int) sizeof(req_buffer));
+#endif /* NODEBUG */
+    req[sizeof(req_buffer) - 1] = '\0';
+    drain_request(ipc_connection);
+    send_info(req, send_what, ipc_connection, INFO_HTTP_REQUEST_ENTITY_TOO_LARGE);
+    return;
+  }
+
+  /* 0 < rx_count < sizeof(requ) */
+
+  req[rx_count] = '\0';
+  req = parseRequest(req, (size_t*) &rx_count);
+  req = skipMultipleSlashes(req, (size_t*) &rx_count);
+  if ((req[0] == '\0') //
+      || ((req[0] == '/') && (req[1] == '\0'))) {
+    /* empty or '/' */
+    send_what = SIW_EVERYTHING;
   } else {
-    /* Use in6addr_any (::) in olsr.conf to allow anybody. */
-    if (!ip6equal(&sock_addr.in6.sin6_addr, &config->accept_ip.v6) && !ip6equal(&config->accept_ip.v6, &in6addr_any)) {
-#ifndef NODEBUG
-      olsr_printf(1, "(%s) From host(%s) not allowed!\n", name, addr);
-#endif /* NODEBUG */
-      close(ipc_connection);
-      return;
-    }
+    send_what = determine_action(req);
   }
 
-#ifndef NODEBUG
-  olsr_printf(2, "(%s) Connect from %s\n", name, addr);
-#endif /* NODEBUG */
-
-  /* purge read buffer to prevent blocking on linux */
-  FD_ZERO(&rfds);
-  FD_SET((unsigned int ) ipc_connection, &rfds); /* Win32 needs the cast here */
-  if (0 <= select(ipc_connection + 1, &rfds, NULL, NULL, &tv)) {
-    char requ[1024];
-    ssize_t s = 0;
-
-    requ[0] = '\0';
-    s = recv(ipc_connection, (void *) &requ, sizeof(requ) - 1, 0); /* Win32 needs the cast here */
-
-    if (s >= (ssize_t) (sizeof(requ) - 1)) {
-      /* input was much too long, just skip it */
-      while (recv(ipc_connection, (void *) &sink_buffer, sizeof(sink_buffer), 0) == sizeof(sink_buffer))
-        ;
-      s = -1;
-      requ[0] = '\0';
-    }
-
-    if (s >= 0) {
-      requ[s] = '\0';
-
-      req = requ;
-      req = parseRequest(req, (size_t*)&s);
-      req = skipMultipleSlashes(req);
-      if ((req[0] == '\0') || ((req[0] == '/') && (req[1] == '\0'))) {
-        /* empty or '/' */
-        send_what = SIW_EVERYTHING;
-      } else {
-        send_what = determine_action(req);
-      }
-    }
-
-    if (!send_what) {
-      http_status = INFO_HTTP_NOTFOUND;
-    }
+  if (!send_what) {
+    http_status = INFO_HTTP_NOTFOUND;
   }
 
-  send_info(req ? req : "", send_what, ipc_connection, http_status);
+  send_info(req, send_what, ipc_connection, http_status);
 }
 
 static int plugin_ipc_init(void) {
