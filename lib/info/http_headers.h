@@ -57,6 +57,7 @@
 #define INFO_HTTP_NOTFOUND                 (404)
 #define INFO_HTTP_REQUEST_ENTITY_TOO_LARGE (413)
 #define INFO_HTTP_INTERNAL_SERVER_ERROR    (500)
+#define INFO_HTTP_SERVICE_UNAVAILABLE      (503)
 
 void http_header_build(const char * plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
@@ -75,6 +76,9 @@ static INLINE const char * httpStatusToReply(unsigned int status) {
 
     case INFO_HTTP_REQUEST_ENTITY_TOO_LARGE:
       return "413 Request Entity Too Large";
+
+    case INFO_HTTP_SERVICE_UNAVAILABLE:
+      return "503 Service Unavailable";
 
     case INFO_HTTP_OK:
       return "200 OK";
