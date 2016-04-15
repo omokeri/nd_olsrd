@@ -60,6 +60,8 @@
 
 #define NETJSON_PROTOCOL "olsrv1"
 
+static struct json_session json_session;
+
 unsigned long long get_supported_commands_mask(void) {
   return SIW_NETJSON & ~(SIW_NETJSON_DEVICE_CONFIGURATION | SIW_NETJSON_DEVICE_MONITORING);
 }
@@ -92,13 +94,14 @@ const char * determine_mime_type(unsigned int send_what __attribute__((unused)))
 
 void output_start(struct autobuf *abuf) {
   /* global variables for tracking when to put a comma in for JSON */
-  abuf_json_reset_entry_number_and_depth();
-  abuf_json_mark_output(true, abuf);
+  abuf_json_reset_entry_number_and_depth(&json_session);
+  abuf_json_mark_output(&json_session, true, abuf);
 }
 
 void output_end(struct autobuf *abuf) {
-  abuf_json_mark_output(false, abuf);
+  abuf_json_mark_output(&json_session, false, abuf);
   abuf_puts(abuf, "\n");
+  abuf_json_reset_entry_number_and_depth(&json_session);
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {
@@ -113,7 +116,7 @@ void output_error(struct autobuf *abuf, unsigned int status, const char * req __
   if (status == INFO_HTTP_NOCONTENT) {
     /* do nothing */
   } else {
-    abuf_json_string(abuf, "error", httpStatusToReply(status));
+    abuf_json_string(&json_session, abuf, "error", httpStatusToReply(status));
   }
 
   output_end(abuf);
@@ -123,37 +126,37 @@ void ipc_print_network_routes(struct autobuf *abuf) {
   struct rt_entry *rt;
 
   /* mandatory */
-  abuf_json_string(abuf, "type", "NetworkRoutes");
-  abuf_json_string(abuf, "protocol", NETJSON_PROTOCOL);
-  abuf_json_string(abuf, "version", release_version);
-  abuf_json_string(abuf, "metric", olsr_cnf->lq_algorithm);
+  abuf_json_string(&json_session, abuf, "type", "NetworkRoutes");
+  abuf_json_string(&json_session, abuf, "protocol", NETJSON_PROTOCOL);
+  abuf_json_string(&json_session, abuf, "version", release_version);
+  abuf_json_string(&json_session, abuf, "metric", olsr_cnf->lq_algorithm);
 
   /* optional */
-  abuf_json_string(abuf, "revision", olsrd_version);
+  abuf_json_string(&json_session, abuf, "revision", olsrd_version);
   // topology_id
-  abuf_json_ip_address(abuf, "router_id", &olsr_cnf->main_addr);
+  abuf_json_ip_address(&json_session, abuf, "router_id", &olsr_cnf->main_addr);
 
   /* Walk the route table */
-  abuf_json_mark_object(true, true, abuf, "routes");
+  abuf_json_mark_object(&json_session, true, true, abuf, "routes");
   OLSR_FOR_ALL_RT_ENTRIES(rt) {
     if (rt->rt_best) {
       struct lqtextbuffer lqbuf;
 
-      abuf_json_mark_array_entry(true, abuf);
+      abuf_json_mark_array_entry(&json_session, true, abuf);
       /* mandatory */
-      abuf_json_prefix(abuf, "destination", &rt->rt_dst);
-      abuf_json_ip_address(abuf, "next", &rt->rt_best->rtp_nexthop.gateway);
-      abuf_json_string(abuf, "device", if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
-      abuf_json_float(abuf, "cost", get_linkcost_scaled(rt->rt_best->rtp_metric.cost, true));
+      abuf_json_prefix(&json_session, abuf, "destination", &rt->rt_dst);
+      abuf_json_ip_address(&json_session, abuf, "next", &rt->rt_best->rtp_nexthop.gateway);
+      abuf_json_string(&json_session, abuf, "device", if_ifwithindex_name(rt->rt_best->rtp_nexthop.iif_index));
+      abuf_json_float(&json_session, abuf, "cost", get_linkcost_scaled(rt->rt_best->rtp_metric.cost, true));
 
       /* optional */
-      abuf_json_string(abuf, "cost_text", get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuf));
+      abuf_json_string(&json_session, abuf, "cost_text", get_linkcost_text(rt->rt_best->rtp_metric.cost, true, &lqbuf));
       // source
 
-      abuf_json_mark_array_entry(false, abuf);
+      abuf_json_mark_array_entry(&json_session, false, abuf);
     }
   } OLSR_FOR_ALL_RT_ENTRIES_END(rt);
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 }
 
 void ipc_print_network_graph(struct autobuf *abuf) {
@@ -167,15 +170,15 @@ void ipc_print_network_graph(struct autobuf *abuf) {
   avl_init(&nodes, (olsr_cnf->ip_version == AF_INET) ? avl_comp_ipv4 : avl_comp_ipv6);
 
   /* mandatory */
-  abuf_json_string(abuf, "type", "NetworkGraph");
-  abuf_json_string(abuf, "protocol", NETJSON_PROTOCOL);
-  abuf_json_string(abuf, "version", release_version);
-  abuf_json_string(abuf, "metric", olsr_cnf->lq_algorithm);
+  abuf_json_string(&json_session, abuf, "type", "NetworkGraph");
+  abuf_json_string(&json_session, abuf, "protocol", NETJSON_PROTOCOL);
+  abuf_json_string(&json_session, abuf, "version", release_version);
+  abuf_json_string(&json_session, abuf, "metric", olsr_cnf->lq_algorithm);
 
   /* optional */
-  abuf_json_string(abuf, "revision", olsrd_version);
+  abuf_json_string(&json_session, abuf, "revision", olsrd_version);
   // topology_id
-  abuf_json_ip_address(abuf, "router_id", &olsr_cnf->main_addr);
+  abuf_json_ip_address(&json_session, abuf, "router_id", &olsr_cnf->main_addr);
   // label
 
   /*
@@ -210,28 +213,28 @@ void ipc_print_network_graph(struct autobuf *abuf) {
    * Output Nodes
    */
 
-  abuf_json_mark_object(true, true, abuf, "nodes");
+  abuf_json_mark_object(&json_session, true, true, abuf, "nodes");
   while (nodes.count > 0) {
     struct avl_node *node = avl_walk_first(&nodes);
     struct node_entry *node_entry = avlnode2node(node);
 
     if (!node_entry->isAlias) {
-      abuf_json_mark_array_entry(true, abuf);
+      abuf_json_mark_array_entry(&json_session, true, abuf);
 
       /* mandatory */
-      abuf_json_ip_address(abuf, "id", node->key);
+      abuf_json_ip_address(&json_session, abuf, "id", node->key);
 
       /* optional */
       // label
       if (node_entry->mid) {
         struct mid_address * alias = node_entry->mid->aliases;
         if (alias) {
-          abuf_json_mark_object(true, true, abuf, "local_addresses");
+          abuf_json_mark_object(&json_session, true, true, abuf, "local_addresses");
           while (alias) {
-            abuf_json_ip_address(abuf, NULL, &alias->alias);
+            abuf_json_ip_address(&json_session, abuf, NULL, &alias->alias);
             alias = alias->next_alias;
           }
-          abuf_json_mark_object(false, true, abuf, NULL);
+          abuf_json_mark_object(&json_session, false, true, abuf, NULL);
         }
       } else if (node_entry->link) {
         /* no local_addresses */
@@ -240,7 +243,7 @@ void ipc_print_network_graph(struct autobuf *abuf) {
       }
       // properties
 
-      abuf_json_mark_array_entry(false, abuf);
+      abuf_json_mark_array_entry(&json_session, false, abuf);
     }
 
     if (node_entry == node_self) {
@@ -250,45 +253,45 @@ void ipc_print_network_graph(struct autobuf *abuf) {
     avl_delete(&nodes, node);
     free(node);
   }
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 
   /*
    * Output Links
    */
 
-  abuf_json_mark_object(true, true, abuf, "links");
+  abuf_json_mark_object(&json_session, true, true, abuf, "links");
   OLSR_FOR_ALL_LINK_ENTRIES(link_entry) {
     struct lqtextbuffer lqbuf;
 
-    abuf_json_mark_array_entry(true, abuf);
+    abuf_json_mark_array_entry(&json_session, true, abuf);
 
     /* mandatory */
-    abuf_json_ip_address(abuf, "source", &link_entry->local_iface_addr);
-    abuf_json_ip_address(abuf, "target", &link_entry->neighbor_iface_addr);
-    abuf_json_float(abuf, "cost", get_linkcost_scaled(link_entry->linkcost, false));
+    abuf_json_ip_address(&json_session, abuf, "source", &link_entry->local_iface_addr);
+    abuf_json_ip_address(&json_session, abuf, "target", &link_entry->neighbor_iface_addr);
+    abuf_json_float(&json_session, abuf, "cost", get_linkcost_scaled(link_entry->linkcost, false));
 
     /* optional */
-    abuf_json_string(abuf, "cost_text", get_linkcost_text(link_entry->linkcost, false, &lqbuf));
+    abuf_json_string(&json_session, abuf, "cost_text", get_linkcost_text(link_entry->linkcost, false, &lqbuf));
     // properties
 
-    abuf_json_mark_array_entry(false, abuf);
+    abuf_json_mark_array_entry(&json_session, false, abuf);
   } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 }
 
 void ipc_print_network_collection(struct autobuf *abuf) {
   /* mandatory */
-  abuf_json_string(abuf, "type", "NetworkCollection");
+  abuf_json_string(&json_session, abuf, "type", "NetworkCollection");
 
-  abuf_json_mark_object(true, true, abuf, "collection");
+  abuf_json_mark_object(&json_session, true, true, abuf, "collection");
 
-  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_mark_array_entry(&json_session, true, abuf);
   ipc_print_network_routes(abuf);
-  abuf_json_mark_array_entry(false, abuf);
+  abuf_json_mark_array_entry(&json_session, false, abuf);
 
-  abuf_json_mark_array_entry(true, abuf);
+  abuf_json_mark_array_entry(&json_session, true, abuf);
   ipc_print_network_graph(abuf);
-  abuf_json_mark_array_entry(false, abuf);
+  abuf_json_mark_array_entry(&json_session, false, abuf);
 
-  abuf_json_mark_object(false, true, abuf, NULL);
+  abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 }

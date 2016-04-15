@@ -51,28 +51,39 @@
 
 #include "common/autobuf.h"
 
-void abuf_json_reset_entry_number_and_depth(void);
+#define INFO_JSON_ENTRY_MAX_DEPTH 16
 
-void abuf_json_mark_output(bool open, struct autobuf *abuf);
+/* JSON does not allow commas dangling at the end of arrays, so we need to
+ * count which entry number we're at in order to make sure we don't tack a
+ * dangling comma on at the end
+ */
+struct json_session {
+    int entrynumber[INFO_JSON_ENTRY_MAX_DEPTH];
+    int currentjsondepth;
+};
 
-void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header);
+void abuf_json_reset_entry_number_and_depth(struct json_session *session);
 
-void abuf_json_mark_array_entry(bool open, struct autobuf *abuf);
+void abuf_json_insert_comma(struct json_session *session, struct autobuf *abuf);
 
-void abuf_json_insert_comma(struct autobuf *abuf);
+void abuf_json_mark_output(struct json_session *session, bool open, struct autobuf *abuf);
 
-void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value);
+void abuf_json_mark_object(struct json_session *session, bool open, bool array, struct autobuf *abuf, const char* header);
 
-void abuf_json_string(struct autobuf *abuf, const char* key, const char* value);
+void abuf_json_mark_array_entry(struct json_session *session, bool open, struct autobuf *abuf);
 
-void abuf_json_int(struct autobuf *abuf, const char* key, long long value);
+void abuf_json_boolean(struct json_session *session, struct autobuf *abuf, const char* key, bool value);
 
-void abuf_json_float(struct autobuf *abuf, const char* key, double value);
+void abuf_json_string(struct json_session *session, struct autobuf *abuf, const char* key, const char* value);
 
-void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip);
+void abuf_json_int(struct json_session *session, struct autobuf *abuf, const char* key, long long value);
 
-void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int af);
+void abuf_json_float(struct json_session *session, struct autobuf *abuf, const char* key, double value);
 
-void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix);
+void abuf_json_ip_address(struct json_session *session, struct autobuf *abuf, const char* key, union olsr_ip_addr *ip);
+
+void abuf_json_ip_address46(struct json_session *session, struct autobuf *abuf, const char* key, void *ip, int af);
+
+void abuf_json_prefix(struct json_session *session, struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix);
 
 #endif /* _OLSRD_LIB_INFO_JSON_HELPERS_H_ */

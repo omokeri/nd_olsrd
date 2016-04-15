@@ -61,23 +61,18 @@ static const char * empty = "";
 
 /* JSON support functions */
 
-/* JSON does not allow commas dangling at the end of arrays, so we need to
- * count which entry number we're at in order to make sure we don't tack a
- * dangling comma on at the end */
-#define ENTRY_NUMBER_MAX_DEPTH 16
-static int entrynumber[ENTRY_NUMBER_MAX_DEPTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-static int currentjsondepth = 0;
+void abuf_json_reset_entry_number_and_depth(struct json_session *session) {
+  assert(session);
 
-void abuf_json_reset_entry_number_and_depth(void) {
-  entrynumber[0] = 0;
-  currentjsondepth = 0;
+  memset(session, 0, sizeof(*session));
 }
 
-static void abuf_json_new_indent(struct autobuf *abuf) {
+static void abuf_json_new_indent(struct json_session *session, struct autobuf *abuf) {
+  assert(session);
   assert(abuf);
 
-  if (currentjsondepth) {
-    int i = currentjsondepth;
+  if (session->currentjsondepth) {
+    int i = session->currentjsondepth;
 
     abuf_puts(abuf, "\n");
     while (i-- > 0) {
@@ -86,74 +81,80 @@ static void abuf_json_new_indent(struct autobuf *abuf) {
   }
 }
 
-void abuf_json_insert_comma(struct autobuf *abuf) {
+void abuf_json_insert_comma(struct json_session *session, struct autobuf *abuf) {
+  assert(session);
   assert(abuf);
 
-  if (entrynumber[currentjsondepth])
+  if (session->entrynumber[session->currentjsondepth])
     abuf_appendf(abuf, ",");
 }
 
-void abuf_json_mark_output(bool open, struct autobuf *abuf) {
+void abuf_json_mark_output(struct json_session *session, bool open, struct autobuf *abuf) {
+  assert(session);
   assert(abuf);
 
   if (open) {
-    assert(!currentjsondepth);
-    abuf_json_new_indent(abuf);
+    assert(!session->currentjsondepth);
+    abuf_json_new_indent(session, abuf);
     abuf_puts(abuf, "{");
-    currentjsondepth++;
-    entrynumber[currentjsondepth] = 0;
+    session->currentjsondepth++;
+    session->entrynumber[session->currentjsondepth] = 0;
   } else {
-    assert(currentjsondepth == 1);
-    entrynumber[currentjsondepth] = 0;
-    currentjsondepth--;
-    abuf_json_new_indent(abuf);
+    assert(session->currentjsondepth == 1);
+    session->entrynumber[session->currentjsondepth] = 0;
+    session->currentjsondepth--;
+    abuf_json_new_indent(session, abuf);
     abuf_puts(abuf, "\n}");
   }
 }
 
-void abuf_json_mark_object(bool open, bool array, struct autobuf *abuf, const char* header) {
+void abuf_json_mark_object(struct json_session *session, bool open, bool array, struct autobuf *abuf, const char* header) {
+  assert(session);
   assert(abuf);
 
   if (open) {
-    abuf_json_insert_comma(abuf);
-    abuf_json_new_indent(abuf);
+    abuf_json_insert_comma(session, abuf);
+    abuf_json_new_indent(session, abuf);
     if (header) {
       abuf_appendf(abuf, "\"%s\": %s", header, array ? "[" : "{");
     } else {
       abuf_appendf(abuf, "%s", array ? "[" : "{");
     }
-    entrynumber[currentjsondepth]++;
-    currentjsondepth++;
-    assert(currentjsondepth < ENTRY_NUMBER_MAX_DEPTH);
-    entrynumber[currentjsondepth] = 0;
+    session->entrynumber[session->currentjsondepth]++;
+    session->currentjsondepth++;
+    assert(session->currentjsondepth < INFO_JSON_ENTRY_MAX_DEPTH);
+    session->entrynumber[session->currentjsondepth] = 0;
   } else {
-    entrynumber[currentjsondepth] = 0;
-    currentjsondepth--;
-    assert(currentjsondepth >= 0);
-    abuf_json_new_indent(abuf);
+    session->entrynumber[session->currentjsondepth] = 0;
+    session->currentjsondepth--;
+    assert(session->currentjsondepth >= 0);
+    abuf_json_new_indent(session, abuf);
     abuf_appendf(abuf, "%s", array ? "]" : "}");
   }
 }
 
-void abuf_json_mark_array_entry(bool open, struct autobuf *abuf) {
+void abuf_json_mark_array_entry(struct json_session *session, bool open, struct autobuf *abuf) {
+  assert(session);
   assert(abuf);
 
-  abuf_json_mark_object(open, false, abuf, NULL);
+  abuf_json_mark_object(session, open, false, abuf, NULL);
 }
 
-void abuf_json_boolean(struct autobuf *abuf, const char* key, bool value) {
+void abuf_json_boolean(struct json_session *session, struct autobuf *abuf, const char* key, bool value) {
+  assert(session);
   assert(abuf);
   assert(key);
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   abuf_appendf(abuf, "\"%s\": %s", key, value ? "true" : "false");
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) {
+void abuf_json_string(struct json_session *session, struct autobuf *abuf, const char* key, const char* value) {
   const char * val;
 
+  assert(session);
   assert(abuf);
   assert(key || value);
 
@@ -163,19 +164,20 @@ void abuf_json_string(struct autobuf *abuf, const char* key, const char* value) 
     val = value;
   }
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   if (!key) {
     abuf_appendf(abuf, "\"%s\"", value);
   } else {
     abuf_appendf(abuf, "\"%s\": \"%s\"", key, val);
   }
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
+void abuf_json_int(struct json_session *session, struct autobuf *abuf, const char* key, long long value) {
   const char * fmt;
 
+  assert(session);
   assert(abuf);
   assert(key);
 
@@ -185,16 +187,17 @@ void abuf_json_int(struct autobuf *abuf, const char* key, long long value) {
   fmt = "\"%s\": %ld";
 #endif
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   abuf_appendf(abuf, fmt, key, value);
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
+void abuf_json_float(struct json_session *session, struct autobuf *abuf, const char* key, double value) {
   double v = value;
   int isInf = isinf(v);
 
+  assert(session);
   assert(abuf);
   assert(key);
 
@@ -206,16 +209,17 @@ void abuf_json_float(struct autobuf *abuf, const char* key, double value) {
     v = DBL_MAX;
   }
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   abuf_appendf(abuf, "\"%s\": %f", key, v);
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
+void abuf_json_ip_address(struct json_session *session, struct autobuf *abuf, const char* key, union olsr_ip_addr *ip) {
   struct ipaddr_str ipStr;
   const char * value;
 
+  assert(session);
   assert(abuf);
   assert(key || ip);
 
@@ -225,20 +229,21 @@ void abuf_json_ip_address(struct autobuf *abuf, const char* key, union olsr_ip_a
     value = olsr_ip_to_string(&ipStr, ip);
   }
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   if (!key) {
     abuf_appendf(abuf, "\"%s\"", value);
   } else {
     abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
   }
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int af) {
+void abuf_json_ip_address46(struct json_session *session, struct autobuf *abuf, const char* key, void *ip, int af) {
   struct ipaddr_str ipStr;
   const char * value;
 
+  assert(session);
   assert(abuf);
   assert(key || ip);
 
@@ -250,21 +255,22 @@ void abuf_json_ip_address46(struct autobuf *abuf, const char* key, void *ip, int
     value = ip6_to_string(&ipStr, (const struct in6_addr * const ) ip);
   }
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   if (!key) {
     abuf_appendf(abuf, "\"%s\"", value);
   } else {
     abuf_appendf(abuf, "\"%s\": \"%s\"", key, value);
   }
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
 
-void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix) {
+void abuf_json_prefix(struct json_session *session, struct autobuf *abuf, const char* key, struct olsr_ip_prefix *prefix) {
   struct ipaddr_str ipStr;
   const char * value = empty;
   int prefixLen = INT_MIN;
 
+  assert(session);
   assert(abuf);
   assert(key || prefix);
 
@@ -273,8 +279,8 @@ void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_pref
     prefixLen = prefix->prefix_len;
   }
 
-  abuf_json_insert_comma(abuf);
-  abuf_json_new_indent(abuf);
+  abuf_json_insert_comma(session, abuf);
+  abuf_json_new_indent(session, abuf);
   if (!key) {
     abuf_appendf(abuf, "\"%s", value);
   } else {
@@ -284,5 +290,5 @@ void abuf_json_prefix(struct autobuf *abuf, const char* key, struct olsr_ip_pref
     abuf_appendf(abuf, "/%d", prefixLen);
   }
   abuf_puts(abuf, "\"");
-  entrynumber[currentjsondepth]++;
+  session->entrynumber[session->currentjsondepth]++;
 }
