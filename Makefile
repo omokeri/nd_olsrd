@@ -224,15 +224,15 @@ rpm:
 
 # This is quite ugly but at least it works
 ifeq ($(OS),linux)
-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
+SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson p2pd pgraph pud quagga secure sgwdynspeed txtinfo watchdog
 else
 ifeq ($(OS),win32)
-SUBDIRS := dot_draw httpinfo info jsoninfo mini pgraph secure txtinfo
+SUBDIRS := dot_draw httpinfo info jsoninfo mini netjson pgraph secure txtinfo
 else
 ifeq ($(OS),android)
-SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice p2pd pgraph pud secure sgwdynspeed txtinfo watchdog
+SUBDIRS := arprefresh bmf dot_draw dyn_gw dyn_gw_plain httpinfo info jsoninfo mdns mini nameservice netjson p2pd pgraph pud secure sgwdynspeed txtinfo watchdog
 else
-SUBDIRS := dot_draw httpinfo info jsoninfo mini nameservice pgraph secure txtinfo watchdog
+SUBDIRS := dot_draw httpinfo info jsoninfo mini nameservice netjson pgraph secure txtinfo watchdog
 endif
 endif
 endif
@@ -388,6 +388,18 @@ nameservice_install:
 
 nameservice_uninstall:
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/nameservice DESTDIR=$(DESTDIR) uninstall
+
+netjson: info
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/netjson
+
+netjson_clean: info_clean
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/netjson DESTDIR=$(DESTDIR) clean
+
+netjson_install: info_install
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/netjson DESTDIR=$(DESTDIR) install
+
+netjson_uninstall: info_uninstall
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/netjson DESTDIR=$(DESTDIR) uninstall
 
 p2pd:
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/p2pd
