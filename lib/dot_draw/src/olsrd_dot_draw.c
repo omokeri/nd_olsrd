@@ -274,7 +274,7 @@ ipc_action(int fd __attribute__ ((unused)), void *data __attribute__ ((unused)),
 #endif /* _WRS_KERNEL */
   olsr_printf(1, "(DOT DRAW)IPC: Connection from %s\n", inet_ntoa(pin.sin_addr));
 
-  abuf_init(&outbuffer, 4096);
+  abuf_init(&outbuffer, AUTOBUFCHUNK);
   outbuffer_socket = ipc_connection;
 
   pcf_event(1, 1, 1);

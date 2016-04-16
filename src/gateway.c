@@ -385,7 +385,7 @@ static bool multiGwRunScript(const char * mode, bool addMode, const char * ifNam
   assert(strcmp(mode, SCRIPT_MODE_SGWTUN) //
       || (!strcmp(mode, SCRIPT_MODE_SGWTUN) && ifName && tableNr && ruleNr && !bypassRuleNr));
 
-  abuf_init(&buf, 1024);
+  abuf_init(&buf, AUTOBUFCHUNK);
 
   abuf_appendf(&buf, "\"%s\"", olsr_cnf->smart_gw_policyrouting_script);
 
