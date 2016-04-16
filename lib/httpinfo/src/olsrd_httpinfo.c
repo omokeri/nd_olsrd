@@ -407,7 +407,7 @@ parse_http_request(int fd, void *data __attribute__ ((unused)), unsigned int fla
   }
 
   olsr_printf(1, "Request: %s\nfile: %s\nVersion: %s\n\n", req_type, filename, http_version);
-  abuf_init(&body_abuf, 25 * AUTOBUFCHUNK);
+  abuf_init(&body_abuf, AUTOBUFCHUNK);
 
   if (!strcmp(req_type, "POST")) {
 #ifdef ADMIN_INTERFACE
