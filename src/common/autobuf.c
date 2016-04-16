@@ -131,23 +131,40 @@ int
 abuf_vappendf(struct autobuf *autobuf, const char *format, va_list ap)
 {
   int rc;
-  int min_size;
   va_list ap2;
+  char *start = &autobuf->buf[autobuf->len];
+  int size_remaining = autobuf->size - autobuf->len;
+
   va_copy(ap2, ap);
-  rc = vsnprintf(autobuf->buf + autobuf->len, autobuf->size - autobuf->len, format, ap);
+
+  rc = vsnprintf(start, size_remaining, format, ap);
   va_end(ap);
-  min_size = autobuf->len + rc;
-  if (min_size >= autobuf->size) {
-    if (autobuf_enlarge(autobuf, min_size) < 0) {
-      autobuf->buf[autobuf->len] = '\0';
-      va_end(ap2);
-      return -1;
-    }
-    vsnprintf(autobuf->buf + autobuf->len, autobuf->size - autobuf->len, format, ap2);
+  if (rc < 0) {
+    goto error_out;
   }
+
+  if (rc >= size_remaining) {
+    /* output was truncated */
+
+    if (autobuf_enlarge(autobuf, autobuf->len + rc) < 0) {
+      goto error_out;
+    }
+
+    size_remaining = autobuf->size - autobuf->len;
+
+    rc = vsnprintf(start, size_remaining, format, ap2);
+    if ((rc < 0) || (rc >= size_remaining)) {
+      goto error_out;
+    }
+  }
+
+  autobuf->len += rc;
   va_end(ap2);
-  autobuf->len = min_size;
   return 0;
+
+  error_out: autobuf->buf[autobuf->len] = '\0';
+  va_end(ap2);
+  return -1;
 }
 
 int
