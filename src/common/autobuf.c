@@ -54,7 +54,7 @@
 #include <assert.h>
 
 
-static int autobuf_enlarge(struct autobuf *autobuf, int new_size);
+static int autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size);
 
 static int ROUND_UP_TO_POWER_OF_2(int val, int pow2) {
   assert(val >= 0);
@@ -98,15 +98,16 @@ abuf_free(struct autobuf *autobuf)
 }
 
 static int
-autobuf_enlarge(struct autobuf *autobuf, int new_size)
+autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size)
 {
+  /* for the the string terminator */
   new_size++;
 
   if (autobuf->size >= INT_MAX) {
     return -1;
   }
 
-  if (new_size > autobuf->size) {
+  if (new_size > (unsigned int) autobuf->size) {
     char *p;
     int roundUpSize = ROUND_UP_TO_POWER_OF_2(new_size, AUTOBUFCHUNK);
     p = realloc(autobuf->buf, roundUpSize);
