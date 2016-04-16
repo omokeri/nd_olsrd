@@ -440,7 +440,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   int contentLengthIndex = 0;
   int headerLength = 0;
 
-  abuf_init(&abuf, 2 * AUTOBUFCHUNK);
+  abuf_init(&abuf, AUTOBUFCHUNK);
 
   if (config->http_headers) {
     http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
