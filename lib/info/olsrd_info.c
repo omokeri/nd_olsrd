@@ -899,8 +899,7 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
 
   info_plugin_cache_init(true);
 
-  plugin_ipc_init();
-  return 1;
+  return plugin_ipc_init();
 }
 
 void info_plugin_exit(void) {
