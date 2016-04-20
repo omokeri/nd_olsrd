@@ -359,7 +359,7 @@ set_loss_link_multiplier(struct link_entry *entry)
   entry->loss_link_multiplier = val;
 
   OLSR_PRINTF(1, "Set linkloss multiplier for %s on %s to %d\n",
-      olsr_ip_to_string(&buf, &entry->neighbor_iface_addr), cfg_inter->name, val);
+      olsr_ip_to_string(&buf, &entry->neighbor_iface_addr), entry->if_name, val);
 }
 
 /*
