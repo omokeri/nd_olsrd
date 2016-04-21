@@ -339,7 +339,7 @@ CreateNonOlsrNetworkInterfaces(struct interface_olsr *skipThisIntf)
   ifc.ifc_buf = NULL;
   for (;;) {
     ifc.ifc_len = sizeof(struct ifreq) * numreqs;
-    ifc.ifc_buf = realloc(ifc.ifc_buf, ifc.ifc_len);
+    ifc.ifc_buf = olsr_realloc(ifc.ifc_buf, ifc.ifc_len, "P2PD: CreateNonOlsrNetworkInterfaces ifc");
 
     if (ioctl(skfd, SIOCGIFCONF, &ifc) < 0) {
       P2pdPError("ioctl(SIOCGIFCONF) error");
