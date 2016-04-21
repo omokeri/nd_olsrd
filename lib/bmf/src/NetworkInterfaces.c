@@ -1608,7 +1608,7 @@ int CreateBmfNetworkInterfaces(struct interface_olsr * skipThisIntf)
   for (;;)
   {
     ifc.ifc_len = sizeof(struct ifreq) * numreqs;
-    ifc.ifc_buf = realloc(ifc.ifc_buf, ifc.ifc_len);
+    ifc.ifc_buf = olsr_realloc(ifc.ifc_buf, ifc.ifc_len, "BMF: CreateBmfNetworkInterfaces ifc");
 
     if (ioctl(skfd, SIOCGIFCONF, &ifc) < 0)
     {
