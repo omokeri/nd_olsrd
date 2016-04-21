@@ -582,7 +582,7 @@ olsr_exit(const char *msg, int val)
 /**
  * Wrapper for malloc(3) that does error-checking
  *
- * @param size the number of bytes to allocalte
+ * @param size the number of bytes to allocate
  * @param id a string identifying the caller for
  * use in error messaging
  *
@@ -599,6 +599,29 @@ olsr_malloc(size_t size, const char *id)
    */
   ptr = calloc(1, size);
 
+  if (!ptr) {
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "%s: out of memory!: %s\n", id, strerror(errno));
+    olsr_exit(buf, EXIT_FAILURE);
+  }
+
+  return ptr;
+}
+
+/**
+ * Wrapper for realloc(3) that does error-checking
+ *
+ * @param ptr pointer to the buffer
+ * @param size the number of bytes to (re)allocate
+ * @param id a string identifying the caller for
+ * use in error messaging
+ *
+ * @return a void pointer to the memory allocated
+ */
+void *
+olsr_realloc(void * ptr, size_t size, const char *id)
+{
+  ptr = realloc(ptr, size);
   if (!ptr) {
     char buf[1024];
     snprintf(buf, sizeof(buf), "%s: out of memory!: %s\n", id, strerror(errno));
