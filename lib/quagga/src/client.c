@@ -64,22 +64,7 @@
 #include "packet.h"
 #include "client.h"
 
-static void *my_realloc(void *, size_t, const char *);
 static void zclient_connect(void);
-
-static void *
-my_realloc(void *buf, size_t s, const char *c)
-{
-
-  buf = realloc(buf, s);
-  if (!buf) {
-    char buf2[1024];
-    snprintf(buf2, sizeof(buf2), "QUAGGA: Out of memory (%s): %s", c, strerror(errno));
-    olsr_exit(buf2, EXIT_FAILURE);
-  }
-
-  return buf;
-}
 
 static void
 zclient_connect(void)
@@ -200,7 +185,7 @@ zclient_read(ssize_t * size)
     if (*size == bufsize) {
       ssize_t start = bufsize;
       bufsize += AUTOBUFCHUNK;
-      buf = my_realloc(buf, bufsize, "grow read buffer");
+      buf = olsr_realloc(buf, bufsize, "QUAGGA: grow read buffer");
       memset(&buf[start], 0, AUTOBUFCHUNK);
     }
 

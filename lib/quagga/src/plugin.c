@@ -62,22 +62,6 @@
 
 #include <stdbool.h>
 
-static void *my_realloc(void *, size_t, const char *);
-
-static void
-*my_realloc(void *buf, size_t s, const char *c)
-{
-
-  buf = realloc(buf, s);
-  if (!buf) {
-    char buf2[1024];
-    snprintf(buf2, sizeof(buf2), "QUAGGA: Out of memory (%s): %s", c, strerror(errno));
-    olsr_exit(buf2, EXIT_FAILURE);
-  }
-
-  return buf;
-}
-
 int
 zplugin_redistribute(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused)))
 {
@@ -156,7 +140,7 @@ zplugin_sockpath(const char *value, void *data __attribute__ ((unused)), set_plu
   if (set_plugin_string(value, &sockpath, addon))
     return 1;
   len = strlen(sockpath) + 1;
-  zebra.sockpath = my_realloc(zebra.sockpath, len, "grow socket path");
+  zebra.sockpath = olsr_realloc(zebra.sockpath, len, "QUAGGA: grow socket path");
   memcpy(zebra.sockpath, sockpath, len);
 
   return 0;
