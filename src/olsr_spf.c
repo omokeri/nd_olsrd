@@ -73,6 +73,10 @@
 #include "lq_plugin.h"
 #include "gateway.h"
 
+#ifdef SPF_PROFILING
+#include <time.h>
+#endif /* SPF_PROFILING */
+
 struct timer_entry *spf_backoff_timer = NULL;
 
 /*
@@ -313,11 +317,23 @@ olsr_expire_spf_backoff(void *context __attribute__ ((unused)))
   spf_backoff_timer = NULL;
 }
 
+#ifdef SPF_PROFILING
+static void timer_sub(struct timespec * end, struct timespec * start, struct timespec * t) {
+  t->tv_sec = end->tv_sec - start->tv_sec;
+  t->tv_nsec = end->tv_nsec - start->tv_nsec;
+
+  if (t->tv_nsec < 0) {
+    t->tv_sec--;
+    t->tv_nsec += 1000000000;
+  }
+}
+#endif /* SPF_PROFILING */
+
 void
 olsr_calculate_routing_table(bool force)
 {
 #ifdef SPF_PROFILING
-  struct timeval t1, t2, t3, t4, t5, spf_init, spf_run, route, kernel, total;
+  struct timespec t1, t2, t3, t4, t5, spf_init, spf_run, route, kernel, total;
 #endif /* SPF_PROFILING */
   struct avl_tree cand_tree;
   struct avl_node *rtp_tree_node;
@@ -340,7 +356,7 @@ olsr_calculate_routing_table(bool force)
   }
 
 #ifdef SPF_PROFILING
-  gettimeofday(&t1, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t1);
 #endif /* SPF_PROFILING */
 
   /*
@@ -435,7 +451,7 @@ olsr_calculate_routing_table(bool force)
   OLSR_FOR_ALL_NBR_ENTRIES_END(neigh);
 
 #ifdef SPF_PROFILING
-  gettimeofday(&t2, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t2);
 #endif /* SPF_PROFILING */
 
   /*
@@ -446,7 +462,7 @@ olsr_calculate_routing_table(bool force)
   OLSR_PRINTF(2, "\n--- %s ------------------------------------------------- DIJKSTRA\n\n", olsr_wallclock_string());
 
 #ifdef SPF_PROFILING
-  gettimeofday(&t3, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t3);
 #endif /* SPF_PROFILING */
 
   /*
@@ -508,7 +524,7 @@ olsr_calculate_routing_table(bool force)
   olsr_update_rib_routes();
 
 #ifdef SPF_PROFILING
-  gettimeofday(&t4, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t4);
 #endif /* SPF_PROFILING */
 
   /* move the route changes into the kernel */
@@ -516,18 +532,23 @@ olsr_calculate_routing_table(bool force)
   olsr_update_kernel_routes();
 
 #ifdef SPF_PROFILING
-  gettimeofday(&t5, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &t5);
 #endif /* SPF_PROFILING */
 
 #ifdef SPF_PROFILING
-  timersub(&t2, &t1, &spf_init);
-  timersub(&t3, &t2, &spf_run);
-  timersub(&t4, &t3, &route);
-  timersub(&t5, &t4, &kernel);
-  timersub(&t5, &t1, &total);
-  OLSR_PRINTF(1, "\n--- SPF-stats for %d nodes, %d routes (total/init/run/route/kern): " "%d, %d, %d, %d, %d\n", path_count,
-              routingtree.count, (int)total.tv_usec, (int)spf_init.tv_usec, (int)spf_run.tv_usec, (int)route.tv_usec,
-              (int)kernel.tv_usec);
+  timer_sub(&t2, &t1, &spf_init);
+  timer_sub(&t3, &t2, &spf_run);
+  timer_sub(&t4, &t3, &route);
+  timer_sub(&t5, &t4, &kernel);
+  timer_sub(&t5, &t1, &total);
+  OLSR_PRINTF(1, "\n--- SPF-stats for %d nodes, %d routes (total/init/run/route/kern): %ld, %ld, %ld, %ld, %ld (nsec)\n", //
+      path_count, //
+      routingtree.count, //
+      (long int) total.tv_nsec, //
+      (long int) spf_init.tv_nsec, //
+      (long int) spf_run.tv_nsec, //
+      (long int) route.tv_nsec, //
+      (long int) kernel.tv_nsec);
 #endif /* SPF_PROFILING */
 }
 
