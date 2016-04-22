@@ -63,9 +63,9 @@
 #endif /* _WIN32 */
 
 /* Timer data, global. Externed in scheduler.h */
-uint32_t now_times;                    /* relative time compared to startup (in milliseconds */
-struct timeval first_tv;               /* timevalue during startup */
-struct timeval last_tv;                /* timevalue used for last olsr_times() calculation */
+uint32_t now_times;                    /* relative time compared to startup (in milliseconds) */
+struct timespec first_tv;              /* timevalue during startup */
+struct timespec last_tv;               /* timevalue used for last olsr_times() calculation */
 
 /* Hashed root of all timers */
 static struct list_node timer_wheel[TIMER_WHEEL_SLOTS];
@@ -128,35 +128,42 @@ static int avl_comp_timer(const void *entry1, const void *entry2) {
 uint32_t
 olsr_times(void)
 {
-  struct timeval tv;
-  uint32_t t;
+  struct timespec tv;
 
-  if (gettimeofday(&tv, NULL) != 0) {
+  if (clock_gettime(CLOCK_MONOTONIC, &tv) != 0) {
     olsr_exit("OS clock is not working, have to shut down OLSR", EXIT_FAILURE);
   }
 
   /* test if time jumped backward or more than 60 seconds forward */
-  if (tv.tv_sec < last_tv.tv_sec || (tv.tv_sec == last_tv.tv_sec && tv.tv_usec < last_tv.tv_usec)
-      || tv.tv_sec - last_tv.tv_sec > 60) {
-    OLSR_PRINTF(1, "Time jump (%d.%06d to %d.%06d)\n",
-              (int32_t) (last_tv.tv_sec), (int32_t) (last_tv.tv_usec), (int32_t) (tv.tv_sec), (int32_t) (tv.tv_usec));
+  if ((tv.tv_sec < last_tv.tv_sec) //
+      || ((tv.tv_sec == last_tv.tv_sec) //
+          && tv.tv_nsec < last_tv.tv_nsec) //
+      || ((tv.tv_sec - last_tv.tv_sec) > 60)) {
+    uint64_t nsec;
 
-    t = (last_tv.tv_sec - first_tv.tv_sec) * 1000 + (last_tv.tv_usec - first_tv.tv_usec) / 1000;
-    t++;                        /* advance time by one millisecond */
+    OLSR_PRINTF(1, "Time jump (%ld.%09ld to %ld.%09ld)\n", //
+        (long int) last_tv.tv_sec,//
+        (long int) last_tv.tv_nsec,//
+        (long int) tv.tv_sec,//
+        (long int) tv.tv_nsec);
+
+    nsec = (last_tv.tv_sec - first_tv.tv_sec) * 1000000000 + (last_tv.tv_nsec - first_tv.tv_nsec);
+    nsec += 1000000; /* advance time by one millisecond */
 
     first_tv = tv;
-    first_tv.tv_sec -= (t / 1000);
-    first_tv.tv_usec -= ((t % 1000) * 1000);
+    first_tv.tv_sec -= (nsec / 1000000000);
+    first_tv.tv_nsec -= (nsec % 1000000000);
 
-    if (first_tv.tv_usec < 0) {
+    if (first_tv.tv_nsec < 0) {
       first_tv.tv_sec--;
-      first_tv.tv_usec += 1000000;
+      first_tv.tv_nsec += 1000000000;
     }
     last_tv = tv;
-    return t;
+    return (nsec / 1000000);
   }
+
   last_tv = tv;
-  return (tv.tv_sec - first_tv.tv_sec) * 1000 + (tv.tv_usec - first_tv.tv_usec) / 1000;
+  return (uint32_t)((tv.tv_sec - first_tv.tv_sec) * 1000 + (tv.tv_nsec - first_tv.tv_nsec) / 1000000);
 }
 
 /**
@@ -620,7 +627,7 @@ olsr_init_timers(void)
   OLSR_PRINTF(3, "Initializing scheduler.\n");
 
   /* Grab initial timestamp */
-  if (gettimeofday(&first_tv, NULL)) {
+  if (clock_gettime(CLOCK_MONOTONIC, &first_tv)) {
     olsr_exit("OS clock is not working, have to shut down OLSR", EXIT_FAILURE);
   }
   last_tv = first_tv;
