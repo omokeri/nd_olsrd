@@ -57,6 +57,7 @@
 
 #include <unistd.h>
 #include <assert.h>
+#include <time.h>
 
 #ifdef _WIN32
 #define close(x) closesocket(x)
