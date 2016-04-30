@@ -47,6 +47,7 @@
 #include "olsrd_dyn_gw.h"
 #include "olsr.h"
 #include "builddata.h"
+#include "olsrd_dyn_gw.h"
 #include <stdio.h>
 
 #define PLUGIN_NAME              "OLSRD dyn_gw plugin"
@@ -57,6 +58,7 @@
  */
 
 static void my_init(void) __attribute__ ((constructor));
+static void my_fini(void) __attribute__ ((destructor));
 
 /*
  * Defines the version of the plugin interface that is used
@@ -77,6 +79,15 @@ my_init(void)
 {
   /* Print plugin info to stdout */
   olsr_printf(0, "%s (%s)\n", PLUGIN_NAME, git_descriptor);
+}
+
+/**
+ *Destructor
+ */
+void
+my_fini(void)
+{
+  olsrd_plugin_fini();
 }
 
 /*

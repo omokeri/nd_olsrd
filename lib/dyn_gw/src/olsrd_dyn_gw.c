@@ -310,6 +310,29 @@ olsrd_plugin_init(void)
   return 1;
 }
 
+void olsrd_plugin_fini(void) {
+  if (!hna_groups) {
+    return;
+  }
+
+  while (hna_groups->ping_hosts) {
+    struct ping_list* next = hna_groups->ping_hosts->next;
+    free(hna_groups->ping_hosts->ping_address);
+    free(hna_groups->ping_hosts);
+    hna_groups->ping_hosts = next;
+  }
+
+  while (hna_groups->hna_list) {
+    struct hna_list * next = hna_groups->hna_list->next;
+    free(hna_groups->hna_list);
+    hna_groups->hna_list = next;
+  }
+
+  free(hna_groups);
+  hna_groups = NULL;
+}
+
+
 /**
  * Scheduled event to update the hna table,
  * called from olsrd main thread to keep the hna table thread-safe
