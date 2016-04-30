@@ -1027,6 +1027,8 @@ olsrd_free_cnf(struct olsrd_config **cnfVariableAddress)
     free(cnf->interfaces->cnf);
     free(cnf->interfaces->cnfi);
 
+    free(cnf->interfaces->name);
+
     interface = cnf->interfaces;
     cnf->interfaces = cnf->interfaces->next;
 
