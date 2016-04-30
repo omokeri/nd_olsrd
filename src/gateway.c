@@ -999,6 +999,13 @@ void olsr_cleanup_gateways(void) {
   struct gateway_entry * tree_gw;
   struct gw_container_entry * gw;
 
+  while (olsr_cnf->smart_gw_egress_interfaces) {
+    struct sgw_egress_if * next = olsr_cnf->smart_gw_egress_interfaces->next;
+    free(olsr_cnf->smart_gw_egress_interfaces->name);
+    free(olsr_cnf->smart_gw_egress_interfaces);
+    olsr_cnf->smart_gw_egress_interfaces = next;
+  }
+
   /* remove all gateways in the gateway tree that are not the active gateway */
   OLSR_FOR_ALL_GATEWAY_ENTRIES(tree_gw) {
     if ((tree_gw != olsr_get_inet_gateway(false)) && (tree_gw != olsr_get_inet_gateway(true))) {

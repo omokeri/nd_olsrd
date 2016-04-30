@@ -1449,7 +1449,8 @@ sgw_egress_if: TOK_STRING
       }
       memset(in, 0, sizeof(*in));
 
-      in->name = str;
+      in->name = strdup(str);
+      free ($1->string);
     }
 
     last = olsr_cnf->smart_gw_egress_interfaces;
