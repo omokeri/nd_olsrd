@@ -66,7 +66,9 @@ MUDFLAP ?= 0
 # shows full compiler/linker calls if activated
 VERBOSE ?= 0
 
-SANITIZE_ADDRESS ?= 0
+SANITIZE_ADDRESS   ?= 0
+SANITIZE_LEAK      ?= 0
+SANITIZE_UNDEFINED ?= 0
 
 ifeq ($(VERBOSE),0)
 MAKECMDPREFIX = @
@@ -264,6 +266,14 @@ ifeq ($(OS),linux)
   ifneq ($(SANITIZE_ADDRESS),0)
     CFLAGS  += -fsanitize=address -fno-omit-frame-pointer
     LDFLAGS += -fsanitize=address -static-libasan
+  endif
+  ifneq ($(SANITIZE_LEAK),0)
+    CFLAGS  += -fsanitize=leak
+    LDFLAGS += -fsanitize=leak -static-liblsan
+  endif
+  ifneq ($(SANITIZE_UNDEFINED),0)
+    CFLAGS  += -fsanitize=undefined
+    LDFLAGS += -fsanitize=undefined -static-libubsan
   endif
 endif
 
