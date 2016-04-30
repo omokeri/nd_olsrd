@@ -55,6 +55,7 @@ struct olsr;
 
 #include "olsr_types.h"
 #include "olsr_cfg.h"
+#include "compiler.h"
 
 #include <string.h>
 
@@ -62,9 +63,6 @@ struct olsr;
 
 #define OLSR_MSGHDRSZ_IPV4 12
 #define OLSR_MSGHDRSZ_IPV6 24
-
-/* must be declared here because of circular dependency through "defs.h" */
-#define INLINE inline __attribute__((always_inline))
 
 /*
  *Emission Intervals

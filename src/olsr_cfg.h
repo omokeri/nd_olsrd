@@ -46,15 +46,13 @@
 #ifndef _OLSRD_CFGPARSER_H
 #define _OLSRD_CFGPARSER_H
 
+#include "compiler.h"
 #include "defs.h"
 #include "olsr_types.h"
 #include "common/autobuf.h"
 #ifdef HTTPINFO_PUD
 #include "pud/src/receiver.h"
 #endif /* HTTPINFO_PUD */
-
-/* must be declared here because of circular dependency through "defs.h" */
-#define INLINE inline __attribute__((always_inline))
 
 /* set to 1 to collect all startup sleep into one sleep
  * (just as long as the longest sleep)

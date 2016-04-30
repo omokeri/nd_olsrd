@@ -61,6 +61,7 @@
 #include "compat.h"
 #endif /* _WIN32 */
 
+#include "compiler.h"
 #include "olsr_protocol.h"
 #include "olsr_cfg.h"
 
@@ -113,18 +114,6 @@ extern FILE *debug_handle;
 #ifndef MIN
 #define MIN(x,y)	((x) < (y) ? (x) : (y))
 #endif /* MIN */
-
-#define INLINE inline __attribute__((always_inline))
-
-/*
- * On ARM, the compiler spits out additional warnings if called
- * with -Wcast-align if you cast e.g. char* -> int*. While this
- * is fine, most of that warnings are un-critical. Also the ARM
- * CPU will throw BUS_ERROR if alignment does not fit. For this,
- * we add an additional cast to (void *) to prevent the warning.
- */
-#define ARM_NOWARN_ALIGN(x) ((void *)(x))
-#define CONST_ARM_NOWARN_ALIGN(x) ((const void *)(x))
 
 /*
  * A somewhat safe version of strncpy and strncat. Note, that

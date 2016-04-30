@@ -43,62 +43,19 @@
  *
  */
 
-#ifndef _LIST_H
-#define _LIST_H
+#ifndef _OLSR_COMPILER_H
+#define _OLSR_COMPILER_H
 
-#include <stddef.h>
-#include "compiler.h"
-#include "defs.h"
-
-struct list_node {
-  struct list_node *next;
-  struct list_node *prev;
-};
-
-void list_head_init(struct list_node *);
-void list_node_init(struct list_node *);
-int list_node_on_list(struct list_node *);
-int list_is_empty(struct list_node *);
-
-void list_add_before(struct list_node *, struct list_node *);
-void list_add_after(struct list_node *, struct list_node *);
-
-void list_remove(struct list_node *);
+#define INLINE inline __attribute__((always_inline))
 
 /*
- * Merge elements of list_head2 at the end of list_head1.
- * list_head2 will be left empty.
+ * On ARM, the compiler spits out additional warnings if called
+ * with -Wcast-align if you cast e.g. char* -> int*. While this
+ * is fine, most of that warnings are un-critical. Also the ARM
+ * CPU will throw BUS_ERROR if alignment does not fit. For this,
+ * we add an additional cast to (void *) to prevent the warning.
  */
-static INLINE void
-list_merge(struct list_node *list_head1, struct list_node *list_head2)
-{
-  if (!list_is_empty(list_head2)) {
-    list_head1->next->prev = list_head2->prev;
-    list_head2->prev->next = list_head1->next;
-    list_head1->next = list_head2->next;
-    list_head2->next->prev = list_head1;
-    list_head2->next = list_head2->prev = list_head2;
-  }
-}
+#define ARM_NOWARN_ALIGN(x) ((void *)(x))
+#define CONST_ARM_NOWARN_ALIGN(x) ((const void *)(x))
 
-/*
- * Macro to define an INLINE function to map from a list_node offset back to the
- * base of the datastructure. That way you save an extra data pointer.
- */
-#define LISTNODE2STRUCT(funcname, structname, listnodename) \
-static INLINE structname * funcname (struct list_node *ptr)\
-{\
-  return( \
-    ptr ? \
-      (structname *) (((size_t) ptr) - offsetof(structname, listnodename)) : \
-      NULL); \
-}
-
-#endif /* _LIST_H */
-
-/*
- * Local Variables:
- * c-basic-offset: 2
- * indent-tabs-mode: nil
- * End:
- */
+#endif /* _OLSR_COMPILER_H */
