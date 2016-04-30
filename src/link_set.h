@@ -98,7 +98,7 @@ struct link_entry {
   uint32_t linkquality[0];
 };
 
-/* inline to recast from link_list back to link_entry */
+/* INLINE to recast from link_list back to link_entry */
 LISTNODE2STRUCT(list2link, struct link_entry, link_list);
 
 #define OLSR_LINK_JITTER       5        /* percent */

@@ -50,6 +50,7 @@
 
 /* OLSR includes */
 #include "olsr_types.h"
+#include "defs.h"
 
 /* System includes */
 #include <assert.h>
@@ -73,7 +74,7 @@ typedef __in_port_t in_port_t;
  @return
  The port (in network byte order)
  */
-static inline in_port_t getOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_t defaultPort) {
+static INLINE in_port_t getOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_t defaultPort) {
 	if (!addr) {
 		return htons(defaultPort);
 	}
@@ -93,7 +94,7 @@ static inline in_port_t getOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_
  @param port
  The port (in network byte order)
  */
-static inline void setOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_t port) {
+static INLINE void setOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_t port) {
 	if (!addr) {
 		return;
 	}
@@ -113,7 +114,7 @@ static inline void setOlsrSockaddrPort(union olsr_sockaddr * addr, in_port_t por
  @param addr
  A pointer to the IP address (in network byte order)
  */
-static inline void setOlsrSockaddrAddr(union olsr_sockaddr * addr, union olsr_sockaddr * ip) {
+static INLINE void setOlsrSockaddrAddr(union olsr_sockaddr * addr, union olsr_sockaddr * ip) {
 	if (!addr) {
 		return;
 	}
@@ -135,7 +136,7 @@ static inline void setOlsrSockaddrAddr(union olsr_sockaddr * addr, union olsr_so
  - true when the address is a multicast address
  - false otherwise
  */
-static inline bool isMulticast(union olsr_sockaddr *addr) {
+static INLINE bool isMulticast(union olsr_sockaddr *addr) {
 	assert(addr != NULL);
 
 	if (addr->in.sa_family == AF_INET) {

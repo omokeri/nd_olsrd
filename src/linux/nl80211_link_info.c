@@ -67,6 +67,7 @@
 #include "olsr.h"
 #include "log.h"
 #include "fpm.h"
+#include "defs.h"
 
 
 // Static values for testing
@@ -74,12 +75,12 @@
 
 #if !defined(CONFIG_LIBNL20) && !defined(CONFIG_LIBNL30)
 #define nl_sock nl_handle
-static inline struct nl_handle *nl_socket_alloc(void)
+static INLINE struct nl_handle *nl_socket_alloc(void)
 {
 	return nl_handle_alloc();
 }
 
-static inline void nl_socket_free(struct nl_sock *sock)
+static INLINE void nl_socket_free(struct nl_sock *sock)
 {
 	nl_handle_destroy(sock);
 }

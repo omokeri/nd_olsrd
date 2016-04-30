@@ -68,6 +68,7 @@
 #include "net_olsr.h"
 #include "link_set.h"
 #include "ipcalc.h"
+#include "defs.h"
 #include "lq_plugin.h"
 #include "common/autobuf.h"
 #ifdef HTTPINFO_PUD
@@ -1125,7 +1126,7 @@ build_all_body(struct autobuf *abuf)
  * @param fieldName use a name from nmeaINFO_FIELD
  * @return a boolean, true when the structure has the requested field
  */
-static inline bool nmea_INFO_is_present_local(uint32_t present, nmeaINFO_FIELD fieldName) {
+static INLINE bool nmea_INFO_is_present_local(uint32_t present, nmeaINFO_FIELD fieldName) {
   return ((present & fieldName) != 0);
 }
 

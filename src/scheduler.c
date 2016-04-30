@@ -92,7 +92,7 @@ struct timer_cleanup_entry {
   struct timer_entry * timer;
 };
 
-/* static inline struct timer_cleanup_entry * node2timercleanup(struct avl_node *ptr) */
+/* static INLINE struct timer_cleanup_entry * node2timercleanup(struct avl_node *ptr) */
 AVLNODE2STRUCT(node2timercleanup, struct timer_cleanup_entry, avl);
 
 /**

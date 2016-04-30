@@ -47,9 +47,9 @@
 #define _AVL_H
 
 #include <stddef.h>
+#include "defs.h"
 
 /* must be declared here because of circular dependency through "defs.h" */
-
 #define INLINE inline __attribute__((always_inline))
 
 struct avl_node {
@@ -131,11 +131,11 @@ extern int avl_comp_ipv6(const void *, const void *);
 extern int avl_comp_mac(const void *, const void *);
 
 /*
- * Macro to define an inline function to map from a list_node offset back to the
+ * Macro to define an INLINE function to map from a list_node offset back to the
  * base of the datastructure. That way you save an extra data pointer.
  */
 #define AVLNODE2STRUCT(funcname, structname, avlnodename) \
-static inline structname * funcname (struct avl_node *ptr)\
+static INLINE structname * funcname (struct avl_node *ptr)\
 {\
   return( \
     ptr ? \

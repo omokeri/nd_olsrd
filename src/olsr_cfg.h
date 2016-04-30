@@ -46,11 +46,15 @@
 #ifndef _OLSRD_CFGPARSER_H
 #define _OLSRD_CFGPARSER_H
 
+#include "defs.h"
 #include "olsr_types.h"
 #include "common/autobuf.h"
 #ifdef HTTPINFO_PUD
 #include "pud/src/receiver.h"
 #endif /* HTTPINFO_PUD */
+
+/* must be declared here because of circular dependency through "defs.h" */
+#define INLINE inline __attribute__((always_inline))
 
 /* set to 1 to collect all startup sleep into one sleep
  * (just as long as the longest sleep)
@@ -405,7 +409,7 @@ extern "C" {
    *
    * @return the number of olsr interfaces
    */
-  static inline unsigned int getNrOfOlsrInterfaces(struct olsrd_config * cfg) {
+  static INLINE unsigned int getNrOfOlsrInterfaces(struct olsrd_config * cfg) {
     struct olsr_if * ifn;
     unsigned int i = 0;
 
@@ -458,21 +462,21 @@ extern "C" {
    * Smart-Gateway uplink/downlink accessors
    */
 
-  static inline void set_smart_gateway_bandwidth_zero(struct olsrd_config *cnf) {
+  static INLINE void set_smart_gateway_bandwidth_zero(struct olsrd_config *cnf) {
     cnf->smart_gateway_bandwidth_zero = !cnf->smart_gw_uplink || !cnf->smart_gw_downlink;
   }
 
-  static inline void smartgw_set_uplink(struct olsrd_config *cnf, uint32_t uplink) {
+  static INLINE void smartgw_set_uplink(struct olsrd_config *cnf, uint32_t uplink) {
     cnf->smart_gw_uplink = uplink;
     set_smart_gateway_bandwidth_zero(cnf);
   }
 
-  static inline void smartgw_set_downlink(struct olsrd_config *cnf, uint32_t downlink) {
+  static INLINE void smartgw_set_downlink(struct olsrd_config *cnf, uint32_t downlink) {
     cnf->smart_gw_downlink = downlink;
     set_smart_gateway_bandwidth_zero(cnf);
   }
 
-  static inline bool smartgw_is_zero_bandwidth(struct olsrd_config *cnf) {
+  static INLINE bool smartgw_is_zero_bandwidth(struct olsrd_config *cnf) {
     return cnf->smart_gateway_bandwidth_zero;
   }
 

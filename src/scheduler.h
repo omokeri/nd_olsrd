@@ -86,7 +86,7 @@ struct timer_entry {
   void *timer_cb_context;              /* context pointer */
 };
 
-/* inline to recast from timer_list back to timer_entry */
+/* INLINE to recast from timer_list back to timer_entry */
 LISTNODE2STRUCT(list2timer, struct timer_entry, timer_list);
 
 #define OLSR_TIMER_ONESHOT    0 /* One shot timer */

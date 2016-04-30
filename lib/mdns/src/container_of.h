@@ -47,6 +47,7 @@
 #define CONTAINER_OF_H_
 
 #include <stddef.h>
+#include "defs.h"
 
 /* allow compilation with c99 mode */
 #ifndef typeof
@@ -66,7 +67,7 @@
 /**
  * Helper function for NULL safe container_of macro
  */
-static inline void *
+static INLINE void *
 __container_of_if_notnull(void *ptr, size_t offset) {
   return ptr == NULL ? NULL : (((char *)ptr) - offset);
 }

@@ -121,7 +121,7 @@ struct db_entry {
   struct list_node db_list;            /* linked list of db entries per hash container */
 };
 
-/* inline to recast from db_list back to db_entry */
+/* INLINE to recast from db_list back to db_entry */
 LISTNODE2STRUCT(list2db, struct db_entry, db_list);
 
 #define OLSR_NAMESVC_DB_JITTER 5        /* percent */

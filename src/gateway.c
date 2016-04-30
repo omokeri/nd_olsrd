@@ -184,7 +184,7 @@ static bool allOlsrInterfacesDown(struct olsrd_config * cfg) {
 /**
  * @return the gateway 'server' tunnel name to use
  */
-static inline const char * server_tunnel_name(void) {
+static INLINE const char * server_tunnel_name(void) {
   return (olsr_cnf->ip_version == AF_INET ? TUNNEL_ENDPOINT_IF : TUNNEL_ENDPOINT_IF6);
 }
 
@@ -196,7 +196,7 @@ static inline const char * server_tunnel_name(void) {
  * @param prefixlen the prefix length
  * @return a pointer to the HNA
  */
-static inline uint8_t * hna_mask_to_hna_pointer(union olsr_ip_addr *mask, int prefixlen) {
+static INLINE uint8_t * hna_mask_to_hna_pointer(union olsr_ip_addr *mask, int prefixlen) {
   return (((uint8_t *)mask) + ((prefixlen+7)/8));
 }
 

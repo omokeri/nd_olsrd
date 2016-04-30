@@ -64,7 +64,7 @@
 /**
  * @return true if multi-gateway mode is enabled
  */
-static inline bool multi_gateway_mode(void) {
+static INLINE bool multi_gateway_mode(void) {
   return (olsr_cnf->smart_gw_use_count > 1);
 }
 
@@ -129,7 +129,7 @@ struct interfaceName {
 #endif /* __linux__ */
 
 /**
- * static inline struct gateway_entry * node2gateway (struct avl_node *ptr)
+ * static INLINE struct gateway_entry * node2gateway (struct avl_node *ptr)
  *
  * Converts a node into a gateway entry
  */

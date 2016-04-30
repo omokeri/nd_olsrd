@@ -89,7 +89,7 @@ struct olsr_gw_handler gw_def_handler = {
  * @param path_cost the path cost
  * @return the threshold path cost
  */
-static inline int64_t gw_default_calc_threshold(int64_t path_cost) {
+static INLINE int64_t gw_default_calc_threshold(int64_t path_cost) {
   if (olsr_cnf->smart_gw_thresh == 0) {
     return path_cost;
   }

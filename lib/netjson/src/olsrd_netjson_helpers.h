@@ -62,7 +62,7 @@ struct node_entry {
   struct neighbor_entry *neighbor;
 };
 
-/* static inline struct node_entry * avlnode2node(struct avl_node *ptr) */
+/* static INLINE struct node_entry * avlnode2node(struct avl_node *ptr) */
 AVLNODE2STRUCT(avlnode2node, struct node_entry, avl);
 
 struct node_entry * netjson_constructMidSelf(struct mid_entry *mid);

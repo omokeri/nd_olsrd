@@ -49,6 +49,7 @@
 
 /* OLSRD includes */
 #include "gateway.h"
+#include "defs.h"
 #include "tc_set.h"
 #include "lq_plugin.h"
 
@@ -59,7 +60,7 @@
  * @param gw the gateway entry
  * @return the speed
  */
-static inline unsigned long long gw_speed(struct gateway_entry *gw) {
+static INLINE unsigned long long gw_speed(struct gateway_entry *gw) {
 	return (gw->uplink + gw->downlink);
 }
 

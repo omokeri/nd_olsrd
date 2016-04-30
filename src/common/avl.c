@@ -55,7 +55,7 @@
  * default comparison pointers
  * set to the respective compare function.
  * if avl_comp_default is set to zero, a fast
- * inline ipv4 comparison will be executed.
+ * INLINE ipv4 comparison will be executed.
  */
 avl_tree_comp avl_comp_default = NULL;
 avl_tree_comp avl_comp_prefix_default;

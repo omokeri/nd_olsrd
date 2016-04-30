@@ -54,7 +54,7 @@
 
 #define OLSR_RANDOM_MAX INT32_MAX
 
-static inline long int olsr_random(void) {
+static INLINE long int olsr_random(void) {
   int32_t value;
   int randomFile;
 

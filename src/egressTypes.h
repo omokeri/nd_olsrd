@@ -50,6 +50,7 @@
 
 /* OLSRD includes */
 #include "olsr_types.h"
+#include "defs.h"
 
 /* System includes */
 #include <stdint.h>
@@ -131,25 +132,25 @@ struct sgw_egress_if {
   struct sgw_egress_if *next;
 };
 
-static inline bool egressBwCostsChanged(struct sgw_egress_if * egress_if) {
+static INLINE bool egressBwCostsChanged(struct sgw_egress_if * egress_if) {
   return (egress_if->bwPrevious.costs != egress_if->bwCurrent.costs);
 }
 
-static inline bool egressBwNetworkChanged(struct sgw_egress_if * egress_if) {
+static INLINE bool egressBwNetworkChanged(struct sgw_egress_if * egress_if) {
   return //
     (egress_if->bwPrevious.networkSet != egress_if->bwCurrent.networkSet) || //
     (egress_if->bwCurrent.networkSet && //
       memcmp(&egress_if->bwPrevious.network, &egress_if->bwCurrent.network, sizeof(egress_if->bwCurrent.network)));
 }
 
-static inline bool egressBwGatewayChanged(struct sgw_egress_if * egress_if) {
+static INLINE bool egressBwGatewayChanged(struct sgw_egress_if * egress_if) {
   return //
     (egress_if->bwPrevious.gatewaySet != egress_if->bwCurrent.gatewaySet) || //
     (egress_if->bwCurrent.gatewaySet && //
       memcmp(&egress_if->bwPrevious.gateway, &egress_if->bwCurrent.gateway, sizeof(egress_if->bwCurrent.gateway)));
 }
 
-static inline bool egressBwChanged(struct sgw_egress_if * egress_if) {
+static INLINE bool egressBwChanged(struct sgw_egress_if * egress_if) {
   return egress_if->bwCostsChanged || egress_if->bwNetworkChanged || egress_if->bwGatewayChanged;
 }
 
