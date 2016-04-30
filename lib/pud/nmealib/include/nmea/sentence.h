@@ -36,11 +36,11 @@ extern "C" {
  */
 enum nmeaPACKTYPE {
 	GPNON = 0,			/**< Unknown packet type. */
-	GPGGA = (1 << 0),	/**< GGA - Essential fix data which provide 3D location and accuracy data. */
-	GPGSA = (1 << 1),	/**< GSA - GPS receiver operating mode, SVs used for navigation, and DOP values. */
-	GPGSV = (1 << 2),	/**< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values. */
-	GPRMC = (1 << 3),	/**< RMC - Recommended Minimum Specific GPS/TRANSIT Data. */
-	GPVTG = (1 << 4)	/**< VTG - Actual track made good and speed over ground. */
+	GPGGA = (1u << 0),	/**< GGA - Essential fix data which provide 3D location and accuracy data. */
+	GPGSA = (1u << 1),	/**< GSA - GPS receiver operating mode, SVs used for navigation, and DOP values. */
+	GPGSV = (1u << 2),	/**< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values. */
+	GPRMC = (1u << 3),	/**< RMC - Recommended Minimum Specific GPS/TRANSIT Data. */
+	GPVTG = (1u << 4)	/**< VTG - Actual track made good and speed over ground. */
 };
 
 /**

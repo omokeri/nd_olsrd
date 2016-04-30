@@ -602,7 +602,7 @@ calc_jitter(unsigned int rel_time, uint8_t jitter_pct, unsigned int random_val)
    * No jitter or, jitter larger than 99% does not make sense.
    * Also protect against overflows resulting from > 25 bit timers.
    */
-  if (jitter_pct == 0 || jitter_pct > 99 || rel_time > (1 << 24)) {
+  if (jitter_pct == 0 || jitter_pct > 99 || rel_time > (1u << 24)) {
     return GET_TIMESTAMP(rel_time);
   }
 

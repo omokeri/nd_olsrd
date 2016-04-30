@@ -59,7 +59,7 @@
 #include <sys/times.h> /* clock_t */
 
 #define N_HASH_BITS 12
-#define HISTORY_HASH_SIZE (1 << N_HASH_BITS)
+#define HISTORY_HASH_SIZE (1u << N_HASH_BITS)
 
 /* Time-out of duplicate entries, in milliseconds */
 #define HISTORY_HOLD_TIME 3000

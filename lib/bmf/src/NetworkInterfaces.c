@@ -215,14 +215,14 @@ int SetBmfInterfaceIp(
   EtherTunTapIpMask = 0;
   for (i = 0; i < prefixLen; i++)
   {
-    EtherTunTapIpMask |= (1 << (IPV4_MAX_PREFIXLEN - 1 - i));
+    EtherTunTapIpMask |= (1u << (IPV4_MAX_PREFIXLEN - 1 - i));
   }
 
   /* Compose IP broadcast address in host byte order */
   EtherTunTapIpBroadcast = EtherTunTapIp;
   for (i = prefixLen; i < IPV4_MAX_PREFIXLEN; i++)
   {
-    EtherTunTapIpBroadcast |= (1 << (IPV4_MAX_PREFIXLEN - 1 - i));
+    EtherTunTapIpBroadcast |= (1u << (IPV4_MAX_PREFIXLEN - 1 - i));
   }
 
   TunTapIpOverruled = 1;

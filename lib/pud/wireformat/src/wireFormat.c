@@ -67,7 +67,7 @@ bool isValidNodeIdType(unsigned long long nodeIdType) {
  */
 
 /** Determine the validity time in seconds from the OLSR wire format value */
-#define PUD_VALIDITY_TIME_FROM_OLSR(msn, lsn) ((((lsn) + 16) * (1 << (msn))) - 16)
+#define PUD_VALIDITY_TIME_FROM_OLSR(msn, lsn) ((((lsn) + 16) * (1u << (msn))) - 16)
 
 /**
  Get the validity time from a message
@@ -106,7 +106,7 @@ void setValidityTime(uint8_t * validityTimeField, unsigned long long validityTim
 		lsn = 15;
 	} else {
 		unsigned long lowerBound = PUD_VALIDITY_TIME_FROM_OLSR(msn, 0);
-		unsigned long resolution = (1 << msn);
+		unsigned long resolution = (1u << msn);
 		lsn = ((validityTime - lowerBound + (resolution >> 1)) / resolution);
 	}
 
@@ -414,7 +414,7 @@ double getPositionUpdateLatitude(
 	/* take half of the rounding error */
 	lat += 0.5;
 
-	lat /= (double) (1 << PUD_LATITUDE_BITS);
+	lat /= (double) (1u << PUD_LATITUDE_BITS);
 	/* lat is now in [0, 1> */
 
 	lat -= 0.5;
@@ -448,12 +448,12 @@ void setPositionUpdateLatitude(
 	lat += 0.5;
 	/* lat is now in [0, 1] */
 
-	lat *= (double) (1 << PUD_LATITUDE_BITS);
+	lat *= (double) (1u << PUD_LATITUDE_BITS);
 	/* lat is now in [0, LATITUDE_BITS] */
 
 	/* clip max */
-	if (unlikely(lat > (double)((1 << PUD_LATITUDE_BITS) - 1))) {
-		lat = (double) ((1 << PUD_LATITUDE_BITS) - 1);
+	if (unlikely(lat > (double)((1u << PUD_LATITUDE_BITS) - 1))) {
+		lat = (double) ((1u << PUD_LATITUDE_BITS) - 1);
 	}
 	/* lat is now in [0, 2^LATITUDE_BITS> */
 
@@ -479,7 +479,7 @@ double getPositionUpdateLongitude(
 	/* take half of the rounding error */
 	lon += 0.5;
 
-	lon /= (1 << PUD_LONGITUDE_BITS);
+	lon /= (1u << PUD_LONGITUDE_BITS);
 	/* lon is now in [0, 1> */
 
 	lon -= 0.5;
@@ -513,12 +513,12 @@ void setPositionUpdateLongitude(
 	lon += 0.5;
 	/* lon is now in [0, 1] */
 
-	lon *= (double) (1 << PUD_LONGITUDE_BITS);
+	lon *= (double) (1u << PUD_LONGITUDE_BITS);
 	/* lon is now in [0, LONGITUDE_BITS] */
 
 	/* clip max */
-	if (unlikely(lon > (double)((1 << PUD_LATITUDE_BITS) - 1))) {
-		lon = (double) ((1 << PUD_LATITUDE_BITS) - 1);
+	if (unlikely(lon > (double)((1u << PUD_LATITUDE_BITS) - 1))) {
+		lon = (double) ((1u << PUD_LATITUDE_BITS) - 1);
 	}
 
 	/* lon is now in [0, 2^LONGITUDE_BITS> */

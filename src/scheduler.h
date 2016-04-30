@@ -93,8 +93,8 @@ LISTNODE2STRUCT(list2timer, struct timer_entry, timer_list);
 #define OLSR_TIMER_PERIODIC   1 /* Periodic timer */
 
 /* Timer flags */
-#define OLSR_TIMER_RUNNING  ( 1 << 0)   /* this timer is running */
-#define OLSR_TIMER_REMOVED  ( 1 << 1)   /* this timer is tagged for removal */
+#define OLSR_TIMER_RUNNING  ( 1u << 0)   /* this timer is running */
+#define OLSR_TIMER_REMOVED  ( 1u << 1)   /* this timer is tagged for removal */
 
 /* Timers */
 void olsr_init_timers(void);

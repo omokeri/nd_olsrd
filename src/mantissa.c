@@ -119,9 +119,9 @@ reltime_to_me(const olsr_reltime interval)
        */
 
       if (b >= 5) {
-        a = (interval - (125 << (b - 1))) / (125 << (b - 5));
+        a = (interval - (125u << (b - 1))) / (125u << (b - 5));
       } else {
-        a = (interval - (125 << (b - 1))) * (1 << (5 - b)) / 125;
+        a = (interval - (125u << (b - 1))) * (1u << (5 - b)) / 125;
       }
 
       b += a >> 4;

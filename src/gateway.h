@@ -77,11 +77,11 @@ static inline bool multi_gateway_mode(void) {
 
 /** gateway HNA flags */
 enum gateway_hna_flags {
-  GW_HNA_FLAG_LINKSPEED   = 1 << 0,
-  GW_HNA_FLAG_IPV4        = 1 << 1,
-  GW_HNA_FLAG_IPV4_NAT    = 1 << 2,
-  GW_HNA_FLAG_IPV6        = 1 << 3,
-  GW_HNA_FLAG_IPV6PREFIX  = 1 << 4
+  GW_HNA_FLAG_LINKSPEED   = 1u << 0,
+  GW_HNA_FLAG_IPV4        = 1u << 1,
+  GW_HNA_FLAG_IPV4_NAT    = 1u << 2,
+  GW_HNA_FLAG_IPV6        = 1u << 3,
+  GW_HNA_FLAG_IPV6PREFIX  = 1u << 4
 };
 
 /** gateway HNA field byte offsets in the netmask field of the HNA */

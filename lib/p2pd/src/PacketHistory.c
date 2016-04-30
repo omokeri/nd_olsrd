@@ -182,7 +182,7 @@ u_int32_t PacketCrc32(unsigned char* ipPacket, ssize_t len)
  * ------------------------------------------------------------------------- */
 u_int32_t Hash(u_int32_t from32)
 {
-  return ((from32 >> N_HASH_BITS) + from32) & ((1 << N_HASH_BITS) - 1);
+  return ((from32 >> N_HASH_BITS) + from32) & ((1u << N_HASH_BITS) - 1);
 } /* Hash */
 
 /* -------------------------------------------------------------------------
@@ -195,7 +195,7 @@ u_int32_t Hash(u_int32_t from32)
  * ------------------------------------------------------------------------- */
 void InitPacketHistory(void)
 {
-  int i;
+  unsigned int i;
 
   GenerateCrc32Table();
 

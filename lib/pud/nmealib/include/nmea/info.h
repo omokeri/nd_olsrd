@@ -173,25 +173,25 @@ typedef struct _nmeaINFO {
  * The values are used in the 'present' mask.
  */
 typedef enum _nmeaINFO_FIELD {
-	SMASK			= (1 << 0),  /* 0x00001 */
-	UTCDATE			= (1 << 1),  /* 0x00002 */
-	UTCTIME			= (1 << 2),  /* 0x00004 */
-	SIG				= (1 << 3),  /* 0x00008 */
-	FIX				= (1 << 4),  /* 0x00010 */
-	PDOP			= (1 << 5),  /* 0x00020 */
-	HDOP			= (1 << 6),  /* 0x00040 */
-	VDOP			= (1 << 7),  /* 0x00080 */
-	LAT				= (1 << 8),  /* 0x00100 */
-	LON				= (1 << 9),  /* 0x00200 */
-	ELV				= (1 << 10), /* 0x00400 */
-	SPEED			= (1 << 11), /* 0x00800 */
-	TRACK			= (1 << 12), /* 0x01000 */
-	MTRACK			= (1 << 13), /* 0x02000 */
-	MAGVAR			= (1 << 14), /* 0x04000 */
-	SATINUSECOUNT	= (1 << 15), /* 0x08000 */
-	SATINUSE		= (1 << 16), /* 0x10000 */
-	SATINVIEW		= (1 << 17), /* 0x20000 */
-	_nmeaINFO_FIELD_LAST = SATINVIEW
+  SMASK         = (1u << 0),  /* 0x00001 */
+  UTCDATE       = (1u << 1),  /* 0x00002 */
+  UTCTIME       = (1u << 2),  /* 0x00004 */
+  SIG           = (1u << 3),  /* 0x00008 */
+  FIX           = (1u << 4),  /* 0x00010 */
+  PDOP          = (1u << 5),  /* 0x00020 */
+  HDOP          = (1u << 6),  /* 0x00040 */
+  VDOP          = (1u << 7),  /* 0x00080 */
+  LAT           = (1u << 8),  /* 0x00100 */
+  LON           = (1u << 9),  /* 0x00200 */
+  ELV           = (1u << 10), /* 0x00400 */
+  SPEED         = (1u << 11), /* 0x00800 */
+  TRACK         = (1u << 12), /* 0x01000 */
+  MTRACK        = (1u << 13), /* 0x02000 */
+  MAGVAR        = (1u << 14), /* 0x04000 */
+  SATINUSECOUNT = (1u << 15), /* 0x08000 */
+  SATINUSE      = (1u << 16), /* 0x10000 */
+  SATINVIEW     = (1u << 17), /* 0x20000 */
+  _nmeaINFO_FIELD_LAST = SATINVIEW
 } nmeaINFO_FIELD;
 
 #define NMEA_INFO_PRESENT_MASK ((_nmeaINFO_FIELD_LAST << 1) - 1)

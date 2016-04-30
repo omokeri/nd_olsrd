@@ -796,7 +796,7 @@ olsrd_sanity_check_cnf(struct olsrd_config *cnf)
 
       uint32_t tablesLow;
       uint32_t tablesHigh;
-      uint32_t tablesLowMax = ((1 << 31) - nrOfTables + 1);
+      uint32_t tablesLowMax = ((1u << 31) - nrOfTables + 1);
 
       uint32_t rulesLow;
       uint32_t rulesHigh;

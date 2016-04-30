@@ -741,8 +741,8 @@ olsr_calculate_tc_border(uint8_t lower_border, union olsr_ip_addr *lower_border_
     for (i = 0; i < lower_border / 8; i++) {
       lower_border_ip->v6.s6_addr[olsr_cnf->ipsize - i - 1] = 0;
     }
-    lower_border_ip->v6.s6_addr[olsr_cnf->ipsize - lower_border / 8 - 1] &= (0xff << (lower_border & 7));
-    lower_border_ip->v6.s6_addr[olsr_cnf->ipsize - lower_border / 8 - 1] |= (1 << (lower_border & 7));
+    lower_border_ip->v6.s6_addr[olsr_cnf->ipsize - lower_border / 8 - 1] &= (0xffu << (lower_border & 7));
+    lower_border_ip->v6.s6_addr[olsr_cnf->ipsize - lower_border / 8 - 1] |= (1u << (lower_border & 7));
   }
 
   if (upper_border == 0xff) {
@@ -755,8 +755,8 @@ olsr_calculate_tc_border(uint8_t lower_border, union olsr_ip_addr *lower_border_
     for (i = 0; i < upper_border / 8; i++) {
       upper_border_ip->v6.s6_addr[olsr_cnf->ipsize - i - 1] = 0;
     }
-    upper_border_ip->v6.s6_addr[olsr_cnf->ipsize - upper_border / 8 - 1] &= (0xff << (upper_border & 7));
-    upper_border_ip->v6.s6_addr[olsr_cnf->ipsize - upper_border / 8 - 1] |= (1 << (upper_border & 7));
+    upper_border_ip->v6.s6_addr[olsr_cnf->ipsize - upper_border / 8 - 1] &= (0xffu << (upper_border & 7));
+    upper_border_ip->v6.s6_addr[olsr_cnf->ipsize - upper_border / 8 - 1] |= (1u << (upper_border & 7));
   }
   return 1;
 }

@@ -546,7 +546,7 @@ send_challenge(struct interface_olsr *olsr_if, const union olsr_ip_addr *new_hos
 
   /* Set the size including OLSR packet size */
 
-  challenge = olsr_random() << 16;
+  challenge = (uint32_t)olsr_random() << 16;
   challenge |= olsr_random();
 
   /* initialise rrmsg */

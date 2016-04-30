@@ -57,7 +57,7 @@
 
 #define MID_ALIAS_HACK_VTIME  10.0
 
-#define LINK_LOSS_MULTIPLIER (1<<16)
+#define LINK_LOSS_MULTIPLIER (1u<<16)
 
 struct link_entry {
   union olsr_ip_addr local_iface_addr;
