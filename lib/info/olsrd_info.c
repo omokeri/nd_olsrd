@@ -432,7 +432,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   struct autobuf abuf;
   unsigned int outputLength = 0;
   unsigned int send_index = 0;
-  unsigned int saved_count = 0;
+  bool first_reply = false;
 
   const char *content_type = functions->determine_mime_type ? functions->determine_mime_type(send_what) : "text/plain; charset=utf-8";
   int contentLengthIndex = 0;
@@ -536,13 +536,13 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   abuf.len = 0;
   abuf.size = 0;
 
-  outbuffer.count++;
+  first_reply = !outbuffer.count;
 
-  saved_count = outbuffer.count;
+  outbuffer.count++;
 
   write_data(NULL);
 
-  if (outbuffer.buffer[send_index] && (saved_count == 1)) {
+  if (first_reply && outbuffer.buffer[send_index]) {
     writetimer_entry = olsr_start_timer(10, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
   }
 }
