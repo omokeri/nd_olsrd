@@ -438,7 +438,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   int contentLengthIndex = 0;
   int headerLength = 0;
 
-  assert(outbuffer.count < MAX_CLIENTS);
+  assert(outbuffer.count <= MAX_CLIENTS);
 
   abuf_init(&abuf, AUTOBUFCHUNK);
 
