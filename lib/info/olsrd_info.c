@@ -530,8 +530,6 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
       writetimer_entry = olsr_start_timer(10, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
     }
   }
-
-  abuf_free(&abuf);
 }
 
 static char * skipLeadingWhitespace(char * requ, size_t *len) {
