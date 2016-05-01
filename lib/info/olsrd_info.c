@@ -304,7 +304,7 @@ static unsigned int determine_action(char *requ) {
   }
 }
 
-static void write_data(void *fullyWritten) {
+static void write_data(void *unused __attribute__((unused))) {
   fd_set set;
   int result, i, max;
   struct timeval tv;
@@ -362,10 +362,6 @@ static void write_data(void *fullyWritten) {
       outbuffer.written[i] = 0;
 
       outbuffer.count--;
-      if (fullyWritten) {
-        bool * p = fullyWritten;
-        *p = true;
-      }
     }
   }
 
@@ -435,6 +431,8 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
 static void send_info(const char * req, unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
   unsigned int outputLength = 0;
+  unsigned int send_index = 0;
+  unsigned int saved_count = 0;
 
   const char *content_type = functions->determine_mime_type ? functions->determine_mime_type(send_what) : "text/plain; charset=utf-8";
   int contentLengthIndex = 0;
@@ -511,24 +509,25 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
     http_header_adjust_content_length(&abuf, contentLengthIndex, abuf.len - headerLength);
   }
 
+  send_index = outbuffer.count;
+
   /* avoid a memcpy: just move the abuf.buf pointer and clear abuf */
-  outbuffer.buffer[outbuffer.count] = abuf.buf;
-  outbuffer.size[outbuffer.count] = abuf.len;
-  outbuffer.written[outbuffer.count] = 0;
-  outbuffer.socket[outbuffer.count] = the_socket;
+  outbuffer.buffer[send_index] = abuf.buf;
+  outbuffer.size[send_index] = abuf.len;
+  outbuffer.written[send_index] = 0;
+  outbuffer.socket[send_index] = the_socket;
   abuf.buf = NULL;
   abuf.len = 0;
   abuf.size = 0;
 
   outbuffer.count++;
 
-  {
-    bool fullyWritten = false;
-    write_data(&fullyWritten);
+  saved_count = outbuffer.count;
 
-    if (!fullyWritten && (outbuffer.count == 1)) {
-      writetimer_entry = olsr_start_timer(10, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
-    }
+  write_data(NULL);
+
+  if (outbuffer.buffer[send_index] && (saved_count == 1)) {
+    writetimer_entry = olsr_start_timer(10, 0, OLSR_TIMER_PERIODIC, &write_data, NULL, 0);
   }
 }
 
