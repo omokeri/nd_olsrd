@@ -264,16 +264,16 @@ endif
 
 ifeq ($(OS),linux)
   ifneq ($(SANITIZE_ADDRESS),0)
-    CFLAGS  += -fsanitize=address -fno-omit-frame-pointer
-    LDFLAGS += -fsanitize=address -static-libasan
+    CFLAGS  += -fsanitize=address -fsanitize-recover -fno-omit-frame-pointer
+    LDFLAGS += -fsanitize=address -fsanitize-recover -static-libasan
   endif
   ifneq ($(SANITIZE_LEAK),0)
-    CFLAGS  += -fsanitize=leak
-    LDFLAGS += -fsanitize=leak -static-liblsan
+    CFLAGS  += -fsanitize=leak -fsanitize-recover
+    LDFLAGS += -fsanitize=leak -fsanitize-recover -static-liblsan
   endif
   ifneq ($(SANITIZE_UNDEFINED),0)
-    CFLAGS  += -fsanitize=undefined
-    LDFLAGS += -fsanitize=undefined -static-libubsan
+    CFLAGS  += -fsanitize=undefined -fsanitize-recover
+    LDFLAGS += -fsanitize=undefined -fsanitize-recover -static-libubsan
   endif
 endif
 
