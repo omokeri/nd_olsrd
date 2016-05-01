@@ -517,12 +517,12 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
    * older replies that are still in-flight (since the send function
    * iterates from the start towards the end).
    */
-  send_index = MAX_CLIENTS - 1;
-  while (true) {
-    if (!outbuffer.buffer[send_index] || !send_index) {
+  send_index = MAX_CLIENTS;
+  while (send_index) {
+    send_index--;
+    if (!outbuffer.buffer[send_index]) {
       break;
     }
-    send_index--;
   }
   assert(send_index < MAX_CLIENTS);
   assert(!outbuffer.buffer[send_index]);
