@@ -316,7 +316,7 @@ static void write_data(void *unused __attribute__((unused))) {
 
   FD_ZERO(&set);
   max = 0;
-  for (i = 0; i < outbuffer.count; i++) {
+  for (i = 0; i < MAX_CLIENTS; i++) {
     if (outbuffer.socket[i] < 0) {
       continue;
     }
@@ -438,6 +438,8 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
   int contentLengthIndex = 0;
   int headerLength = 0;
 
+  assert(outbuffer.count < MAX_CLIENTS);
+
   abuf_init(&abuf, AUTOBUFCHUNK);
 
   if (config->http_headers) {
@@ -509,7 +511,21 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
     http_header_adjust_content_length(&abuf, contentLengthIndex, abuf.len - headerLength);
   }
 
-  send_index = outbuffer.count;
+  /*
+   * Determine the last available outbuffer slot.
+   * Search from the end towards the start to avoid starvation of
+   * older replies that are still in-flight (since the send function
+   * iterates from the start towards the end).
+   */
+  send_index = MAX_CLIENTS - 1;
+  while (true) {
+    if (!outbuffer.buffer[send_index] || !send_index) {
+      break;
+    }
+    send_index--;
+  }
+  assert(send_index < MAX_CLIENTS);
+  assert(!outbuffer.buffer[send_index]);
 
   /* avoid a memcpy: just move the abuf.buf pointer and clear abuf */
   outbuffer.buffer[send_index] = abuf.buf;
