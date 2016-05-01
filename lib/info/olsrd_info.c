@@ -59,7 +59,7 @@
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
 
-#define MAX_CLIENTS 3
+#define MAX_CLIENTS 8
 
 /*
  * There is the problem that writing to a network socket can block,
