@@ -50,6 +50,7 @@
 
 #include "common/avl.h"
 #include "mid_set.h"
+#include "tc_set.h"
 #include "link_set.h"
 #include "neighbor_table.h"
 #include "olsr_types.h"
@@ -58,6 +59,8 @@ struct node_entry {
   struct avl_node avl;
   bool isAlias;
   struct mid_entry *mid;
+  struct tc_entry *tc;
+  struct tc_edge_entry *tc_edge;
   struct link_entry *link;
   struct neighbor_entry *neighbor;
 };
@@ -68,6 +71,8 @@ AVLNODE2STRUCT(avlnode2node, struct node_entry, avl);
 struct node_entry * netjson_constructMidSelf(struct mid_entry *mid);
 void netjson_cleanup_mid_self(struct node_entry *node_entry);
 void netjson_midIntoNodesTree(struct avl_tree *nodes, struct mid_entry *mid);
+void netjson_tcIntoNodesTree(struct avl_tree *nodes, struct tc_entry *tc);
+void netjson_tcEdgeIntoNodesTree(struct avl_tree *nodes, struct tc_edge_entry *tc_edge);
 void netjson_linkIntoNodesTree(struct avl_tree *nodes, struct link_entry *link, union olsr_ip_addr *addr);
 void netjson_neighborIntoNodesTree(struct avl_tree *nodes, struct neighbor_entry *neigh);
 

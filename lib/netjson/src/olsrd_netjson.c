@@ -163,6 +163,7 @@ void ipc_print_network_graph(struct autobuf *abuf) {
   struct avl_tree nodes;
   struct mid_entry mid_self;
   struct node_entry * node_self;
+  struct tc_entry * tc;
   struct link_entry * link_entry;
   struct neighbor_entry * neighbor;
   int idx;
@@ -197,6 +198,15 @@ void ipc_print_network_graph(struct autobuf *abuf) {
       entry = entry->next;
     }
   }
+
+  /* TC */
+  OLSR_FOR_ALL_TC_ENTRIES(tc) {
+    struct tc_edge_entry *tc_edge;
+    netjson_tcIntoNodesTree(&nodes, tc);
+    OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
+     netjson_tcEdgeIntoNodesTree(&nodes, tc_edge);
+    } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
+  } OLSR_FOR_ALL_TC_ENTRIES_END(tc);
 
   /* LINKS */
   OLSR_FOR_ALL_LINK_ENTRIES(link_entry) {
@@ -236,6 +246,10 @@ void ipc_print_network_graph(struct autobuf *abuf) {
           }
           abuf_json_mark_object(&json_session, false, true, abuf, NULL);
         }
+      } else if (node_entry->tc) {
+        /* no local_addresses */
+      } else if (node_entry->tc_edge) {
+        /* no local_addresses */
       } else if (node_entry->link) {
         /* no local_addresses */
       } else if (node_entry->neighbor) {
@@ -260,14 +274,41 @@ void ipc_print_network_graph(struct autobuf *abuf) {
    */
 
   abuf_json_mark_object(&json_session, true, true, abuf, "links");
+
   OLSR_FOR_ALL_LINK_ENTRIES(link_entry) {
     struct lqtextbuffer lqbuf;
+    int link_status = lookup_link_status(link_entry);
 
+    if ((link_status != ASYM_LINK) && (link_status != SYM_LINK)) {
+      continue;
+    }
+
+    /*
+     * link from node to neighbor
+     */
+    if (link_status == SYM_LINK) {
+      abuf_json_mark_array_entry(&json_session, true, abuf);
+
+      /* mandatory */
+      abuf_json_ip_address(&json_session, abuf, "source", &link_entry->local_iface_addr);
+      abuf_json_ip_address(&json_session, abuf, "target", &link_entry->neighbor_iface_addr);
+      abuf_json_float(&json_session, abuf, "cost", get_linkcost_scaled(link_entry->linkcost, false));
+
+      /* optional */
+      abuf_json_string(&json_session, abuf, "cost_text", get_linkcost_text(link_entry->linkcost, false, &lqbuf));
+      // properties
+
+      abuf_json_mark_array_entry(&json_session, false, abuf);
+    }
+
+    /*
+     * link from neighbor to node
+     */
     abuf_json_mark_array_entry(&json_session, true, abuf);
 
     /* mandatory */
-    abuf_json_ip_address(&json_session, abuf, "source", &link_entry->local_iface_addr);
-    abuf_json_ip_address(&json_session, abuf, "target", &link_entry->neighbor_iface_addr);
+    abuf_json_ip_address(&json_session, abuf, "source", &link_entry->neighbor_iface_addr);
+    abuf_json_ip_address(&json_session, abuf, "target", &link_entry->local_iface_addr);
     abuf_json_float(&json_session, abuf, "cost", get_linkcost_scaled(link_entry->linkcost, false));
 
     /* optional */
@@ -276,6 +317,31 @@ void ipc_print_network_graph(struct autobuf *abuf) {
 
     abuf_json_mark_array_entry(&json_session, false, abuf);
   } OLSR_FOR_ALL_LINK_ENTRIES_END(my_link);
+
+  OLSR_FOR_ALL_TC_ENTRIES(tc) {
+    struct tc_edge_entry *tc_edge;
+    OLSR_FOR_ALL_TC_EDGE_ENTRIES(tc, tc_edge) {
+      struct lqtextbuffer lqbuf;
+
+      if (ipequal(&olsr_cnf->main_addr, &tc->addr)) {
+        continue;
+      }
+
+      abuf_json_mark_array_entry(&json_session, true, abuf);
+
+      /* mandatory */
+      abuf_json_ip_address(&json_session, abuf, "source", &tc->addr);
+      abuf_json_ip_address(&json_session, abuf, "target", &tc_edge->T_dest_addr);
+      abuf_json_float(&json_session, abuf, "cost", get_linkcost_scaled(tc_edge->cost, false));
+
+      /* optional */
+      abuf_json_string(&json_session, abuf, "cost_text", get_linkcost_text(tc_edge->cost, false, &lqbuf));
+      // properties
+
+      abuf_json_mark_array_entry(&json_session, false, abuf);
+    } OLSR_FOR_ALL_TC_EDGE_ENTRIES_END(tc, tc_edge);
+  } OLSR_FOR_ALL_TC_ENTRIES_END(tc);
+
   abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 }
 

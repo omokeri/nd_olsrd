@@ -164,6 +164,52 @@ void netjson_midIntoNodesTree(struct avl_tree *nodes, struct mid_entry *mid) {
   }
 }
 
+void netjson_tcIntoNodesTree(struct avl_tree *nodes, struct tc_entry *tc) {
+  struct avl_node *avlnode;
+  struct node_entry *node;
+
+  avlnode = avl_find(nodes, &tc->addr);
+  if (avlnode) {
+    /* the IP address is already known */
+    return;
+  }
+
+  /* the IP address is not yet known */
+
+  node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - TC - main");
+  memset(node, 0, sizeof(*node));
+  node->avl.key = &tc->addr;
+  node->isAlias = false;
+  node->tc = tc;
+  if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
+    /* duplicate */
+    free(node);
+  }
+}
+
+void netjson_tcEdgeIntoNodesTree(struct avl_tree *nodes, struct tc_edge_entry *tc_edge) {
+  struct avl_node *avlnode;
+  struct node_entry *node;
+
+  avlnode = avl_find(nodes, &tc_edge->T_dest_addr);
+  if (avlnode) {
+    /* the IP address is already known */
+    return;
+  }
+
+  /* the IP address is not yet known */
+
+  node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - TC - main");
+  memset(node, 0, sizeof(*node));
+  node->avl.key = &tc_edge->T_dest_addr;
+  node->isAlias = false;
+  node->tc_edge = tc_edge;
+  if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
+    /* duplicate */
+    free(node);
+  }
+}
+
 void netjson_linkIntoNodesTree(struct avl_tree *nodes, struct link_entry *link, union olsr_ip_addr *addr) {
   struct avl_node *avlnode;
   struct node_entry *node;
