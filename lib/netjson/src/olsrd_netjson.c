@@ -246,7 +246,7 @@ void ipc_print_network_graph(struct autobuf *abuf) {
       abuf_json_mark_array_entry(&json_session, false, abuf);
     }
 
-    if (node_entry == node_self) {
+    if (node_entry->mid && (node_entry == node_self)) {
       netjson_cleanup_mid_self(node_self);
     }
 
@@ -256,7 +256,7 @@ void ipc_print_network_graph(struct autobuf *abuf) {
   abuf_json_mark_object(&json_session, false, true, abuf, NULL);
 
   /*
-   * Output Links
+   * Links
    */
 
   abuf_json_mark_object(&json_session, true, true, abuf, "links");
