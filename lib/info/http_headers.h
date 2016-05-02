@@ -59,6 +59,8 @@
 #define INFO_HTTP_INTERNAL_SERVER_ERROR    (500)
 #define INFO_HTTP_SERVICE_UNAVAILABLE      (503)
 
+void http_header_build_result(unsigned int status, struct autobuf *abuf);
+
 void http_header_build(const char * plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex);
 
 void http_header_adjust_content_length(struct autobuf *abuf, int contentLengthIndex, int contentLength);

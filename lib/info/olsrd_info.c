@@ -304,6 +304,27 @@ static unsigned int determine_action(char *requ) {
   }
 }
 
+static void send_status_no_retries(const char * req, int the_socket, unsigned int status) {
+  struct autobuf abuf;
+
+  abuf_init(&abuf, AUTOBUFCHUNK);
+
+  if (config->http_headers) {
+    http_header_build_result(status, &abuf);
+  } else if (status != INFO_HTTP_OK) {
+    if (functions->output_error) {
+      functions->output_error(&abuf, status, req, config->http_headers);
+    } else if (status == INFO_HTTP_NOCONTENT) {
+      /* wget can't handle output of zero length */
+      abuf_puts(&abuf, "\n");
+    }
+  }
+
+  (void) send(the_socket, abuf.buf, abuf.len, 0);
+  close(the_socket);
+  abuf_free(&abuf);
+}
+
 static void write_data(void *unused __attribute__((unused))) {
   fd_set set;
   int result, i, max;
@@ -670,7 +691,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if (outbuffer.count >= MAX_CLIENTS) {
     /* limit the number of replies that are in-flight */
-    close(ipc_connection);
+    send_status_no_retries(req, ipc_connection, INFO_HTTP_SERVICE_UNAVAILABLE);
     return;
   }
 

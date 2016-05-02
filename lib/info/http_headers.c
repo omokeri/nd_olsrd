@@ -47,6 +47,16 @@
 
 #include <assert.h>
 
+void http_header_build_result(unsigned int status, struct autobuf *abuf) {
+  assert(abuf);
+
+  /* Status */
+  abuf_appendf(abuf, "%s %s\r\n", INFO_HTTP_VERSION, httpStatusToReply(status));
+
+  /* End header */
+  abuf_puts(abuf, "\r\n");
+}
+
 void http_header_build(const char *plugin_name, unsigned int status, const char *mime, struct autobuf *abuf, int *contentLengthIndex) {
   assert(plugin_name);
   assert(abuf);
