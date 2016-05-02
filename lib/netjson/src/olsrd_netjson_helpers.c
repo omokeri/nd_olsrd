@@ -56,11 +56,10 @@ struct node_entry * netjson_constructMidSelf(struct mid_entry *mid) {
   mid->main_addr = olsr_cnf->main_addr;
 
   node_self = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - MID - self");
+  memset(node_self, 0, sizeof(*node_self));
   node_self->avl.key = &olsr_cnf->main_addr;
   node_self->isAlias = false;
   node_self->mid = mid;
-  node_self->link = NULL;
-  node_self->neighbor = NULL;
 
   for (ifs = olsr_cnf->interfaces; ifs != NULL ; ifs = ifs->next) {
     union olsr_ip_addr *addr = NULL;
@@ -93,13 +92,13 @@ struct node_entry * netjson_constructMidSelf(struct mid_entry *mid) {
       struct mid_address *alias;
 
       node_self_alias = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - MID - self alias");
+      memset(node_self_alias, 0, sizeof(*node_self_alias));
       node_self_alias->avl.key = addr;
       node_self_alias->isAlias = true;
       node_self_alias->mid = mid;
-      node_self_alias->link = NULL;
-      node_self_alias->neighbor = NULL;
 
       alias = olsr_malloc(sizeof(struct mid_address), "netjson NetworkGraph node - MID - self alias");
+      memset(alias, 0, sizeof(*alias));
       alias->alias = *addr;
       alias->main_entry = mid;
       alias->next_alias = mid->aliases;
@@ -129,11 +128,10 @@ void netjson_midIntoNodesTree(struct avl_tree *nodes, struct mid_entry *mid) {
   struct mid_address *alias;
 
   node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - MID - main");
+  memset(node, 0, sizeof(*node));
   node->avl.key = &mid->main_addr;
   node->isAlias = false;
   node->mid = mid;
-  node->link = NULL;
-  node->neighbor = NULL;
   if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
     /* duplicate */
     free(node);
@@ -142,11 +140,10 @@ void netjson_midIntoNodesTree(struct avl_tree *nodes, struct mid_entry *mid) {
   alias = mid->aliases;
   while (alias) {
     node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - MID - alias");
+    memset(node, 0, sizeof(*node));
     node->avl.key = &alias->alias;
     node->isAlias = true;
     node->mid = mid;
-    node->link = NULL;
-    node->neighbor = NULL;
     if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
       /* duplicate */
       free(node);
@@ -169,11 +166,10 @@ void netjson_linkIntoNodesTree(struct avl_tree *nodes, struct link_entry *link, 
   /* the IP address is not yet known */
 
   node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - link");
+  memset(node, 0, sizeof(*node));
   node->avl.key = addr;
   node->isAlias = false;
-  node->mid = NULL;
   node->link = link;
-  node->neighbor = NULL;
   if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
     /* duplicate */
     free(node);
@@ -193,11 +189,9 @@ void netjson_neighborIntoNodesTree(struct avl_tree *nodes, struct neighbor_entry
   /* the IP address is not yet known */
 
   node = olsr_malloc(sizeof(struct node_entry), "netjson NetworkGraph node - neighbor");
-
+  memset(node, 0, sizeof(*node));
   node->avl.key = &neighbor->neighbor_main_addr;
   node->isAlias = false;
-  node->mid = NULL;
-  node->link = NULL;
   node->neighbor = neighbor;
   if (avl_insert(nodes, &node->avl, AVL_DUP_NO) == -1) {
     /* duplicate */
