@@ -49,7 +49,10 @@
 #include "plugin_util.h"
 #include "info/info_types.h"
 
+#include <stdbool.h>
+
 extern info_plugin_config_t config;
+extern bool pretty;
 
 int olsrd_plugin_interface_version(void);
 int olsrd_plugin_init(void);

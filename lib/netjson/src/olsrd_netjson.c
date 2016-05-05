@@ -48,6 +48,7 @@
 #include <unistd.h>
 
 #include "olsrd_netjson_helpers.h"
+#include "olsrd_plugin.h"
 #include "info/info_types.h"
 #include "info/http_headers.h"
 #include "info/json_helpers.h"
@@ -94,14 +95,14 @@ const char * determine_mime_type(unsigned int send_what __attribute__((unused)))
 
 void output_start(struct autobuf *abuf) {
   /* global variables for tracking when to put a comma in for JSON */
-  abuf_json_reset_entry_number_and_depth(&json_session);
+  abuf_json_reset_entry_number_and_depth(&json_session, pretty);
   abuf_json_mark_output(&json_session, true, abuf);
 }
 
 void output_end(struct autobuf *abuf) {
   abuf_json_mark_output(&json_session, false, abuf);
   abuf_puts(abuf, "\n");
-  abuf_json_reset_entry_number_and_depth(&json_session);
+  abuf_json_reset_entry_number_and_depth(&json_session, pretty);
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {

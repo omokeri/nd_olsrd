@@ -59,4 +59,10 @@ LoadPlugin "olsrd_jsoninfo.so.0.0"
   # field.
   # Default: <not set>
   # PlParam "uuidfile" "uuid.txt"
+
+  # When set to 'true' or 'yes' then the output will be pretty-printed
+  # (multi-line indented). Otherwise the output will not contain
+  # line-breaks and indentation.
+  # Default: false
+  # PlParam "pretty" "false"
 }

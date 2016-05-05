@@ -58,11 +58,12 @@
  * dangling comma on at the end
  */
 struct json_session {
+    bool pretty;
     int entrynumber[INFO_JSON_ENTRY_MAX_DEPTH];
     int currentjsondepth;
 };
 
-void abuf_json_reset_entry_number_and_depth(struct json_session *session);
+void abuf_json_reset_entry_number_and_depth(struct json_session *session, bool pretty);
 
 void abuf_json_insert_comma(struct json_session *session, struct autobuf *abuf);
 

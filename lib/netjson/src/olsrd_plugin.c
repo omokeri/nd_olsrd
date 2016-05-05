@@ -55,6 +55,7 @@
 
 info_plugin_functions_t functions;
 info_plugin_config_t config;
+bool pretty = false;
 
 static void my_init(void) __attribute__ ((constructor));
 static void my_fini(void) __attribute__ ((destructor));
@@ -121,6 +122,7 @@ int olsrd_plugin_interface_version(void) {
 static const struct olsrd_plugin_parameters plugin_parameters[] = { //
     //
         INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config), //
+        { .name = "pretty", .set_plugin_parameter = &set_plugin_boolean, .data = &pretty, .addon = { .pc = NULL } } //
     };
 
 void olsrd_get_plugin_parameters(const struct olsrd_plugin_parameters **params, int *size) {

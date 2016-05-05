@@ -209,7 +209,7 @@ const char * determine_mime_type(unsigned int send_what) {
 
 void output_start(struct autobuf *abuf) {
   /* global variables for tracking when to put a comma in for JSON */
-  abuf_json_reset_entry_number_and_depth(&json_session);
+  abuf_json_reset_entry_number_and_depth(&json_session, pretty);
   abuf_json_mark_output(&json_session, true, abuf);
 
   abuf_json_int(&json_session, abuf, "systemTime", time(NULL));
@@ -222,7 +222,7 @@ void output_start(struct autobuf *abuf) {
 void output_end(struct autobuf *abuf) {
   abuf_json_mark_output(&json_session, false, abuf);
   abuf_puts(abuf, "\n");
-  abuf_json_reset_entry_number_and_depth(&json_session);
+  abuf_json_reset_entry_number_and_depth(&json_session, pretty);
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {

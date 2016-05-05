@@ -57,10 +57,11 @@ static const char * empty = "";
 
 /* JSON support functions */
 
-void abuf_json_reset_entry_number_and_depth(struct json_session *session) {
+void abuf_json_reset_entry_number_and_depth(struct json_session *session, bool pretty) {
   assert(session);
 
   memset(session, 0, sizeof(*session));
+  session->pretty = pretty;
 }
 
 static void abuf_json_new_indent(struct json_session *session, struct autobuf *abuf) {
@@ -70,9 +71,11 @@ static void abuf_json_new_indent(struct json_session *session, struct autobuf *a
   if (session->currentjsondepth) {
     int i = session->currentjsondepth;
 
-    abuf_puts(abuf, "\n");
-    while (i-- > 0) {
-      abuf_puts(abuf, "  ");
+    if (session->pretty) {
+      abuf_puts(abuf, "\n");
+      while (i-- > 0) {
+        abuf_puts(abuf, "  ");
+      }
     }
   }
 }
@@ -100,7 +103,10 @@ void abuf_json_mark_output(struct json_session *session, bool open, struct autob
     session->entrynumber[session->currentjsondepth] = 0;
     session->currentjsondepth--;
     abuf_json_new_indent(session, abuf);
-    abuf_puts(abuf, "\n}");
+    if (session->pretty) {
+      abuf_puts(abuf, "\n");
+    }
+    abuf_puts(abuf, "}");
   }
 }
 
