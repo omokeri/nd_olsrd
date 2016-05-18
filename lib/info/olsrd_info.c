@@ -205,22 +205,19 @@ static void info_plugin_cache_init(bool init) {
     }
 
     if (init) {
-      entry->initialised = false;
+      entry->timestamp = 0;
+      abuf_init(&entry->buf, 0);
     } else {
-      if (entry->initialised) {
-        abuf_free(&entry->buf);
-        entry->initialised = false;
-      }
+      abuf_free(&entry->buf);
       entry->timestamp = 0;
     }
   }
 }
 
 static INLINE void info_plugin_cache_init_entry(struct info_cache_entry_t * entry) {
-  if (!entry->initialised) {
+  if (!entry->buf.buf) {
     entry->timestamp = 0;
     abuf_init(&entry->buf, AUTOBUFCHUNK);
-    entry->initialised = true;
   }
 }
 
@@ -424,9 +421,13 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
         if (!cache_entry) {
             func(abuf);
         } else {
-          long long now = olsr_times();
-          long long age = abs(now - cache_entry->timestamp);
+          long long now;
+          long long age;
+
           info_plugin_cache_init_entry(cache_entry);
+
+          now = olsr_times();
+          age = abs(now - cache_entry->timestamp);
           if (!cache_entry->timestamp || (age >= cache_timeout)) {
             /* cache is never used before or cache is too old */
             cache_entry->buf.buf[0] = '\0';
