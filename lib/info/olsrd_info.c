@@ -82,7 +82,7 @@ typedef struct {
   int count;
 } info_plugin_outbuffer_t;
 
-static const char * name = NULL;
+static const char * name;
 
 static info_plugin_functions_t *functions = NULL;
 
