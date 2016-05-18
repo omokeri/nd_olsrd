@@ -149,7 +149,7 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     };
 
 long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long long siw) {
-  long timeout = plugin_config->cache_timeout;
+  long timeout = !plugin_config ? 0 : plugin_config->cache_timeout;
   if (timeout <= 0) {
     return timeout;
   }
