@@ -193,13 +193,7 @@ static void info_plugin_cache_init(bool init) {
 
   for (i = 0; i < ARRAY_SIZE(SIW_ENTRIES_ALL); ++i) {
     unsigned long long siw = SIW_ENTRIES_ALL[i];
-    struct info_cache_entry_t * entry;
-
-    if (functions->cache_timeout(config, siw) <= 0) {
-      continue;
-    }
-
-    entry = info_cache_get_entry(&info_cache, siw);
+    struct info_cache_entry_t * entry = info_cache_get_entry(&info_cache, siw);
     if (!entry) {
       continue;
     }
