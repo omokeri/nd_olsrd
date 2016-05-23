@@ -144,8 +144,9 @@ AVLNODE2STRUCT(node2gateway, struct gateway_entry, node);
   for (gw_node = avl_walk_first(&gateway_tree); \
     gw_node; gw_node = next_gw_node) { \
     next_gw_node = avl_walk_next(gw_node); \
-    gw = node2gateway(gw_node);
-#define OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw) }}
+    gw = node2gateway(gw_node); \
+    if (gw) {
+#define OLSR_FOR_ALL_GATEWAY_ENTRIES_END(gw) }}}
 
 /** the gateway tree */
 extern struct avl_tree gateway_tree;
