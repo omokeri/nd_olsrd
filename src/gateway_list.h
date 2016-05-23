@@ -79,8 +79,9 @@ LISTNODE2STRUCT(olsr_gw_list_node2entry, struct gw_container_entry, list_node);
   struct list_node * _next_list_node; \
   for (_list_node = (head)->next; _list_node != (head); _list_node = _next_list_node) { \
     _next_list_node = _list_node->next; \
-    gw = olsr_gw_list_node2entry(_list_node);
-#define OLSR_FOR_ALL_GWS_END(gw) }}
+    gw = olsr_gw_list_node2entry(_list_node); \
+    if (gw) {
+#define OLSR_FOR_ALL_GWS_END(gw) }}}
 
 /**
  * @param list a pointer to the list
