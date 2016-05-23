@@ -220,10 +220,8 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   olsr_scheduler_stop();
 
 #ifdef __linux__
-  /* trigger gateway selection */
   if (olsr_cnf->smart_gw_active) {
     olsr_shutdown_gateways();
-    olsr_cleanup_gateways();
   }
 #endif
 
@@ -250,6 +248,12 @@ static void olsr_shutdown(int signo __attribute__ ((unused)))
   olsr_delete_all_tc_entries();
 
   olsr_delete_all_mid_entries();
+
+#ifdef __linux__
+  if (olsr_cnf->smart_gw_active) {
+    olsr_cleanup_gateways();
+  }
+#endif
 
 #ifdef __linux__
   /* trigger niit static route cleanup */
