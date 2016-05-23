@@ -82,21 +82,37 @@ void avl_delete(struct avl_tree *, struct avl_node *);
 static INLINE struct avl_node *
 avl_walk_first(struct avl_tree *tree)
 {
+  if (!tree) {
+    return NULL;
+  }
+
   return tree->first;
 }
 static INLINE struct avl_node *
 avl_walk_last(struct avl_tree *tree)
 {
+  if (!tree) {
+    return NULL;
+  }
+
   return tree->last;
 }
 static INLINE struct avl_node *
 avl_walk_next(struct avl_node *node)
 {
+  if (!node) {
+    return NULL;
+  }
+
   return node->next;
 }
 static INLINE struct avl_node *
 avl_walk_prev(struct avl_node *node)
 {
+  if (!node) {
+    return NULL;
+  }
+
   return node->prev;
 }
 
@@ -104,21 +120,37 @@ avl_walk_prev(struct avl_node *node)
 static INLINE const struct avl_node *
 avl_walk_first_c(const struct avl_tree *tree)
 {
+  if (!tree) {
+    return NULL;
+  }
+
   return tree->first;
 }
 static INLINE const struct avl_node *
 avl_walk_last_c(const struct avl_tree *tree)
 {
+  if (!tree) {
+    return NULL;
+  }
+
   return tree->last;
 }
 static INLINE const struct avl_node *
 avl_walk_next_c(const struct avl_node *node)
 {
+  if (!node) {
+    return NULL;
+  }
+
   return node->next;
 }
 static INLINE const struct avl_node *
 avl_walk_prev_c(const struct avl_node *node)
 {
+  if (!node) {
+    return NULL;
+  }
+
   return node->prev;
 }
 
