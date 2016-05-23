@@ -1566,50 +1566,48 @@ static void sgw_ipvx(struct autobuf *abuf, bool ipv6) {
 
     current_gw = olsr_get_inet_gateway(false);
     OLSR_FOR_ALL_GWS(&list->head, gw) {
-      if (gw) {
-        struct gwtextbuffer gwbuf;
-        bool is_current = (current_gw && (gw->gw == current_gw));
+      struct gwtextbuffer gwbuf;
+      bool is_current = (current_gw && (gw->gw == current_gw));
 
-        if (is_current) {
-          abuf_puts(abuf, "    <tr bgcolor=\"lime\">\n");
-        } else {
-          abuf_puts(abuf, "    <tr>\n");
-        }
-
-        if (!gw->gw) {
-          int i;
-          for (i = 0; i < 8; i++) {
-            abuf_puts(abuf, "      <td></td>\n");
-          }
-        } else {
-          struct tc_entry* tc = olsr_lookup_tc_entry(&gw->gw->originator);
-          olsr_linkcost etx = ROUTE_COST_BROKEN;
-          struct lqtextbuffer lcbuf;
-          if (tc) {
-            etx = tc->path_cost;
-          }
-
-          abuf_appendf(abuf, "      <td>%s</td>\n", inet_ntop(ipv6 ? AF_INET6 : AF_INET, &gw->gw->originator, buf, sizeof(buf)));
-          abuf_appendf(abuf, "      <td>%s</td>\n", olsr_ip_prefix_to_string(&gw->gw->external_prefix));
-          abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->uplink);
-          abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->downlink);
-          abuf_appendf(abuf, "      <td>%s</td>\n", get_linkcost_text(etx, true, &lcbuf));
-          abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4 ? "yes" : "no");
-          abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4nat ? "yes" : "no");
-          abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv6 ? "yes" : "no");
-        }
-        if (!gw->tunnel) {
-          int i;
-          for (i = 0; i < 2; i++) {
-            abuf_puts(abuf, "      <td></td>\n");
-          }
-        } else {
-          abuf_appendf(abuf, "      <td>%s</td>\n", gw->tunnel->if_name);
-          abuf_appendf(abuf, "      <td>%s</td>\n", inet_ntop(ipv6 ? AF_INET6 : AF_INET, &gw->tunnel->target, buf, sizeof(buf)));
-        }
-        abuf_appendf(abuf, "      <td>%s</td>\n", get_gwcost_text(!gw->gw ? INT64_MAX : gw->gw->path_cost, &gwbuf));
-        abuf_puts(abuf, "    </tr>\n");
+      if (is_current) {
+        abuf_puts(abuf, "    <tr bgcolor=\"lime\">\n");
+      } else {
+        abuf_puts(abuf, "    <tr>\n");
       }
+
+      if (!gw->gw) {
+        int i;
+        for (i = 0; i < 8; i++) {
+          abuf_puts(abuf, "      <td></td>\n");
+        }
+      } else {
+        struct tc_entry* tc = olsr_lookup_tc_entry(&gw->gw->originator);
+        olsr_linkcost etx = ROUTE_COST_BROKEN;
+        struct lqtextbuffer lcbuf;
+        if (tc) {
+          etx = tc->path_cost;
+        }
+
+        abuf_appendf(abuf, "      <td>%s</td>\n", inet_ntop(ipv6 ? AF_INET6 : AF_INET, &gw->gw->originator, buf, sizeof(buf)));
+        abuf_appendf(abuf, "      <td>%s</td>\n", olsr_ip_prefix_to_string(&gw->gw->external_prefix));
+        abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->uplink);
+        abuf_appendf(abuf, "      <td>%u</td>\n", gw->gw->downlink);
+        abuf_appendf(abuf, "      <td>%s</td>\n", get_linkcost_text(etx, true, &lcbuf));
+        abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4 ? "yes" : "no");
+        abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv4nat ? "yes" : "no");
+        abuf_appendf(abuf, "      <td>%s</td>\n", gw->gw->ipv6 ? "yes" : "no");
+      }
+      if (!gw->tunnel) {
+        int i;
+        for (i = 0; i < 2; i++) {
+          abuf_puts(abuf, "      <td></td>\n");
+        }
+      } else {
+        abuf_appendf(abuf, "      <td>%s</td>\n", gw->tunnel->if_name);
+        abuf_appendf(abuf, "      <td>%s</td>\n", inet_ntop(ipv6 ? AF_INET6 : AF_INET, &gw->tunnel->target, buf, sizeof(buf)));
+      }
+      abuf_appendf(abuf, "      <td>%s</td>\n", get_gwcost_text(!gw->gw ? INT64_MAX : gw->gw->path_cost, &gwbuf));
+      abuf_puts(abuf, "    </tr>\n");
     } OLSR_FOR_ALL_GWS_END(gw);
     abuf_puts(abuf, "  </tbody>\n");
     abuf_puts(abuf, "</table>\n");

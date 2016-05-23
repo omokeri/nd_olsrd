@@ -1015,7 +1015,7 @@ void olsr_cleanup_gateways(void) {
 
   /* remove all active IPv4 gateways (should be at most 1 now) */
   OLSR_FOR_ALL_GWS(&gw_list_ipv4.head, gw) {
-    if (gw && gw->gw) {
+    if (gw->gw) {
       olsr_delete_gateway_entry(&gw->gw->originator, FORCE_DELETE_GW_ENTRY, true);
     }
   }
@@ -1023,7 +1023,7 @@ void olsr_cleanup_gateways(void) {
 
   /* remove all active IPv6 gateways (should be at most 1 now) */
   OLSR_FOR_ALL_GWS(&gw_list_ipv6.head, gw) {
-    if (gw && gw->gw) {
+    if (gw->gw) {
       olsr_delete_gateway_entry(&gw->gw->originator, FORCE_DELETE_GW_ENTRY, true);
     }
   }

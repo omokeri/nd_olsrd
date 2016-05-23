@@ -97,7 +97,7 @@ struct gw_container_entry * olsr_gw_list_find(struct gw_list * list, struct gate
 	assert(entry);
 
 	OLSR_FOR_ALL_GWS(&list->head, gw) {
-		if (gw && gw->gw && (gw->gw == entry)) {
+		if (gw->gw && (gw->gw == entry)) {
 			return gw;
 		}
 	}
