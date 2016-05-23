@@ -349,6 +349,10 @@ olsr_remove_ifchange_handler(void (*f) (int if_index, struct interface_olsr *, e
 {
   struct ifchgf *tmp_ifchgf, *prev;
 
+  if (!f) {
+    return 0;
+  }
+
   tmp_ifchgf = ifchgf_list;
   prev = NULL;
 
