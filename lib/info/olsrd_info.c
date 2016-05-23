@@ -212,6 +212,15 @@ static INLINE void info_plugin_cache_init_entry(struct info_cache_entry_t * entr
   if (!entry->buf.buf) {
     entry->timestamp = 0;
     abuf_init(&entry->buf, AUTOBUFCHUNK);
+    assert(!entry->timestamp);
+    assert(!entry->buf.len);
+    assert(entry->buf.size == AUTOBUFCHUNK);
+    assert(entry->buf.buf);
+  } else {
+    assert(entry->timestamp >= 0);
+    assert(entry->buf.len >= 0);
+    assert(entry->buf.size >= AUTOBUFCHUNK);
+    assert(entry->buf.buf);
   }
 }
 
