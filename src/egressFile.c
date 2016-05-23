@@ -445,6 +445,7 @@ void stopEgressFile(void) {
     regfree(&compiledRegexEgress);
     regfree(&compiledRegexComment);
     free(line);
+    line = NULL;
 
     started = false;
   }
