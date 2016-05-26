@@ -54,6 +54,10 @@
 #include <stdbool.h>
 
 static INLINE bool isGwSelectable(struct gateway_entry * gw, bool ipv6) {
+  if (!gw) {
+    return false;
+  }
+
   if (!ipv6) {
     return gw->ipv4 //
         && ((olsr_cnf->ip_version == AF_INET) //
