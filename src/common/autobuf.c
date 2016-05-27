@@ -166,12 +166,13 @@ abuf_puts(struct autobuf *autobuf, const char *s)
 {
   int len; 
 
-  if (NULL == s) return 0;
+  if (!autobuf || !s) return 0;
   len = strlen(s);
+  if (!len) return 0;
   if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
     return -1;
   }
-  strcpy(autobuf->buf + autobuf->len, s);
+  strncpy(autobuf->buf + autobuf->len, s, len + 1);
   autobuf->len += len;
   return len;
 }
@@ -181,12 +182,13 @@ abuf_concat(struct autobuf *autobuf, struct autobuf *s)
 {
   int len;
 
-  if (NULL == s) return 0;
+  if (!autobuf || !s) return 0;
   len = s->len;
+  if (!len) return 0;
   if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
     return -1;
   }
-  strcpy(autobuf->buf + autobuf->len, s->buf);
+  strncpy(autobuf->buf + autobuf->len, s->buf, len + 1);
   autobuf->len += len;
   return len;
 }
