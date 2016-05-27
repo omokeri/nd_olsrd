@@ -52,7 +52,7 @@
 
 #include "common/autobuf.h"
 
-#define CACHE_TIMEOUT_DEFAULT 0
+#define CACHE_TIMEOUT_DEFAULT 1000
 
 typedef struct {
     union olsr_ip_addr accept_ip;
@@ -70,7 +70,8 @@ typedef struct {
   { .name = "listen", .set_plugin_parameter = &set_plugin_ipaddress, .data = &config.listen_ip }, \
   { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
   { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
-  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only }
+  { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only },\
+  { .name = "cachetimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.cache_timeout }
 
 /* these provide all of the runtime status info */
 #define SIW_NEIGHBORS                    (1ULL <<  0)
