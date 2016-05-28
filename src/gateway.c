@@ -529,17 +529,16 @@ static bool multiGwRulesEgressInterfaces(bool add) {
 static bool multiGwRulesSgwTunnels(bool add) {
   bool ok = true;
   unsigned int i = 0;
+  uint8_t count = olsr_cnf->smart_gw_use_count;
 
-  while (i < olsr_cnf->smart_gw_use_count) {
-    struct interfaceName * ifn = (olsr_cnf->ip_version == AF_INET) ? &sgwTunnel4InterfaceNames[i] : &sgwTunnel6InterfaceNames[i];
+  while (++i <= count) {
+    struct interfaceName * ifn = (olsr_cnf->ip_version == AF_INET) ? &sgwTunnel4InterfaceNames[count - i] : &sgwTunnel6InterfaceNames[count - i];
     if (!multiGwRunScript(SCRIPT_MODE_SGWTUN, add, ifn->name, ifn->tableNr, ifn->ruleNr, ifn->bypassRuleNr)) {
       ok = false;
       if (add) {
         return ok;
       }
     }
-
-    i++;
   }
 
   return ok;
