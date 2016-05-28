@@ -313,12 +313,12 @@ fi
 
 # process ipVersion argument
 declare IPTABLES="iptables"
-declare IPTABLES_ARGS=""
+declare IPTABLES_ARGS="-w"
 declare IP="ip"
 declare IP_ARGS="-4"
 if [ "$ipVersion" = "$IPVERSION_6" ]; then
   IPTABLES="ip6tables"
-  IPTABLES_ARGS=""
+  IPTABLES_ARGS="-w"
   IP="ip"
   IP_ARGS="-6"
 fi
