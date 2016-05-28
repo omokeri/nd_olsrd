@@ -495,17 +495,26 @@ static bool multiGwRulesSgwServerTunnel(bool add) {
  */
 static bool multiGwRulesEgressInterfaces(bool add) {
   bool ok = true;
+  struct sgw_egress_if * egress_ifs[olsr_cnf->smart_gw_egress_interfaces_count];
+  uint8_t i;
+  struct sgw_egress_if * egress_if;
 
-  struct sgw_egress_if * egress_if = olsr_cnf->smart_gw_egress_interfaces;
+  /* construct an array of egress interface pointers with reversed ordering */
+  i = olsr_cnf->smart_gw_egress_interfaces_count;
+  egress_if = olsr_cnf->smart_gw_egress_interfaces;
   while (egress_if) {
+    egress_ifs[--i] = egress_if;
+    egress_if = egress_if->next;
+  }
+
+  while (i < olsr_cnf->smart_gw_egress_interfaces_count) {
+    egress_if = egress_ifs[i++];
     if (!multiGwRunScript(SCRIPT_MODE_EGRESSIF, add, egress_if->name, egress_if->tableNr, egress_if->ruleNr, egress_if->bypassRuleNr)) {
       ok = false;
       if (add) {
         return ok;
       }
     }
-
-    egress_if = egress_if->next;
   }
 
   return ok;
