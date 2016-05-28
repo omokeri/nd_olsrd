@@ -911,11 +911,11 @@ int olsr_startup_gateways(void) {
   }
 
   ok = ok && multiGwRulesCleanup(true);
-  ok = ok && multiGwRulesGeneric(true);
-  ok = ok && multiGwRulesSgwServerTunnel(true);
   ok = ok && multiGwRulesOlsrInterfaces(true);
-  ok = ok && multiGwRulesEgressInterfaces(true);
   ok = ok && multiGwRulesSgwTunnels(true);
+  ok = ok && multiGwRulesEgressInterfaces(true);
+  ok = ok && multiGwRulesSgwServerTunnel(true);
+  ok = ok && multiGwRulesGeneric(true);
   if (!ok) {
     olsr_printf(0, "Could not setup multi-gateway iptables and ip rules\n");
     olsr_shutdown_gateways();
@@ -992,11 +992,11 @@ void olsr_shutdown_gateways(void) {
   }
   doRoutesMultiGw(true, false, GW_MULTI_CHANGE_PHASE_SHUTDOWN);
 
-  (void)multiGwRulesSgwTunnels(false);
-  (void)multiGwRulesEgressInterfaces(false);
-  (void)multiGwRulesOlsrInterfaces(false);
-  (void)multiGwRulesSgwServerTunnel(false);
   (void)multiGwRulesGeneric(false);
+  (void)multiGwRulesSgwServerTunnel(false);
+  (void)multiGwRulesEgressInterfaces(false);
+  (void)multiGwRulesSgwTunnels(false);
+  (void)multiGwRulesOlsrInterfaces(false);
   (void)multiGwRulesCleanup(false);
 }
 
