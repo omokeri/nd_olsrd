@@ -69,6 +69,7 @@
 #include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <net/if.h>
 
 /*
  * Defines for the multi-gateway script
@@ -418,6 +419,30 @@ static bool multiGwRunScript(const char * mode, bool addMode, const char * ifNam
   abuf_free(&buf);
 
   return (r == 0);
+}
+
+/**
+ * Remove all sgw tunnel interfaces
+ */
+static void multiGwTunnelsCleanup(bool add) {
+  bool ipv4 = (olsr_cnf->ip_version == AF_INET);
+
+  unsigned int i = 0;
+  uint8_t count = olsr_cnf->smart_gw_use_count;
+
+  while (++i <= count) {
+    struct interfaceName * ifn = ipv4 ? &sgwTunnel4InterfaceNames[count - i] : &sgwTunnel6InterfaceNames[count - i];
+
+    unsigned int ifindex = if_nametoindex(ifn->name);
+    if (!ifindex) {
+      continue;
+    }
+    olsr_syslog(OLSR_LOG_ERR, "Smart-gateway tunnel '%s' %s exists, removing it", ifn->name, !add ? "still" : "already");
+
+    olsr_os_inetgw_tunnel_route(ifindex, ipv4, false, ifn->tableNr);
+    olsr_if_set_state(ifn->name, false);
+    os_ip_tunnel(ifn->name, NULL);
+  }
 }
 
 /**
@@ -910,6 +935,7 @@ int olsr_startup_gateways(void) {
     return 0;
   }
 
+  multiGwTunnelsCleanup(true);
   ok = ok && multiGwRulesCleanup(true);
   ok = ok && multiGwRulesOlsrInterfaces(true);
   ok = ok && multiGwRulesSgwTunnels(true);
@@ -1006,6 +1032,8 @@ void olsr_shutdown_gateways(void) {
 void olsr_cleanup_gateways(void) {
   struct gateway_entry * tree_gw;
   struct gw_container_entry * gw;
+
+  multiGwTunnelsCleanup(false);
 
   while (olsr_cnf->smart_gw_egress_interfaces) {
     struct sgw_egress_if * next = olsr_cnf->smart_gw_egress_interfaces->next;
