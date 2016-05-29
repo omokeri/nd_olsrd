@@ -216,7 +216,8 @@ function sgwsrvtun() {
   local ruleNr="$3"
 
   "$IPTABLES" $IPTABLES_ARGS -t mangle "$ADDMODE_IPTABLES" PREROUTING  -m conntrack --ctstate NEW -i "$interfaceName" -j CONNMARK --set-mark "$ruleNr"
-  "$IP"       $IP_ARGS       rule      "$ADDMODE_IP" fwmark "$ruleNr" table "$tableNr" priority "$ruleNr"
+  "$IP"       $IP_ARGS       rule      "$ADDMODE_IP" iif    "$interfaceName" table "$tableNr" priority "$ruleNr"
+  "$IP"       $IP_ARGS       rule      "$ADDMODE_IP" fwmark "$ruleNr"        table "$tableNr" priority "$ruleNr"
 }
 
 function sgwtun() {
