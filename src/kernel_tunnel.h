@@ -82,4 +82,8 @@ void olsr_os_cleanup_iptunnel(const char * name);
 struct olsr_iptunnel_entry *olsr_os_add_ipip_tunnel(union olsr_ip_addr *target, bool transportV4, char *name);
 void olsr_os_del_ipip_tunnel(struct olsr_iptunnel_entry *);
 
+#ifdef __linux__
+int os_ip_tunnel(const char *name, void *target);
+#endif /* __linux__ */
+
 #endif /* KERNEL_TUNNEL_H_ */

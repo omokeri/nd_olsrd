@@ -129,7 +129,7 @@ void olsr_os_cleanup_iptunnel(const char * dev) {
  * @return 0 if an error happened,
  *   if_index for successful created tunnel, 1 for successful deleted tunnel
  */
-static int os_ip_tunnel(const char *name, void *target) {
+int os_ip_tunnel(const char *name, void *target) {
 	struct ifreq ifr;
 	int err;
 	void * p;
