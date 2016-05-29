@@ -239,30 +239,21 @@ struct olsr_iptunnel_entry *olsr_os_add_ipip_tunnel(union olsr_ip_addr *target, 
  * Release an olsr ipip tunnel. Tunnel will be deleted
  * if this was the last user
  * @param t pointer to olsr_iptunnel_entry
- * @param cleanup true to free t's memory
  */
-static void internal_olsr_os_del_ipip_tunnel(struct olsr_iptunnel_entry *t, bool cleanup) {
-  if (!cleanup) {
-    if (t->usage == 0) {
-      return;
-    }
-    t->usage--;
+void olsr_os_del_ipip_tunnel(struct olsr_iptunnel_entry *t) {
+  if (t->usage == 0) {
+    return;
+  }
+  t->usage--;
 
-    if (t->usage > 0) {
-      return;
-    }
+  if (t->usage > 0) {
+    return;
   }
 
   olsr_if_set_state(t->if_name, false);
   os_ip_tunnel(t->if_name, NULL);
 
   avl_delete(&tunnel_tree, &t->node);
-  if (!cleanup) {
-    olsr_cookie_free(tunnel_cookie, t);
-  }
-}
-
-void olsr_os_del_ipip_tunnel(struct olsr_iptunnel_entry *t) {
-  internal_olsr_os_del_ipip_tunnel(t, false);
+  olsr_cookie_free(tunnel_cookie, t);
 }
 #endif /* __linux__ */
