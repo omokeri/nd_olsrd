@@ -213,7 +213,7 @@ zclient_read(ssize_t * size)
 
     /* detect zebra packet fragmentation */
     while (*size >= (ssize_t) (offset + sizeof(packet_length))) {
-      packet_length = ntohs(*((uint16_t *) &buf[offset]));
+      packet_length = ntohs(*((uint16_t *)(void *) &buf[offset]));
       offset += packet_length;
     }
   } while (*size != offset);

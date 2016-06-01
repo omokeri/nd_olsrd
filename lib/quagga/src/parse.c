@@ -176,7 +176,7 @@ zparse(void *foo __attribute__ ((unused)))
   if (data) {
     f = data;
     do {
-      length = ntohs(*((uint16_t *) f));
+      length = ntohs(*((uint16_t *)(void *) f));
       if (!length) { // something weird happened
         olsr_exit("QUAGGA: Zero message length", EXIT_FAILURE);
       }
@@ -198,7 +198,7 @@ zparse(void *foo __attribute__ ((unused)))
             olsr_exit("QUAGGA: Invalid zebra header received", EXIT_FAILURE);
           }
 
-          command = ntohs(*((uint16_t *) &f[4]));
+          command = ntohs(*((uint16_t *)(void *) &f[4]));
           break;
 
         default:
