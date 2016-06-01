@@ -594,7 +594,7 @@ static bool readEgressFile(const char * fileName) {
     {
       regoff_t len = pmatch[2].rm_eo - pmatch[2].rm_so;
       char * requireNetworkString = &line[pmatch[2].rm_so];
-      unsigned long long value;
+      unsigned long long value = 1;
       line[pmatch[2].rm_eo] = '\0';
 
       if ((len > 0) && !readULL(requireNetworkString, &value)) {
@@ -611,7 +611,7 @@ static bool readEgressFile(const char * fileName) {
     {
       regoff_t len = pmatch[3].rm_eo - pmatch[3].rm_so;
       char * requireGatewayString = &line[pmatch[3].rm_so];
-      unsigned long long value;
+      unsigned long long value = 1;
       line[pmatch[3].rm_eo] = '\0';
 
       if ((len > 0) && !readULL(requireGatewayString, &value)) {
