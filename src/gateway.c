@@ -2081,7 +2081,7 @@ static void configureEgressLinkRoutes(enum sgw_multi_change_phase phase) {
 
       struct sgw_route_info networkRoutePrevious = egress_if->networkRouteCurrent;
 
-      if (!egress_if->bwCurrent.networkSet || !egress_if->upCurrent) {
+      if (!egress_if->bwCurrent.requireNetwork || !egress_if->bwCurrent.networkSet || !egress_if->upCurrent) {
         memset(&egress_if->networkRouteCurrent, 0, sizeof(egress_if->networkRouteCurrent));
         egress_if->networkRouteCurrent.active = false;
       } else {
@@ -2114,7 +2114,7 @@ static void configureEgressLinkRoutes(enum sgw_multi_change_phase phase) {
 
       struct sgw_route_info egressRoutePrevious = egress_if->egressRouteCurrent;
 
-      if (!egress_if->upCurrent) {
+      if ((egress_if->bwCurrent.requireGateway && !egress_if->bwCurrent.gatewaySet) || !egress_if->upCurrent) {
         memset(&egress_if->egressRouteCurrent, 0, sizeof(egress_if->egressRouteCurrent));
         egress_if->egressRouteCurrent.active = false;
       } else {
