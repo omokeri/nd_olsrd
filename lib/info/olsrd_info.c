@@ -430,7 +430,7 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
           info_plugin_cache_init_entry(cache_entry);
 
           now = olsr_times();
-          age = abs(now - cache_entry->timestamp);
+          age = llabs(now - cache_entry->timestamp);
           if (!cache_entry->timestamp || (age >= cache_timeout)) {
             /* cache is never used before or cache is too old */
             cache_entry->buf.buf[0] = '\0';
