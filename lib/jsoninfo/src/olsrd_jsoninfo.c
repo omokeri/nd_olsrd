@@ -786,6 +786,8 @@ static void sgw_ipvx(struct json_session *session, struct autobuf *abuf, bool ip
 static void sgw_egress_bw(struct json_session *session, struct autobuf * abuf, const char * key, struct egress_if_bw * bw) {
   abuf_json_mark_object(session, true, false, abuf, key);
 
+  abuf_json_boolean(session, abuf, "requireNetwork", bw->requireNetwork);
+  abuf_json_boolean(session, abuf, "requireGateway", bw->requireGateway);
   abuf_json_int(session, abuf, "egressUk", bw->egressUk);
   abuf_json_int(session, abuf, "egressDk", bw->egressDk);
   abuf_json_float(session, abuf, "pathCost", get_linkcost_scaled(bw->path_cost, true));
