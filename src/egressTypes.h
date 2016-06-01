@@ -82,6 +82,8 @@ struct sgw_route_info {
 
 struct egress_if_bw {
   /* in the egress file */
+  bool requireNetwork;
+  bool requireGateway;
   uint32_t egressUk; /**< in Kbps, [0, MAX_SMARTGW_SPEED] */
   uint32_t egressDk; /**< in Kbps, [0, MAX_SMARTGW_SPEED] */
   uint32_t path_cost; /**<         [0, UINT32_MAX]        */
@@ -138,6 +140,7 @@ static INLINE bool egressBwCostsChanged(struct sgw_egress_if * egress_if) {
 
 static INLINE bool egressBwNetworkChanged(struct sgw_egress_if * egress_if) {
   return //
+    (egress_if->bwPrevious.requireNetwork != egress_if->bwCurrent.requireNetwork) || //
     (egress_if->bwPrevious.networkSet != egress_if->bwCurrent.networkSet) || //
     (egress_if->bwCurrent.networkSet && //
       memcmp(&egress_if->bwPrevious.network, &egress_if->bwCurrent.network, sizeof(egress_if->bwCurrent.network)));
@@ -145,6 +148,7 @@ static INLINE bool egressBwNetworkChanged(struct sgw_egress_if * egress_if) {
 
 static INLINE bool egressBwGatewayChanged(struct sgw_egress_if * egress_if) {
   return //
+    (egress_if->bwPrevious.requireGateway != egress_if->bwCurrent.requireGateway) || //
     (egress_if->bwPrevious.gatewaySet != egress_if->bwCurrent.gatewaySet) || //
     (egress_if->bwCurrent.gatewaySet && //
       memcmp(&egress_if->bwPrevious.gateway, &egress_if->bwCurrent.gateway, sizeof(egress_if->bwCurrent.gateway)));

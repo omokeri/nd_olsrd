@@ -348,6 +348,8 @@ bool egressBwCalculateCosts(struct egress_if_bw * bw, bool up) {
  * @param up true when the interface is up
  */
 void egressBwClear(struct egress_if_bw * bw, bool up) {
+  bw->requireNetwork = true;
+  bw->requireGateway = true;
   bw->egressUk = 0;
   bw->egressDk = 0;
   bw->path_cost = 0;
@@ -529,6 +531,8 @@ static bool readEgressFile(const char * fileName) {
 
   while (fgets(line, LINE_LENGTH, fp)) {
     struct sgw_egress_if * egress_if = NULL;
+    bool requireNetwork = true;
+    bool requireGateway = true;
     unsigned long long uplink = DEF_EGRESS_UPLINK_KBPS;
     unsigned long long downlink = DEF_EGRESS_DOWNLINK_KBPS;
     unsigned long long pathCosts = DEF_EGRESS_PATH_COSTS;
@@ -656,6 +660,8 @@ static bool readEgressFile(const char * fileName) {
       }
 
       network.prefix_len = prefix_len;
+    } else {
+      requireNetwork = false;
     }
 
     /* gateway: optional presence */
@@ -670,6 +676,8 @@ static bool readEgressFile(const char * fileName) {
         reportedErrorsLocal = true;
         continue;
       }
+    } else {
+      requireGateway = false;
     }
 
     /* check all IP versions are the same */
@@ -699,6 +707,8 @@ static bool readEgressFile(const char * fileName) {
     if (!uplink || !downlink) {
       egressBwClear(&egress_if->bwCurrent, egress_if->upCurrent);
     } else {
+      egress_if->bwCurrent.requireNetwork = requireNetwork;
+      egress_if->bwCurrent.requireGateway = requireGateway;
       egress_if->bwCurrent.egressUk = uplink;
       egress_if->bwCurrent.egressDk = downlink;
       egress_if->bwCurrent.path_cost = pathCosts;
