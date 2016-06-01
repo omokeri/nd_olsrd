@@ -289,10 +289,13 @@ All other parameters will be ignored if SmartGateway is set to "no"
    Every line in the file declares bandwidth parameters of an egress interface,
    with the format:
      # this is a comment
-     interface=upstream,downstream,pathcost,network/prefix,gateway
-   Only the upstream and downstream fields are mandatory, the other fields are
-   optional. An empty field signifies that its default should be used.
+     interface=requireNetwork,requireGateway,upstream,downstream,pathcost,network/prefix,gateway
+   Only the requireNetwork, requireGateway, upstream and downstream fields are
+   mandatory, the other fields are optional. An empty field signifies that its
+   default should be used.
    The field defaults are:
+     requireNetwork     = 1 (true)
+     requireGateway     = 1 (true)
      upstream           = 0 (Kbps)
      downstream         = 0 (Kbps)
      pathcost           = 0 (dimensionless, 1024 is equivalent to 1 hop)
@@ -302,13 +305,15 @@ All other parameters will be ignored if SmartGateway is set to "no"
                             and in the range [0, 128] for IPv6
      gateway            = no default / not set (IP address)
    Note that when an interface needs a gateway to properly transport traffic
-   then the gateway IP address field MUST be set; doing otherwise will
-   result in non-functional routes being programmed. When an interface doesn't
-   need a gateway (for example a ppp interface) then the gateway IP address
-   field must be left empty.
+   then the gateway IP address field MUST be set AND requireGateway MUST be
+   non-zero; doing otherwise will result in non-functional routes being
+   programmed. When an interface doesn't  need a gateway (for example a PPP
+   interface) then the gateway IP address field MUST be left empty AND
+   requireGateway MUST be set to zero.
    Also note that when an interface has an attached network (like an Ethernet
-   interface, but not like a ppp interface) then the network/prefix field must
-   be set in order for a network route to be programmed.
+   interface, but not like a PPP interface) then the network/prefix field MUST
+   be set AND requireNetwork MUST be non-zero in order for a network route to
+   be programmed.
    The default setting is "/var/run/olsrd-sgw-egress.conf".
 7- SmartGatewayEgressFilePeriod determines the period (in milliseconds) on which
    the SmartGatewayEgressFile is checked for changes and processed if changed.

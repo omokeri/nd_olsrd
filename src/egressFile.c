@@ -79,25 +79,29 @@ static const char * regexComment = "^([[:space:]]*|[[:space:]#]+.*)$";
 static const char * regexEgress = "^[[:space:]]*" //
         "([^[:space:]=]+)"                     /* 01: interface, mandatory, can NOT be empty */
         "[[:space:]]*=[[:space:]]*"            /* --: field separator */
-        "([[:digit:]]*)"                       /* 02: uplink, mandatory, can be empty */
+        "([[:digit:]]*)"                       /* 02: requireNetwork, mandatory, can be empty */
         "[[:space:]]*,[[:space:]]*"            /* --: field separator */
-        "([[:digit:]]*)"                       /* 03: downlink, mandatory, can be empty */
-        "("                                    /* 04: (the rest is optional) */
+        "([[:digit:]]*)"                       /* 03: requireGateway, mandatory, can be empty */
         "[[:space:]]*,[[:space:]]*"            /* --: field separator */
-        "([[:digit:]]*)"                       /* 05: path cost, optional, can be empty */
+        "([[:digit:]]*)"                       /* 04: uplink, mandatory, can be empty */
+        "[[:space:]]*,[[:space:]]*"            /* --: field separator */
+        "([[:digit:]]*)"                       /* 05: downlink, mandatory, can be empty */
         "("                                    /* 06: (the rest is optional) */
         "[[:space:]]*,[[:space:]]*"            /* --: field separator */
-        "(|([[:digit:]\\.:]+)/([[:digit:]]+))" /* 07: network, optional, can be empty, 07=ip/x 08=ip 09=x */
-        "("                                    /* 10: (the rest is optional) */
+        "([[:digit:]]*)"                       /* 07: path cost, optional, can be empty */
+        "("                                    /* 08: (the rest is optional) */
         "[[:space:]]*,[[:space:]]*"            /* --: field separator */
-        "([[:digit:]\\.:]*)"                   /* 11: gateway, optional, can be empty */
-        ")?"                                   /* 10 */
+        "(|([[:digit:]\\.:]+)/([[:digit:]]+))" /* 09: network, optional, can be empty, 09=ip/x 10=ip 11=x */
+        "("                                    /* 12: (the rest is optional) */
+        "[[:space:]]*,[[:space:]]*"            /* --: field separator */
+        "([[:digit:]\\.:]*)"                   /* 13: gateway, optional, can be empty */
+        ")?"                                   /* 12 */
+        ")?"                                   /* 08 */
         ")?"                                   /* 06 */
-        ")?"                                   /* 04 */
         "[[:space:]]*$";
 
 /** the number of matches in regexEgress */
-#define REGEX_EGRESS_LINE_MATCH_COUNT (1 /* 00 */ + 11)
+#define REGEX_EGRESS_LINE_MATCH_COUNT (1 /* 00 */ + 13)
 
 /** the compiled regular expression describing a comment */
 static regex_t compiledRegexComment;
@@ -586,11 +590,45 @@ static bool readEgressFile(const char * fileName) {
     }
     assert(egress_if);
 
-    /* uplink: mandatory presence, guaranteed through regex match */
+    /* requireNetwork: mandatory presence, guaranteed through regex match */
     {
       regoff_t len = pmatch[2].rm_eo - pmatch[2].rm_so;
-      char * uplinkString = &line[pmatch[2].rm_so];
+      char * requireNetworkString = &line[pmatch[2].rm_so];
+      unsigned long long value;
       line[pmatch[2].rm_eo] = '\0';
+
+      if ((len > 0) && !readULL(requireNetworkString, &value)) {
+        egressFileError(false, __LINE__, "Egress speed file line %d: requireNetwork \"%s\" is not a valid number: line is ignored", lineNumber,
+            requireNetworkString);
+        reportedErrorsLocal = true;
+        continue;
+      } else {
+        requireNetwork = (value != 0);
+      }
+    }
+
+    /* requireGateway: mandatory presence, guaranteed through regex match */
+    {
+      regoff_t len = pmatch[3].rm_eo - pmatch[3].rm_so;
+      char * requireGatewayString = &line[pmatch[3].rm_so];
+      unsigned long long value;
+      line[pmatch[3].rm_eo] = '\0';
+
+      if ((len > 0) && !readULL(requireGatewayString, &value)) {
+        egressFileError(false, __LINE__, "Egress speed file line %d: requireGateway \"%s\" is not a valid number: line is ignored", lineNumber,
+            requireGatewayString);
+        reportedErrorsLocal = true;
+        continue;
+      } else {
+        requireGateway = (value != 0);
+      }
+    }
+
+    /* uplink: mandatory presence, guaranteed through regex match */
+    {
+      regoff_t len = pmatch[4].rm_eo - pmatch[4].rm_so;
+      char * uplinkString = &line[pmatch[4].rm_so];
+      line[pmatch[4].rm_eo] = '\0';
 
       if ((len > 0) && !readULL(uplinkString, &uplink)) {
         egressFileError(false, __LINE__, "Egress speed file line %d: uplink bandwidth \"%s\" is not a valid number: line is ignored", lineNumber, uplinkString);
@@ -602,9 +640,9 @@ static bool readEgressFile(const char * fileName) {
 
     /* downlink: mandatory presence, guaranteed through regex match */
     {
-      regoff_t len = pmatch[3].rm_eo - pmatch[3].rm_so;
-      char * downlinkString = &line[pmatch[3].rm_so];
-      line[pmatch[3].rm_eo] = '\0';
+      regoff_t len = pmatch[5].rm_eo - pmatch[5].rm_so;
+      char * downlinkString = &line[pmatch[5].rm_so];
+      line[pmatch[5].rm_eo] = '\0';
 
       if ((len > 0) && !readULL(downlinkString, &downlink)) {
         egressFileError(false, __LINE__, "Egress speed file line %d: downlink bandwidth \"%s\" is not a valid number: line is ignored", lineNumber,
@@ -616,10 +654,10 @@ static bool readEgressFile(const char * fileName) {
     downlink = MIN(downlink, MAX_SMARTGW_SPEED);
 
     /* path costs: optional presence */
-    if (pmatch[5].rm_so != -1) {
-      regoff_t len = pmatch[5].rm_eo - pmatch[5].rm_so;
-      char * pathCostsString = &line[pmatch[5].rm_so];
-      line[pmatch[5].rm_eo] = '\0';
+    if (pmatch[7].rm_so != -1) {
+      regoff_t len = pmatch[7].rm_eo - pmatch[7].rm_so;
+      char * pathCostsString = &line[pmatch[7].rm_so];
+      line[pmatch[7].rm_eo] = '\0';
 
       if ((len > 0) && !readULL(pathCostsString, &pathCosts)) {
         egressFileError(false, __LINE__, "Egress speed file line %d: path costs \"%s\" is not a valid number: line is ignored", lineNumber, pathCostsString);
@@ -630,13 +668,13 @@ static bool readEgressFile(const char * fileName) {
     pathCosts = MIN(pathCosts, UINT32_MAX);
 
     /* network: optional presence */
-    if ((pmatch[7].rm_so != -1) && ((pmatch[7].rm_eo - pmatch[7].rm_so) > 0)) {
+    if ((pmatch[9].rm_so != -1) && ((pmatch[9].rm_eo - pmatch[9].rm_so) > 0)) {
       /* network is present: guarantees IP and prefix presence */
       unsigned long long prefix_len;
-      char * networkString = &line[pmatch[8].rm_so];
-      char * prefixlenString = &line[pmatch[9].rm_so];
-      line[pmatch[8].rm_eo] = '\0';
-      line[pmatch[9].rm_eo] = '\0';
+      char * networkString = &line[pmatch[10].rm_so];
+      char * prefixlenString = &line[pmatch[11].rm_so];
+      line[pmatch[10].rm_eo] = '\0';
+      line[pmatch[11].rm_eo] = '\0';
 
       if (!readIPAddress(networkString, &network.prefix, &networkSet, &networkIpVersion)) {
         egressFileError(false, __LINE__, "Egress speed file line %d: network IP address \"%s\" is not a valid IP address: line is ignored", lineNumber,
@@ -660,15 +698,13 @@ static bool readEgressFile(const char * fileName) {
       }
 
       network.prefix_len = prefix_len;
-    } else {
-      requireNetwork = false;
     }
 
     /* gateway: optional presence */
-    if (pmatch[11].rm_so != -1) {
-      regoff_t len = pmatch[11].rm_eo - pmatch[11].rm_so;
-      char * gatewayString = &line[pmatch[11].rm_so];
-      line[pmatch[11].rm_eo] = '\0';
+    if (pmatch[13].rm_so != -1) {
+      regoff_t len = pmatch[13].rm_eo - pmatch[13].rm_so;
+      char * gatewayString = &line[pmatch[13].rm_so];
+      line[pmatch[13].rm_eo] = '\0';
 
       if ((len > 0) && !readIPAddress(gatewayString, &gateway, &gatewaySet, &gatewayIpVersion)) {
         egressFileError(false, __LINE__, "Egress speed file line %d: gateway IP address \"%s\" is not a valid IP address: line is ignored", lineNumber,
@@ -676,8 +712,6 @@ static bool readEgressFile(const char * fileName) {
         reportedErrorsLocal = true;
         continue;
       }
-    } else {
-      requireGateway = false;
     }
 
     /* check all IP versions are the same */
