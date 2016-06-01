@@ -2076,7 +2076,7 @@ static void configureEgressLinkRoutes(enum sgw_multi_change_phase phase) {
     }
 
     /* network route */
-    if (egress_if->bwNetworkChanged || force) {
+    if (egress_if->upChanged || egress_if->bwNetworkChanged || force) {
       bool routeChanged;
 
       struct sgw_route_info networkRoutePrevious = egress_if->networkRouteCurrent;
@@ -2109,7 +2109,7 @@ static void configureEgressLinkRoutes(enum sgw_multi_change_phase phase) {
     }
 
     /* default route */
-    if (egress_if->bwGatewayChanged || force) {
+    if (egress_if->upChanged || egress_if->bwGatewayChanged || force) {
       bool routeChanged;
 
       struct sgw_route_info egressRoutePrevious = egress_if->egressRouteCurrent;
