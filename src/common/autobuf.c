@@ -53,7 +53,6 @@
 #include <limits.h>
 #include <assert.h>
 
-
 static int autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size);
 
 static int ROUND_UP_TO_POWER_OF_2(int val, int pow2) {
@@ -69,9 +68,7 @@ static int ROUND_UP_TO_POWER_OF_2(int val, int pow2) {
   return (INT32_MAX & ~(pow2 - 1));
 }
 
-int
-abuf_init(struct autobuf *autobuf, int initial_size)
-{
+int abuf_init(struct autobuf *autobuf, int initial_size) {
   autobuf->len = 0;
   if (initial_size <= 0) {
     autobuf->size = 0;
@@ -88,18 +85,14 @@ abuf_init(struct autobuf *autobuf, int initial_size)
   return 0;
 }
 
-void
-abuf_free(struct autobuf *autobuf)
-{
+void abuf_free(struct autobuf *autobuf) {
   free(autobuf->buf);
   autobuf->buf = NULL;
   autobuf->len = 0;
   autobuf->size = 0;
 }
 
-static int
-autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size)
-{
+static int autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size) {
   /* for the the string terminator */
   new_size++;
 
@@ -127,9 +120,7 @@ autobuf_enlarge(struct autobuf *autobuf, unsigned int new_size)
   return 0;
 }
 
-int
-abuf_vappendf(struct autobuf *autobuf, const char *format, va_list ap)
-{
+int abuf_vappendf(struct autobuf *autobuf, const char *format, va_list ap) {
   int rc;
   int min_size;
   va_list ap2;
@@ -150,9 +141,7 @@ abuf_vappendf(struct autobuf *autobuf, const char *format, va_list ap)
   return 0;
 }
 
-int
-abuf_appendf(struct autobuf *autobuf, const char *fmt, ...)
-{
+int abuf_appendf(struct autobuf *autobuf, const char *fmt, ...) {
   int rv;
   va_list ap;
   va_start(ap, fmt);
@@ -161,14 +150,14 @@ abuf_appendf(struct autobuf *autobuf, const char *fmt, ...)
   return rv;
 }
 
-int
-abuf_puts(struct autobuf *autobuf, const char *s)
-{
-  int len; 
+int abuf_puts(struct autobuf *autobuf, const char *s) {
+  int len;
 
-  if (!autobuf || !s) return 0;
+  if (!autobuf || !s)
+    return 0;
   len = strlen(s);
-  if (!len) return 0;
+  if (!len)
+    return 0;
   if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
     return -1;
   }
@@ -178,14 +167,14 @@ abuf_puts(struct autobuf *autobuf, const char *s)
   return len;
 }
 
-int
-abuf_concat(struct autobuf *autobuf, struct autobuf *s)
-{
+int abuf_concat(struct autobuf *autobuf, struct autobuf *s) {
   int len;
 
-  if (!autobuf || !s) return 0;
+  if (!autobuf || !s)
+    return 0;
   len = s->len;
-  if (!len) return 0;
+  if (!len)
+    return 0;
   if (autobuf_enlarge(autobuf, autobuf->len + len + 1) < 0) {
     return -1;
   }
@@ -194,9 +183,7 @@ abuf_concat(struct autobuf *autobuf, struct autobuf *s)
   return len;
 }
 
-int
-abuf_strftime(struct autobuf *autobuf, const char *format, const struct tm *tm)
-{
+int abuf_strftime(struct autobuf *autobuf, const char *format, const struct tm *tm) {
   int rc = strftime(autobuf->buf + autobuf->len, autobuf->size - autobuf->len, format, tm);
   if (rc == 0) {
     /* we had an error! Probably the buffer too small. So we add some bytes. */
@@ -210,9 +197,7 @@ abuf_strftime(struct autobuf *autobuf, const char *format, const struct tm *tm)
   return rc;
 }
 
-int
-abuf_memcpy(struct autobuf *autobuf, const void *p, const unsigned int len)
-{
+int abuf_memcpy(struct autobuf *autobuf, const void *p, const unsigned int len) {
   if (autobuf_enlarge(autobuf, autobuf->len + len) < 0) {
     return -1;
   }
@@ -221,9 +206,7 @@ abuf_memcpy(struct autobuf *autobuf, const void *p, const unsigned int len)
   return len;
 }
 
-int
-abuf_memcpy_prefix(struct autobuf *autobuf, const void *p, const unsigned int len)
-{
+int abuf_memcpy_prefix(struct autobuf *autobuf, const void *p, const unsigned int len) {
   if (autobuf_enlarge(autobuf, autobuf->len + len) < 0) {
     return -1;
   }
@@ -233,8 +216,7 @@ abuf_memcpy_prefix(struct autobuf *autobuf, const void *p, const unsigned int le
   return len;
 }
 
-int
-abuf_pull(struct autobuf * autobuf, int len) {
+int abuf_pull(struct autobuf * autobuf, int len) {
   char *p;
   size_t newsize;
 
