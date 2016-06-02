@@ -50,18 +50,19 @@ HDRS =
 
 include local.mk
 
+OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../lock_file.o
+
 ifeq ($(OS), win32)
 
 LIBNAME ?=	olsrd_cfgparser.dll
 BINNAME ?=	olsrd_cfgparser.exe
-OBJS +=		../win32/compat.o ../ipcalc.o ../builddata.o ../common/autobuf.o
+OBJS +=		../win32/compat.o
 
 else
 
 LIBNAME ?=	olsrd_cfgparser.so.0.1
 BINNAME ?=	olsrd_cfgparser
 
-OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../lock_file.o
 endif
 
 
