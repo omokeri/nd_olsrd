@@ -1059,6 +1059,47 @@ int setTxNmeaMessagePrefix(const char *value, void *data __attribute__ ((unused)
 }
 
 /*
+ * positionOutputFile
+ */
+
+/** The positionOutputFile buffer */
+static char positionOutputFile[PATH_MAX + 1];
+
+/** True when the positionOutputFile is set */
+static bool positionOutputFileSet = false;
+
+/**
+ @return
+ The positionOutputFile (NULL when not set)
+ */
+char * getPositionOutputFile(void) {
+  if (!positionOutputFileSet) {
+    return NULL;
+  }
+
+  return &positionOutputFile[0];
+}
+
+int setPositionOutputFile(const char *value, void *data __attribute__ ((unused)),
+    set_plugin_parameter_addon addon __attribute__ ((unused))) {
+  size_t valueLength;
+
+  assert(value != NULL);
+
+  valueLength = strlen(value);
+  if (valueLength > PATH_MAX) {
+    pudError(false, "Value of parameter %s is too long, maximum length is"
+        " %u, current length is %lu", PUD_POSFILE_NAME, PATH_MAX, (unsigned long) valueLength);
+    return true;
+  }
+
+  strcpy((char *) &positionOutputFile[0], value);
+  positionOutputFileSet = true;
+
+  return false;
+}
+
+/*
  * uplinkAddr + uplinkPort
  */
 

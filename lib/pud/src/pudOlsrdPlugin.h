@@ -86,6 +86,7 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = {
 	{	.name = PUD_TX_MC_PORT_NAME, .set_plugin_parameter = &setTxMcPort, .data = NULL},
 	{	.name = PUD_TX_TTL_NAME, .set_plugin_parameter = &setTxTtl, .data = NULL},
 	{	.name = PUD_TX_NMEAMESSAGEPREFIX_NAME, .set_plugin_parameter = &setTxNmeaMessagePrefix, .data = NULL},
+	{	.name = PUD_POSOUTFILE_NAME, .set_plugin_parameter = &setPositionOutputFile, .data = NULL},
 
 	/* UPLINK / DOWNLINK */
 	{	.name = PUD_UPLINK_ADDR_NAME, .set_plugin_parameter = &setUplinkAddr, .data = NULL},

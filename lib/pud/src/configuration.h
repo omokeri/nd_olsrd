@@ -192,6 +192,12 @@ unsigned char * getTxNmeaMessagePrefix(void);
 int setTxNmeaMessagePrefix(const char *value, void *data,
 		set_plugin_parameter_addon addon);
 
+/** The name of the positionOutputFile plugin parameter */
+#define PUD_POSOUTFILE_NAME            "positionOutputFile"
+
+char * getPositionOutputFile(void);
+int setPositionOutputFile(const char *value, void *data, set_plugin_parameter_addon addon);
+
 /*
  * Uplink Parameters
  */

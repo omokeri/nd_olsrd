@@ -64,6 +64,7 @@
 #include <nmea/sentence.h>
 #include <nmea/context.h>
 #include <OlsrdPudWireFormat/wireFormat.h>
+#include <unistd.h>
 
 /*
  * NMEA parser
@@ -115,6 +116,15 @@ static TransmitGpsInformation transmitGpsInformation;
 
 /** The size of the buffer in which the OLSR and uplink messages are assembled */
 #define TX_BUFFER_SIZE_FOR_OLSR 1024
+
+/** the prefix of all parameters written to the position output file */
+#define PUD_POSOUT_FILE_PARAM_PREFIX "OLSRD_PUD_"
+
+/** the position output file */
+static char * positionOutputFile = NULL;
+
+/** true when a postion output file error was already reported */
+static bool positionOutputFileError = false;
 
 /*
  * Functions
@@ -304,6 +314,169 @@ static void txToAllOlsrInterfaces(TimedTxInterface interfaces) {
 	}
 }
 
+/**
+ * Write the position output file (if so configured)
+ *
+ * @return true on success
+ */
+static bool writePositionOutputFile(void) {
+  FILE * fp = NULL;
+  nmeaINFO * nmeaInfo;
+  nmeaSATINFO * satInfo;
+  const char * signal;
+  const char * fix;
+  int i;
+
+  if (!positionOutputFile) {
+    return true;
+  }
+
+  fp = fopen(positionOutputFile, "w");
+  if (!fp) {
+    /* could not open the file */
+    if (!positionOutputFileError) {
+      pudError(true, "Could not write to the position output file \"%s\"", positionOutputFile);
+      positionOutputFileError = true;
+    }
+    return false;
+  }
+  positionOutputFileError = false;
+
+  nmeaInfo = &transmitGpsInformation.txPosition.nmeaInfo;
+  satInfo = &nmeaInfo->satinfo;
+
+  /* node id */
+  fprintf(fp, "%s%s=\"%s\"\n", PUD_POSOUT_FILE_PARAM_PREFIX, "NODE_ID", transmitGpsInformation.nodeId);
+
+  /* sig */
+  switch (nmeaInfo->sig) {
+    case 0:
+      signal = "INVALID";
+      break;
+
+    case 1:
+      signal = "FIX";
+      break;
+
+    case 2:
+      signal = "DIFFERENTIAL";
+      break;
+
+    case 3:
+      signal = "SENSITIVE";
+      break;
+
+    case 4:
+      signal = "REALTIME";
+      break;
+
+    case 5:
+      signal = "FLOAT";
+      break;
+
+    case 6:
+      signal = "ESTIMATED";
+      break;
+
+    case 7:
+      signal = "MANUAL";
+      break;
+
+    case 8:
+      signal = "SIMULATED";
+      break;
+
+    default:
+      signal = NULL;
+      break;
+  }
+  if (!signal) {
+    fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SIGNAL", nmeaInfo->sig);
+  } else {
+    fprintf(fp, "%s%s=%s\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SIGNAL", signal);
+  }
+
+  /* fix */
+  switch (nmeaInfo->fix) {
+    case 1:
+      fix = "NONE";
+      break;
+
+    case 2:
+      fix = "2D";
+      break;
+
+    case 3:
+      fix = "3D";
+      break;
+
+    default:
+      fix = NULL;
+      break;
+  }
+  if (!fix) {
+    fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "FIX", nmeaInfo->fix);
+  } else {
+    fprintf(fp, "%s%s=%s\n", PUD_POSOUT_FILE_PARAM_PREFIX, "FIX", fix);
+  }
+
+  /* utc */
+  fprintf(fp, "%s%s=%04d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "YEAR", nmeaInfo->utc.year + 1900);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MONTH", nmeaInfo->utc.mon + 1);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "DAY", nmeaInfo->utc.day);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "HOUR", nmeaInfo->utc.hour);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MINUTE", nmeaInfo->utc.min);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SECONDS", nmeaInfo->utc.sec);
+  fprintf(fp, "%s%s=%03d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MILLISECONDS", nmeaInfo->utc.hsec * 10);
+
+  /* DOPs */
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "PDOP", nmeaInfo->PDOP);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "HDOP", nmeaInfo->HDOP);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "VDOP", nmeaInfo->VDOP);
+
+  /* lat, lon, ... */
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "LATTITUDE", nmeaInfo->lat);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "LONGITUDE", nmeaInfo->lon);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "ELEVATION", nmeaInfo->elv);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SPEED", nmeaInfo->speed);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "TRACK", nmeaInfo->track);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MAGNETIC_TRACK", nmeaInfo->mtrack);
+  fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MAGNETIC_VARIATION", nmeaInfo->magvar);
+
+  /* satinfo */
+  fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_USE_COUNT", satInfo->inuse);
+  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_USE");
+  for (i = 0; i < NMEA_MAXSAT; i++) {
+    fprintf(fp, " %d", satInfo->in_use[i]);
+  }
+  fprintf(fp, " )\n");
+
+  fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_COUNT", satInfo->inview);
+  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_ID");
+  for (i = 0; i < NMEA_MAXSAT; i++) {
+    fprintf(fp, " %d", satInfo->sat[i].id);
+  }
+  fprintf(fp, " )\n");
+  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_ELEVATION");
+  for (i = 0; i < NMEA_MAXSAT; i++) {
+    fprintf(fp, " %d", satInfo->sat[i].elv);
+  }
+  fprintf(fp, " )\n");
+  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_AZIMUTH");
+  for (i = 0; i < NMEA_MAXSAT; i++) {
+    fprintf(fp, " %d", satInfo->sat[i].azimuth);
+  }
+  fprintf(fp, " )\n");
+  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_SIGNAL_DB");
+  for (i = 0; i < NMEA_MAXSAT; i++) {
+    fprintf(fp, " %d", satInfo->sat[i].sig);
+  }
+  fprintf(fp, " )\n");
+
+  fclose(fp);
+  return true;
+}
+
 /*
  * Timer Callbacks
  */
@@ -364,6 +537,9 @@ static void doImmediateTransmit(MovementState externalState) {
 
 	/* do an immediate transmit */
 	txToAllOlsrInterfaces(interfaces);
+
+	/* write the position output file */
+	writePositionOutputFile();
 }
 
 /**
@@ -862,6 +1038,14 @@ bool startReceiver(void) {
 		return false;
 	}
 
+	positionOutputFile = getPositionOutputFile();
+	positionOutputFileError = false;
+
+	/* write the position output file */
+	if (!writePositionOutputFile()) {
+	  return false;
+	}
+
 	externalState = getExternalState();
 	restartOlsrTimer(externalState);
 	restartUplinkTimer(externalState);
@@ -878,6 +1062,10 @@ bool startReceiver(void) {
  Stop the receiver
  */
 void stopReceiver(void) {
+	if (positionOutputFile) {
+	  unlink(positionOutputFile);
+	}
+
 	destroyGatewayTimer();
 	destroyUplinkTxTimer();
 	destroyOlsrTxTimer();
