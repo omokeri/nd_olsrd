@@ -185,8 +185,8 @@ static void txToAllOlsrInterfaces(TimedTxInterface interfaces) {
 
 	externalState = getExternalState();
 
-	/* only fixup timestamp when the position is valid _and_ when the position was not updated */
-	if (positionValid(&transmitGpsInformation.txPosition) && !transmitGpsInformation.positionUpdated) {
+	/* only update the timestamp when the position is invalid AND when the position was not updated */
+	if (!positionValid(&transmitGpsInformation.txPosition) && !transmitGpsInformation.positionUpdated) {
 		nmea_time_now(&transmitGpsInformation.txPosition.nmeaInfo.utc, &transmitGpsInformation.txPosition.nmeaInfo.present);
 	}
 
