@@ -43,6 +43,7 @@
  *
  */
 
+#include "common/string_handling.h"
 #include "olsr_host_switch.h"
 #include "olsr_types.h"
 #include "commands.h"

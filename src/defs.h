@@ -47,6 +47,8 @@
 #define _OLSR_DEFS
 
 /* Common includes */
+#include "common/string_handling.h"
+
 #include <sys/time.h>
 #include <sys/times.h>
 #include <sys/socket.h>
@@ -114,42 +116,6 @@ extern FILE *debug_handle;
 #ifndef MIN
 #define MIN(x,y)	((x) < (y) ? (x) : (y))
 #endif /* MIN */
-
-/*
- * A somewhat safe version of strncpy and strncat. Note, that
- * BSD/Solaris strlcpy()/strlcat() differ in implementation, while
- * the BSD compiler prints out a warning if you use plain strcpy().
- */
-
-static INLINE char *
-strscpy(char *dest, const char *src, size_t size)
-{
-  register size_t l = 0;
-#if !defined(NODEBUG) && defined(DEBUG)
-  if (NULL == dest)
-    fprintf(stderr, "Warning: dest is NULL in strscpy!\n");
-  if (NULL == src)
-    fprintf(stderr, "Warning: src is NULL in strscpy!\n");
-#endif /* !defined(NODEBUG) && defined(DEBUG) */
-  if (!dest || !src) {
-    return NULL;
-  }
-
-  /* src does not need to be null terminated */
-  if (0 < size--)
-    while (l < size && 0 != src[l])
-      l++;
-  dest[l] = 0;
-
-  return strncpy(dest, src, l);
-}
-
-static INLINE char *
-strscat(char *dest, const char *src, size_t size)
-{
-  register size_t l = strlen(dest);
-  return strscpy(dest + l, src, size > l ? size - l : 0);
-}
 
 /*
  * Queueing macros

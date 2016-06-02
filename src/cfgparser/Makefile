@@ -50,7 +50,7 @@ HDRS =
 
 include local.mk
 
-OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../lock_file.o
+OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../common/string_handling.o ../lock_file.o
 
 ifeq ($(OS), win32)
 
