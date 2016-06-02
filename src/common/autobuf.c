@@ -173,7 +173,7 @@ abuf_puts(struct autobuf *autobuf, const char *s)
     return -1;
   }
   /* we already checked length of source and destination buffer */
-  memcpy(autobuf->buf + autobuf->len, s, len+1);
+  memcpy(autobuf->buf + autobuf->len, s, len + 1);
   autobuf->len += len;
   return len;
 }
