@@ -65,7 +65,6 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   /* number of bytes to be copied without null byte */
   size_t length = 0;
 
-  /* fail hard on debug build */
   assert(dest);
   assert(src);
   assert(dest_size);
@@ -99,7 +98,6 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
  * @return pointer to destination buffer
  */
 char * strscpy(char *dest, const char *src, size_t dest_size) {
-  /* fail hard on debug build */
   assert(dest);
   assert(src);
   assert(dest_size);
@@ -131,7 +129,6 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
 char * strscat(char *dest, const char *src, size_t dest_size) {
   size_t dst_content_len;
 
-  /* fail hard on debug build */
   assert(dest);
   assert(src);
   assert(dest_size);
