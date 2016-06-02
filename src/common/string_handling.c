@@ -62,7 +62,7 @@
  *
  * @return pointer to destination buffer
  */
-char * strscpy(char *dest, const char *src, size_t dest_size) {
+static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   register size_t l = 0;
 #if !defined(NODEBUG) && defined(DEBUG)
   if (NULL == dest)
@@ -84,6 +84,23 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
 }
 
 /**
+ * A somewhat safe version of strncpy.
+ * 1) This function never writes more than dest_size bytes.
+ * 2) This function always terminates the content of the dest buffer with
+ *    a zero byte.
+ * 3) This function does not write more than strlen(src)+1 bytes
+ *
+ * @param dest pointer to the destination buffer
+ * @param src pointer to the source buffer
+ * @param dest_size length of destination buffer in bytes
+ *
+ * @return pointer to destination buffer
+ */
+char * strscpy(char *dest, const char *src, size_t dest_size) {
+  return _internal_strscpy(dest, src, dest_size);
+}
+
+/**
  * A somewhat safe version of strncat, it appends the string
  * content of src to dest.
  * 1) This function never writes more than dest_size bytes.
@@ -101,5 +118,5 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
  */
 char * strscat(char *dest, const char *src, size_t dest_size) {
   register size_t l = strlen(dest);
-  return strscpy(dest + l, src, dest_size > l ? dest_size - l : 0);
+  return _internal_strscpy(dest + l, src, dest_size > l ? dest_size - l : 0);
 }
