@@ -322,10 +322,8 @@ static void txToAllOlsrInterfaces(TimedTxInterface interfaces) {
 static bool writePositionOutputFile(void) {
   FILE * fp = NULL;
   nmeaINFO * nmeaInfo;
-  nmeaSATINFO * satInfo;
   const char * signal;
   const char * fix;
-  int i;
 
   if (!positionOutputFile) {
     return true;
@@ -343,7 +341,6 @@ static bool writePositionOutputFile(void) {
   positionOutputFileError = false;
 
   nmeaInfo = &transmitGpsInformation.txPosition.nmeaInfo;
-  satInfo = &nmeaInfo->satinfo;
 
   /* node id */
   fprintf(fp, "%s%s=\"%s\"\n", PUD_POSOUT_FILE_PARAM_PREFIX, "NODE_ID", transmitGpsInformation.nodeId);
@@ -442,36 +439,6 @@ static bool writePositionOutputFile(void) {
   fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "TRACK", nmeaInfo->track);
   fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MAGNETIC_TRACK", nmeaInfo->mtrack);
   fprintf(fp, "%s%s=%f\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MAGNETIC_VARIATION", nmeaInfo->magvar);
-
-  /* satinfo */
-  fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_USE_COUNT", satInfo->inuse);
-  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_USE");
-  for (i = 0; i < NMEA_MAXSAT; i++) {
-    fprintf(fp, " %d", satInfo->in_use[i]);
-  }
-  fprintf(fp, " )\n");
-
-  fprintf(fp, "%s%s=%d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_COUNT", satInfo->inview);
-  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_ID");
-  for (i = 0; i < NMEA_MAXSAT; i++) {
-    fprintf(fp, " %d", satInfo->sat[i].id);
-  }
-  fprintf(fp, " )\n");
-  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_ELEVATION");
-  for (i = 0; i < NMEA_MAXSAT; i++) {
-    fprintf(fp, " %d", satInfo->sat[i].elv);
-  }
-  fprintf(fp, " )\n");
-  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_AZIMUTH");
-  for (i = 0; i < NMEA_MAXSAT; i++) {
-    fprintf(fp, " %d", satInfo->sat[i].azimuth);
-  }
-  fprintf(fp, " )\n");
-  fprintf(fp, "%s%s=(", PUD_POSOUT_FILE_PARAM_PREFIX, "SAT_IN_VIEW_SIGNAL_DB");
-  for (i = 0; i < NMEA_MAXSAT; i++) {
-    fprintf(fp, " %d", satInfo->sat[i].sig);
-  }
-  fprintf(fp, " )\n");
 
   fclose(fp);
   return true;
