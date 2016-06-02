@@ -64,8 +64,8 @@ zebra_init(void)
 {
 
   memset(&zebra, 0, sizeof zebra);
-  zebra.sockpath = olsr_malloc(sizeof ZEBRA_SOCKPATH  + 1, "QUAGGA: New socket path");
-  strscpy(zebra.sockpath, ZEBRA_SOCKPATH, sizeof ZEBRA_SOCKPATH);
+  zebra.sockpath = olsr_malloc(sizeof (ZEBRA_SOCKPATH), "QUAGGA: New socket path");
+  strscpy(zebra.sockpath, ZEBRA_SOCKPATH, sizeof (ZEBRA_SOCKPATH));
 
 }
 
