@@ -62,19 +62,25 @@
  * @return pointer to destination buffer
  */
 static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
+  /* number of bytes to be copied without null byte */
   size_t length = 0;
 
   assert(dest);
   assert(src);
   assert(dest_size);
 
+  /* reserve space for null byte in dest */
+  dest_size--;
 
-  /* src does not need to be null terminated */
-  if (0 < dest_size--)
-    while (length < dest_size && 0 != src[length])
-      length++;
+  /* determine src length (without null byte) */
+  while ((length < dest_size) && src[length]) {
+    length++;
+  }
+
+  /* force null byte */
   dest[length] = 0;
 
+  /* copy src content without null byte */
   return strncpy(dest, src, length);
 }
 
