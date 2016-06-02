@@ -126,12 +126,12 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
  * @return pointer to destination buffer, NULL if an error happened
  */
 char * strscat(char *dest, const char *src, size_t dest_size) {
-  register size_t l;
+  register size_t dst_content_len;
 
   assert(dest);
   assert(src);
   assert(dest_size);
 
-  l = strlen(dest);
-  return _internal_strscpy(dest + l, src, dest_size > l ? dest_size - l : 0);
+  dst_content_len = strlen(dest);
+  return _internal_strscpy(dest + dst_content_len, src, dest_size > dst_content_len ? dest_size - dst_content_len : 0);
 }
