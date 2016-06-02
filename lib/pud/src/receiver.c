@@ -298,7 +298,7 @@ static void txToAllOlsrInterfaces(TimedTxInterface interfaces) {
 
 			errno = 0;
 			if (sendto(fd, &txBuffer, txBufferBytesUsed, 0, addr, addrSize) < 0) {
-				pudError(true, "Could not send to uplink (size=%u)", txBufferBytesUsed);
+				/* do not report send errors, they're not really relevant */
 			}
 		}
 	}
