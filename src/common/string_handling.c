@@ -63,7 +63,7 @@
  * @return pointer to destination buffer
  */
 static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
-  register size_t l = 0;
+  size_t l = 0;
 
   assert(dest);
   assert(src);
@@ -126,7 +126,7 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
  * @return pointer to destination buffer, NULL if an error happened
  */
 char * strscat(char *dest, const char *src, size_t dest_size) {
-  register size_t dst_content_len;
+  size_t dst_content_len;
 
   assert(dest);
   assert(src);
