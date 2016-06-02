@@ -64,6 +64,11 @@
  */
 static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   register size_t l = 0;
+
+  assert(dest);
+  assert(src);
+  assert(dest_size);
+
 #if !defined(NODEBUG) && defined(DEBUG)
   if (NULL == dest)
     fprintf(stderr, "Warning: dest is NULL in strscpy!\n");
@@ -97,6 +102,10 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
  * @return pointer to destination buffer
  */
 char * strscpy(char *dest, const char *src, size_t dest_size) {
+  assert(dest);
+  assert(src);
+  assert(dest_size);
+
   return _internal_strscpy(dest, src, dest_size);
 }
 
@@ -117,6 +126,12 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
  * @return pointer to destination buffer, NULL if an error happened
  */
 char * strscat(char *dest, const char *src, size_t dest_size) {
-  register size_t l = strlen(dest);
+  register size_t l;
+
+  assert(dest);
+  assert(src);
+  assert(dest_size);
+
+  l = strlen(dest);
   return _internal_strscpy(dest + l, src, dest_size > l ? dest_size - l : 0);
 }
