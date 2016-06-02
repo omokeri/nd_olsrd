@@ -51,6 +51,9 @@ else
 BINNAME = olsr_switch
 endif
 
+HDRS += ../common/string_handling.h
+SRCS += ../common/string_handling.c
+
 default_target:	$(TOPDIR)/$(BINNAME)
 
 $(TOPDIR)/$(BINNAME):	$(OBJS)
