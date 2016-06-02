@@ -65,6 +65,11 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   /* number of bytes to be copied without null byte */
   size_t length = 0;
 
+  /* fail hard on debug build */
+  assert(dest);
+  assert(src);
+  assert(dest_size);
+
   /* reserve space for null byte in dest */
   dest_size--;
 
