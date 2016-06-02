@@ -45,7 +45,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "common/string_handling.h"
 
@@ -69,15 +68,6 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   assert(src);
   assert(dest_size);
 
-#if !defined(NODEBUG) && defined(DEBUG)
-  if (NULL == dest)
-    fprintf(stderr, "Warning: dest is NULL in strscpy!\n");
-  if (NULL == src)
-    fprintf(stderr, "Warning: src is NULL in strscpy!\n");
-#endif /* !defined(NODEBUG) && defined(DEBUG) */
-  if (!dest || !src) {
-    return NULL;
-  }
 
   /* src does not need to be null terminated */
   if (0 < dest_size--)
@@ -106,6 +96,11 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
   assert(src);
   assert(dest_size);
 
+  /* paranoid checks */
+  if (!dest || !src || !dest_size) {
+    return dest;
+  }
+
   return _internal_strscpy(dest, src, dest_size);
 }
 
@@ -131,6 +126,11 @@ char * strscat(char *dest, const char *src, size_t dest_size) {
   assert(dest);
   assert(src);
   assert(dest_size);
+
+  /* paranoid checks */
+  if (!dest || !src || !dest_size) {
+    return dest;
+  }
 
   dst_content_len = strlen(dest);
   if ((dest_size - dst_content_len) <= 0) {
