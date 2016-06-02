@@ -102,9 +102,9 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
   assert(src);
   assert(dest_size);
 
-  /* just return for non-debug build */
-  if (!src || !dest || !dest_size) {
-    return NULL ;
+  /* paranoid checks */
+  if (!dest || !src || !dest_size) {
+    return dest;
   }
 
   return _internal_strscpy(dest, src, dest_size);
@@ -133,9 +133,9 @@ char * strscat(char *dest, const char *src, size_t dest_size) {
   assert(src);
   assert(dest_size);
 
-  /* just return for non-debug build */
-  if (!src || !dest || !dest_size) {
-    return NULL ;
+  /* paranoid checks */
+  if (!dest || !src || !dest_size) {
+    return dest;
   }
 
   dst_content_len = strlen(dest);
