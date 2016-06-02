@@ -142,7 +142,7 @@ char * strscat(char *dest, const char *src, size_t dest_size) {
   }
 
   dst_content_len = strlen(dest);
-  if (dest_size <= dst_content_len) {
+  if ((dest_size - dst_content_len) <= 0) {
     return dest;
   }
   return _internal_strscpy(dest + dst_content_len, src, dest_size - dst_content_len);
