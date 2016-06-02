@@ -61,9 +61,7 @@
  *
  * @return pointer to destination buffer
  */
-static
-char *_internal_strscpy(char *dest, const char *src, size_t dest_size)
-{
+static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
   /* number of bytes to be copied without null byte */
   size_t length = 0;
 
@@ -93,16 +91,15 @@ char *_internal_strscpy(char *dest, const char *src, size_t dest_size)
  *
  * @return pointer to destination buffer
  */
-char *
-strscpy(char *dest, const char *src, size_t dest_size) {
+char * strscpy(char *dest, const char *src, size_t dest_size) {
   /* fail hard on debug build */
-  assert (dest);
-  assert (src);
-  assert (dest_size);
+  assert(dest);
+  assert(src);
+  assert(dest_size);
 
   /* just return for non-debug build */
   if (!src || !dest || !dest_size) {
-    return NULL;
+    return NULL ;
   }
 
   return _internal_strscpy(dest, src, dest_size);
@@ -124,19 +121,17 @@ strscpy(char *dest, const char *src, size_t dest_size) {
  *
  * @return pointer to destination buffer, NULL if an error happened
  */
-char *
-strscat(char *dest, const char *src, size_t dest_size)
-{
+char * strscat(char *dest, const char *src, size_t dest_size) {
   size_t dst_content_len;
 
   /* fail hard on debug build */
-  assert (dest);
-  assert (src);
-  assert (dest_size);
+  assert(dest);
+  assert(src);
+  assert(dest_size);
 
   /* just return for non-debug build */
   if (!src || !dest || !dest_size) {
-    return NULL;
+    return NULL ;
   }
 
   dst_content_len = strlen(dest);
