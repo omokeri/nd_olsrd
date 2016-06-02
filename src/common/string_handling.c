@@ -49,12 +49,19 @@
 
 #include "common/string_handling.h"
 
-/*
- * A somewhat safe version of strncpy and strncat. Note, that
- * BSD/Solaris strlcpy()/strlcat() differ in implementation, while
- * the BSD compiler prints out a warning if you use plain strcpy().
+/**
+ * A somewhat safe version of strncpy.
+ * 1) This function never writes more than dest_size bytes.
+ * 2) This function always terminates the content of the dest buffer with
+ *    a zero byte.
+ * 3) This function does not write more than strlen(src)+1 bytes
+ *
+ * @param dest pointer to the destination buffer
+ * @param src pointer to the source buffer
+ * @param dest_size length of destination buffer in bytes
+ *
+ * @return pointer to destination buffer
  */
-
 char * strscpy(char *dest, const char *src, size_t dest_size) {
   register size_t l = 0;
 #if !defined(NODEBUG) && defined(DEBUG)
@@ -76,6 +83,22 @@ char * strscpy(char *dest, const char *src, size_t dest_size) {
   return strncpy(dest, src, l);
 }
 
+/**
+ * A somewhat safe version of strncat, it appends the string
+ * content of src to dest.
+ * 1) This function never writes more than dest_size bytes.
+ * 2) This function always terminates the content of the dest buffer with
+ *    a zero byte.
+ * 3) This function does not write more than strlen(src)+1 bytes
+ *
+ * The function returns an error if dst or src or dst_size is zero.
+ *
+ * @param dest pointer to the destination buffer
+ * @param src pointer to the source buffer
+ * @param dest_size length of destination buffer in bytes
+ *
+ * @return pointer to destination buffer, NULL if an error happened
+ */
 char * strscat(char *dest, const char *src, size_t dest_size) {
   register size_t l = strlen(dest);
   return strscpy(dest + l, src, dest_size > l ? dest_size - l : 0);
