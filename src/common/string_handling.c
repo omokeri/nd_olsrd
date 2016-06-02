@@ -63,7 +63,7 @@
  * @return pointer to destination buffer
  */
 static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
-  size_t l = 0;
+  size_t length = 0;
 
   assert(dest);
   assert(src);
@@ -81,11 +81,11 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
 
   /* src does not need to be null terminated */
   if (0 < dest_size--)
-    while (l < dest_size && 0 != src[l])
-      l++;
-  dest[l] = 0;
+    while (length < dest_size && 0 != src[length])
+      length++;
+  dest[length] = 0;
 
-  return strncpy(dest, src, l);
+  return strncpy(dest, src, length);
 }
 
 /**
