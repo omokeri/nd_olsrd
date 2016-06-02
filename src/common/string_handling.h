@@ -43,12 +43,12 @@
  *
  */
 
-#ifndef STRING_H_
-#define STRING_H_
+#ifndef _COMMON_STRING_H_
+#define _COMMON_STRING_H_
 
 #include <stddef.h>
 
 char *strscpy(char *dest, const char *src, size_t dest_size);
 char *strscat(char *dest, const char *src, size_t dest_size);
 
-#endif /* STRING_H_ */
+#endif /* _COMMON_STRING_H_ */
