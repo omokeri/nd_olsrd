@@ -67,6 +67,8 @@ static char *_internal_strscpy(char *dest, const char *src, size_t dest_size) {
 
   /* reserve space for null byte in dest */
   dest_size--;
+
+  /* determine src length (without null byte) */
   while ((length < dest_size) && src[length]) {
     length++;
   }
