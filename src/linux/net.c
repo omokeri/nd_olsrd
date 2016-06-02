@@ -717,7 +717,7 @@ bool olsr_if_isup(const char * dev)
   }
 
   memset(&ifr, 0, sizeof(ifr));
-  strscpy(ifr.ifr_name, dev, IFNAMSIZ);
+  strscpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
 
   if (ioctl(olsr_cnf->ioctl_s, SIOCGIFFLAGS, &ifr) < 0) {
     OLSR_PRINTF(1, "ioctl SIOCGIFFLAGS (get flags) error on device %s: %s (%d)\n",
@@ -732,7 +732,7 @@ int olsr_if_set_state(const char *dev, bool up) {
   struct ifreq ifr;
 
   memset(&ifr, 0, sizeof(ifr));
-  strscpy(ifr.ifr_name, dev, IFNAMSIZ);
+  strscpy(ifr.ifr_name, dev, sizeof(ifr.ifr_name));
 
   if (ioctl(olsr_cnf->ioctl_s, SIOCGIFFLAGS, &ifr) < 0) {
     OLSR_PRINTF(1, "ioctl SIOCGIFFLAGS (get flags) error on device %s: %s (%d)\n",
