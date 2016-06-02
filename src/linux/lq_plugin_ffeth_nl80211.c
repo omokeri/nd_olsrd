@@ -83,11 +83,12 @@ static void lq_clear_ffeth_nl80211(void *target);
 static void lq_clear_ffeth_nl80211_hello(void *target);
 
 static const char *lq_print_ffeth_nl80211(void *ptr, char separator, struct lqtextbuffer *buffer);
-static const char *lq_print_cost_ffeth_nl80211(olsr_linkcost cost, struct lqtextbuffer *buffer);
+static double lq_get_cost_scaled_nl80211(olsr_linkcost cost);
 
 /* etx lq plugin (freifunk fpm version) settings */
 struct lq_handler lq_etx_ffeth_nl80211_handler = {
   &lq_initialize_ffeth_nl80211,
+
   &lq_calc_cost_ffeth_nl80211,
   &lq_calc_cost_ffeth_nl80211,
 
@@ -106,7 +107,7 @@ struct lq_handler lq_etx_ffeth_nl80211_handler = {
 
   &lq_print_ffeth_nl80211,
   &lq_print_ffeth_nl80211,
-  &lq_print_cost_ffeth_nl80211,
+  &lq_get_cost_scaled_nl80211,
 
   sizeof(struct lq_ffeth_hello),
   sizeof(struct lq_ffeth_nl80211),
@@ -486,11 +487,10 @@ lq_print_ffeth_nl80211(void *ptr, char separator, struct lqtextbuffer *buffer)
   return buffer->buf;
 }
 
-static const char *
-lq_print_cost_ffeth_nl80211(olsr_linkcost cost, struct lqtextbuffer *buffer)
+static double
+lq_get_cost_scaled_nl80211(olsr_linkcost cost)
 {
-  snprintf(buffer->buf, sizeof(buffer->buf), "%s", fpmtoa(cost));
-  return buffer->buf;
+  return fpmtod(cost);
 }
 
 #endif /* LINUX_NL80211 */
