@@ -133,5 +133,8 @@ char * strscat(char *dest, const char *src, size_t dest_size) {
   assert(dest_size);
 
   dst_content_len = strlen(dest);
-  return _internal_strscpy(dest + dst_content_len, src, dest_size > dst_content_len ? dest_size - dst_content_len : 0);
+  if ((dest_size - dst_content_len) <= 0) {
+    return dest;
+  }
+  return _internal_strscpy(dest + dst_content_len, src, dest_size - dst_content_len);
 }
