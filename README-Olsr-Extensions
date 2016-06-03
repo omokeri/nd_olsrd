@@ -462,13 +462,13 @@ e) For a standalone client (a notebook user running OLSRd in order to browse)
    interface created by OLSRd. Because OLSRd uses an arbitrary name for the
    tunnel interface (e.g. tnl_7c41c668) you may want to include a wildcard
    iptables rule. Example:
-     iptables -A FORWARD -o tnl_+ -p tcp --tcp-flags SYN,RST SYN \
+     iptables -w -A FORWARD -o tnl_+ -p tcp --tcp-flags SYN,RST SYN \
               -j TCPMSS --clamp-mss-to-pmtu
 
 Furthermore (or alternatively) you might consider (on your gateway nodes)
 clamping all traffic leaving your mesh to your ipip mtu (regardless if the
 traffic comes out of the smart gateway tunnel or not!). Example:
-  iptables -A FORWARD -o [your_gateway_interface] -p tcp \
+  iptables -w -A FORWARD -o [your_gateway_interface] -p tcp \
            --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1480
 
 Especially as during OLSRd startup, before an smart gateway is chosen (which is
