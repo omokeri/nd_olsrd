@@ -212,6 +212,7 @@ void output_start(struct autobuf *abuf) {
   abuf_json_reset_entry_number_and_depth(&json_session, pretty);
   abuf_json_mark_output(&json_session, true, abuf);
 
+  abuf_json_int(&json_session, abuf, "pid", getpid());
   abuf_json_int(&json_session, abuf, "systemTime", time(NULL));
   abuf_json_int(&json_session, abuf, "timeSinceStartup", now_times);
   if (*uuid) {

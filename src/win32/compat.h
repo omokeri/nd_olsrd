@@ -74,6 +74,9 @@
     }                       \
   } while (0)
 
+
+int getpid(void);
+
 #endif /* COMPAT_H_ */
 
 #endif /* defined(MINGW_VERSION) && MINGW_VERSION >= 40600 */

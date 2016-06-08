@@ -544,6 +544,10 @@ write(int fd, const void *buf, unsigned int count)
   return written;
 }
 
+int getpid(void) {
+  return (int)GetCurrentProcessId();
+}
+
 #endif /* _WIN32 */
 
 /*
