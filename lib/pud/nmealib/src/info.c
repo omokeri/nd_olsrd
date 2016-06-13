@@ -134,17 +134,6 @@ bool nmea_INFO_is_present_smask(int smask, nmeaINFO_FIELD fieldName) {
 }
 
 /**
- * Determine if a nmeaINFO structure has a certain field
- *
- * @param present the presence field
- * @param fieldName use a name from nmeaINFO_FIELD
- * @return a boolean, true when the structure has the requested field
- */
-bool nmea_INFO_is_present(uint32_t present, nmeaINFO_FIELD fieldName) {
-	return ((present & fieldName) != 0);
-}
-
-/**
  * Flag a nmeaINFO structure to contain a certain field
  *
  * @param present a pointer to the presence field

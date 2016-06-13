@@ -25,6 +25,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef INLINE
+#define INLINE inline __attribute__((always_inline))
+#endif
+
 /**
  * @file
  * The table below describes which fields are present in the sentences that are
@@ -200,7 +204,18 @@ void nmea_time_now(nmeaTIME *utc, uint32_t * present);
 void nmea_zero_INFO(nmeaINFO *info);
 
 bool nmea_INFO_is_present_smask(int smask, nmeaINFO_FIELD fieldName);
-bool nmea_INFO_is_present(uint32_t present, nmeaINFO_FIELD fieldName);
+
+/**
+ * Determine if a nmeaINFO structure has a certain field
+ *
+ * @param present the presence field
+ * @param fieldName use a name from nmeaINFO_FIELD
+ * @return a boolean, true when the structure has the requested field
+ */
+static INLINE bool nmea_INFO_is_present(uint32_t present, nmeaINFO_FIELD fieldName) {
+  return ((present & fieldName) != 0);
+}
+
 void nmea_INFO_set_present(uint32_t * present, nmeaINFO_FIELD fieldName);
 void nmea_INFO_unset_present(uint32_t * present, nmeaINFO_FIELD fieldName);
 
