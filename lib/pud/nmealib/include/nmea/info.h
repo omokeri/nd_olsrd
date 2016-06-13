@@ -19,6 +19,7 @@
 #define __NMEA_INFO_H__
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 #ifdef  __cplusplus
@@ -71,11 +72,53 @@ extern "C" {
 #define NMEA_SIG_SIM   (8)
 #define NMEA_SIG_LAST  (NMEA_SIG_SIM)
 
+static INLINE const char * nmea_INFO_sig_to_string(int sig) {
+  switch (sig) {
+    case NMEA_SIG_BAD:
+      return "INVALID";
+    case NMEA_SIG_LOW:
+      return "FIX";
+    case NMEA_SIG_MID:
+      return "DIFFERENTIAL";
+    case NMEA_SIG_HIGH:
+      return "SENSITIVE";
+    case NMEA_SIG_RTKIN:
+      return "REAL TIME KINEMATIC";
+    case NMEA_SIG_FLRTK:
+      return "FLOAT RTK";
+    case NMEA_SIG_ESTIM:
+      return "ESTIMATED (DEAD RECKONING)";
+    case NMEA_SIG_MAN:
+      return "MANUAL INPUT MODE";
+    case NMEA_SIG_SIM:
+      return "SIMULATION MODE";
+    default:
+      return NULL;
+  }
+}
+
 #define NMEA_FIX_FIRST (NMEA_FIX_BAD)
 #define NMEA_FIX_BAD   (1)
 #define NMEA_FIX_2D    (2)
 #define NMEA_FIX_3D    (3)
 #define NMEA_FIX_LAST  (NMEA_FIX_3D)
+
+static INLINE const char * nmea_INFO_fix_to_string(int fix) {
+  if (!fix) {
+    return NULL;
+  }
+
+  switch (fix) {
+    case NMEA_FIX_BAD:
+      return "BAD";
+    case NMEA_FIX_2D:
+      return "2D";
+    case NMEA_FIX_3D:
+      return "3D";
+    default:
+      return NULL;
+  }
+}
 
 #define NMEA_MAXSAT    (64)
 #define NMEA_SATINPACK (4)
@@ -199,6 +242,53 @@ typedef enum _nmeaINFO_FIELD {
 } nmeaINFO_FIELD;
 
 #define NMEA_INFO_PRESENT_MASK ((_nmeaINFO_FIELD_LAST << 1) - 1)
+
+static INLINE const char * nmea_INFO_field_to_string(nmeaINFO_FIELD field) {
+  if (!field) {
+    return NULL;
+  }
+
+  switch (field) {
+    case SMASK:
+      return "SMASK";
+    case UTCDATE:
+      return "UTCDATE";
+    case UTCTIME:
+      return "UTCTIME";
+    case SIG:
+      return "SIG";
+    case FIX:
+      return "FIX";
+    case PDOP:
+      return "PDOP";
+    case HDOP:
+      return "HDOP";
+    case VDOP:
+      return "VDOP";
+    case LAT:
+      return "LAT";
+    case LON:
+      return "LON";
+    case ELV:
+      return "ELV";
+    case SPEED:
+      return "SPEED";
+    case TRACK:
+      return "TRACK";
+    case MTRACK:
+      return "MTRACK";
+    case MAGVAR:
+      return "MAGVAR";
+    case SATINUSECOUNT:
+      return "SATINUSECOUNT";
+    case SATINUSE:
+      return "SATINUSE";
+    case SATINVIEW:
+      return "SATINVIEW";
+    default:
+      return NULL;
+  }
+}
 
 void nmea_time_now(nmeaTIME *utc, uint32_t * present);
 void nmea_zero_INFO(nmeaINFO *info);

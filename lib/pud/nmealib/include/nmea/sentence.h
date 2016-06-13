@@ -26,6 +26,7 @@
 #include <nmea/info.h>
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -40,8 +41,31 @@ enum nmeaPACKTYPE {
 	GPGSA = (1u << 1),	/**< GSA - GPS receiver operating mode, SVs used for navigation, and DOP values. */
 	GPGSV = (1u << 2),	/**< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values. */
 	GPRMC = (1u << 3),	/**< RMC - Recommended Minimum Specific GPS/TRANSIT Data. */
-	GPVTG = (1u << 4)	/**< VTG - Actual track made good and speed over ground. */
+	GPVTG = (1u << 4),	/**< VTG - Actual track made good and speed over ground. */
+	_nmeaPACKTYPE_LAST = GPVTG
 };
+
+static INLINE const char * nmea_INFO_smask_packtype_to_string(enum nmeaPACKTYPE packType) {
+  if (!packType) {
+    return NULL;
+  }
+
+  switch(packType) {
+      case GPGGA:
+        return "GPGGA";
+      case GPGSA:
+        return "GPGSA";
+      case GPGSV:
+        return "GPGSV";
+      case GPRMC:
+        return "GPRMC";
+      case GPVTG:
+        return "GPVTG";
+      case GPNON:
+      default:
+        return NULL;
+  }
+}
 
 /**
  * GGA packet information structure (Global Positioning System Fix Data)
