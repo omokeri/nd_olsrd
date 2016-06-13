@@ -84,31 +84,32 @@ typedef struct {
 #define SIW_INTERFACES                   (1ULL <<  7)
 #define SIW_2HOP                         (1ULL <<  8)
 #define SIW_SGW                          (1ULL <<  9)
-#define SIW_RUNTIME_ALL                  (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW)
+#define SIW_PUD_POSITION                 (1ULL << 10)
+#define SIW_RUNTIME_ALL                  (SIW_NEIGHBORS | SIW_LINKS | SIW_ROUTES | SIW_HNA | SIW_MID | SIW_TOPOLOGY | SIW_GATEWAYS | SIW_INTERFACES | SIW_2HOP | SIW_SGW | SIW_PUD_POSITION)
 #define SIW_NEIGHBORS_FREIFUNK           (SIW_NEIGHBORS | SIW_LINKS) /* special */
 
 /* these only change at olsrd startup */
-#define SIW_VERSION                      (1ULL << 10)
-#define SIW_CONFIG                       (1ULL << 11)
-#define SIW_PLUGINS                      (1ULL << 12)
+#define SIW_VERSION                      (1ULL << 11)
+#define SIW_CONFIG                       (1ULL << 12)
+#define SIW_PLUGINS                      (1ULL << 13)
 #define SIW_STARTUP_ALL                  (SIW_VERSION | SIW_CONFIG | SIW_PLUGINS)
 
 /* this is everything in normal format */
 #define SIW_ALL                          (SIW_RUNTIME_ALL | SIW_STARTUP_ALL)
 
 /* this data is not normal format but olsrd.conf format */
-#define SIW_OLSRD_CONF                   (1ULL << 13)
+#define SIW_OLSRD_CONF                   (1ULL << 14)
 
 /* netjson */
-#define SIW_NETJSON_NETWORK_ROUTES       (1ULL << 14)
-#define SIW_NETJSON_NETWORK_GRAPH        (1ULL << 15)
-#define SIW_NETJSON_DEVICE_CONFIGURATION (1ULL << 16)
-#define SIW_NETJSON_DEVICE_MONITORING    (1ULL << 17)
-#define SIW_NETJSON_NETWORK_COLLECTION   (1ULL << 18)
+#define SIW_NETJSON_NETWORK_ROUTES       (1ULL << 15)
+#define SIW_NETJSON_NETWORK_GRAPH        (1ULL << 16)
+#define SIW_NETJSON_DEVICE_CONFIGURATION (1ULL << 17)
+#define SIW_NETJSON_DEVICE_MONITORING    (1ULL << 18)
+#define SIW_NETJSON_NETWORK_COLLECTION   (1ULL << 19)
 #define SIW_NETJSON                      (SIW_NETJSON_NETWORK_ROUTES | SIW_NETJSON_NETWORK_GRAPH | SIW_NETJSON_DEVICE_CONFIGURATION | SIW_NETJSON_DEVICE_MONITORING | SIW_NETJSON_NETWORK_COLLECTION)
 
 /* everything */
-#define SIW_EVERYTHING                   ((1ULL << 19) - 1)
+#define SIW_EVERYTHING                   ((SIW_NETJSON_NETWORK_COLLECTION << 1) - 1)
 
 typedef void (*init_plugin)(const char *plugin_name);
 typedef unsigned long long (*supported_commands_mask_func)(void);
@@ -137,6 +138,8 @@ typedef struct {
     printer_generic mid;
     printer_generic gateways;
     printer_generic sgw;
+    printer_generic pudPosition;
+
     printer_generic version;
     printer_generic olsrd_conf;
     printer_generic interfaces;
@@ -167,6 +170,7 @@ struct info_cache_t {
     struct info_cache_entry_t interfaces;
     struct info_cache_entry_t twohop;
     struct info_cache_entry_t sgw;
+    struct info_cache_entry_t pudPosition;
 
     struct info_cache_entry_t version;
     struct info_cache_entry_t config;
@@ -225,6 +229,10 @@ static INLINE struct info_cache_entry_t * info_cache_get_entry(struct info_cache
 
     case SIW_SGW:
       r = &cache->sgw;
+      break;
+
+    case SIW_PUD_POSITION:
+      r = &cache->pudPosition;
       break;
 
     case SIW_VERSION:

@@ -129,6 +129,7 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     SIW_INTERFACES, //
     SIW_2HOP, //
     SIW_SGW, //
+    SIW_PUD_POSITION, //
     SIW_RUNTIME_ALL,//
     SIW_NEIGHBORS_FREIFUNK, //
     //
@@ -165,6 +166,7 @@ long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long lo
     case SIW_INTERFACES:
     case SIW_2HOP:
     case SIW_SGW:
+    case SIW_PUD_POSITION:
 
     case SIW_NETJSON_NETWORK_ROUTES:
     case SIW_NETJSON_NETWORK_GRAPH:
@@ -478,20 +480,21 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
     // only add if normal format
     if (send_what & SIW_ALL) {
       SiwLookupTableEntry funcs[] = {
-        { SIW_NEIGHBORS , functions->neighbors  }, //
-        { SIW_LINKS     , functions->links      }, //
-        { SIW_ROUTES    , functions->routes     }, //
-        { SIW_HNA       , functions->hna        }, //
-        { SIW_MID       , functions->mid        }, //
-        { SIW_TOPOLOGY  , functions->topology   }, //
-        { SIW_GATEWAYS  , functions->gateways   }, //
-        { SIW_INTERFACES, functions->interfaces }, //
-        { SIW_2HOP      , functions->twohop     }, //
-        { SIW_SGW       , functions->sgw        }, //
+        { SIW_NEIGHBORS   , functions->neighbors   }, //
+        { SIW_LINKS       , functions->links       }, //
+        { SIW_ROUTES      , functions->routes      }, //
+        { SIW_HNA         , functions->hna         }, //
+        { SIW_MID         , functions->mid         }, //
+        { SIW_TOPOLOGY    , functions->topology    }, //
+        { SIW_GATEWAYS    , functions->gateways    }, //
+        { SIW_INTERFACES  , functions->interfaces  }, //
+        { SIW_2HOP        , functions->twohop      }, //
+        { SIW_SGW         , functions->sgw         }, //
+        { SIW_PUD_POSITION, functions->pudPosition }, //
         //
-        { SIW_VERSION   , functions->version    }, //
-        { SIW_CONFIG    , functions->config     }, //
-        { SIW_PLUGINS   , functions->plugins    } //
+        { SIW_VERSION     , functions->version     }, //
+        { SIW_CONFIG      , functions->config      }, //
+        { SIW_PLUGINS     , functions->plugins     } //
       };
 
       send_info_from_table(&abuf, send_what, funcs, ARRAY_SIZE(funcs), &outputLength);
