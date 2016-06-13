@@ -1172,132 +1172,61 @@ static void build_pud_body(struct autobuf *abuf) {
 	}
 	abuf_puts(abuf, "</td></tr>\n");
 
-	/* present */
-	abuf_puts(abuf, "<tr><td>Input Fields</td><td></td><td></td><td></td><td id=\"present\">");
-	if (txGpsInfo->txPosition.nmeaInfo.present != 0) {
-    const nmeaINFO_FIELD id[] = {
-        SMASK,
-        UTCDATE,
-        UTCTIME,
-        SIG,
-        FIX,
-        PDOP,
-        HDOP,
-        VDOP,
-        LAT,
-        LON,
-        ELV,
-        SPEED,
-        TRACK,
-        MTRACK,
-        MAGVAR,
-        SATINUSECOUNT,
-        SATINUSE,
-        SATINVIEW,
-        0 };
-		const char * ids[] = {
-        "SMASK",
-        "UTCDATE",
-        "UTCTIME",
-        "SIG",
-        "FIX",
-        "PDOP",
-        "HDOP",
-        "VDOP",
-        "LAT",
-        "LON",
-        "ELV",
-        "SPEED",
-        "TRACK",
-        "MTRACK",
-        "MAGVAR",
-        "SATINUSECOUNT",
-        "SATINUSE",
-        "SATINVIEW" };
-		bool printed = false;
-		int i = 0;
-		int count = 0;
+  /* present */
+  abuf_puts(abuf, "<tr><td>Input Fields</td><td></td><td></td><td></td><td id=\"present\">");
+  if (txGpsInfo->txPosition.nmeaInfo.present != 0) {
+    uint32_t present = txGpsInfo->txPosition.nmeaInfo.present;
+    bool printed = false;
+    int i = 1;
+    int count = 0;
+    while (i <= _nmeaINFO_FIELD_LAST) {
+      const char * s = nmea_INFO_field_to_string(i & present);
+      if (s) {
+        if (printed) {
+          if (count >= 8) {
+            abuf_puts(abuf, "<br/>");
+            count = 0;
+          } else {
+            abuf_puts(abuf, "&nbsp;");
+          }
+        }
+        abuf_puts(abuf, s);
+        count++;
+        printed = true;
+      }
+      i <<= 1;
+    }
+  } else {
+    abuf_puts(abuf, NA_STRING);
+  }
+  abuf_puts(abuf, "</td></tr>\n");
 
-		while (id[i] != 0) {
-			if (txGpsInfo->txPosition.nmeaInfo.present & id[i]) {
-				if (printed) {
-				  if (count >= 8) {
-				    abuf_puts(abuf, "<br/>");
-				    count = 0;
-				  } else {
-				    abuf_puts(abuf, "&nbsp;");
-				  }
-				}
-				abuf_puts(abuf, ids[i]);
-				count++;
-				printed = true;
-			}
-			i++;
-		}
-	} else {
-		abuf_puts(abuf, NA_STRING);
-	}
-	abuf_puts(abuf, "</td></tr>\n");
-
-	/* smask */
-	abuf_puts(abuf, "<tr><td>Input Sentences</td><td></td><td></td><td></td><td id=\"smask\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SMASK)
-			&& (txGpsInfo->txPosition.nmeaInfo.smask != GPNON)) {
-		const int id[] = { GPGGA, GPGSA, GPGSV, GPRMC, GPVTG, GPNON };
-		const char * ids[] = { "GPGGA", "GPGSA", "GPGSV", "GPRMC", "GPVTG" };
-		bool printed = false;
-		int i = 0;
-
-		while (id[i] != GPNON) {
-			if (txGpsInfo->txPosition.nmeaInfo.smask & id[i]) {
-				if (printed)
-					abuf_puts(abuf, "&nbsp;");
-				abuf_puts(abuf, ids[i]);
-				printed = true;
-			}
-			i++;
-		}
-	} else {
-		abuf_puts(abuf, NA_STRING);
-	}
-	abuf_puts(abuf, "</td></tr>\n");
+  /* smask */
+  abuf_puts(abuf, "<tr><td>Input Sentences</td><td></td><td></td><td></td><td id=\"smask\">");
+  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SMASK) //
+      && (txGpsInfo->txPosition.nmeaInfo.smask != GPNON)) {
+    int smask = txGpsInfo->txPosition.nmeaInfo.smask;
+    bool printed = false;
+    int i = 1;
+    while (i <= _nmeaPACKTYPE_LAST) {
+      const char * s = nmea_INFO_smask_packtype_to_string(i & smask);
+      if (s) {
+        if (printed)
+          abuf_puts(abuf, "&nbsp;");
+        abuf_puts(abuf, s);
+        printed = true;
+      }
+      i <<= 1;
+    }
+  } else {
+    abuf_puts(abuf, NA_STRING);
+  }
+  abuf_puts(abuf, "</td></tr>\n");
 
 	/* sig */
 	abuf_puts(abuf, "<tr><td>Signal Strength</td><td></td><td></td><td></td><td id=\"sig\">");
 	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SIG)) {
-		const char * s;
-		switch (txGpsInfo->txPosition.nmeaInfo.sig) {
-			case NMEA_SIG_BAD:
-				s = "Invalid";
-				break;
-			case NMEA_SIG_LOW:
-				s = "Fix";
-				break;
-			case NMEA_SIG_MID:
-				s = "Differential";
-				break;
-			case NMEA_SIG_HIGH:
-				s = "Sensitive";
-				break;
-			case NMEA_SIG_RTKIN:
-				s = "Real Time Kinematic";
-				break;
-			case NMEA_SIG_FLRTK:
-				s = "Float RTK";
-				break;
-			case NMEA_SIG_ESTIM:
-				s = "Estimated (Dead Reckoning)";
-				break;
-			case NMEA_SIG_MAN:
-				s = "Manual Input Mode";
-				break;
-			case NMEA_SIG_SIM:
-				s = "Simulation Mode";
-				break;
-			default:
-				s = "Unknown";
-				break;
-		}
+		const char * s = nmea_INFO_sig_to_string(txGpsInfo->txPosition.nmeaInfo.sig);
 		abuf_appendf(abuf, "%s (%d)", s, txGpsInfo->txPosition.nmeaInfo.sig);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1307,21 +1236,7 @@ static void build_pud_body(struct autobuf *abuf) {
 	/* fix */
 	abuf_puts(abuf, "<tr><td>Fix</td><td></td><td></td><td></td><td id=\"fix\">");
 	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, FIX)) {
-		const char * s;
-		switch (txGpsInfo->txPosition.nmeaInfo.fix) {
-			case NMEA_FIX_BAD:
-				s = "BAD";
-				break;
-			case NMEA_FIX_2D:
-				s = "2D";
-				break;
-			case NMEA_FIX_3D:
-				s = "3D";
-				break;
-			default:
-				s = "Unknown";
-				break;
-		}
+		const char * s = nmea_INFO_fix_to_string(txGpsInfo->txPosition.nmeaInfo.fix);
 		abuf_appendf(abuf, "%s (%d)", s, txGpsInfo->txPosition.nmeaInfo.fix);
 	} else {
 		abuf_puts(abuf, NA_STRING);
