@@ -1186,9 +1186,7 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
   cnf->lq_nat_thresh = DEF_LQ_NAT_THRESH;
 
-#ifdef HTTPINFO_PUD
   cnf->pud_position = NULL;
-#endif /* HTTPINFO_PUD */
 }
 
 struct if_config_options *

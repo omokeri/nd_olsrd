@@ -50,9 +50,7 @@
 #include "defs.h"
 #include "olsr_types.h"
 #include "common/autobuf.h"
-#ifdef HTTPINFO_PUD
 #include "pud/src/receiver.h"
-#endif /* HTTPINFO_PUD */
 
 /* set to 1 to collect all startup sleep into one sleep
  * (just as long as the longest sleep)
@@ -385,9 +383,7 @@ struct olsrd_config {
 #endif /* defined __FreeBSD__ || defined __FreeBSD_kernel__ || defined __APPLE__ || defined __NetBSD__ || defined __OpenBSD__ */
   float lq_nat_thresh;
 
-#ifdef HTTPINFO_PUD
   TransmitGpsInformation * pud_position;
-#endif /* HTTPINFO_PUD */
 };
 
 #if defined __cplusplus

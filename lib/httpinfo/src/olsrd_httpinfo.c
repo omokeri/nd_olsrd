@@ -71,12 +71,10 @@
 #include "defs.h"
 #include "lq_plugin.h"
 #include "common/autobuf.h"
-#ifdef HTTPINFO_PUD
-  #include <pud/src/receiver.h>
-  #include <pud/src/pud.h>
-  #include <nmea/info.h>
-  #include <nmea/sentence.h>
-#endif /* HTTPINFO_PUD */
+#include <pud/src/receiver.h>
+#include <pud/src/pud.h>
+#include <nmea/info.h>
+#include <nmea/sentence.h>
 
 #include "olsrd_httpinfo.h"
 #include "admin_interface.h"
@@ -193,9 +191,7 @@ static void build_all_body(struct autobuf *);
 static void build_sgw_body(struct autobuf *);
 #endif /* __linux__ */
 
-#ifdef HTTPINFO_PUD
 static void build_pud_body(struct autobuf *);
-#endif /* HTTPINFO_PUD */
 
 static void build_about_body(struct autobuf *);
 
@@ -230,9 +226,7 @@ static const struct tab_entry tab_entries[] = {
 #ifdef __linux__
   {"Smart Gateway", "sgw", build_sgw_body, true},
 #endif /* __linux__ */
-#ifdef HTTPINFO_PUD
   {"Position", "position", build_pud_body, true},
-#endif /* HTTPINFO_PUD */
   {"All", "all", build_all_body, true},
 #ifdef ADMIN_INTERFACE
   {"Admin", "admin", build_admin_body, true},
@@ -1112,12 +1106,8 @@ build_all_body(struct autobuf *abuf)
 #ifdef __linux__
   build_sgw_body(abuf);
 #endif /* __linux__ */
-#ifdef HTTPINFO_PUD
   build_pud_body(abuf);
-#endif /* HTTPINFO_PUD */
 }
-
-#ifdef HTTPINFO_PUD
 /**
  * Determine if a nmeaINFO structure has a certain field.
  * We need this function locally because nmealib might not be loaded.
@@ -1524,7 +1514,6 @@ static void build_pud_body(struct autobuf *abuf) {
 		);
 	}
 }
-#endif /* HTTPINFO_PUD */
 
 #ifdef __linux__
 

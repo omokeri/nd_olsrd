@@ -985,9 +985,8 @@ bool startReceiver(void) {
 	transmitGpsInformation.positionUpdated = false;
 	transmitGpsInformation.nodeId = getNodeId(NULL);
 
-#ifdef HTTPINFO_PUD
 	olsr_cnf->pud_position = &transmitGpsInformation;
-#endif /* HTTPINFO_PUD */
+
 	initPositionAverageList(&positionAverageList, getAverageDepth());
 
 	if (!initOlsrTxTimer()) {
