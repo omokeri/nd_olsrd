@@ -46,10 +46,6 @@ enum nmeaPACKTYPE {
 };
 
 static INLINE const char * nmea_INFO_smask_packtype_to_string(enum nmeaPACKTYPE packType) {
-  if (!packType) {
-    return NULL;
-  }
-
   switch(packType) {
       case GPGGA:
         return "GPGGA";
