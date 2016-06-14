@@ -72,6 +72,7 @@ void ipc_print_hna(struct autobuf *abuf);
 void ipc_print_mid(struct autobuf *abuf);
 void ipc_print_gateways(struct autobuf *abuf);
 void ipc_print_sgw(struct autobuf *abuf);
+void ipc_print_pud_position(struct autobuf *abuf);
 void ipc_print_version(struct autobuf *abuf);
 void ipc_print_olsrd_conf(struct autobuf *abuf);
 void ipc_print_interfaces(struct autobuf *abuf);

@@ -116,6 +116,7 @@ int olsrd_plugin_init(void) {
   functions.mid = ipc_print_mid;
   functions.gateways = ipc_print_gateways;
   functions.sgw = ipc_print_sgw;
+  functions.pudPosition = ipc_print_pud_position;
   functions.version = ipc_print_version;
   functions.olsrd_conf = ipc_print_olsrd_conf;
   functions.interfaces = ipc_print_interfaces;
