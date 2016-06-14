@@ -21,6 +21,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef  __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /**
  * @file
  * The table below describes which fields are present in the sentences that are
@@ -75,10 +79,6 @@
 
 #define NMEA_DEF_LAT   (0.0)
 #define NMEA_DEF_LON   (0.0)
-
-#ifdef  __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 /**
  * Date and time data
