@@ -156,14 +156,13 @@ void abuf_json_boolean(struct json_session *session, struct autobuf *abuf, const
 void abuf_json_string(struct json_session *session, struct autobuf *abuf, const char* key, const char* value) {
   assert(session);
   assert(abuf);
-  assert(value);
 
   abuf_json_insert_comma(session, abuf);
   abuf_json_new_indent(session, abuf);
   if (key) {
     abuf_appendf(abuf, "\"%s\": ", key);
   }
-  abuf_appendf(abuf, "\"%s\"", value);
+  abuf_appendf(abuf, "\"%s\"", !value ? "" : value);
   session->entrynumber[session->currentjsondepth]++;
 }
 
@@ -216,14 +215,13 @@ void abuf_json_ip_address(struct json_session *session, struct autobuf *abuf, co
 
   assert(session);
   assert(abuf);
-  assert(ip);
 
   abuf_json_insert_comma(session, abuf);
   abuf_json_new_indent(session, abuf);
   if (key) {
     abuf_appendf(abuf, "\"%s\": ", key);
   }
-  abuf_appendf(abuf, "\"%s\"", olsr_ip_to_string(&ipStr, ip));
+  abuf_appendf(abuf, "\"%s\"", !ip ? "" : olsr_ip_to_string(&ipStr, ip));
   session->entrynumber[session->currentjsondepth]++;
 }
 
@@ -233,9 +231,10 @@ void abuf_json_ip_address46(struct json_session *session, struct autobuf *abuf, 
 
   assert(session);
   assert(abuf);
-  assert(ip);
 
-  if (af == AF_INET) {
+  if (!ip) {
+    value = "";
+  } else if (af == AF_INET) {
     value = ip4_to_string(&ipStr, *((const struct in_addr*) ip));
   } else {
     value = ip6_to_string(&ipStr, (const struct in6_addr * const ) ip);
@@ -257,16 +256,19 @@ void abuf_json_prefix(struct json_session *session, struct autobuf *abuf, const 
 
   assert(session);
   assert(abuf);
-  assert(prefix);
-
-  value = olsr_ip_to_string(&ipStr, &prefix->prefix);
-  prefixLen = prefix->prefix_len;
 
   abuf_json_insert_comma(session, abuf);
   abuf_json_new_indent(session, abuf);
   if (key) {
     abuf_appendf(abuf, "\"%s\": ", key);
   }
-  abuf_appendf(abuf, "\"%s/%d\"", value, prefixLen);
+  if (!prefix) {
+    abuf_puts(abuf, "\"\"");
+  } else {
+    value = olsr_ip_to_string(&ipStr, &prefix->prefix);
+    prefixLen = prefix->prefix_len;
+    abuf_appendf(abuf, "\"%s/%d\"", value, prefixLen);
+  }
+
   session->entrynumber[session->currentjsondepth]++;
 }
