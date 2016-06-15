@@ -200,7 +200,11 @@ zclient_read(ssize_t * size)
     /* handle no data available */
     if (bytes_received < 0) {
       /* handle disconnect */
+#if EWOULDBLOCK == EAGAIN
+      if (errno != EAGAIN) { // oops - we got disconnected
+#else
       if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) { // oops - we got disconnected
+#endif
         OLSR_PRINTF(1, "(QUAGGA) Disconnected from zebra\n");
         zebra.status &= ~STATUS_CONNECTED;
         /* TODO: Remove HNAs added from redistribution */

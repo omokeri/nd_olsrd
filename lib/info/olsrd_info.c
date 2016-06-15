@@ -371,7 +371,11 @@ static void write_data(void *unused __attribute__((unused))) {
       outbuffer.written[i] += result;
     }
 
+#if EWOULDBLOCK == EAGAIN
+    if ((result < 0) && (errno == EAGAIN)) {
+#else
     if ((result < 0) && ((errno == EWOULDBLOCK) || (errno == EAGAIN))) {
+#endif
       continue;
     }
 
