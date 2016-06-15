@@ -127,7 +127,7 @@ SGW_POLICY_SCRIPT ?= sgw_policy_routing_setup.sh
 DOCDIR_OLSRD ?= $(DOCDIR)/$(EXENAME)
 
 
-CPPFLAGS  = -Isrc -I$(TOPDIR)/src -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
+CPPFLAGS  = -I$(TOPDIR)/src -I$(TOPDIR)/lib -I$(TOPDIR)/lib/pud/nmealib/include -I$(TOPDIR)/lib/pud/wireformat/include
 
 # include OS specific compiler settings
 -include $(TOPDIR)/make/Makefile.$(OS).compiler
@@ -158,6 +158,7 @@ WARNINGS += -Winit-self
 WARNINGS += -Winline
 WARNINGS += -Wmissing-declarations
 WARNINGS += -Wmissing-format-attribute
+WARNINGS += -Wmissing-include-dirs
 WARNINGS += -Wmissing-noreturn
 WARNINGS += -Wmissing-prototypes
 WARNINGS += -Wno-deprecated-declarations
