@@ -55,7 +55,7 @@ struct autobuf;
 
 #define AUTOBUFCHUNK	4096
 
-#define AUTOBUFSIZEMAX INT_MAX
+#define AUTOBUFSIZEMAX (1 << 24)
 
 struct autobuf {
     int size;
