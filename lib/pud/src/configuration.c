@@ -58,7 +58,7 @@
 
 /* System includes */
 #include <unistd.h>
-#include <nmea/parse.h>
+#include <nmealib/validate.h>
 #include <OlsrdPudWireFormat/nodeIdConversion.h>
 #include <limits.h>
 
@@ -380,15 +380,15 @@ static bool intSetupNodeIdBinaryDoubleLongLong(
  - false on failure
  */
 static bool intSetupNodeIdBinaryString(void) {
-  const char * invalidCharName;
+  const NmeaInvalidCharacter * invalidCharName;
   size_t nodeidlength;
   char * nodeid = (char *) getNodeId(&nodeidlength);
 
-  invalidCharName = nmea_parse_sentence_has_invalid_chars(nodeid, nodeidlength);
+  invalidCharName = nmeaValidateSentenceHasInvalidCharacters(nodeid, nodeidlength);
   if (invalidCharName) {
     char report[256];
     snprintf(report, sizeof(report), "Configured %s (%s),"
-        " contains invalid NMEA characters (%s)", PUD_NODE_ID_NAME, nodeid, invalidCharName);
+        " contains invalid NMEA character '%c' (%s)", PUD_NODE_ID_NAME, nodeid, invalidCharName->character, invalidCharName->description);
     pudError(false, "%s", &report[0]);
     return false;
   }
@@ -1025,7 +1025,7 @@ unsigned char * getTxNmeaMessagePrefix(void) {
 
 int setTxNmeaMessagePrefix(const char *value, void *data __attribute__ ((unused)),
 		set_plugin_parameter_addon addon __attribute__ ((unused))) {
-	const char * invalidCharName;
+	const NmeaInvalidCharacter * invalidCharName;
 	static const char * valueName = PUD_TX_NMEAMESSAGEPREFIX_NAME;
 	size_t valueLength;
 
@@ -1038,11 +1038,11 @@ int setTxNmeaMessagePrefix(const char *value, void *data __attribute__ ((unused)
 		return true;
 	}
 
-  invalidCharName = nmea_parse_sentence_has_invalid_chars(value, valueLength);
+  invalidCharName = nmeaValidateSentenceHasInvalidCharacters(value, valueLength);
   if (invalidCharName) {
     char report[256];
     snprintf(report, sizeof(report), "Configured %s (%s),"
-        " contains invalid NMEA characters (%s)", valueName, value, invalidCharName);
+        " contains invalid NMEA character '%c' (%s)", valueName, value, invalidCharName->character, invalidCharName->description);
     pudError(false, "%s", report);
     return true;
   }

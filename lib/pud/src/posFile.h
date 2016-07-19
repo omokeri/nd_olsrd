@@ -52,8 +52,8 @@
 
 /* System includes */
 #include <stdbool.h>
-#include <nmea/info.h>
-#include <nmea/sentence.h>
+#include <nmealib/info.h>
+#include <nmealib/sentence.h>
 
 /**
  <pre>
@@ -81,11 +81,11 @@
  x1 = not present in the sentence but the library sets it up.
  </pre>
  */
-#define POSFILE_DEFAULT_SMASK           (GPGGA | GPGSA | GPRMC | GPVTG)
+#define POSFILE_DEFAULT_SMASK           (NMEALIB_SENTENCE_GPGGA | NMEALIB_SENTENCE_GPGSA | NMEALIB_SENTENCE_GPRMC | NMEALIB_SENTENCE_GPVTG)
 
 /* no default utc: current time is always used */
-#define POSFILE_DEFAULT_SIG             (NMEA_SIG_HIGH)
-#define POSFILE_DEFAULT_FIX             (NMEA_FIX_BAD)
+#define POSFILE_DEFAULT_SIG             (NMEALIB_SIG_SENSITIVE)
+#define POSFILE_DEFAULT_FIX             (NMEALIB_FIX_BAD)
 #define POSFILE_DEFAULT_HDOP            (0.0)
 #define POSFILE_DEFAULT_LAT             (0.0)
 #define POSFILE_DEFAULT_LON             (0.0)
@@ -120,6 +120,6 @@
 
 bool startPositionFile(void);
 void stopPositionFile(void);
-bool readPositionFile(char * fileName, nmeaINFO * nmeaInfo);
+bool readPositionFile(char * fileName, NmeaInfo * nmeaInfo);
 
 #endif /* _PUD_POSFILE_H_ */

@@ -73,8 +73,8 @@
 #include "common/autobuf.h"
 #include <pud/src/receiver.h>
 #include <pud/src/pud.h>
-#include <nmea/info.h>
-#include <nmea/sentence.h>
+#include <nmealib/info.h>
+#include <nmealib/sentence.h>
 
 #include "olsrd_httpinfo.h"
 #include "admin_interface.h"
@@ -1148,8 +1148,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* utc */
 	abuf_puts(abuf, "<tr><td>Date / Time</td><td></td><td>UTC</td><td></td><td id=\"utc\">");
-	datePresent = nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, UTCDATE);
-	timePresent = nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, UTCTIME);
+	datePresent = nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_UTCDATE);
+	timePresent = nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_UTCTIME);
 	if (datePresent || timePresent) {
 		if (datePresent) {
 			abuf_appendf(abuf, "%04d%02d%02d",
@@ -1179,8 +1179,8 @@ static void build_pud_body(struct autobuf *abuf) {
     bool printed = false;
     int i = 1;
     int count = 0;
-    while (i <= _nmeaINFO_FIELD_LAST) {
-      const char * s = nmea_INFO_field_to_string(i & present);
+    while (i <= NMEALIB_PRESENT_LAST) {
+      const char * s = nmeaInfoFieldToString(i & present);
       if (s) {
         if (printed) {
           if (count >= 8) {
@@ -1203,13 +1203,13 @@ static void build_pud_body(struct autobuf *abuf) {
 
   /* smask */
   abuf_puts(abuf, "<tr><td>Input Sentences</td><td></td><td></td><td></td><td id=\"smask\">");
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SMASK) //
-      && (txGpsInfo->txPosition.nmeaInfo.smask != GPNON)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SMASK) //
+      && (txGpsInfo->txPosition.nmeaInfo.smask != NMEALIB_SENTENCE_GPNON)) {
     int smask = txGpsInfo->txPosition.nmeaInfo.smask;
     bool printed = false;
     int i = 1;
-    while (i <= _nmeaPACKTYPE_LAST) {
-      const char * s = nmea_INFO_smask_packtype_to_string(i & smask);
+    while (i <= NMEALIB_SENTENCE_LAST) {
+      const char * s = nmeaSentenceToPrefix(i & smask);
       if (s) {
         if (printed)
           abuf_puts(abuf, "&nbsp;");
@@ -1225,8 +1225,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* sig */
 	abuf_puts(abuf, "<tr><td>Signal Strength</td><td></td><td></td><td></td><td id=\"sig\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SIG)) {
-		const char * s = nmea_INFO_sig_to_string(txGpsInfo->txPosition.nmeaInfo.sig);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SIG)) {
+		const char * s = nmeaInfoSignalToString(txGpsInfo->txPosition.nmeaInfo.sig);
 		abuf_appendf(abuf, "%s (%d)", s, txGpsInfo->txPosition.nmeaInfo.sig);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1235,8 +1235,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* fix */
 	abuf_puts(abuf, "<tr><td>Fix</td><td></td><td></td><td></td><td id=\"fix\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, FIX)) {
-		const char * s = nmea_INFO_fix_to_string(txGpsInfo->txPosition.nmeaInfo.fix);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_FIX)) {
+		const char * s = nmeaInfoFixToString(txGpsInfo->txPosition.nmeaInfo.fix);
 		abuf_appendf(abuf, "%s (%d)", s, txGpsInfo->txPosition.nmeaInfo.fix);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1245,8 +1245,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* PDOP */
 	abuf_puts(abuf, "<tr><td>PDOP</td><td></td><td></td><td></td><td id=\"pdop\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, PDOP)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.PDOP);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_PDOP)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.pdop);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1254,8 +1254,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* HDOP */
 	abuf_puts(abuf, "<tr><td>HDOP</td><td></td><td></td><td></td><td id=\"hdop\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, HDOP)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.HDOP);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_HDOP)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.hdop);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1263,8 +1263,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* VDOP */
 	abuf_puts(abuf, "<tr><td>VDOP</td><td></td><td></td><td></td><td id=\"vdop\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, VDOP)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.VDOP);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_VDOP)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.vdop);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1272,8 +1272,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* lat */
 	abuf_puts(abuf, "<tr><td>Latitude</td><td></td><td>degrees</td><td></td><td id=\"lat\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LAT)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.lat);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LAT)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.latitude);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1281,8 +1281,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* lon */
 	abuf_puts(abuf, "<tr><td>Longitude</td><td></td><td>degrees</td><td></td><td id=\"lon\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LON)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.lon);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LON)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.longitude);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1290,8 +1290,8 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* elv */
 	abuf_puts(abuf, "<tr><td>Elevation</td><td></td><td>m</td><td></td><td id=\"elv\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, ELV)) {
-		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.elv);
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_ELV)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.elevation);
 	} else {
 		abuf_puts(abuf, NA_STRING);
 	}
@@ -1299,7 +1299,7 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* speed */
 	abuf_puts(abuf, "<tr><td>Speed</td><td></td><td>kph</td><td></td><td id=\"speed\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SPEED)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SPEED)) {
 		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.speed);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1308,7 +1308,7 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* track */
 	abuf_puts(abuf, "<tr><td>Track</td><td></td><td>degrees</td><td></td><td id=\"track\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, TRACK)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_TRACK)) {
 		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.track);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1317,7 +1317,7 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* mtrack */
 	abuf_puts(abuf, "<tr><td>Magnetic Track</td><td></td><td>degrees</td><td></td><td id=\"mtrack\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, MTRACK)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_MTRACK)) {
 		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.mtrack);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1326,7 +1326,7 @@ static void build_pud_body(struct autobuf *abuf) {
 
 	/* magvar */
 	abuf_puts(abuf, "<tr><td>Magnetic Variation</td><td></td><td>degrees</td><td></td><td id=\"magvar\">");
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, MAGVAR)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_MAGVAR)) {
 		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.magvar);
 	} else {
 		abuf_puts(abuf, NA_STRING);
@@ -1337,7 +1337,7 @@ static void build_pud_body(struct autobuf *abuf) {
 	abuf_puts(abuf, "</table></p>\n");
 
 	/* sats */
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINVIEW)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINVIEW)) {
 		int cnt = 0;
 
 		abuf_puts(abuf, "<p>\n");
@@ -1347,20 +1347,20 @@ static void build_pud_body(struct autobuf *abuf) {
 		abuf_puts(abuf,
 				"<tr><th>ID</th><th>In Use</th><th>Elevation (degrees)</th><th>Azimuth (degrees)</th><th>Signal (dB)</th></tr>\n");
 
-		if (txGpsInfo->txPosition.nmeaInfo.satinfo.inview) {
-			int satIndex;
-			for (satIndex = 0; satIndex < NMEA_MAXSAT; satIndex++) {
-				nmeaSATELLITE * sat = &txGpsInfo->txPosition.nmeaInfo.satinfo.sat[satIndex];
-				if (sat->id) {
+		if (txGpsInfo->txPosition.nmeaInfo.satellites.inViewCount) {
+			size_t satIndex;
+			for (satIndex = 0; satIndex < NMEALIB_MAX_SATELLITES; satIndex++) {
+			  NmeaSatellite * sat = &txGpsInfo->txPosition.nmeaInfo.satellites.inView[satIndex];
+				if (sat->prn) {
 					bool inuse = false;
 					const char * inuseStr;
 
-					if (!nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINUSE)) {
+					if (!nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSE)) {
 						inuseStr = NA_STRING;
 					} else {
-						int inuseIndex;
-						for (inuseIndex = 0; inuseIndex < NMEA_MAXSAT; inuseIndex++) {
-							if (txGpsInfo->txPosition.nmeaInfo.satinfo.in_use[inuseIndex] == sat->id) {
+						size_t inuseIndex;
+						for (inuseIndex = 0; inuseIndex < NMEALIB_MAX_SATELLITES; inuseIndex++) {
+							if (txGpsInfo->txPosition.nmeaInfo.satellites.inUse[inuseIndex] == sat->prn) {
 								inuse = true;
 								break;
 							}
@@ -1372,8 +1372,8 @@ static void build_pud_body(struct autobuf *abuf) {
 						}
 					}
 
-					abuf_appendf(abuf, "<tr><td>%02d</td><td bgcolor=\"%s\">%s</td><td>%02d</td><td>%03d</td><td>%02d</td></tr>\n",
-							sat->id, inuse ? SAT_INUSE_COLOR : SAT_NOTINUSE_COLOR, inuseStr, sat->elv, sat->azimuth, sat->sig);
+					abuf_appendf(abuf, "<tr><td>%02u</td><td bgcolor=\"%s\">%s</td><td>%02d</td><td>%03u</td><td>%02d</td></tr>\n",
+							sat->prn, inuse ? SAT_INUSE_COLOR : SAT_NOTINUSE_COLOR, inuseStr, sat->elevation, sat->azimuth, sat->snr);
 					cnt++;
 				}
 			}
@@ -1388,15 +1388,15 @@ static void build_pud_body(struct autobuf *abuf) {
 	}
 
 	/* add Google Maps and OpenStreetMap links when we have both lat and lon */
-	if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LAT)
-			&& nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LON)) {
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LAT)
+			&& nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LON)) {
 		const char * c = nodeId;
 
 		abuf_appendf(abuf,
 			"<p>\n"
 			"<a href=\"http://maps.google.com/maps?q=%f,+%f+%%28",
-			txGpsInfo->txPosition.nmeaInfo.lat,
-			txGpsInfo->txPosition.nmeaInfo.lon
+			txGpsInfo->txPosition.nmeaInfo.latitude,
+			txGpsInfo->txPosition.nmeaInfo.longitude
 		);
 
 		while (*c != '\0') {
@@ -1413,8 +1413,8 @@ static void build_pud_body(struct autobuf *abuf) {
 		abuf_appendf(abuf,
 			"<p>\n"
 			"<a href=\"http://www.openstreetmap.org/index.html?mlat=%f&amp;mlon=%f&amp;zoom=15&amp;layers=M\">Show on OpenStreetMap</a></p>\n",
-			txGpsInfo->txPosition.nmeaInfo.lat,
-			txGpsInfo->txPosition.nmeaInfo.lon
+			txGpsInfo->txPosition.nmeaInfo.latitude,
+			txGpsInfo->txPosition.nmeaInfo.longitude
 		);
 	}
 }

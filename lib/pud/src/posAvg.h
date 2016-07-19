@@ -51,7 +51,7 @@
 /* OLSR includes */
 
 /* System includes */
-#include <nmea/info.h>
+#include <nmealib/info.h>
 #include <stdbool.h>
 
 /** Stores angle components */
@@ -62,7 +62,7 @@ typedef struct _AngleComponents {
 
 /** Stores an nmeaINFO entry, used in the averaging */
 typedef struct _PositionUpdateEntry {
-		nmeaINFO nmeaInfo; /**< the position information */
+		NmeaInfo nmeaInfo; /**< the position information */
 
 		/* used for averaging of angles */
 		AngleComponents track; /**< the track angle components */

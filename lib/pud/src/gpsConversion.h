@@ -52,7 +52,7 @@
 #include "olsr_protocol.h"
 
 /* System includes */
-#include <nmea/info.h>
+#include <nmealib/info.h>
 
 /*
  * Version
@@ -68,7 +68,7 @@
  * Functions
  */
 
-unsigned int gpsToOlsr(nmeaINFO *nmeaInfo, union olsr_message *olsrMessage,
+unsigned int gpsToOlsr(NmeaInfo *nmeaInfo, union olsr_message *olsrMessage,
 		unsigned int olsrMessageSize, unsigned long long validityTime);
 
 unsigned int gpsFromOlsr(union olsr_message *olsrMessage,

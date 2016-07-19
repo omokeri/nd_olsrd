@@ -64,8 +64,8 @@
 #include "info/json_helpers.h"
 #include "gateway_default_handler.h"
 #include "egressTypes.h"
-#include "nmea/info.h"
-#include "nmea/sentence.h"
+#include "nmealib/info.h"
+#include "nmealib/sentence.h"
 
 #define UUIDLEN 256
 char uuid[UUIDLEN];
@@ -900,7 +900,7 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   }
 
   /* utc */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, UTCDATE)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_UTCDATE)) {
     abuf_json_mark_object(&json_session, true, false, abuf, "date");
     abuf_json_int(&json_session, abuf, "year", txGpsInfo->txPosition.nmeaInfo.utc.year + 1900);
     abuf_json_int(&json_session, abuf, "month", txGpsInfo->txPosition.nmeaInfo.utc.mon + 1);
@@ -908,7 +908,7 @@ void ipc_print_pud_position(struct autobuf *abuf) {
     abuf_json_mark_object(&json_session, false, false, abuf, NULL);
   }
 
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, UTCTIME)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_UTCTIME)) {
     abuf_json_mark_object(&json_session, true, false, abuf, "time");
     abuf_json_int(&json_session, abuf, "hour", txGpsInfo->txPosition.nmeaInfo.utc.hour);
     abuf_json_int(&json_session, abuf, "minute", txGpsInfo->txPosition.nmeaInfo.utc.min);
@@ -921,9 +921,9 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   abuf_json_mark_object(&json_session, true, true, abuf, "present");
   {
     uint32_t present = txGpsInfo->txPosition.nmeaInfo.present;
-    int i = 1;
-    while (i <= _nmeaINFO_FIELD_LAST) {
-      const char * s = nmea_INFO_field_to_string(present & i);
+    size_t i = 1;
+    while (i <= NMEALIB_PRESENT_LAST) {
+      const char * s = nmeaInfoFieldToString(present & i);
       if (s) {
         abuf_json_string(&json_session, abuf, NULL, s);
       }
@@ -934,13 +934,13 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   abuf_json_int(&json_session, abuf, "presentValue", txGpsInfo->txPosition.nmeaInfo.present);
 
   /* smask */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SMASK)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SMASK)) {
     int smask = txGpsInfo->txPosition.nmeaInfo.smask;
     abuf_json_mark_object(&json_session, true, true, abuf, "smask");
-    if (smask != GPNON) {
+    if (smask != NMEALIB_SENTENCE_GPNON) {
       int i = 1;
-      while (i <= _nmeaPACKTYPE_LAST) {
-        const char * s = nmea_INFO_smask_packtype_to_string(smask & i);
+      while (i <= NMEALIB_SENTENCE_LAST) {
+        const char * s = nmeaSentenceToPrefix(smask & i);
         if (s) {
           abuf_json_string(&json_session, abuf, NULL, s);
         }
@@ -952,103 +952,103 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   }
 
   /* sig */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SIG)) {
-    abuf_json_string(&json_session, abuf, "sig", nmea_INFO_sig_to_string(txGpsInfo->txPosition.nmeaInfo.sig));
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SIG)) {
+    abuf_json_string(&json_session, abuf, "sig", nmeaInfoSignalToString(txGpsInfo->txPosition.nmeaInfo.sig));
     abuf_json_int(&json_session, abuf, "sigValue", txGpsInfo->txPosition.nmeaInfo.sig);
   }
 
   /* fix */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, FIX)) {
-    abuf_json_string(&json_session, abuf, "fix", nmea_INFO_fix_to_string(txGpsInfo->txPosition.nmeaInfo.fix));
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_FIX)) {
+    abuf_json_string(&json_session, abuf, "fix", nmeaInfoFixToString(txGpsInfo->txPosition.nmeaInfo.fix));
     abuf_json_int(&json_session, abuf, "fixValue", txGpsInfo->txPosition.nmeaInfo.fix);
   }
 
   /* PDOP */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, PDOP)) {
-    abuf_json_float(&json_session, abuf, "pdop", txGpsInfo->txPosition.nmeaInfo.PDOP);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_PDOP)) {
+    abuf_json_float(&json_session, abuf, "pdop", txGpsInfo->txPosition.nmeaInfo.pdop);
   }
 
   /* HDOP */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, HDOP)) {
-    abuf_json_float(&json_session, abuf, "hdop", txGpsInfo->txPosition.nmeaInfo.HDOP);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_HDOP)) {
+    abuf_json_float(&json_session, abuf, "hdop", txGpsInfo->txPosition.nmeaInfo.hdop);
   }
 
   /* VDOP */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, VDOP)) {
-    abuf_json_float(&json_session, abuf, "vdop", txGpsInfo->txPosition.nmeaInfo.VDOP);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_VDOP)) {
+    abuf_json_float(&json_session, abuf, "vdop", txGpsInfo->txPosition.nmeaInfo.vdop);
   }
 
   /* lat */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LAT)) {
-    abuf_json_float(&json_session, abuf, "latitude", txGpsInfo->txPosition.nmeaInfo.lat);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LAT)) {
+    abuf_json_float(&json_session, abuf, "latitude", txGpsInfo->txPosition.nmeaInfo.latitude);
   }
 
   /* lon */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, LON)) {
-    abuf_json_float(&json_session, abuf, "longitude", txGpsInfo->txPosition.nmeaInfo.lon);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LON)) {
+    abuf_json_float(&json_session, abuf, "longitude", txGpsInfo->txPosition.nmeaInfo.longitude);
   }
 
   /* elv */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, ELV)) {
-    abuf_json_float(&json_session, abuf, "elevation", txGpsInfo->txPosition.nmeaInfo.elv);
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_ELV)) {
+    abuf_json_float(&json_session, abuf, "elevation", txGpsInfo->txPosition.nmeaInfo.elevation);
   }
 
   /* speed */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SPEED)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SPEED)) {
     abuf_json_float(&json_session, abuf, "speed", txGpsInfo->txPosition.nmeaInfo.speed);
   }
 
   /* track */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, TRACK)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_TRACK)) {
     abuf_json_float(&json_session, abuf, "track", txGpsInfo->txPosition.nmeaInfo.track);
   }
 
   /* mtrack */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, MTRACK)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_MTRACK)) {
     abuf_json_float(&json_session, abuf, "magneticTrack", txGpsInfo->txPosition.nmeaInfo.mtrack);
   }
 
   /* magvar */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, MAGVAR)) {
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_MAGVAR)) {
     abuf_json_float(&json_session, abuf, "magneticVariation", txGpsInfo->txPosition.nmeaInfo.magvar);
   }
 
   /* sats */
-  if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINUSECOUNT | SATINUSE | SATINVIEW)) {
-    nmeaSATINFO * satinfo = &txGpsInfo->txPosition.nmeaInfo.satinfo;
-    int i = 0;
+  if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSECOUNT | NMEALIB_PRESENT_SATINUSE | NMEALIB_PRESENT_SATINVIEW)) {
+    NmeaSatellites * satinfo = &txGpsInfo->txPosition.nmeaInfo.satellites;
+    size_t i = 0;
 
     abuf_json_mark_object(&json_session, true, false, abuf, "satellites");
 
-    if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINUSECOUNT)) {
-      abuf_json_int(&json_session, abuf, "inUseCount", satinfo->inuse);
+    if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSECOUNT)) {
+      abuf_json_int(&json_session, abuf, "inUseCount", satinfo->inUseCount);
     }
 
-    if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINUSE)) {
+    if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSE)) {
       abuf_json_mark_object(&json_session, true, true, abuf, "inUse");
-      for (i = 0; i < NMEA_MAXSAT; i++) {
-        int inuse = satinfo->in_use[i];
-        if (inuse) {
-          abuf_json_int(&json_session, abuf, NULL, inuse);
+      for (i = 0; i < NMEALIB_MAX_SATELLITES; i++) {
+        unsigned int prn = satinfo->inUse[i];
+        if (prn) {
+          abuf_json_int(&json_session, abuf, NULL, prn);
         }
       }
       abuf_json_mark_object(&json_session, false, true, abuf, NULL);
     }
 
-    if (nmea_INFO_is_present(txGpsInfo->txPosition.nmeaInfo.present, SATINVIEW)) {
-      abuf_json_int(&json_session, abuf, "inViewCount", satinfo->inview);
+    if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINVIEW)) {
+      abuf_json_int(&json_session, abuf, "inViewCount", satinfo->inViewCount);
       abuf_json_mark_object(&json_session, true, true, abuf, "inView");
-      for (i = 0; i < NMEA_MAXSAT; i++) {
-        nmeaSATELLITE * sat = &satinfo->sat[i];
-        if (!sat->id) {
+      for (i = 0; i < NMEALIB_MAX_SATELLITES; i++) {
+        NmeaSatellite * sat = &satinfo->inView[i];
+        if (!sat->prn) {
           continue;
         }
 
         abuf_json_mark_object(&json_session, true, false, abuf, NULL);
-        abuf_json_int(&json_session, abuf, "id", sat->id);
-        abuf_json_int(&json_session, abuf, "elevation", sat->elv);
+        abuf_json_int(&json_session, abuf, "id", sat->prn);
+        abuf_json_int(&json_session, abuf, "elevation", sat->elevation);
         abuf_json_int(&json_session, abuf, "azimuth", sat->azimuth);
-        abuf_json_int(&json_session, abuf, "signal", sat->sig);
+        abuf_json_int(&json_session, abuf, "signal", sat->snr);
         abuf_json_mark_object(&json_session, false, false, abuf, NULL);
       }
       abuf_json_mark_object(&json_session, false, true, abuf, NULL);
