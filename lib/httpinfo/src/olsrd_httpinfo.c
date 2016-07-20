@@ -1297,6 +1297,15 @@ static void build_pud_body(struct autobuf *abuf) {
 	}
 	abuf_puts(abuf, "</td></tr>\n");
 
+	/* height */
+	abuf_puts(abuf, "<tr><td>Separation</td><td></td><td>m</td><td></td><td id=\"separation\">");
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_HEIGHT)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.height);
+	} else {
+		abuf_puts(abuf, NA_STRING);
+	}
+	abuf_puts(abuf, "</td></tr>\n");
+
 	/* speed */
 	abuf_puts(abuf, "<tr><td>Speed</td><td></td><td>kph</td><td></td><td id=\"speed\">");
 	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SPEED)) {
@@ -1333,12 +1342,32 @@ static void build_pud_body(struct autobuf *abuf) {
 	}
 	abuf_puts(abuf, "</td></tr>\n");
 
+	/* dgps age */
+	abuf_puts(abuf, "<tr><td>dGPS Age</td><td></td><td>sec</td><td></td><td id=\"dgpsage\">");
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_DGPSAGE)) {
+		abuf_appendf(abuf, "%f", txGpsInfo->txPosition.nmeaInfo.dgpsAge);
+	} else {
+		abuf_puts(abuf, NA_STRING);
+	}
+	abuf_puts(abuf, "</td></tr>\n");
+
+	/* dgps sid */
+	abuf_puts(abuf, "<tr><td>dGPS Station ID</td><td></td><td></td><td></td><td id=\"dgpssid\">");
+	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_DGPSSID)) {
+		abuf_appendf(abuf, "%u", txGpsInfo->txPosition.nmeaInfo.dgpsSid);
+	} else {
+		abuf_puts(abuf, NA_STRING);
+	}
+	abuf_puts(abuf, "</td></tr>\n");
+
 	/* end of table */
 	abuf_puts(abuf, "</table></p>\n");
 
 	/* sats */
 	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINVIEW)) {
 		int cnt = 0;
+    size_t satIndex;
+    bool hasInUse = nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSE);
 
 		abuf_puts(abuf, "<p>\n");
 		abuf_puts(abuf, "Satellite Infomation:\n");
@@ -1347,45 +1376,44 @@ static void build_pud_body(struct autobuf *abuf) {
 		abuf_puts(abuf,
 				"<tr><th>ID</th><th>In Use</th><th>Elevation (degrees)</th><th>Azimuth (degrees)</th><th>Signal (dB)</th></tr>\n");
 
-		if (txGpsInfo->txPosition.nmeaInfo.satellites.inViewCount) {
-			size_t satIndex;
-			for (satIndex = 0; satIndex < NMEALIB_MAX_SATELLITES; satIndex++) {
-			  NmeaSatellite * sat = &txGpsInfo->txPosition.nmeaInfo.satellites.inView[satIndex];
-				if (sat->prn) {
-					bool inuse = false;
-					const char * inuseStr;
+    for (satIndex = 0; satIndex < NMEALIB_MAX_SATELLITES; satIndex++) {
+      NmeaSatellite * sat = &txGpsInfo->txPosition.nmeaInfo.satellites.inView[satIndex];
+      bool inuse = false;
+      const char * inuseStr;
 
-					if (!nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_SATINUSE)) {
-						inuseStr = NA_STRING;
-					} else {
-						size_t inuseIndex;
-						for (inuseIndex = 0; inuseIndex < NMEALIB_MAX_SATELLITES; inuseIndex++) {
-							if (txGpsInfo->txPosition.nmeaInfo.satellites.inUse[inuseIndex] == sat->prn) {
-								inuse = true;
-								break;
-							}
-						}
-						if (inuse) {
-							inuseStr = "yes";
-						} else {
-							inuseStr = "no";
-						}
-					}
+      if (!sat->prn) {
+        continue;
+      }
 
-					abuf_appendf(abuf, "<tr><td>%02u</td><td bgcolor=\"%s\">%s</td><td>%02d</td><td>%03u</td><td>%02d</td></tr>\n",
-							sat->prn, inuse ? SAT_INUSE_COLOR : SAT_NOTINUSE_COLOR, inuseStr, sat->elevation, sat->azimuth, sat->snr);
-					cnt++;
-				}
-			}
-		}
+      if (!hasInUse) {
+        inuseStr = NA_STRING;
+      } else {
+        size_t inuseIndex;
+        for (inuseIndex = 0; inuseIndex < NMEALIB_MAX_SATELLITES; inuseIndex++) {
+          if (txGpsInfo->txPosition.nmeaInfo.satellites.inUse[inuseIndex] == sat->prn) {
+            inuse = true;
+            break;
+          }
+        }
+        if (inuse) {
+          inuseStr = "yes";
+        } else {
+          inuseStr = "no";
+        }
+      }
 
-		if (!cnt) {
-			abuf_puts(abuf, "<tr><td colspan=\"5\">none</td></tr>\n");
-		}
+      abuf_appendf(abuf, "<tr><td>%02u</td><td bgcolor=\"%s\">%s</td><td>%02d</td><td>%03u</td><td>%02d</td></tr>\n", sat->prn,
+          inuse ? SAT_INUSE_COLOR : SAT_NOTINUSE_COLOR, inuseStr, sat->elevation, sat->azimuth, sat->snr);
+      cnt++;
+    }
 
-		abuf_puts(abuf, "</tbody></table>\n");
-		abuf_puts(abuf, "</p>\n");
-	}
+    if (!cnt) {
+      abuf_puts(abuf, "<tr><td colspan=\"5\">none</td></tr>\n");
+    }
+
+    abuf_puts(abuf, "</tbody></table>\n");
+    abuf_puts(abuf, "</p>\n");
+  }
 
 	/* add Google Maps and OpenStreetMap links when we have both lat and lon */
 	if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_LAT)
