@@ -902,8 +902,8 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   /* utc */
   if (nmeaInfoIsPresentAll(txGpsInfo->txPosition.nmeaInfo.present, NMEALIB_PRESENT_UTCDATE)) {
     abuf_json_mark_object(&json_session, true, false, abuf, "date");
-    abuf_json_int(&json_session, abuf, "year", txGpsInfo->txPosition.nmeaInfo.utc.year + 1900);
-    abuf_json_int(&json_session, abuf, "month", txGpsInfo->txPosition.nmeaInfo.utc.mon + 1);
+    abuf_json_int(&json_session, abuf, "year", txGpsInfo->txPosition.nmeaInfo.utc.year);
+    abuf_json_int(&json_session, abuf, "month", txGpsInfo->txPosition.nmeaInfo.utc.mon);
     abuf_json_int(&json_session, abuf, "day", txGpsInfo->txPosition.nmeaInfo.utc.day);
     abuf_json_mark_object(&json_session, false, false, abuf, NULL);
   }
