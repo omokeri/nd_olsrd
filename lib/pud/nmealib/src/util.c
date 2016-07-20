@@ -335,12 +335,6 @@ size_t nmeaScanf(const char *s, size_t sz, const char *format, ...) {
 
         if (!width) {
           /* no width specified */
-
-          if (('C' == toupper(*formatCharacter)) //
-              && (*sCharacter != formatCharacter[1])) {
-            width = 1;
-          }
-
           if (!formatCharacter[1] //
               || (0 == (sCharacter = (char *) memchr(sCharacter, formatCharacter[1], (size_t) sCharsLeft)))) {
             sCharacter = sEnd;
