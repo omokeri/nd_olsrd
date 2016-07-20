@@ -1153,8 +1153,8 @@ static void build_pud_body(struct autobuf *abuf) {
 	if (datePresent || timePresent) {
 		if (datePresent) {
 			abuf_appendf(abuf, "%04d%02d%02d",
-				txGpsInfo->txPosition.nmeaInfo.utc.year + 1900,
-				txGpsInfo->txPosition.nmeaInfo.utc.mon + 1,
+				txGpsInfo->txPosition.nmeaInfo.utc.year,
+				txGpsInfo->txPosition.nmeaInfo.utc.mon,
 				txGpsInfo->txPosition.nmeaInfo.utc.day);
 		}
 		if (datePresent && timePresent) {
