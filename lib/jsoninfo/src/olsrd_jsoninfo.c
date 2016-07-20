@@ -923,6 +923,7 @@ void ipc_print_pud_position(struct autobuf *abuf) {
   abuf_json_mark_object(&json_session, true, true, abuf, "present");
   {
     uint32_t present = txGpsInfo->txPosition.nmeaInfo.present;
+    i = 1;
     while (i <= NMEALIB_PRESENT_LAST) {
       const char * s = nmeaInfoFieldToString(present & i);
       if (s) {
@@ -939,6 +940,7 @@ void ipc_print_pud_position(struct autobuf *abuf) {
     int smask = txGpsInfo->txPosition.nmeaInfo.smask;
     abuf_json_mark_object(&json_session, true, true, abuf, "smask");
     if (smask != NMEALIB_SENTENCE_GPNON) {
+      i = 1;
       while (i <= NMEALIB_SENTENCE_LAST) {
         const char * s = nmeaSentenceToPrefix(smask & i);
         if (s) {
