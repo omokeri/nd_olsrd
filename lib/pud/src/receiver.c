@@ -418,8 +418,8 @@ static bool writePositionOutputFile(void) {
   }
 
   /* utc */
-  fprintf(fp, "%s%s=%04d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "YEAR", nmeaInfo->utc.year + 1900);
-  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MONTH", nmeaInfo->utc.mon + 1);
+  fprintf(fp, "%s%s=%04d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "YEAR", nmeaInfo->utc.year);
+  fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MONTH", nmeaInfo->utc.mon);
   fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "DAY", nmeaInfo->utc.day);
   fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "HOUR", nmeaInfo->utc.hour);
   fprintf(fp, "%s%s=%02d\n", PUD_POSOUT_FILE_PARAM_PREFIX, "MINUTE", nmeaInfo->utc.min);
