@@ -288,9 +288,25 @@ static void updateCounters(PositionAverageList * positionAverageList,
 		assert(add ? (counters->satinuse < maxCount):(counters->satinuse > 0));
 		counters->satinuse += amount;
 	}
+	if (nmeaInfoIsPresentAll(present, NMEALIB_PRESENT_SATINVIEWCOUNT)) {
+	  assert(add ? (counters->satinviewcount < maxCount) : (counters->satinviewcount > 0));
+	  counters->satinviewcount += amount;
+	}
 	if (nmeaInfoIsPresentAll(present, NMEALIB_PRESENT_SATINVIEW)) {
 		assert(add ? (counters->satinview < maxCount):(counters->satinview > 0));
 		counters->satinview += amount;
+	}
+	if (nmeaInfoIsPresentAll(present, NMEALIB_PRESENT_HEIGHT)) {
+	  assert(add ? (counters->height < maxCount) : (counters->height > 0));
+	  counters->height += amount;
+	}
+	if (nmeaInfoIsPresentAll(present, NMEALIB_PRESENT_DGPSAGE)) {
+	  assert(add ? (counters->dgpsage < maxCount) : (counters->dgpsage > 0));
+	  counters->dgpsage += amount;
+	}
+	if (nmeaInfoIsPresentAll(present, NMEALIB_PRESENT_DGPSSID)) {
+	  assert(add ? (counters->dgpssid < maxCount) : (counters->dgpssid > 0));
+	  counters->dgpssid += amount;
 	}
 
 	/* smask */
@@ -418,8 +434,20 @@ static void determineCumulativePresentSmaskSigFix(
 	if (counters->satinuse >= count) {
 	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_SATINUSE);
 	}
+	if (counters->satinviewcount >= count) {
+	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_SATINVIEWCOUNT);
+	}
 	if (counters->satinview >= count) {
 	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_SATINVIEW);
+	}
+	if (counters->height >= count) {
+	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_HEIGHT);
+	}
+	if (counters->dgpsage >= count) {
+	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_DGPSAGE);
+	}
+	if (counters->dgpssid >= count) {
+	  nmeaInfoSetPresent(&cumulative->nmeaInfo.present, NMEALIB_PRESENT_DGPSSID);
 	}
 
 	/* smask */

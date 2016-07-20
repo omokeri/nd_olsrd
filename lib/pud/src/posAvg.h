@@ -95,7 +95,11 @@ typedef struct _PositionUpdateCounters {
 		unsigned long long magvar; /**< the number of entries with MAGVAR present */
 		unsigned long long satinusecount; /**< the number of entries with SATINUSECOUNT present */
 		unsigned long long satinuse; /**< the number of entries with SATINUSE present */
+		unsigned long long satinviewcount; /**< the number of entries with SATINVIEWCOUNT present */
 		unsigned long long satinview; /**< the number of entries with SATINVIEW present */
+		unsigned long long height; /**< the number of entries with HEIGHT present */
+		unsigned long long dgpsage; /**< the number of entries with DGPSAGE present */
+		unsigned long long dgpssid; /**< the number of entries with DGPSSID present */
 
 		/* smask */
 		unsigned long long gpgga; /**< the number of GPGGA based entries */
