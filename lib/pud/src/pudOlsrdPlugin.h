@@ -77,6 +77,8 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = {
 	{	.name = PUD_RX_ALLOWED_SOURCE_IP_NAME, .set_plugin_parameter = &addRxAllowedSourceIpAddress, .data = NULL},
 	{	.name = PUD_RX_MC_ADDR_NAME, .set_plugin_parameter = &setRxMcAddr, .data = NULL},
 	{	.name = PUD_RX_MC_PORT_NAME, .set_plugin_parameter = &setRxMcPort, .data = NULL},
+
+	/* position input file */
 	{	.name = PUD_POSFILE_NAME, .set_plugin_parameter = &setPositionFile, .data = NULL},
 	{	.name = PUD_POSFILEPERIOD_NAME, .set_plugin_parameter = &setPositionFilePeriod, .data = NULL},
 
@@ -86,6 +88,8 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = {
 	{	.name = PUD_TX_MC_PORT_NAME, .set_plugin_parameter = &setTxMcPort, .data = NULL},
 	{	.name = PUD_TX_TTL_NAME, .set_plugin_parameter = &setTxTtl, .data = NULL},
 	{	.name = PUD_TX_NMEAMESSAGEPREFIX_NAME, .set_plugin_parameter = &setTxNmeaMessagePrefix, .data = NULL},
+
+	/* position output file */
 	{	.name = PUD_POSOUTFILE_NAME, .set_plugin_parameter = &setPositionOutputFile, .data = NULL},
 
 	/* UPLINK / DOWNLINK */
