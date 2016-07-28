@@ -1678,7 +1678,7 @@ int setGpsdUse(const char *value, void *data __attribute__ ((unused)), set_plugi
 static char gpsd[PATH_MAX];
 
 /** The gpsd plugin parameter as gpsd source spec */
-static struct fixsource_t gpsdSource;
+static GpsDaemon gpsDaemon;
 
 /** True when the gpsd is set */
 static bool gpsdSet = false;
@@ -1687,62 +1687,12 @@ static bool gpsdSet = false;
  @return
  The gpsd plugin parameter (NULL when not set)
  */
-struct fixsource_t *getGpsd(void) {
+GpsDaemon *getGpsd(void) {
   if (!gpsdSet || !gpsdUse) {
     return NULL ;
   }
 
-  return &gpsdSource;
-}
-
-/* standard parsing of a GPS data source spec */
-static void gpsd_source_spec(const char *arg, struct fixsource_t *source) {
-  source->server = DEFAULT_GPSD_HOST;
-  source->port = DEFAULT_GPSD_PORT;
-  source->device = NULL;
-
-  if (arg != NULL && *arg) {
-    char *colon1;
-    const char *skipto;
-    char *rbrk;
-
-    strcpy(source->spec, arg);
-
-    skipto = source->spec;
-    if ((*skipto == '[') //
-        && ((rbrk = strchr(skipto, ']')) != NULL)) {
-      skipto = rbrk;
-    }
-    colon1 = strchr(skipto, ':');
-
-    if (colon1 != NULL) {
-      char *colon2;
-
-      *colon1 = '\0';
-      if (colon1 != source->spec) {
-        source->server = source->spec;
-      }
-
-      source->port = colon1 + 1;
-      colon2 = strchr(source->port, ':');
-      if (colon2 != NULL) {
-        *colon2 = '\0';
-        source->device = colon2 + 1;
-      }
-    } else if (strchr(source->spec, '/') != NULL) {
-      source->device = source->spec;
-    } else {
-      source->server = source->spec;
-    }
-  }
-
-  if (*source->server == '[') {
-    char *rbrk = strchr(source->server, ']');
-    ++source->server;
-    if (rbrk != NULL) {
-      *rbrk = '\0';
-    }
-  }
+  return &gpsDaemon;
 }
 
 int setGpsd(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused))) {
@@ -1764,7 +1714,7 @@ int setGpsd(const char *value, void *data __attribute__ ((unused)), set_plugin_p
   }
 
   strcpy((char *) &gpsd[0], value);
-  gpsd_source_spec(gpsd, &gpsdSource);
+  gpsdParseSourceSpec(gpsd, &gpsDaemon);
   gpsdSet = true;
 
   return false;

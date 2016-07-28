@@ -65,10 +65,10 @@ LIBRARY_LIB = $(LIBRARY_PATH)/lib
 NMEALIB_LIB_STATIC = $(NMEALIB_LIB)/lib$(NMEALIB_NAME).a
 
 ifeq ($(PUD_NMEALIB_STATICALLY_LINKED),)
-LIBS += -L $(NMEALIB_LIB) -L $(LIBRARY_LIB) -l$(NMEALIB_NAME) -lm -l$(LIBRARY_NAME)
+LIBS += -L $(NMEALIB_LIB) -L $(LIBRARY_LIB) -l$(NMEALIB_NAME) -lm -l$(LIBRARY_NAME) -lgps
 else
 # libnmea is statically linked
-LIBS += -L $(LIBRARY_LIB) -lm -l$(LIBRARY_NAME)
+LIBS += -L $(LIBRARY_LIB) -lm -l$(LIBRARY_NAME) -lgps
 endif
 
 

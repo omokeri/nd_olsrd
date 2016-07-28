@@ -47,6 +47,7 @@
 #define _PUD_CONFIGURATION_H_
 
 /* Plugin includes */
+#include "gpsdclient.h"
 
 /* OLSR includes */
 #include "olsrd_plugin.h"
@@ -445,13 +446,6 @@ setUseLoopback(const char *value, void *data, set_plugin_parameter_addon addon);
  * gpsd
  */
 
-struct fixsource_t {
-  char spec[PATH_MAX]; /* working space, will be modified */
-  const char *server;
-  const char *port;
-  const char *device;
-};
-
 /** The name of the gpsd update interval plugin parameter */
 #define PUD_GPSD_USE_NAME  "gpsdUse"
 
@@ -464,16 +458,7 @@ int setGpsdUse(const char *value, void *data, set_plugin_parameter_addon addon);
 /** The name of the gpsd plugin parameter */
 #define PUD_GPSD_NAME  "gpsd"
 
-/** The default gpsd host */
-#define DEFAULT_GPSD_HOST "localhost"
-
-/** The default gpsd port */
-#define DEFAULT_GPSD_PORT "2947"
-
-/** The default value of the gpsd plugin parameter */
-#define PUD_GPSD_DEFAULT (DEFAULT_GPSD_HOST ":" DEFAULT_GPSD_PORT)
-
-struct fixsource_t *getGpsd(void);
+GpsDaemon *getGpsd(void);
 int setGpsd(const char *value, void *data, set_plugin_parameter_addon addon);
 
 /*
