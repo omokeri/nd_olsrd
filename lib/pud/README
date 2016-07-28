@@ -57,6 +57,24 @@ LoadPlugin "<olsrd plugin library path>/olsrd_pud.so.2.2.0"
 
 
     #
+    # gpsd Parameters
+    #
+
+    # gpsdUse determines whether the gpsd daemon should be used for position
+    #         information
+    #
+    # Default: true
+    #
+    # PlParam     "gpsdUse"                      "true"
+
+    # gpsd is the gpsd source spec of the gpsd daemon to connect to
+    #
+    # Default: localhost:2947
+    #
+    # PlParam     "gpsd"                         "localhost:2947"
+
+
+    #
     # RX Parameters
     #
 

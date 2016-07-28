@@ -72,6 +72,10 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = {
 	{	.name = PUD_UPDATE_INTERVAL_STATIONARY_NAME, .set_plugin_parameter = &setUpdateIntervalStationary, .data = NULL},
 	{	.name = PUD_UPDATE_INTERVAL_MOVING_NAME, .set_plugin_parameter = &setUpdateIntervalMoving, .data = NULL},
 
+	/* gpsd */
+	{	.name = PUD_GPSD_USE_NAME, .set_plugin_parameter = &setGpsdUse, .data = NULL},
+	{	.name = PUD_GPSD_NAME, .set_plugin_parameter = &setGpsd, .data = NULL},
+
 	/* RX */
 	{	.name = PUD_RX_NON_OLSR_IF_NAME, .set_plugin_parameter = &addRxNonOlsrInterface, .data = NULL},
 	{	.name = PUD_RX_ALLOWED_SOURCE_IP_NAME, .set_plugin_parameter = &addRxAllowedSourceIpAddress, .data = NULL},

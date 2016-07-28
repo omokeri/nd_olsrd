@@ -1656,6 +1656,121 @@ int setUseLoopback(const char *value, void *data __attribute__ ((unused)),
 }
 
 /*
+ * gpsdUse
+ */
+
+/** True when the gps daemon should be used */
+static bool gpsdUse = PUD_USE_GPSD_DEFAULT;
+
+bool getGpsdUse(void) {
+  return gpsdUse;
+}
+
+int setGpsdUse(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused))) {
+  return !readBool(PUD_GPSD_USE_NAME, value, &gpsdUse);
+}
+
+/*
+ * gpsd
+ */
+
+/** The gpsd plugin parameter */
+static char gpsd[PATH_MAX];
+
+/** The gpsd plugin parameter as gpsd source spec */
+static struct fixsource_t gpsdSource;
+
+/** True when the gpsd is set */
+static bool gpsdSet = false;
+
+/**
+ @return
+ The gpsd plugin parameter (NULL when not set)
+ */
+struct fixsource_t *getGpsd(void) {
+  if (!gpsdSet || !gpsdUse) {
+    return NULL ;
+  }
+
+  return &gpsdSource;
+}
+
+/* standard parsing of a GPS data source spec */
+static void gpsd_source_spec(const char *arg, struct fixsource_t *source) {
+  source->server = DEFAULT_GPSD_HOST;
+  source->port = DEFAULT_GPSD_PORT;
+  source->device = NULL;
+
+  if (arg != NULL && *arg) {
+    char *colon1;
+    const char *skipto;
+    char *rbrk;
+
+    strcpy(source->spec, arg);
+
+    skipto = source->spec;
+    if ((*skipto == '[') //
+        && ((rbrk = strchr(skipto, ']')) != NULL)) {
+      skipto = rbrk;
+    }
+    colon1 = strchr(skipto, ':');
+
+    if (colon1 != NULL) {
+      char *colon2;
+
+      *colon1 = '\0';
+      if (colon1 != source->spec) {
+        source->server = source->spec;
+      }
+
+      source->port = colon1 + 1;
+      colon2 = strchr(source->port, ':');
+      if (colon2 != NULL) {
+        *colon2 = '\0';
+        source->device = colon2 + 1;
+      }
+    } else if (strchr(source->spec, '/') != NULL) {
+      source->device = source->spec;
+    } else {
+      source->server = source->spec;
+    }
+  }
+
+  if (*source->server == '[') {
+    char *rbrk = strchr(source->server, ']');
+    ++source->server;
+    if (rbrk != NULL) {
+      *rbrk = '\0';
+    }
+  }
+}
+
+int setGpsd(const char *value, void *data __attribute__ ((unused)), set_plugin_parameter_addon addon __attribute__ ((unused))) {
+  static const char * valueName = PUD_GPSD_NAME;
+  size_t valueLength;
+
+  assert(value != NULL);
+
+  valueLength = strlen(value);
+
+  if (!valueLength) {
+    pudError(false, "No value specified for parameter %s", valueName);
+    return true;
+  }
+  if (valueLength > PATH_MAX) {
+    pudError(false, "Value of parameter %s is too long, maximum length is"
+        " %u, current length is %lu", valueName, PATH_MAX, (unsigned long) valueLength);
+    return true;
+  }
+
+  strcpy((char *) &gpsd[0], value);
+  gpsd_source_spec(gpsd, &gpsdSource);
+  gpsdSet = true;
+
+  return false;
+}
+
+/*
  * Check Functions
  */
 
@@ -1668,6 +1783,11 @@ int setUseLoopback(const char *value, void *data __attribute__ ((unused)),
  */
 unsigned int checkConfig(void) {
 	int retval = true;
+
+	if (!gpsdSet) {
+	  set_plugin_parameter_addon addon;
+	  setGpsd(PUD_GPSD_DEFAULT, NULL, addon);
+	}
 
 	if (rxNonOlsrInterfaceCount == 0) {
 		pudError(false, "No receive non-OLSR interfaces configured");
