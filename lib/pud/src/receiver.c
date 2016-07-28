@@ -66,6 +66,8 @@
 #include <OlsrdPudWireFormat/wireFormat.h>
 #include <unistd.h>
 
+static void receiverProcessIncomingEntry(PositionUpdateEntry * incomingEntry);
+
 /*
  * NMEA parser
  */
@@ -847,21 +849,10 @@ static void detemineMovingFromPosition(PositionUpdateEntry * avg, PositionUpdate
  - true otherwise
  */
 bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
-	static bool gpnonPrev = false;
-
 	static const char * rxBufferPrefix = "$GP";
 	static const size_t rxBufferPrefixLength = 3;
 
-	bool retval = false;
 	PositionUpdateEntry * incomingEntry;
-	PositionUpdateEntry * posAvgEntry;
-	MovementType movementResult;
-	bool subStateExternalStateChange;
-	bool externalStateChange;
-	bool updateTransmitGpsInformation = false;
-	MovementState externalState;
-	bool gpnon;
-	bool gpnonChanged;
 
 	/* do not process when the message does not start with $GP */
 	if ((rxCount < rxBufferPrefixLength) || (strncmp((char *) rxBuffer,
@@ -874,15 +865,30 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	nmeaInfoClear(&incomingEntry->nmeaInfo);
 	nmeaTimeSet(&incomingEntry->nmeaInfo.utc, &incomingEntry->nmeaInfo.present, NULL);
 	nmeaParserParse(&nmeaParser, (char *) rxBuffer, rxCount, &incomingEntry->nmeaInfo);
+	nmeaInfoSanitise(&incomingEntry->nmeaInfo);
+
+	receiverProcessIncomingEntry(incomingEntry);
+	return true;
+}
+
+static void receiverProcessIncomingEntry(PositionUpdateEntry * incomingEntry) {
+	static bool gpnonPrev = false;
+
+	PositionUpdateEntry * posAvgEntry;
+	MovementType movementResult;
+	bool subStateExternalStateChange;
+	bool externalStateChange;
+	bool updateTransmitGpsInformation = false;
+	MovementState externalState;
+	bool gpnon;
+	bool gpnonChanged;
+
+	/* we always work with latitude, longitude in degrees and DOPs in meters */
+	nmeaInfoUnitConversion(&incomingEntry->nmeaInfo, true);
 
 	gpnon = !nmeaInfoIsPresentAll(incomingEntry->nmeaInfo.present, NMEALIB_PRESENT_SMASK) || (incomingEntry->nmeaInfo.smask == NMEALIB_SENTENCE_GPNON);
 	gpnonChanged = gpnon != gpnonPrev;
 	gpnonPrev = gpnon;
-
-	nmeaInfoSanitise(&incomingEntry->nmeaInfo);
-
-	/* we always work with latitude, longitude in degrees and DOPs in meters */
-	nmeaInfoUnitConversion(&incomingEntry->nmeaInfo, true);
 
 	/*
 	 * Averaging
@@ -937,10 +943,6 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	if (externalStateChange) {
 		doImmediateTransmit(externalState);
 	}
-
-	retval = true;
-
-	return retval;
 }
 
 /**
