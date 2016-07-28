@@ -571,7 +571,8 @@ static void detemineMovingFromPosition(PositionUpdateEntry * avg, PositionUpdate
 	bool avgHasElv;
 	bool avgHasVdop;
 
-	/* lastTx field presence booleans */bool lastTxHasPos;
+	/* lastTx field presence booleans */
+	bool lastTxHasPos;
 	bool lastTxHasHdop;
 	bool lastTxHasElv;
 	bool lastTxHasVdop;
