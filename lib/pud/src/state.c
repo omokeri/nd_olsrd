@@ -129,8 +129,8 @@ void determineStateWithHysteresis(SubStateIndex subStateIndex, TristateBoolean m
 	} else if (movingNow == TRISTATE_BOOLEAN_UNSET) {
 		newState = MOVEMENT_STATE_STATIONARY;
 	} else {
-		/* keep current sub-state */
-		newState = subState->internalState;
+		/* move to stationary */
+		newState = MOVEMENT_STATE_STATIONARY;
 	}
 	internalStateChange = (subState->internalState != newState);
 	subState->internalState = newState;
