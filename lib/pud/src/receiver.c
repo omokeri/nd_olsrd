@@ -535,7 +535,7 @@ static void pud_gateway_timer_callback(void *context __attribute__ ((unused))) {
 	 * State Determination
 	 */
 
-	determineStateWithHysteresis(SUBSTATE_GATEWAY, movingNow, &externalState, &externalStateChange, NULL);
+	determineStateWithHysteresis(SUBSTATE_GATEWAY, movingNow, &externalState, &externalStateChange, NULL, false);
 
 	/*
 	 * Update transmitGpsInformation
@@ -847,6 +847,8 @@ static void detemineMovingFromPosition(PositionUpdateEntry * avg, PositionUpdate
  - true otherwise
  */
 bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
+	static bool gpnonPrev = false;
+
 	static const char * rxBufferPrefix = "$GP";
 	static const size_t rxBufferPrefixLength = 3;
 
@@ -858,6 +860,8 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	bool externalStateChange;
 	bool updateTransmitGpsInformation = false;
 	MovementState externalState;
+	bool gpnon;
+	bool gpnonChanged;
 
 	/* do not process when the message does not start with $GP */
 	if ((rxCount < rxBufferPrefixLength) || (strncmp((char *) rxBuffer,
@@ -871,11 +875,9 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	nmeaTimeSet(&incomingEntry->nmeaInfo.utc, &incomingEntry->nmeaInfo.present, NULL);
 	nmeaParserParse(&nmeaParser, (char *) rxBuffer, rxCount, &incomingEntry->nmeaInfo);
 
-	/* ignore when no useful information */
-	if (incomingEntry->nmeaInfo.smask == NMEALIB_SENTENCE_GPNON) {
-		retval = true;
-		goto end;
-	}
+	gpnon = !nmeaInfoIsPresentAll(incomingEntry->nmeaInfo.present, NMEALIB_PRESENT_SMASK) || (incomingEntry->nmeaInfo.smask == NMEALIB_SENTENCE_GPNON);
+	gpnonChanged = gpnon != gpnonPrev;
+	gpnonPrev = gpnon;
 
 	nmeaInfoSanitise(&incomingEntry->nmeaInfo);
 
@@ -886,7 +888,7 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	 * Averaging
 	 */
 
-	if (getInternalState(SUBSTATE_POSITION) == MOVEMENT_STATE_MOVING) {
+	if ((getInternalState(SUBSTATE_POSITION) == MOVEMENT_STATE_MOVING) || gpnonChanged) {
 		/* flush average: keep only the incoming entry */
 		flushPositionAverageList(&positionAverageList);
 	}
@@ -906,7 +908,7 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 	 */
 
 	determineStateWithHysteresis(SUBSTATE_POSITION, movementResult.moving, &externalState, &externalStateChange,
-			&subStateExternalStateChange);
+			&subStateExternalStateChange, gpnonChanged);
 
 	/*
 	 * Update transmitGpsInformation
@@ -938,7 +940,6 @@ bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
 
 	retval = true;
 
-	end:
 	return retval;
 }
 

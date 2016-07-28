@@ -112,9 +112,11 @@ MovementState getExternalState(void) {
  * a pointer to the variable in which to store whether the external state changed
  * @param subStateExternalStateChange
  * a pointer to the variable in which to store whether the sub-state external state changed
+ * @param gpnonChanged
+ * true when there was a state change w.r.t. 'no info received'
  */
 void determineStateWithHysteresis(SubStateIndex subStateIndex, TristateBoolean movingNow, MovementState * externalState,
-		bool * externalStateChange, bool * subStateExternalStateChange) {
+		bool * externalStateChange, bool * subStateExternalStateChange, bool gpnonChanged) {
 	MovementState newState;
 	bool internalStateChange;
 	bool subStateExternalStateChanged;
@@ -124,7 +126,7 @@ void determineStateWithHysteresis(SubStateIndex subStateIndex, TristateBoolean m
 	 * Substate Internal State
 	 */
 
-	if (movingNow == TRISTATE_BOOLEAN_SET) {
+	if ((movingNow == TRISTATE_BOOLEAN_SET) || gpnonChanged) {
 		newState = MOVEMENT_STATE_MOVING;
 	} else if (movingNow == TRISTATE_BOOLEAN_UNSET) {
 		newState = MOVEMENT_STATE_STATIONARY;
@@ -167,7 +169,11 @@ void determineStateWithHysteresis(SubStateIndex subStateIndex, TristateBoolean m
 			/* internal state is MOVING, external state is STATIONARY */
 
 			/* delay going to moving a bit */
-			subState->hysteresisCounter++;
+			if (gpnonChanged) {
+			  subState->hysteresisCounter = subState->hysteresisCounterToMoving;
+			} else {
+			  subState->hysteresisCounter++;
+			}
 
 			if (subState->hysteresisCounter >= subState->hysteresisCounterToMoving) {
 				/* outside the hysteresis range, go to moving */
