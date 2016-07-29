@@ -128,6 +128,12 @@ static char * positionOutputFile = NULL;
 /** true when a postion output file error was already reported */
 static bool positionOutputFileError = false;
 
+/** gpsd daemon data */
+struct gps_data_t gpsdata;
+
+/** gpsd daemon connection tracking */
+static struct GpsdConnectionState connectionTracking;
+
 /*
  * Functions
  */
@@ -457,7 +463,28 @@ static bool writePositionOutputFile(void) {
  unused
  */
 static void pud_gpsd_fetch_timer_callback(void *context __attribute__ ((unused))) {
-  // FIXME
+  static char cnt = 0;
+
+  PositionUpdateEntry * incomingEntry;
+  GpsDaemon *gpsd = getGpsd();
+  if (!gpsd) {
+    return;
+  }
+
+  /* fetch info from gpsd daemon into the incoming entry */
+  incomingEntry = getPositionAverageEntry(&positionAverageList, INCOMING);
+  if (!cnt) {
+    nmeaInfoClear(&incomingEntry->nmeaInfo);
+    nmeaTimeSet(&incomingEntry->nmeaInfo.utc, &incomingEntry->nmeaInfo.present, NULL);
+  }
+  readFromGpsd(gpsd, &gpsdata, &connectionTracking, &incomingEntry->nmeaInfo);
+
+  if (cnt >= (TIMER_GPSD_READS_PER_SEC - 1)) {
+    receiverProcessIncomingEntry(incomingEntry);
+    cnt = 0;
+  } else {
+    cnt++;
+  }
 }
 
 /**
@@ -1017,6 +1044,10 @@ bool startReceiver(void) {
 
 	initPositionAverageList(&positionAverageList, getAverageDepth());
 
+	memset(&gpsdata, 0, sizeof(gpsdata));
+	gpsdata.gps_fd = -1;
+	memset(&connectionTracking, 0, sizeof(connectionTracking));
+
 	if (!initGpsdFetchTimer()) {
 	  stopReceiver();
 	  return false;
@@ -1072,6 +1103,11 @@ void stopReceiver(void) {
 	destroyGpsdFetchTimer();
 
 	destroyPositionAverageList(&positionAverageList);
+
+	gpsdDisconnect(&gpsdata, &connectionTracking);
+	memset(&connectionTracking, 0, sizeof(connectionTracking));
+	memset(&gpsdata, 0, sizeof(gpsdata));
+	gpsdata.gps_fd = -1;
 
 	nmeaInfoClear(&transmitGpsInformation.txPosition.nmeaInfo);
 	transmitGpsInformation.txGateway = olsr_cnf->main_addr;
