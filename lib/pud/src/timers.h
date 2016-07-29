@@ -51,7 +51,14 @@
 /* OLSRD includes */
 #include "scheduler.h"
 
+/* the number of times per second the gpsd daemon is read */
+#define TIMER_GPSD_READS_PER_SEC 4
+
 /* System includes */
+
+int initGpsdFetchTimer(void);
+void destroyGpsdFetchTimer(void);
+int restartGpsdFetchTimer(timer_cb_func cb_func);
 
 int initOlsrTxTimer(void);
 void destroyOlsrTxTimer(void);

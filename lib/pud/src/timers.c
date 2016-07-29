@@ -54,6 +54,91 @@
 /* System includes */
 
 /*
+ * gpsd Fetch Timer
+ */
+
+/** The timer cookie, used to trace back the originator in debug */
+static struct olsr_cookie_info *pud_gpsd_fetch_timer_cookie = NULL;
+
+/** The timer */
+static struct timer_entry * pud_gpsd_fetch_timer = NULL;
+
+/**
+ Start the gpsd fetch timer. Does nothing when the timer is already running.
+
+ @param cb_func
+ The callback function to call when the timer expires
+
+ @return
+ - false on failure
+ - true otherwise
+ */
+static int startGpsdFetchTimer(timer_cb_func cb_func) {
+  if (!pud_gpsd_fetch_timer) {
+    pud_gpsd_fetch_timer = olsr_start_timer(1 * (MSEC_PER_SEC / TIMER_GPSD_READS_PER_SEC), 0, OLSR_TIMER_PERIODIC, cb_func, NULL, pud_gpsd_fetch_timer_cookie);
+    if (!pud_gpsd_fetch_timer) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ Stop the gpsd fetch timer
+ */
+static void stopGpsdFetchTimer(void) {
+  if (pud_gpsd_fetch_timer) {
+    olsr_stop_timer(pud_gpsd_fetch_timer);
+    pud_gpsd_fetch_timer = NULL;
+  }
+}
+
+/**
+ Restart the gpsd fetch timer
+
+ @param cb_func
+ The callback function to call when the timer expires
+
+ @return
+ - false on failure
+ - true otherwise
+ */
+int restartGpsdFetchTimer(timer_cb_func cb_func) {
+  stopGpsdFetchTimer();
+  return startGpsdFetchTimer(cb_func);
+}
+
+/**
+ Initialise the gpsd fetch timer.
+
+ @return
+ - false on failure
+ - true otherwise
+ */
+int initGpsdFetchTimer(void) {
+  if (!pud_gpsd_fetch_timer_cookie) {
+    pud_gpsd_fetch_timer_cookie = olsr_alloc_cookie(PUD_PLUGIN_ABBR ": gpsd fetch timer", OLSR_COOKIE_TYPE_TIMER);
+    if (!pud_gpsd_fetch_timer_cookie) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ Destroy the gpsd fetch timer.
+ */
+void destroyGpsdFetchTimer(void) {
+  stopGpsdFetchTimer();
+  if (pud_gpsd_fetch_timer_cookie) {
+    olsr_free_cookie(pud_gpsd_fetch_timer_cookie);
+    pud_gpsd_fetch_timer_cookie = NULL;
+  }
+}
+
+/*
  * OLSR Tx Timer
  */
 
