@@ -451,6 +451,16 @@ static bool writePositionOutputFile(void) {
  */
 
 /**
+ The gpsd fetch timer callback
+
+ @param context
+ unused
+ */
+static void pud_gpsd_fetch_timer_callback(void *context __attribute__ ((unused))) {
+  // FIXME
+}
+
+/**
  The OLSR tx timer callback
 
  @param context
@@ -468,6 +478,19 @@ static void pud_olsr_tx_timer_callback(void *context __attribute__ ((unused))) {
  */
 static void pud_uplink_timer_callback(void *context __attribute__ ((unused))) {
 	txToAllOlsrInterfaces(TX_INTERFACE_UPLINK);
+}
+
+/**
+ Restart the gpsd fetch timer
+ */
+static void restartGpsdTimer(void) {
+  if (!getGpsd()) {
+    return;
+  }
+
+  if (!restartGpsdFetchTimer(&pud_gpsd_fetch_timer_callback)) {
+    pudError(0, "Could not restart gpsd fetch timer, no position information will be available");
+  }
 }
 
 /**
@@ -994,6 +1017,11 @@ bool startReceiver(void) {
 
 	initPositionAverageList(&positionAverageList, getAverageDepth());
 
+	if (!initGpsdFetchTimer()) {
+	  stopReceiver();
+	  return false;
+	}
+
 	if (!initOlsrTxTimer()) {
 		stopReceiver();
 		return false;
@@ -1018,6 +1046,7 @@ bool startReceiver(void) {
 	}
 
 	externalState = getExternalState();
+	restartGpsdTimer();
 	restartOlsrTimer(externalState);
 	restartUplinkTimer(externalState);
 	if (!restartGatewayTimer(getGatewayDeterminationInterval(), &pud_gateway_timer_callback)) {
@@ -1040,6 +1069,7 @@ void stopReceiver(void) {
 	destroyGatewayTimer();
 	destroyUplinkTxTimer();
 	destroyOlsrTxTimer();
+	destroyGpsdFetchTimer();
 
 	destroyPositionAverageList(&positionAverageList);
 
