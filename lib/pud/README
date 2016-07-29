@@ -75,41 +75,8 @@ LoadPlugin "<olsrd plugin library path>/olsrd_pud.so.2.2.0"
 
 
     #
-    # RX Parameters
+    # Position Input File Parameters
     #
-
-    # rxNonOlsrIf is a network interface on the host on which the plugin will
-    #             listen for GPS multicasts. Multiple such interfaces can be
-    #             specified by specifying the parameter multiple times.
-    #
-    # Default: none
-    #
-    # PlParam     "rxNonOlsrIf"                  ""
-
-    # rxAllowedSourceIpAddress is an IP address from which the plugin is
-    #                          allowed to process/parse GPS sentences. When
-    #                          this parameter is not configured then GPS
-    #                          sentences from ALL IP addresses are processed.
-    #                          Multiple IP addresses can be specified by
-    #                          specifying the parameter multiple times.
-    #
-    # Default: none
-    #
-    # PlParam     "rxAllowedSourceIpAddress"     ""
-
-    # rxMcAddr is the multicast address on which the plugin will listen for GPS
-    #          multicasts.
-    #
-    # Default: 224.0.0.224 (IPv4) or FF02:0:0:0:0:0:0:1 (IPv6)
-    #
-    # PlParam     "rxMcAddr"                     "224.0.0.224"
-
-    # rxMcPort is the UDP port on which the plugin will listen for GPS
-    #          multicasts.
-    #
-    # Default: 2240
-    #
-    # PlParam     "rxMcPort"                     "2240"
 
     # positionFile is the file that contains the position information that the
     #              plugin should use. When this parameter is set then the
@@ -172,6 +139,11 @@ LoadPlugin "<olsrd plugin library path>/olsrd_pud.so.2.2.0"
     # Default: NBSX
     #
     # PlParam     "txNmeaMessagePrefix"          "NBSX"
+
+
+    #
+    # Position Output File Parameters
+    #
 
     # positionOutputFile is the file into which the position is written when it
     #                    changes. The file will contain all position parameters

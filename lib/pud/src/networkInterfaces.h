@@ -81,14 +81,11 @@ typedef struct _TOLSRNetworkInterface {
 		struct _TOLSRNetworkInterface * next;
 } TOLSRNetworkInterface;
 
-bool createNetworkInterfaces(socket_handler_func rxSocketHandlerFunction,
-		socket_handler_func rxSocketHandlerFunctionDownlink);
+bool createNetworkInterfaces(socket_handler_func rxSocketHandlerFunctionDownlink);
 void closeNetworkInterfaces(void);
 
 unsigned char * getMainIpMacAddress(void);
-TRxTxNetworkInterface * getRxNetworkInterfaces(void);
 TRxTxNetworkInterface * getTxNetworkInterfaces(void);
 int getDownlinkSocketFd(void);
-TOLSRNetworkInterface * getOlsrNetworkInterface(struct interface_olsr * olsrIntf);
 
 #endif /* _PUD_NETWORKINTERFACES_H */

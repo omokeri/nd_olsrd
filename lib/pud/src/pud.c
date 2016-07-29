@@ -64,9 +64,6 @@
 
 /* System includes */
 
-/** The size of the buffer in which the received NMEA string is stored */
-#define BUFFER_SIZE_RX_NMEA		2048
-
 /** The size of the buffer in which the received downlink message is stored */
 #define BUFFER_SIZE_RX_DOWNLINK	2048
 
@@ -305,52 +302,6 @@ static void packetReceivedFromDownlink(int skfd, void *data __attribute__ ((unus
 }
 
 /**
- Called by OLSR core when a packet for the plugin is received from the non-OLSR
- network. It converts the packet into the internal OLSR wire format for a
- position update and transmits it over all OLSR network interfaces.
-
- @param skfd
- the socket file descriptor on which the packet is received
- @param data
- a pointer to the network interface structure on which the packet was received
- @param flags
- unused
- */
-static void packetReceivedForOlsr(int skfd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
-	if (skfd >= 0) {
-		unsigned char rxBuffer[BUFFER_SIZE_RX_NMEA];
-		ssize_t rxCount;
-		union olsr_sockaddr sender;
-		socklen_t senderSize = sizeof(sender);
-
-		assert(data != NULL);
-
-		/* Receive the captured Ethernet frame */
-		memset(&sender, 0, senderSize);
-		errno = 0;
-		rxCount = recvfrom(skfd, &rxBuffer[0], (sizeof(rxBuffer) - 1), 0,
-				(struct sockaddr *)&sender, &senderSize);
-		if (rxCount < 0) {
-			pudError(true, "Receive error in %s, ignoring message.", __func__);
-			return;
-		}
-
-		/* make sure the string is null-terminated */
-		rxBuffer[rxCount] = '\0';
-
-		/* only accept messages from configured IP addresses */
-		if (!isRxAllowedSourceIpAddress(&sender)) {
-			return;
-		}
-
-		/* we have the received string in the rxBuffer now */
-
-		/* hand the NMEA information to the receiver */
-		(void) receiverUpdateGpsInformation(&rxBuffer[0], rxCount);
-	}
-}
-
-/**
  * Timer callback that reads the pud position file
  */
 static void pud_read_position_file(void *context __attribute__ ((unused))) {
@@ -401,8 +352,7 @@ bool initPud(void) {
 	 * Creates receive and transmit sockets and register the receive sockets
 	 * with the OLSR stack
 	 */
-	if (!createNetworkInterfaces(&packetReceivedForOlsr,
-			&packetReceivedFromDownlink)) {
+	if (!createNetworkInterfaces(&packetReceivedFromDownlink)) {
 		pudError(false, "Could not create require network interfaces");
 		goto error;
 	}

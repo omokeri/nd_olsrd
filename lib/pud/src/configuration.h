@@ -75,47 +75,8 @@ nodeIdBinaryType * getNodeIdBinary(void);
 int setNodeId(const char *value, void *data, set_plugin_parameter_addon addon);
 
 /*
- * RX Parameters
+ * Position Input File Parameters
  */
-
-/** The name of the receive non-OLSR interfaces plugin parameter */
-#define PUD_RX_NON_OLSR_IF_NAME					"rxNonOlsrIf"
-
-bool isRxNonOlsrInterface(const char *ifName);
-int addRxNonOlsrInterface(const char *value, void *data,
-		set_plugin_parameter_addon addon);
-unsigned int getRxNonOlsrInterfaceCount(void);
-unsigned char * getRxNonOlsrInterfaceName(unsigned int index);
-
-/** The name of the allowed source IP address plugin parameter */
-#define PUD_RX_ALLOWED_SOURCE_IP_NAME			"rxAllowedSourceIpAddress"
-
-bool isRxAllowedSourceIpAddress(union olsr_sockaddr * sender);
-int addRxAllowedSourceIpAddress(const char *value, void *data,
-		set_plugin_parameter_addon addon);
-
-/** The name of the receive multicast address plugin parameter */
-#define PUD_RX_MC_ADDR_NAME						"rxMcAddr"
-
-/** The default value of the receive multicast address plugin parameter for IPv4 */
-#define PUD_RX_MC_ADDR_4_DEFAULT				"224.0.0.224"
-
-/** The default value of the receive multicast address plugin parameter for IPv6 */
-#define PUD_RX_MC_ADDR_6_DEFAULT				"FF02:0:0:0:0:0:0:1"
-
-union olsr_sockaddr * getRxMcAddr(void);
-int
-setRxMcAddr(const char *value, void *data, set_plugin_parameter_addon addon);
-
-/** The name of the receive multicast port plugin parameter */
-#define PUD_RX_MC_PORT_NAME						"rxMcPort"
-
-/** The default value of the receive multicast port plugin parameter */
-#define PUD_RX_MC_PORT_DEFAULT					2240
-
-unsigned short getRxMcPort(void);
-int
-setRxMcPort(const char *value, void *data, set_plugin_parameter_addon addon);
 
 /** The name of the positionFile plugin parameter */
 #define PUD_POSFILE_NAME						"positionFile"
@@ -192,6 +153,10 @@ int setTxTtl(const char *value, void *data, set_plugin_parameter_addon addon);
 unsigned char * getTxNmeaMessagePrefix(void);
 int setTxNmeaMessagePrefix(const char *value, void *data,
 		set_plugin_parameter_addon addon);
+
+/*
+ * Position Output File Parameters
+ */
 
 /** The name of the positionOutputFile plugin parameter */
 #define PUD_POSOUTFILE_NAME            "positionOutputFile"

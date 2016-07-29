@@ -76,12 +76,6 @@ static const struct olsrd_plugin_parameters plugin_parameters[] = {
 	{	.name = PUD_GPSD_USE_NAME, .set_plugin_parameter = &setGpsdUse, .data = NULL},
 	{	.name = PUD_GPSD_NAME, .set_plugin_parameter = &setGpsd, .data = NULL},
 
-	/* RX */
-	{	.name = PUD_RX_NON_OLSR_IF_NAME, .set_plugin_parameter = &addRxNonOlsrInterface, .data = NULL},
-	{	.name = PUD_RX_ALLOWED_SOURCE_IP_NAME, .set_plugin_parameter = &addRxAllowedSourceIpAddress, .data = NULL},
-	{	.name = PUD_RX_MC_ADDR_NAME, .set_plugin_parameter = &setRxMcAddr, .data = NULL},
-	{	.name = PUD_RX_MC_PORT_NAME, .set_plugin_parameter = &setRxMcPort, .data = NULL},
-
 	/* position input file */
 	{	.name = PUD_POSFILE_NAME, .set_plugin_parameter = &setPositionFile, .data = NULL},
 	{	.name = PUD_POSFILEPERIOD_NAME, .set_plugin_parameter = &setPositionFilePeriod, .data = NULL},

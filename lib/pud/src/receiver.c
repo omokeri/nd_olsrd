@@ -884,43 +884,6 @@ static void detemineMovingFromPosition(PositionUpdateEntry * avg, PositionUpdate
 	return;
 }
 
-/**
- Update the latest GPS information. This function is called when a packet is
- received from a rxNonOlsr interface, containing one or more NMEA strings with
- GPS information.
-
- @param rxBuffer
- the receive buffer with the received NMEA string(s)
- @param rxCount
- the number of bytes in the receive buffer
-
- @return
- - false on failure
- - true otherwise
- */
-bool receiverUpdateGpsInformation(unsigned char * rxBuffer, size_t rxCount) {
-	static const char * rxBufferPrefix = "$GP";
-	static const size_t rxBufferPrefixLength = 3;
-
-	PositionUpdateEntry * incomingEntry;
-
-	/* do not process when the message does not start with $GP */
-	if ((rxCount < rxBufferPrefixLength) || (strncmp((char *) rxBuffer,
-			rxBufferPrefix, rxBufferPrefixLength) != 0)) {
-		return true;
-	}
-
-	/* parse all NMEA strings in the rxBuffer into the incoming entry */
-	incomingEntry = getPositionAverageEntry(&positionAverageList, INCOMING);
-	nmeaInfoClear(&incomingEntry->nmeaInfo);
-	nmeaTimeSet(&incomingEntry->nmeaInfo.utc, &incomingEntry->nmeaInfo.present, NULL);
-	nmeaParserParse(&nmeaParser, (char *) rxBuffer, rxCount, &incomingEntry->nmeaInfo);
-	nmeaInfoSanitise(&incomingEntry->nmeaInfo);
-
-	receiverProcessIncomingEntry(incomingEntry);
-	return true;
-}
-
 static void receiverProcessIncomingEntry(PositionUpdateEntry * incomingEntry) {
 	static bool gpnonPrev = false;
 
