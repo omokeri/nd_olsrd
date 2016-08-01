@@ -521,6 +521,9 @@ void nmeaInfoFromGpsd(struct gps_data_t *gpsdata, NmeaInfo *info, struct GpsdCon
 #ifndef GPSD_NEW
       int prn = gpsdata->used[iGpsd];
       info->satellites.inUse[iInUse++] = (prn < 0) ? 0 : (unsigned int) prn;
+      if (prn > 0) {
+        info->satellites.inUseCount++;
+      }
 
       prn = gpsdata->PRN[iGpsd];
       if (prn > 0) {
