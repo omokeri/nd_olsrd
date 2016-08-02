@@ -350,7 +350,7 @@ void nmeaInfoFromGpsd(struct gps_data_t *gpsdata, NmeaInfo *info, struct GpsdCon
           | PPS_SET //
           | NAVDATA_SET //
 #endif
-      );
+          );
 
   gpsdata->set &= ~STATUS_SET; /* always valid */
   if (gpsdata->status == STATUS_NO_FIX) {
@@ -366,73 +366,72 @@ void nmeaInfoFromGpsd(struct gps_data_t *gpsdata, NmeaInfo *info, struct GpsdCon
   nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_SMASK);
 
   /* date & time */
-  if (gpsdata->set & TIME_SET) {
-    if (!isNaN(gpsdata->fix.time)) {
-      double seconds;
-      double fraction = modf(fabs(gpsdata->fix.time), &seconds);
-      long sec = lrint(seconds);
-      struct tm *time = gmtime(&sec);
-      if (time) {
-        info->utc.year = (unsigned int) time->tm_year + 1900;
-        info->utc.mon = (unsigned int) time->tm_mon + 1;
-        info->utc.day = (unsigned int) time->tm_mday;
-        info->utc.hour = (unsigned int) time->tm_hour;
-        info->utc.min = (unsigned int) time->tm_min;
-        info->utc.sec = (unsigned int) time->tm_sec;
-        info->utc.hsec = (unsigned int) lrint(fraction * 100);
+  if (!isNaN(gpsdata->fix.time)) {
+    double seconds;
+    double fraction = modf(fabs(gpsdata->fix.time), &seconds);
+    long sec = lrint(seconds);
+    struct tm *time = gmtime(&sec);
+    if (time) {
+      info->utc.year = (unsigned int) time->tm_year + 1900;
+      info->utc.mon = (unsigned int) time->tm_mon + 1;
+      info->utc.day = (unsigned int) time->tm_mday;
+      info->utc.hour = (unsigned int) time->tm_hour;
+      info->utc.min = (unsigned int) time->tm_min;
+      info->utc.sec = (unsigned int) time->tm_sec;
+      info->utc.hsec = (unsigned int) lrint(fraction * 100);
 
-        nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_UTCDATE | NMEALIB_PRESENT_UTCTIME);
-      }
+      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_UTCDATE | NMEALIB_PRESENT_UTCTIME);
     }
-
-    gpsdata->set &= ~TIME_SET;
   }
+  gpsdata->set &= ~TIME_SET;
 
   /* sig & fix */
-  if (gpsdata->set & MODE_SET) {
-    switch (gpsdata->fix.mode) {
-      case MODE_3D:
-        info->fix = NMEALIB_FIX_3D;
-        info->sig = NMEALIB_SIG_FIX;
-        break;
+  if (!gpsdata->online) {
+    gpsdata->fix.mode = MODE_NO_FIX;
+  }
 
-      case MODE_2D:
-        info->fix = NMEALIB_FIX_2D;
-        info->sig = NMEALIB_SIG_FIX;
-        break;
+  switch (gpsdata->fix.mode) {
+    case MODE_3D:
+      info->fix = NMEALIB_FIX_3D;
+      info->sig = NMEALIB_SIG_FIX;
+      break;
 
-      case MODE_NOT_SEEN:
-      case MODE_NO_FIX:
-      default:
-        info->fix = NMEALIB_FIX_BAD;
-        info->sig = NMEALIB_SIG_INVALID;
-        break;
-    }
+    case MODE_2D:
+      info->fix = NMEALIB_FIX_2D;
+      info->sig = NMEALIB_SIG_FIX;
+      break;
 
-    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_FIX | NMEALIB_PRESENT_SIG);
-    gpsdata->set &= ~MODE_SET;
+    case MODE_NOT_SEEN:
+    case MODE_NO_FIX:
+    default:
+      info->fix = NMEALIB_FIX_BAD;
+      info->sig = NMEALIB_SIG_INVALID;
+      break;
+  }
+  nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_FIX | NMEALIB_PRESENT_SIG);
+  gpsdata->set &= ~MODE_SET;
+
+  if ((info->fix == NMEALIB_FIX_BAD) //
+      || (info->sig == NMEALIB_SIG_INVALID)) {
+    nmeaInfoClear(info);
+    nmeaTimeSet(&info->utc, &info->present, NULL);
+    return;
   }
 
   /* hdop */
-  if (gpsdata->set & HERR_SET) {
-    if (!isNaN(gpsdata->fix.epx) //
-        && !isNaN(gpsdata->fix.epy)) {
-      info->hdop = nmeaMathPdopCalculate(gpsdata->fix.epx, gpsdata->fix.epy);
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_HDOP);
-    }
-
-    gpsdata->set &= ~HERR_SET;
+  if (!isNaN(gpsdata->fix.epx) //
+      && !isNaN(gpsdata->fix.epy)) {
+    info->hdop = nmeaMathPdopCalculate(gpsdata->fix.epx, gpsdata->fix.epy);
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_HDOP);
   }
+  gpsdata->set &= ~HERR_SET;
 
   /* vdop */
-  if (gpsdata->set & VERR_SET) {
-    if (!isNaN(gpsdata->fix.epv)) {
-      info->vdop = gpsdata->fix.epv;
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_VDOP);
-    }
-
-    gpsdata->set &= ~VERR_SET;
+  if (!isNaN(gpsdata->fix.epv)) {
+    info->vdop = gpsdata->fix.epv;
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_VDOP);
   }
+  gpsdata->set &= ~VERR_SET;
 
   /* pdop */
   if (nmeaInfoIsPresentAll(info->present, NMEALIB_PRESENT_HDOP | NMEALIB_PRESENT_VDOP)) {
@@ -440,138 +439,129 @@ void nmeaInfoFromGpsd(struct gps_data_t *gpsdata, NmeaInfo *info, struct GpsdCon
     nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_PDOP);
   }
 
-  if (gpsdata->set & LATLON_SET) {
-    /* lat */
-    if ((gpsdata->fix.mode >= MODE_2D) //
-        && !isNaN(gpsdata->fix.latitude)) {
-      info->latitude = nmeaMathDegreeToNdeg(gpsdata->fix.latitude);
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_LAT);
-    }
-
-    /* lon */
-    if ((gpsdata->fix.mode >= MODE_2D) //
-        && !isNaN(gpsdata->fix.longitude)) {
-      info->longitude = nmeaMathDegreeToNdeg(gpsdata->fix.longitude);
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_LON);
-    }
-
-    gpsdata->set &= ~LATLON_SET;
+  /* lat */
+  if ((gpsdata->fix.mode >= MODE_2D) //
+      && !isNaN(gpsdata->fix.latitude)) {
+    info->latitude = nmeaMathDegreeToNdeg(gpsdata->fix.latitude);
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_LAT);
   }
 
-  if (gpsdata->set & ALTITUDE_SET) {
-    /* elv */
-    if ((gpsdata->fix.mode >= MODE_3D) //
-        && !isNaN(gpsdata->fix.altitude)) {
-      info->elevation = gpsdata->fix.altitude;
-      info->height = gpsdata->separation;
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_ELV | NMEALIB_PRESENT_HEIGHT);
-    }
-
-    gpsdata->set &= ~ALTITUDE_SET;
+  /* lon */
+  if ((gpsdata->fix.mode >= MODE_2D) //
+      && !isNaN(gpsdata->fix.longitude)) {
+    info->longitude = nmeaMathDegreeToNdeg(gpsdata->fix.longitude);
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_LON);
   }
 
-  if (gpsdata->set & SPEED_SET) {
-    /* speed */
-    if ((gpsdata->fix.mode >= MODE_2D) //
-        && !isNaN(gpsdata->fix.speed)) {
-      info->speed = gpsdata->fix.speed * MPS_TO_KPH;
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_SPEED);
-    }
+  /* lat & lon */
+  gpsdata->set &= ~LATLON_SET;
 
-    gpsdata->set &= ~SPEED_SET;
+  /* elv */
+  if ((gpsdata->fix.mode >= MODE_3D) //
+      && !isNaN(gpsdata->fix.altitude)) {
+    info->elevation = gpsdata->fix.altitude;
+    info->height = gpsdata->separation;
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_ELV | NMEALIB_PRESENT_HEIGHT);
   }
+  gpsdata->set &= ~ALTITUDE_SET;
 
-  if (gpsdata->set & TRACK_SET) {
-    /* track & mtrack */
-    if ((gpsdata->fix.mode >= MODE_2D) //
-        && !isNaN(gpsdata->fix.track)) {
-      info->track = gpsdata->fix.track;
-      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_TRACK);
-
-      if (nmeaInfoIsPresentAll(info->present, NMEALIB_PRESENT_LAT | NMEALIB_PRESENT_LON)) {
-        double magheading = true2magnetic(gpsdata->fix.latitude, gpsdata->fix.longitude, gpsdata->fix.track);
-        if (!isNaN(magheading)) {
-          info->mtrack = magheading;
-          nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_MTRACK);
-        }
-      }
-    }
-
-    gpsdata->set &= ~TRACK_SET;
+  /* speed */
+  if ((gpsdata->fix.mode >= MODE_2D) //
+      && !isNaN(gpsdata->fix.speed)) {
+    info->speed = gpsdata->fix.speed * MPS_TO_KPH;
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_SPEED);
   }
+  gpsdata->set &= ~SPEED_SET;
+
+  /* track & mtrack */
+  if ((gpsdata->fix.mode >= MODE_2D) //
+      && !isNaN(gpsdata->fix.track)) {
+    double magheading;
+
+    info->track = gpsdata->fix.track;
+    nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_TRACK);
+
+    magheading = true2magnetic(gpsdata->fix.latitude, gpsdata->fix.longitude, gpsdata->fix.track);
+    if (!isNaN(magheading)) {
+      info->mtrack = magheading;
+      nmeaInfoSetPresent(&info->present, NMEALIB_PRESENT_MTRACK);
+    }
+  }
+  gpsdata->set &= ~TRACK_SET;
 
   /* magvar: not available */
 
-  /* satellites & sig */
-  if (gpsdata->set & SATELLITE_SET) {
-    size_t iGpsd;
-    size_t iInUse;
-    size_t iInView;
+  /* satellites */
 
-    info->satellites.inUseCount = 0;
-    memset(&info->satellites.inUse, 0, sizeof(info->satellites.inUse));
-    info->satellites.inViewCount = 0;
-    memset(&info->satellites.inView, 0, sizeof(info->satellites.inView));
+  info->satellites.inUseCount = 0;
+  memset(&info->satellites.inUse, 0, sizeof(info->satellites.inUse));
+  info->satellites.inViewCount = 0;
+  memset(&info->satellites.inView, 0, sizeof(info->satellites.inView));
 
-    iInUse = 0;
-    iInView = 0;
-    for (iGpsd = 0; //
-        (iGpsd < MAXCHANNELS) && (iInUse < NMEALIB_MAX_SATELLITES) && (iInView < NMEALIB_MAX_SATELLITES); //
-        iGpsd++) {
+  if (gpsdata->satellites_visible > 0) {
+    int iGpsd;
+
 #ifndef GPSD_NEW
-      int prn = gpsdata->used[iGpsd];
-      info->satellites.inUse[iInUse++] = (prn < 0) ? 0 : (unsigned int) prn;
-      if (prn > 0) {
-        info->satellites.inUseCount++;
-      }
+    bool usedFlags[MAXCHANNELS];
 
-      prn = gpsdata->PRN[iGpsd];
-      if (prn > 0) {
-        info->satellites.inViewCount++;
-        NmeaSatellite *infoSatellite = &info->satellites.inView[iInView++];
-        infoSatellite->prn = (unsigned int) prn;
-        infoSatellite->elevation = gpsdata->elevation[iGpsd];
-        infoSatellite->azimuth = (unsigned int) gpsdata->azimuth[iGpsd];
-        infoSatellite->snr = (unsigned int) lrint(gpsdata->ss[iGpsd]);
+    memset(usedFlags, 0, sizeof(usedFlags));
+
+    /* build a bitmap of which satellites are used */
+    for (iGpsd = 0; iGpsd < MAXCHANNELS; iGpsd++) {
+      size_t iGpsdUsed;
+      for (iGpsdUsed = 0; iGpsdUsed < (size_t) gpsdata->satellites_used; iGpsdUsed++) {
+        if (gpsdata->used[iGpsdUsed] == gpsdata->PRN[iGpsd]) {
+          usedFlags[iGpsd] = true;
+          iGpsdUsed = (size_t) gpsdata->satellites_used;
+        }
       }
+    }
+#endif
+
+    for (iGpsd = 0; //
+        (iGpsd < gpsdata->satellites_visible) && (iGpsd < MAXCHANNELS) && (iGpsd < (int) NMEALIB_MAX_SATELLITES); //
+        iGpsd++) {
+      NmeaSatellite *infoSatellite = &info->satellites.inView[iGpsd];
+      unsigned int prn;
+      int elevation;
+      unsigned int azimuth;
+      unsigned int snr;
+      bool inUse;
+
+#ifndef GPSD_NEW
+      prn = (unsigned int) gpsdata->PRN[iGpsd];
+      elevation = gpsdata->elevation[iGpsd];
+      azimuth = (unsigned int) gpsdata->azimuth[iGpsd];
+      snr = (unsigned int) lrint(gpsdata->ss[iGpsd]);
+      inUse = usedFlags[iGpsd];
 #else
       struct satellite_t *gpsdSatellite = &gpsdata->skyview[iGpsd];
-      if (gpsdSatellite->used) {
-        info->satellites.inUseCount++;
-        info->satellites.inUse[iInUse++] = (unsigned int) gpsdSatellite->PRN;
-      }
 
-      if (gpsdSatellite->PRN > 0) {
-        NmeaSatellite *infoSatellite;
-
-        info->satellites.inViewCount++;
-        infoSatellite = &info->satellites.inView[iInView++];
-        infoSatellite->prn = (unsigned int) gpsdSatellite->PRN;
-        infoSatellite->elevation = gpsdSatellite->elevation;
-        infoSatellite->azimuth = (unsigned int) gpsdSatellite->azimuth;
-        infoSatellite->snr = (unsigned int) lrint(gpsdSatellite->ss);
-      }
+      prn = (unsigned int) gpsdSatellite->PRN;
+      elevation = gpsdSatellite->elevation;
+      azimuth = (unsigned int) gpsdSatellite->azimuth;
+      snr = (unsigned int) lrint(gpsdSatellite->ss);
+      inUse = gpsdSatellite->used;
 #endif
+
+      infoSatellite->prn = prn;
+      infoSatellite->elevation = elevation;
+      infoSatellite->azimuth = azimuth;
+      infoSatellite->snr = snr;
+      info->satellites.inViewCount++;
+
+      if (inUse) {
+        info->satellites.inUse[iGpsd] = prn;
+        info->satellites.inUseCount++;
+      }
     }
-
-    nmeaInfoSetPresent(&info->present, //
-        NMEALIB_PRESENT_SATINUSECOUNT //
-        | NMEALIB_PRESENT_SATINUSE //
-        | NMEALIB_PRESENT_SATINVIEWCOUNT //
-        | NMEALIB_PRESENT_SATINVIEW);
-
-    gpsdata->set &= ~SATELLITE_SET;
   }
-
-  if (nmeaInfoIsPresentAll(info->present, NMEALIB_PRESENT_FIX) && (info->fix == NMEALIB_FIX_BAD)) {
-    nmeaInfoClear(info);
-    nmeaTimeSet(&info->utc, &info->present, NULL);
-  }
-
-  if (nmeaInfoIsPresentAll(info->present, NMEALIB_PRESENT_SIG) && (info->sig == NMEALIB_SIG_INVALID)) {
-    nmeaInfoClear(info);
-    nmeaTimeSet(&info->utc, &info->present, NULL);
-  }
+  nmeaInfoSetPresent(&info->present, //
+      NMEALIB_PRESENT_SATINUSECOUNT //
+      | NMEALIB_PRESENT_SATINUSE //
+      | NMEALIB_PRESENT_SATINVIEWCOUNT //
+      | NMEALIB_PRESENT_SATINVIEW);
+  gpsdata->set &= ~SATELLITE_SET;
 
   nmeaInfoSanitise(info);
 
