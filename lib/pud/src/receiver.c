@@ -61,19 +61,11 @@
 /* System includes */
 #include <nmealib/context.h>
 #include <nmealib/nmath.h>
-#include <nmealib/parser.h>
 #include <nmealib/sentence.h>
 #include <OlsrdPudWireFormat/wireFormat.h>
 #include <unistd.h>
 
 static void receiverProcessIncomingEntry(PositionUpdateEntry * incomingEntry);
-
-/*
- * NMEA parser
- */
-
-/** The NMEA string parser */
-static NmeaParser nmeaParser;
 
 /*
  * State
@@ -987,11 +979,6 @@ void updatePositionFromFile(void) {
 bool startReceiver(void) {
 	MovementState externalState;
 
-	if (!nmeaParserInit(&nmeaParser, 0)) {
-		pudError(false, "Could not initialise NMEA parser");
-		return false;
-	}
-
 	/* hook up the NMEA library error callback */
 	nmeaContextSetErrorFunction(&nmea_errors);
 
@@ -1075,6 +1062,4 @@ void stopReceiver(void) {
 	nmeaInfoClear(&transmitGpsInformation.txPosition.nmeaInfo);
 	transmitGpsInformation.txGateway = olsr_cnf->main_addr;
 	transmitGpsInformation.positionUpdated = false;
-
-	nmeaParserDestroy(&nmeaParser);
 }
