@@ -7,6 +7,6 @@
 -testpath: \
 	${junit}
 Bundle-Name:OLSRd Info Proxy
-Bundle-Version:1.0.0.${tstamp}
+Bundle-Version:1.0.1.${tstamp}
 Private-Package: \
 	org.olsr.v1.info.proxy
