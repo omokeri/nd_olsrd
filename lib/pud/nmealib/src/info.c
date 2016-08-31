@@ -92,12 +92,12 @@ char nmeaInfoSignalToMode(NmeaSignal sig) {
   }
 }
 
-bool nmeaTimeParseTime(const char *s, NmeaTime *time) {
+bool nmeaTimeParseTime(const char *s, NmeaTime *ntime) {
   const char *t;
   size_t sz;
 
   if (!s //
-      || !time) {
+      || !ntime) {
     return false;
   }
 
@@ -109,25 +109,25 @@ bool nmeaTimeParseTime(const char *s, NmeaTime *time) {
   }
 
   if (sz == 6) { // HHMMSS
-    time->hsec = 0;
-    return (3 == nmeaScanf(t, sz, "%2u%2u%2u", &time->hour, &time->min, &time->sec));
+    ntime->hsec = 0;
+    return (3 == nmeaScanf(t, sz, "%2u%2u%2u", &ntime->hour, &ntime->min, &ntime->sec));
   }
 
   if (sz == 8) { // HHMMSS.t
-    if (4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &time->hour, &time->min, &time->sec, &time->hsec)) {
-      time->hsec *= 10;
+    if (4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &ntime->hour, &ntime->min, &ntime->sec, &ntime->hsec)) {
+      ntime->hsec *= 10;
       return true;
     }
     return false;
   }
 
   if (sz == 9) { // HHMMSS.hh
-    return (4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &time->hour, &time->min, &time->sec, &time->hsec));
+    return (4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &ntime->hour, &ntime->min, &ntime->sec, &ntime->hsec));
   }
 
   if (sz == 10) { // HHMMSS.mmm
-    if ((4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &time->hour, &time->min, &time->sec, &time->hsec))) {
-      time->hsec = (time->hsec + 5) / 10;
+    if ((4 == nmeaScanf(t, sz, "%2u%2u%2u.%u", &ntime->hour, &ntime->min, &ntime->sec, &ntime->hsec))) {
+      ntime->hsec = (ntime->hsec + 5) / 10;
       return true;
     }
     return false;
