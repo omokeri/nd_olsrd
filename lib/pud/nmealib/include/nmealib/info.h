@@ -176,10 +176,10 @@ typedef struct _NmeaTime {
  * determined by the length of the string.
  *
  * @param s The time
- * @param time The structure in which to store the parsed time
+ * @param ntime The structure in which to store the parsed time
  * @return True on success
  */
-bool nmeaTimeParseTime(const char *s, NmeaTime *time);
+bool nmeaTimeParseTime(const char *s, NmeaTime *ntime);
 
 /**
  * Parse a NMEA date into a NmeaTime structure (date only, no time).
