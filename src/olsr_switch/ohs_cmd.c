@@ -539,7 +539,9 @@ ohs_parse_command(void)
     ohs_cmd_exit(NULL);
   }
 
-  for (cmd_len = 0; cmd_line[cmd_len] != 0 && cmd_line[cmd_len] != '\n'; cmd_len++);
+  for (cmd_len = 0; cmd_line[cmd_len] != 0 && cmd_line[cmd_len] != '\n'; cmd_len++) {
+    // Avoid: error: this ‘for’ clause does not guard... [-Werror=misleading-indentation]
+  }
 #endif /* defined _WIN32 */
 
   {
