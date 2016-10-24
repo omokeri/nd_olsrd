@@ -69,7 +69,7 @@ ohs_check_link(struct ohs_connection *oc, union olsr_ip_addr *dst)
       return 0;
     }
 
-    r = 1 + (int)(100.0 / (RAND_MAX + 1.0) * olsr_random());
+    r = 1 + (int)(100.0 / (OLSR_RANDOM_MAX + 1.0) * olsr_random());
 
     if (logbits & LOG_LINK) {
       struct ipaddr_str addrstr, dststr;
