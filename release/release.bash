@@ -181,7 +181,7 @@ function gitIsGitDirectory() {
 function checkIsOlsrdGitCheckout() {
   if [[ "$(gitIsGitDirectory ".")" == "0" ]] || \
      [[ ! -r ./Makefile.inc ]] || \
-     [[ ! -r ./files/olsrd.conf.default.full ]]; then
+     [[ ! -r ./files/olsrd.conf.default ]]; then
     echo "* You do not appear to be running the script from an olsrd git checkout"
     exit 1
   fi
