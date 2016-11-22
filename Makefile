@@ -44,7 +44,7 @@
 # Please also write a new version to:
 # gui/win32/Main/Frontend.rc (line 71, around "CAPTION [...]")
 # gui/win32/Inst/installer.nsi (line 57, around "MessageBox MB_YESNO [...]")
-VERS =		pre-0.9.5
+VERS =		0.9.5
 
 TOPDIR = $(shell pwd)
 INSTALLOVERWRITE ?=
