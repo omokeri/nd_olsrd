@@ -762,21 +762,61 @@ EOF
   # Make the release tarballs
   #
   echo "Generating the release tarballs..."
-  declare tarFile="${scriptDir}/olsrd-${relBranchVersionDigits}.tar"
-  declare tarGzFile="${tarFile}.gz"
-  declare tarBz2File="${tarFile}.bz2"
-  git archive --format=tar --prefix="olsrd-${relBranchVersionDigits}/" --output="${tarFile}" "${relTagVersion}"
-  gzip   -c "${tarFile}" > "${tarGzFile}"
-  bzip2  -c "${tarFile}" > "${tarBz2File}"
-  rm -f "${tarFile}"
+  declare tarFile="olsrd-$relBranchVersionDigits.tar"
+  declare tarFileJava="olsrd-$relBranchVersionDigits-java.tar"
+  declare tarFileFull="olsrd-$relBranchVersionDigits-full.tar"
+
+  declare tarGzFile="$tarFile.gz"
+  declare tarGzFileJava="$tarFileJava.gz"
+  declare tarGzFileFull="$tarFileFull.gz"
+
+  declare tarBz2File="$tarFile.bz2"
+  declare tarBz2FileJava="$tarFileJava.bz2"
+  declare tarBz2FileFull="$tarFileFull.bz2"
+
+  git archive \
+      --format=tar \
+      --prefix="olsrd-$relBranchVersionDigits/" \
+      --output="$scriptDir/$tarFile" \
+      "$relTagVersion"
+
+  git archive \
+      --format=tar \
+      --prefix="olsrd-$relBranchVersionDigits/" \
+      --output="$scriptDir/$tarFileJava" \
+      "$relTagVersion" \
+      "lib/info.java" \
+      "lib/pud/wireformat-java"
+
+  cp "$scriptDir/$tarFile" "$scriptDir/$tarFileFull"
+
+  pushd "$scriptDir" &> /dev/null
+
+  tar f "$tarFile" \
+      --delete "olsrd-$relBranchVersionDigits/lib/info.java" \
+      --delete "olsrd-$relBranchVersionDigits/lib/pud/wireformat-java"
+
+  gzip   -c "$tarFile" > "$tarGzFile"
+  gzip   -c "$tarFileJava" > "$tarGzFileJava"
+  gzip   -c "$tarFileFull" > "$tarGzFileFull"
+
+  bzip2  -c "$tarFile" > "$tarBz2File"
+  bzip2  -c "$tarFileJava" > "$tarBz2FileJava"
+  bzip2  -c "$tarFileFull" > "$tarBz2FileFull"
+
+  rm -f "$tarFile" "$tarFileJava" "$tarFileFull"
+
   echo "Generating the release tarball checksums..."
-  declare md5File="${scriptDir}/MD5SUM-${relBranchVersionDigits}"
-  declare sha256File="${scriptDir}/SHA256SUM-${relBranchVersionDigits}"
-  md5sum    "${tarGzFile}" "${tarBz2File}" > "${md5File}"
-  sha256sum "${tarGzFile}" "${tarBz2File}" > "${sha256File}"
+  declare md5File="MD5SUM-$relBranchVersionDigits"
+  declare sha256File="SHA256SUM-$relBranchVersionDigits"
+  md5sum    "$tarGzFile" "$tarGzFileJava" "$tarGzFileFull" "$tarBz2File" "$tarBz2FileJava" "$tarBz2FileFull" > "$md5File"
+  sha256sum "$tarGzFile" "$tarGzFileJava" "$tarGzFileFull" "$tarBz2File" "$tarBz2FileJava" "$tarBz2FileFull" > "$sha256File"
+
   echo "Signing the release tarball checksums..."
-  signTextFile "${md5File}"
-  signTextFile "${sha256File}"
+  signTextFile "$md5File"
+  signTextFile "$sha256File"
+
+  popd &> /dev/null
 fi
 
 
@@ -802,10 +842,14 @@ if [[ "${mode}" == "${MODE_RELEASE}" ]]; then
   echo "= Generated Files ="
   echo "==================="
   cat >&1 << EOF
-${tarGzFile}
-${tarBz2File}
-${md5File}
-${sha256File}"
+$tarGzFile
+$tarGzFileJava
+$tarGzFileFull
+$tarBz2File
+$tarBz2FileJava
+$tarBz2FileFull
+$md5File
+$sha256File"
 EOF
 fi
 
