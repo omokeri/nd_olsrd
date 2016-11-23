@@ -1,5 +1,27 @@
 0.9.5 -------------------------------------------------------------------
 
+Note: The txtinfo and jsoninfo plugins were 'merged' to use a common
+      codebase for receiving requests and dispatching replies. Also,
+      these plugins were subjected to review and fixes. As a result:
+      - request handling has become much stricter, e.g. a txtinfo
+        request '/links' will no longer work since the correct request is
+        (and has always been) '/lin'.
+      - some fixes change the format and/or content of txtinfo and/or
+        jsoninfo output. An example is the txtinfo output of the request
+        '/mid' when 'vtime' is enabled on txtinfo; this has been broken
+        since the end of 2009 (c555a44).
+      - invalid requests will return HTTP error status code
+        "Not Found" (404) when HTTP headers are enabled, and report
+        an error in the output when they are not enabled.
+      - requests without output will return HTTP error status code
+        "No Content" (204) when HTTP headers are enabled, and report
+        an error in the output when they are not enabled.
+
+      It is VERY strongly advised to check your scripts and applications
+      interfacing with olsrd txtinfo and/or jsoninfo before switching
+      to this version of olsrd.
+
+
 Ferry Huberts (824):
       Update version after branch of v0.9.0
       Merge branch 'release-0.9.0'
@@ -848,28 +870,6 @@ Henning Rogge (15):
 Karol Kruzelecki (1):
       pud: fix of 'time' shadowing a global declaration (that causes a
          compilation error on older Ubuntu)
-
-Note: The txtinfo and jsoninfo plugins were 'merged' to use a common
-      codebase for receiving requests and dispatching replies. Also,
-      these plugins were subjected to review and fixes. As a result:
-      - request handling has become much stricter, e.g. a txtinfo
-        request '/links' will no longer work since the correct request is
-        (and has always been) '/lin'.
-      - some fixes change the format and/or content of txtinfo and/or
-        jsoninfo output. An example is the txtinfo output of the request
-        '/mid' when 'vtime' is enabled on txtinfo; this has been broken
-        since the end of 2009 (c555a44).
-      - invalid requests will return HTTP error status code
-        "Not Found" (404) when HTTP headers are enabled, and report
-        an error in the output when they are not enabled.
-      - requests without output will return HTTP error status code
-        "No Content" (204) when HTTP headers are enabled, and report
-        an error in the output when they are not enabled.
-
-      It is VERY strongly advised to check your scripts and applications
-      interfacing with olsrd txtinfo and/or jsoninfo before switching
-      to this version of olsrd.
-
 
 0.9.0.3 -------------------------------------------------------------------
 
