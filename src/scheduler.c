@@ -59,6 +59,10 @@
 #include <assert.h>
 #include <time.h>
 
+#ifdef __MACH__
+#include "mach/clock_gettime.h"
+#endif
+
 #ifdef _WIN32
 #define close(x) closesocket(x)
 #endif /* _WIN32 */
