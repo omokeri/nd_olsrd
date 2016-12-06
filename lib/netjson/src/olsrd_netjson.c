@@ -90,7 +90,7 @@ bool isCommand(const char *str, unsigned long long siw) {
 }
 
 const char * determine_mime_type(unsigned int send_what __attribute__((unused))) {
-  return "application/json; charset=utf-8";
+  return "application/vnd.api+json";
 }
 
 void output_start(struct autobuf *abuf) {

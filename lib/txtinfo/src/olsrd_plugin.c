@@ -72,6 +72,7 @@ static void my_init(void) {
   olsr_printf(0, "%s (%s)\n", PLUGIN_TITLE, git_descriptor);
 
   info_plugin_config_init(&config, 2006);
+  config.http_headers = false;
   vtime = false;
 }
 
