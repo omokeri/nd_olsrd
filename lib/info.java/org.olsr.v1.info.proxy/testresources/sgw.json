@@ -2,7 +2,7 @@ HTTP/1.1 200 OK
 Date: Mon, 07 Dec 2015 07:33:54 GMT
 Server: OLSRD JSONINFO
 Connection: close
-Content-Type: application/json; charset=utf-8
+Content-Type: application/vnd.api+json
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST, OPTIONS
 Access-Control-Allow-Headers: Accept, Origin, X-Requested-With
