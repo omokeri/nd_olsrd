@@ -683,6 +683,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if (outbuffer.count >= MAX_CLIENTS) {
     /* limit the number of replies that are in-flight */
+    drain_request(ipc_connection);
     send_status_no_retries(req, ipc_connection, INFO_HTTP_SERVICE_UNAVAILABLE);
     return;
   }
