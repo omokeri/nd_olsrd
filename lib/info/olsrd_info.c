@@ -761,7 +761,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if (rx_count < 0) {
 #ifndef NODEBUG
-    olsr_printf(1, "(%s) s < 0\n", name);
+    olsr_printf(1, "(%s) rx_count < 0\n", name);
 #endif /* NODEBUG */
     *req = '\0';
     drain_request(ipc_connection);
@@ -773,7 +773,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if (!rx_count) {
 #ifndef NODEBUG
-    olsr_printf(1, "(%s) s == 0\n", name);
+    olsr_printf(1, "(%s) rx_count == 0\n", name);
 #endif /* NODEBUG */
     *req = '\0';
     drain_request(ipc_connection);
@@ -785,7 +785,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   if (rx_count >= (ssize_t) sizeof(req_buffer)) {
 #ifndef NODEBUG
-    olsr_printf(1, "(%s) s > %ld\n", name, (long int) sizeof(req_buffer));
+    olsr_printf(1, "(%s) rx_count > %ld\n", name, (long int) sizeof(req_buffer));
 #endif /* NODEBUG */
     req[sizeof(req_buffer) - 1] = '\0';
     drain_request(ipc_connection);
