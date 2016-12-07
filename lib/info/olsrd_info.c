@@ -308,16 +308,16 @@ static unsigned int determine_action(char *requ) {
   }
 }
 
-static void send_status_no_retries(const char * req, int the_socket, unsigned int status) {
+static void send_status_no_retries(const char * req, bool add_headers, int the_socket, unsigned int status) {
   struct autobuf abuf;
 
   abuf_init(&abuf, AUTOBUFCHUNK);
 
-  if (config->http_headers) {
+  if (add_headers) {
     http_header_build_result(status, &abuf);
   } else if (status != INFO_HTTP_OK) {
     if (functions->output_error) {
-      functions->output_error(&abuf, status, req, config->http_headers);
+      functions->output_error(&abuf, status, req, add_headers);
     } else if (status == INFO_HTTP_NOCONTENT) {
       /* wget can't handle output of zero length */
       abuf_puts(&abuf, "\n");
@@ -461,7 +461,7 @@ static void send_info_from_table(struct autobuf *abuf, unsigned int send_what, S
   }
 }
 
-static void send_info(const char * req, unsigned int send_what, int the_socket, unsigned int status) {
+static void send_info(const char * req, bool add_headers, unsigned int send_what, int the_socket, unsigned int status) {
   struct autobuf abuf;
   unsigned int outputLength = 0;
   unsigned int send_index = 0;
@@ -475,7 +475,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
 
   abuf_init(&abuf, AUTOBUFCHUNK);
 
-  if (config->http_headers) {
+  if (add_headers) {
     http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
     headerLength = abuf.len;
   }
@@ -525,7 +525,7 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
       status = INFO_HTTP_NOCONTENT;
       abuf.buf[0] = '\0';
       abuf.len = 0;
-      if (config->http_headers) {
+      if (add_headers) {
         http_header_build(name, status, content_type, &abuf, &contentLengthIndex);
         headerLength = abuf.len;
       }
@@ -534,14 +534,14 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
 
   if (status != INFO_HTTP_OK) {
     if (functions->output_error) {
-      functions->output_error(&abuf, status, req, config->http_headers);
+      functions->output_error(&abuf, status, req, add_headers);
     } else if (status == INFO_HTTP_NOCONTENT) {
       /* wget can't handle output of zero length */
       abuf_puts(&abuf, "\n");
     }
   }
 
-  if (config->http_headers) {
+  if (add_headers) {
     http_header_adjust_content_length(&abuf, contentLengthIndex, abuf.len - headerLength);
   }
 
@@ -689,6 +689,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   ssize_t rx_count = 0;
   unsigned int send_what = 0;
   unsigned int http_status = INFO_HTTP_OK;
+  bool add_headers = config->http_headers;
 
   *req = '\0';
 
@@ -703,7 +704,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   if (outbuffer.count >= MAX_CLIENTS) {
     /* limit the number of replies that are in-flight */
     drain_request(ipc_connection);
-    send_status_no_retries(req, ipc_connection, INFO_HTTP_SERVICE_UNAVAILABLE);
+    send_status_no_retries(req, add_headers, ipc_connection, INFO_HTTP_SERVICE_UNAVAILABLE);
     return;
   }
 
@@ -736,7 +737,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     olsr_printf(1, "(%s) Connect from host %s is not allowed!\n", name, addr);
 #endif /* NODEBUG */
     drain_request(ipc_connection);
-    send_info(req, send_what, ipc_connection, INFO_HTTP_FORBIDDEN);
+    send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_FORBIDDEN);
     return;
   }
 
@@ -766,7 +767,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
     drain_request(ipc_connection);
-    send_info(req, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
     return;
   }
 
@@ -784,7 +785,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #endif /* NODEBUG */
     *req = '\0';
     drain_request(ipc_connection);
-    send_info(req, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
     return;
   }
 
@@ -796,7 +797,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #endif /* NODEBUG */
     *req = '\0';
     drain_request(ipc_connection);
-    send_info(req, SIW_EVERYTHING, ipc_connection, INFO_HTTP_OK);
+    send_info(req, add_headers, SIW_EVERYTHING, ipc_connection, INFO_HTTP_OK);
     return;
   }
 
@@ -808,7 +809,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #endif /* NODEBUG */
     req[sizeof(req_buffer) - 1] = '\0';
     drain_request(ipc_connection);
-    send_info(req, send_what, ipc_connection, INFO_HTTP_REQUEST_ENTITY_TOO_LARGE);
+    send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_REQUEST_ENTITY_TOO_LARGE);
     return;
   }
 
@@ -840,7 +841,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     http_status = INFO_HTTP_NOTFOUND;
   }
 
-  send_info(req, send_what, ipc_connection, http_status);
+  send_info(req, add_headers, send_what, ipc_connection, http_status);
 }
 
 static int plugin_ipc_init(void) {
