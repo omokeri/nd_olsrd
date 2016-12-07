@@ -809,8 +809,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   req = skipLeadingWhitespace(req, (size_t*) &rx_count);
   req = skipMultipleSlashes(req, (size_t*) &rx_count);
 
-  if ((req[0] == '\0') //
-      || ((req[0] == '/') && (req[1] == '\0'))) {
+  if (!rx_count //
+      || ((rx_count == 1) && (*req == '/'))) {
     /* empty or '/' */
     send_what = SIW_EVERYTHING;
   } else {
