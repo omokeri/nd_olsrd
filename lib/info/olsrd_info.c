@@ -142,11 +142,11 @@ static unsigned long long SIW_ENTRIES_ALL[] = {
     //
     SIW_OLSRD_CONF, //
     //
-    SIW_NETJSON_NETWORK_ROUTES,
-    SIW_NETJSON_NETWORK_GRAPH,
-    SIW_NETJSON_DEVICE_CONFIGURATION,
-    SIW_NETJSON_DEVICE_MONITORING,
-    SIW_NETJSON_NETWORK_COLLECTION
+    SIW_NETJSON_NETWORK_ROUTES, //
+    SIW_NETJSON_NETWORK_GRAPH, //
+    SIW_NETJSON_DEVICE_CONFIGURATION, //
+    SIW_NETJSON_DEVICE_MONITORING, //
+    SIW_NETJSON_NETWORK_COLLECTION //
     };
 
 long cache_timeout_generic(info_plugin_config_t *plugin_config, unsigned long long siw) {
