@@ -588,6 +588,10 @@ static char * skipLeadingWhitespace(char * requ, size_t *len) {
 }
 
 static char * stripEOLs(char * requ, size_t *len) {
+  if (!requ || !len || !*len) {
+    return requ;
+  }
+
   while (isspace(requ[*len - 1]) && (requ[*len - 1] != '\0')) {
     *len = *len - 1;
     requ[*len] = '\0';
