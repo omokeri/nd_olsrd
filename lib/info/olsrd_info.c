@@ -582,6 +582,10 @@ static void send_info(const char * req, unsigned int send_what, int the_socket, 
 }
 
 static char * skipLeadingWhitespace(char * requ, size_t *len) {
+  if (!requ || !len || !*len) {
+    return requ;
+  }
+
   while (isspace(*requ) && (*requ != '\0')) {
     *len = *len - 1;
     requ++;
