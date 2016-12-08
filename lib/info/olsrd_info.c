@@ -620,6 +620,11 @@ static char * stripTrailingSlashes(char * requ, size_t *len) {
 static char * cutAtFirstEOL(char * requ, size_t *len) {
   char * s = requ;
   size_t l = 0;
+
+  if (!requ || !len || !*len) {
+    return requ;
+  }
+
   while (!((*s == '\n') || (*s == '\r')) && (*s != '\0')) {
     s++;
     l++;
