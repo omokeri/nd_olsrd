@@ -776,7 +776,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #endif /* NODEBUG */
     *req = '\0';
     drain_request(ipc_connection);
-    send_info(req, send_what, ipc_connection, INFO_HTTP_NOCONTENT);
+    send_info(req, SIW_EVERYTHING, ipc_connection, INFO_HTTP_OK);
     return;
   }
 
