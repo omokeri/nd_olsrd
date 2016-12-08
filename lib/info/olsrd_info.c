@@ -749,6 +749,22 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     req[sizeof(req_buffer) - 1] = '\0';
   }
 
+  /* sanitise the request */
+  if (rx_count > 0) {
+    req = cutAtFirstEOL(req, (size_t*) &rx_count);
+
+    req = stripTrailingWhitespace(req, (size_t*) &rx_count);
+    req = skipLeadingWhitespace(req, (size_t*) &rx_count);
+
+    /* detect http requests */
+    req = parseRequest(req, (size_t*) &rx_count);
+
+    req = stripTrailingWhitespace(req, (size_t*) &rx_count);
+    req = stripTrailingSlashes(req, (size_t*) &rx_count);
+    req = skipLeadingWhitespace(req, (size_t*) &rx_count);
+    req = skipMultipleSlashes(req, (size_t*) &rx_count);
+  }
+
   if (outbuffer.count >= MAX_CLIENTS) {
     /* limit the number of replies that are in-flight */
     drain_request(ipc_connection);
@@ -825,18 +841,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   }
 
   /* 0 < rx_count < sizeof(requ) */
-
-  req = cutAtFirstEOL(req, (size_t*) &rx_count);
-
-  req = stripTrailingWhitespace(req, (size_t*) &rx_count);
-  req = skipLeadingWhitespace(req, (size_t*) &rx_count);
-
-  req = parseRequest(req, (size_t*) &rx_count);
-
-  req = stripTrailingWhitespace(req, (size_t*) &rx_count);
-  req = stripTrailingSlashes(req, (size_t*) &rx_count);
-  req = skipLeadingWhitespace(req, (size_t*) &rx_count);
-  req = skipMultipleSlashes(req, (size_t*) &rx_count);
 
   if (!rx_count //
       || ((rx_count == 1) && (*req == '/'))) {
