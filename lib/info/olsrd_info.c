@@ -692,6 +692,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   unsigned int send_what = 0;
   unsigned int http_status = INFO_HTTP_OK;
 
+  *req = '\0';
+
   if ((ipc_connection = accept(fd, &sock_addr.in, &sock_addr_len)) < 0) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) accept()=%s\n", name, strerror(errno));
@@ -769,7 +771,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
-  *req = '\0';
   rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0); /* Win32 needs the cast here */
 
   /* Upon successful completion, recv() shall return the length of the message
