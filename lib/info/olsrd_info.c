@@ -101,7 +101,9 @@ static struct info_cache_t info_cache;
 static char * skipMultipleSlashes(char * requ, size_t* len) {
   char * r = requ;
 
-  if ((r[0] == '\0') // zero length
+  if (!r // null pointer
+      || (len && !*len) // zero length
+      || (r[0] == '\0') // zero length
       || (r[0] != '/') // does not start with a slash
       || (r[1] != '/')) // does not have another slash
   {
