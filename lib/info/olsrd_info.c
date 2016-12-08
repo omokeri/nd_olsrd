@@ -593,7 +593,7 @@ static char * skipLeadingWhitespace(char * requ, size_t *len) {
   return requ;
 }
 
-static char * stripEOLs(char * requ, size_t *len) {
+static char * stripTrailingWhitespace(char * requ, size_t *len) {
   if (!requ || !len || !*len) {
     return requ;
   }
@@ -818,12 +818,12 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   req = cutAtFirstEOL(req, (size_t*) &rx_count);
 
-  req = stripEOLs(req, (size_t*) &rx_count);
+  req = stripTrailingWhitespace(req, (size_t*) &rx_count);
   req = skipLeadingWhitespace(req, (size_t*) &rx_count);
 
   req = parseRequest(req, (size_t*) &rx_count);
 
-  req = stripEOLs(req, (size_t*) &rx_count);
+  req = stripTrailingWhitespace(req, (size_t*) &rx_count);
   req = stripTrailingSlashes(req, (size_t*) &rx_count);
   req = skipLeadingWhitespace(req, (size_t*) &rx_count);
   req = skipMultipleSlashes(req, (size_t*) &rx_count);
