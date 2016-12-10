@@ -617,50 +617,29 @@ static char * cutAtFirstEOL(char * requ, size_t *len) {
   return requ;
 }
 
-static char * parseRequest(char * requ, size_t *len) {
-  char * req = requ;
-
-  if (!req || !*len) {
-    return requ;
-  }
-
-  req = skipLeadingWhitespace(req, len);
-  req = stripEOLs(req, len);
-
-  /* HTTP request: GET whitespace URI whitespace HTTP/1.1 */
-  if (*len < (3 + 1 + 1 + 1 + 8)) {
+static char * parseRequest(char * req, size_t *len) {
+  if (!req || !len || !*len) {
     return req;
   }
 
-  if (strncasecmp(req, "GET", 3) || !isspace(req[3])) {
-    /* does not start with 'GET ' */
-    return req;
-  }
-
-  /* skip 'GET ' and further leading whitespace */
-  req = skipLeadingWhitespace(&req[4], len);
-  if (!*len) return req;
-
-  /* cut req at the first '\n' */
-  req = cutAtFirstEOL(req, len);
-  if (!*len) return req;
-
-  /* strip req of trailing EOL and whitespace */
-  req = stripEOLs(req, len);
-  if (*len < 9) return req;
-
-  if (!isspace(req[*len - 9]) //
+  /* HTTP request: GET whitespace URI whitespace HTTP/1.[01] */
+  if (*len < (3 + 1 + 1 + 1 + 8) //
+      || strncasecmp(req, "GET", 3) //
+      || !isspace(req[3]) //
+      || !isspace(req[*len - 9]) //
       || strncasecmp(&req[*len - 8], "HTTP/1.", 7) //
       || ((req[*len - 1] != '1') && (req[*len - 1] != '0'))) {
+    /* too short or does not start with 'GET ' nor ends with ' HTTP/1.[01]'*/
     return req;
   }
-  *len = *len - 8;
-  req[*len] = '\0';
-  if (!*len) return req;
 
-  /* strip req of trailing EOL and whitespace */
-  req = stripEOLs(req, len);
-  req = stripTrailingSlashes(req, len);
+  /* skip 'GET ' */
+  *len = *len - 4;
+  req = &req[4];
+
+  /* strip ' HTTP/1.[01]' */
+  *len = *len - 9;
+  req[*len] = '\0';
 
   return req;
 }
@@ -816,8 +795,19 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   /* 0 < rx_count < sizeof(requ) */
 
   req[rx_count] = '\0';
+
+  req = cutAtFirstEOL(req, (size_t*) &rx_count);
+
+  req = stripEOLs(req, (size_t*) &rx_count);
+  req = skipLeadingWhitespace(req, (size_t*) &rx_count);
+
   req = parseRequest(req, (size_t*) &rx_count);
+
+  req = stripEOLs(req, (size_t*) &rx_count);
+  req = stripTrailingSlashes(req, (size_t*) &rx_count);
+  req = skipLeadingWhitespace(req, (size_t*) &rx_count);
   req = skipMultipleSlashes(req, (size_t*) &rx_count);
+
   if ((req[0] == '\0') //
       || ((req[0] == '/') && (req[1] == '\0'))) {
     /* empty or '/' */
