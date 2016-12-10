@@ -701,6 +701,54 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
+  timeout.tv_sec = timeout.tv_usec = 0;
+
+  FD_ZERO(&read_fds);
+#ifndef _WIN32
+  FD_SET(ipc_connection, &read_fds);
+#else
+  FD_SET((unsigned int ) ipc_connection, &read_fds); /* Win32 needs the cast here */
+#endif
+
+  /* On success, select() and pselect() return the number of file descriptors
+   * contained in the three returned descriptor sets (that is, the total number
+   * of bits that are set in readfds, writefds, exceptfds) which may be zero if
+   * the timeout expires before anything interesting happens. On error, -1 is
+   * returned, and errno is set to indicate the error; the file descriptor sets
+   * are unmodified, and timeout becomes undefined.
+   */
+
+  if (select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout) < 0) {
+    /* ipc_connection is not ready for reading */
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
+#endif /* NODEBUG */
+    drain_request(ipc_connection);
+    if (outbuffer.count >= MAX_CLIENTS) {
+      send_status_no_retries(req, add_headers, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    } else {
+      send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    }
+    return;
+  }
+
+  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0);
+
+  /* Upon successful completion, recv() shall return the length of the message
+   * in bytes. If no messages are available to be received and the peer has
+   * performed an orderly shutdown, recv() shall return 0. Otherwise, −1 shall
+   * be returned and errno set to indicate the error.
+   */
+
+  /* ensure proper request termination */
+  if (rx_count <= 0) {
+    *req = '\0';
+  } else if (rx_count < (ssize_t) sizeof(req_buffer)) {
+    req[rx_count] = '\0';
+  } else {
+    req[sizeof(req_buffer) - 1] = '\0';
+  }
+
   if (outbuffer.count >= MAX_CLIENTS) {
     /* limit the number of replies that are in-flight */
     drain_request(ipc_connection);
@@ -745,46 +793,10 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   olsr_printf(2, "(%s) Connect from host %s is allowed\n", name, addr);
 #endif /* NODEBUG */
 
-  timeout.tv_sec = timeout.tv_usec = 0;
-
-  FD_ZERO(&read_fds);
-#ifndef _WIN32
-  FD_SET(ipc_connection, &read_fds);
-#else
-  FD_SET((unsigned int ) ipc_connection, &read_fds); /* Win32 needs the cast here */
-#endif
-
-  /* On success, select() and pselect() return the number of file descriptors
-   * contained in the three returned descriptor sets (that is, the total number
-   * of bits that are set in readfds, writefds, exceptfds) which may be zero if
-   * the timeout expires before anything interesting happens. On error, -1 is
-   * returned, and errno is set to indicate the error; the file descriptor sets
-   * are unmodified, and timeout becomes undefined.
-   */
-
-  if (select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout) < 0) {
-    /* ipc_connection is not ready for reading */
-#ifndef NODEBUG
-    olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
-#endif /* NODEBUG */
-    drain_request(ipc_connection);
-    send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
-    return;
-  }
-
-  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0);
-
-  /* Upon successful completion, recv() shall return the length of the message
-   * in bytes. If no messages are available to be received and the peer has
-   * performed an orderly shutdown, recv() shall return 0. Otherwise, −1 shall
-   * be returned and errno set to indicate the error.
-   */
-
   if (rx_count < 0) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) rx_count < 0\n", name);
 #endif /* NODEBUG */
-    *req = '\0';
     drain_request(ipc_connection);
     send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
     return;
@@ -796,7 +808,6 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifndef NODEBUG
     olsr_printf(1, "(%s) rx_count == 0\n", name);
 #endif /* NODEBUG */
-    *req = '\0';
     drain_request(ipc_connection);
     send_info(req, add_headers, SIW_EVERYTHING, ipc_connection, INFO_HTTP_OK);
     return;
@@ -808,15 +819,12 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifndef NODEBUG
     olsr_printf(1, "(%s) rx_count > %ld\n", name, (long int) sizeof(req_buffer));
 #endif /* NODEBUG */
-    req[sizeof(req_buffer) - 1] = '\0';
     drain_request(ipc_connection);
     send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_REQUEST_ENTITY_TOO_LARGE);
     return;
   }
 
   /* 0 < rx_count < sizeof(requ) */
-
-  req[rx_count] = '\0';
 
   req = cutAtFirstEOL(req, (size_t*) &rx_count);
 
