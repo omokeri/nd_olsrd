@@ -751,7 +751,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifndef _WIN32
   FD_SET(ipc_connection, &read_fds);
 #else
-  FD_SET((unsigned int ) ipc_connection, &read_fds);
+  FD_SET((unsigned int ) ipc_connection, &read_fds); /* Win32 needs the cast here */
 #endif
 
   /* On success, select() and pselect() return the number of file descriptors
@@ -763,6 +763,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
    */
 
   if (select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout) < 0) {
+    /* ipc_connection is not ready for reading */
 #ifndef NODEBUG
     olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
@@ -771,7 +772,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
-  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0); /* Win32 needs the cast here */
+  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0);
 
   /* Upon successful completion, recv() shall return the length of the message
    * in bytes. If no messages are available to be received and the peer has
