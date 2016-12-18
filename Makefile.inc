@@ -96,6 +96,7 @@ CC = 		$(CCACHE) gcc
 else
 CC ?= 		$(CCACHE) gcc
 endif
+CC := $(strip $(CC))
 ifeq ($(DEBUG),0)
   ifeq ($(NOSTRIP),0)
   STRIP ?=  strip
