@@ -49,12 +49,6 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <fcntl.h>
-#if defined(__linux__) && !defined(__ANDROID__)
-  #ifdef __GLIBC__
-    #include <execinfo.h>
-  #endif
-#include <syslog.h>
-#endif /* defined(__linux__) && !defined(__ANDROID__) */
 
 #include "cfgparser/olsrd_conf.h"
 #include "ipcalc.h"
@@ -79,6 +73,14 @@
 #include "lock_file.h"
 #include "cli.h"
 
+#if defined(__GLIBC__) && defined(__linux__) && !defined(__ANDROID__)
+  #define OLSR_HAVE_EXECINFO_H
+#endif /* defined(__GLIBC__) && defined(__linux__) && !defined(__ANDROID__) */
+
+#ifdef OLSR_HAVE_EXECINFO_H
+  #include <execinfo.h>
+#endif /* OLSR_HAVE_EXECINFO_H */
+
 #ifdef __linux__
 #include <linux/types.h>
 #include <linux/rtnetlink.h>
@@ -102,7 +104,7 @@ static char **olsr_argv = NULL;
 struct olsr_cookie_info *def_timer_ci = NULL;
 
 static void printStacktrace(const char * message) {
-#ifdef __GLIBC__
+#ifdef OLSR_HAVE_EXECINFO_H
   void *bt_array[64];
   size_t bt_size;
   size_t bt_index=0;
@@ -117,7 +119,7 @@ static void printStacktrace(const char * message) {
   }
 #else
   olsr_syslog(OLSR_LOG_ERR, "%s (logging a stack trace is not supported on this platform)", message);
-#endif
+#endif /* OLSR_HAVE_EXECINFO_H */
 }
 
 #ifndef _WIN32
