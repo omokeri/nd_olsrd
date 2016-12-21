@@ -73,9 +73,9 @@
 #include "lock_file.h"
 #include "cli.h"
 
-#if defined(__GLIBC__) && defined(__linux__) && !defined(__ANDROID__)
+#if defined(__GLIBC__) && defined(__linux__) && !defined(__ANDROID__) && !defined(__UCLIBC__)
   #define OLSR_HAVE_EXECINFO_H
-#endif /* defined(__GLIBC__) && defined(__linux__) && !defined(__ANDROID__) */
+#endif
 
 #ifdef OLSR_HAVE_EXECINFO_H
   #include <execinfo.h>
