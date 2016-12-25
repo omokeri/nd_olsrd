@@ -1070,6 +1070,7 @@ olsrd_get_default_cnf(char * configuration_file)
     return NULL;
   }
 
+  memset(c, 0, sizeof(struct olsrd_config));
   set_default_cnf(c, configuration_file);
   return c;
 }
