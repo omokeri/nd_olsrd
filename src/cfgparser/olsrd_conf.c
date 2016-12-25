@@ -162,6 +162,10 @@ olsrmain_load_config(char *file) {
     fprintf(stderr, "Error while reading config file %s!\n", file);
     return -1;
   }
+
+  free(olsr_cnf->configuration_file);
+  olsr_cnf->configuration_file = strdup(file);
+
   return 0;
 }
 
