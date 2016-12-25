@@ -404,8 +404,31 @@ static int set_default_ifcnfs(struct olsr_if *ifs, struct if_config_options *cnf
  * Main entrypoint
  */
 
+static int argc_saved = 0;
+char ** argv_saved = NULL;
+
+void get_argc_argv(int *argc, char ***argv) {
+  if (argc) {
+    *argc = argc_saved;
+  }
+  if (argv) {
+    *argv = argv_saved;
+  }
+}
+
 int main(int argc, char *argv[]) {
   int argcLocal = argc;
+
+  /* save argc and argv */
+  {
+    size_t i;
+
+    argc_saved = argc;
+    argv_saved = malloc(sizeof(char*) * (argc + 1));
+    for (i = 0; i <= (size_t) argc; i++) {
+      argv_saved[i] = argv[i];
+    }
+  }
 
   /* Open syslog */
   olsr_openlog("olsrd");

@@ -56,6 +56,8 @@ extern bool changes_force;
 
 extern union olsr_ip_addr all_zero;
 
+void get_argc_argv(int *argc, char **argv[]);
+
 void olsr_startup_sleep(int);
 void olsr_do_startup_sleep(void);
 
