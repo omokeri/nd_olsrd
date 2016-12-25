@@ -156,7 +156,7 @@ public class TestJsonInfoStartup {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(2038520371)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(954758003)));
 
     /* set */
     final JsonInfoVersionEntry version = new JsonInfoVersionEntry();
@@ -174,14 +174,14 @@ public class TestJsonInfoStartup {
     this.impl.setConfig(config);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1991057907)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(907295539)));
 
     /* set */
     this.impl.setVersion(null);
     this.impl.setPlugins(null);
     this.impl.setConfig(null);
 
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1991057907)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(907295539)));
   }
 
   @Test(timeout = 8000)

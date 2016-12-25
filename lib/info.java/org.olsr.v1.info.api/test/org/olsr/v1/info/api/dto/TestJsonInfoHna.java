@@ -100,7 +100,7 @@ public class TestJsonInfoHna {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503681)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810335)));
 
     final JsonInfoHnaEntry entry = new JsonInfoHnaEntry();
     entry.setDestinationPrefixLength(1);
@@ -110,7 +110,7 @@ public class TestJsonInfoHna {
     this.impl.setHna(hnas);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(888427233)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1743733887)));
   }
 
   @Test(timeout = 8000)

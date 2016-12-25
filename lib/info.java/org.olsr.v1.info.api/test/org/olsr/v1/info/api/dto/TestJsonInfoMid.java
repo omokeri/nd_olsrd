@@ -101,7 +101,7 @@ public class TestJsonInfoMid {
   public void testHashCode() {
     this.impl.setMid(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503682)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810336)));
 
     final List<JsonInfoMidEntry> mid = new LinkedList<>();
     final JsonInfoMidEntry entry = new JsonInfoMidEntry();
@@ -111,7 +111,7 @@ public class TestJsonInfoMid {
     this.impl.setMid(mid);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887534464)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742841118)));
   }
 
   @Test(timeout = 8000)

@@ -10,11 +10,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @ProviderType
 public class JsonInfoBase {
-  private long   pid              = 0;
-  private long   systemTime       = 0;
-  private long   timeSinceStartup = 0;
-  private String uuid             = ""; /* optional */
-  private String error            = ""; /* optional */
+  private long   pid                   = 0;
+  private long   systemTime            = 0;
+  private long   timeSinceStartup      = 0;
+  private String configurationChecksum = "";
+  private String uuid                  = ""; /* optional */
+  private String error                 = ""; /* optional */
 
   /**
    * @return the PID
@@ -62,6 +63,25 @@ public class JsonInfoBase {
   }
 
   /**
+   * @return the configuration checksum
+   */
+  public String getConfigurationChecksum() {
+    return this.configurationChecksum;
+  }
+
+  /**
+   * @param configurationChecksum the configuration checksum to set
+   */
+  @JsonProperty("configurationChecksum")
+  public void setConfigurationChecksum(final String configurationChecksum) {
+    if (configurationChecksum == null) {
+      this.configurationChecksum = "";
+    } else {
+      this.configurationChecksum = configurationChecksum;
+    }
+  }
+
+  /**
    * @return the UUID
    */
   public String getUuid() {
@@ -106,6 +126,7 @@ public class JsonInfoBase {
     result = (prime * result) + (int) (this.pid ^ (this.pid >>> 32));
     result = (prime * result) + (int) (this.systemTime ^ (this.systemTime >>> 32));
     result = (prime * result) + (int) (this.timeSinceStartup ^ (this.timeSinceStartup >>> 32));
+    result = (prime * result) + this.configurationChecksum.hashCode();
     result = (prime * result) + this.uuid.hashCode();
     result = (prime * result) + this.error.hashCode();
     return result;
@@ -146,6 +167,11 @@ public class JsonInfoBase {
       return result;
     }
 
+    result = this.configurationChecksum.compareTo(other.configurationChecksum);
+    if (result != 0) {
+      return CompareUtils.clip(result);
+    }
+
     result = this.uuid.compareTo(other.uuid);
     if (result != 0) {
       return CompareUtils.clip(result);
@@ -168,6 +194,8 @@ public class JsonInfoBase {
     builder.append(this.systemTime);
     builder.append(", timeSinceStartup=");
     builder.append(this.timeSinceStartup);
+    builder.append(", configurationChecksum=");
+    builder.append(this.configurationChecksum);
     builder.append(", uuid=");
     builder.append(this.uuid);
     builder.append(", error=");

@@ -103,7 +103,7 @@ public class TestJsonInfoRoutes {
   public void testHashCode() {
     this.impl.setRoutes(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503681)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810335)));
 
     final Set<JsonInfoRoutesEntry> routes = new TreeSet<>();
     final JsonInfoRoutesEntry entry = new JsonInfoRoutesEntry();
@@ -112,7 +112,7 @@ public class TestJsonInfoRoutes {
     this.impl.setRoutes(routes);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1905047285)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1534613357)));
   }
 
   @Test(timeout = 8000)

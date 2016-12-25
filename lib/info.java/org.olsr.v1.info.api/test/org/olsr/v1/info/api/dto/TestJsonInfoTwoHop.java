@@ -100,7 +100,7 @@ public class TestJsonInfoTwoHop {
   public void testHashCode() {
     this.impl.setTwoHop(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503682)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810336)));
 
     final List<JsonInfoTwoHopEntry> neighbors = new LinkedList<>();
     final JsonInfoTwoHopEntry entry = new JsonInfoTwoHopEntry();
@@ -109,7 +109,7 @@ public class TestJsonInfoTwoHop {
     this.impl.setTwoHop(neighbors);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(565149067)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1420455721)));
   }
 
   @Test(timeout = 8000)

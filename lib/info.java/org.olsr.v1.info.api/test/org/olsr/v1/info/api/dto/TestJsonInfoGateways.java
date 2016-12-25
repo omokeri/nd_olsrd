@@ -89,7 +89,7 @@ public class TestJsonInfoGateways {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887504642)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742811296)));
 
     /* set */
     final JsonInfoGatewaysFields gateways = new JsonInfoGatewaysFields();
@@ -101,7 +101,7 @@ public class TestJsonInfoGateways {
     this.impl.setGateways(gateways);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(345062030)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1200368684)));
   }
 
   @Test(timeout = 8000)

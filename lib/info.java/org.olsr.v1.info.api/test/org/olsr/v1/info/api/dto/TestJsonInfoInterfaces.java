@@ -100,7 +100,7 @@ public class TestJsonInfoInterfaces {
   public void testHashCode() {
     this.impl.setInterfaces(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503682)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810336)));
 
     final List<JsonInfoInterfacesEntry> mid = new LinkedList<>();
     final JsonInfoInterfacesEntry entry = new JsonInfoInterfacesEntry();
@@ -109,7 +109,7 @@ public class TestJsonInfoInterfaces {
     this.impl.setInterfaces(mid);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-474986892)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(380319762)));
   }
 
   @Test(timeout = 8000)

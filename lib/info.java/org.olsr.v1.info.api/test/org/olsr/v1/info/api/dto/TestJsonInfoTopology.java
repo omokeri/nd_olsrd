@@ -103,7 +103,7 @@ public class TestJsonInfoTopology {
   public void testHashCode() {
     this.impl.setTopology(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503681)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810335)));
 
     final Set<JsonInfoTopologyEntry> routes = new TreeSet<>();
     final JsonInfoTopologyEntry entry = new JsonInfoTopologyEntry();
@@ -112,7 +112,7 @@ public class TestJsonInfoTopology {
     this.impl.setTopology(routes);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(69259661)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(924566315)));
   }
 
   @Test(timeout = 8000)

@@ -109,7 +109,7 @@ public class TestJsonInfoNeighbours {
   public void testHashCode() {
     this.impl.setNeighbors(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810335)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1807454463)));
 
     /* set */
     final Set<JsonInfoNeighborsEntry> neighbors = new TreeSet<>();
@@ -123,7 +123,7 @@ public class TestJsonInfoNeighbours {
     this.impl.setLinks(links);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1257381955)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-512679457)));
   }
 
   @Test(timeout = 8000)

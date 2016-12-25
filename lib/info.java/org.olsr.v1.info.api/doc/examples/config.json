@@ -2,8 +2,10 @@
   "pid": 12345,
   "systemTime": 1458316795,
   "timeSinceStartup": 9159412,
+  "configurationChecksum": "2e2c14b6e3562ddfd73111847d7a9d8277993ff7",
   "uuid": "d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d",
   "config": {
+    "configurationChecksum": "2e2c14b6e3562ddfd73111847d7a9d8277993ff7",
     "configurationFile": "/etc/olsrd/olsrd.conf",
     "olsrPort": 698,
     "debugLevel": 0,

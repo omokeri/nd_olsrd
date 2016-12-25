@@ -90,7 +90,7 @@ public class TestJsonInfoSgw {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887533472)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742840126)));
 
     /* set */
     final JsonInfoSgwEntry entry = new JsonInfoSgwEntry();
@@ -102,11 +102,11 @@ public class TestJsonInfoSgw {
     this.impl.setSgw(sgw);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-825816172)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(29490482)));
 
     this.impl.setSgw(null);
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887533472)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742840126)));
   }
 
   @Test(timeout = 8000)

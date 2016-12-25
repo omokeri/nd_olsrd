@@ -31,6 +31,7 @@ public class TestJsonInfoBase {
     assertThat(Long.valueOf(this.impl.getPid()), equalTo(Long.valueOf(0)));
     assertThat(Long.valueOf(this.impl.getSystemTime()), equalTo(Long.valueOf(0)));
     assertThat(Long.valueOf(this.impl.getTimeSinceStartup()), equalTo(Long.valueOf(0)));
+    assertThat(this.impl.getConfigurationChecksum(), equalTo(""));
     assertThat(this.impl.getUuid(), equalTo(""));
     assertThat(this.impl.getError(), equalTo(""));
 
@@ -38,6 +39,7 @@ public class TestJsonInfoBase {
     this.impl.setPid(333);
     this.impl.setSystemTime(123);
     this.impl.setTimeSinceStartup(321);
+    this.impl.setConfigurationChecksum("2e2c14b6e3562ddfd73111847d7a9d8277993ff7");
     this.impl.setUuid("d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d");
     this.impl.setError("something");
 
@@ -45,6 +47,7 @@ public class TestJsonInfoBase {
     assertThat(Long.valueOf(this.impl.getPid()), equalTo(Long.valueOf(333)));
     assertThat(Long.valueOf(this.impl.getSystemTime()), equalTo(Long.valueOf(123)));
     assertThat(Long.valueOf(this.impl.getTimeSinceStartup()), equalTo(Long.valueOf(321)));
+    assertThat(this.impl.getConfigurationChecksum(), equalTo("2e2c14b6e3562ddfd73111847d7a9d8277993ff7"));
     assertThat(this.impl.getUuid(), equalTo("d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d"));
     assertThat(this.impl.getError(), equalTo("something"));
   }
@@ -69,6 +72,12 @@ public class TestJsonInfoBase {
     r = this.impl.equals(other);
     assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
 
+    other = new JsonInfoBase();
+    other.setConfigurationChecksum("configChecksum");
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
+
+    other = new JsonInfoBase();
     other.setUuid("uuid");
     r = this.impl.equals(other);
     assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
@@ -78,6 +87,8 @@ public class TestJsonInfoBase {
   public void testComapreTo() {
     int r;
     final JsonInfoBase other = new JsonInfoBase();
+    final String checksum1 = "checksum 1";
+    final String checksum2 = "checksum 2";
     final String gateway1 = "127.0.0.31";
     final String gateway2 = "127.0.0.32";
 
@@ -152,9 +163,36 @@ public class TestJsonInfoBase {
     this.impl.setTimeSinceStartup(longOrg);
     other.setTimeSinceStartup(longOrg);
 
+    /* configChecksum */
+
+    String stringOrg = this.impl.getConfigurationChecksum();
+
+    this.impl.setConfigurationChecksum(null);
+    other.setConfigurationChecksum(checksum2);
+    r = this.impl.compareTo(other);
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1)));
+
+    this.impl.setConfigurationChecksum(checksum2);
+    other.setConfigurationChecksum(null);
+    r = this.impl.compareTo(other);
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1)));
+
+    this.impl.setConfigurationChecksum(checksum1);
+    other.setConfigurationChecksum(checksum2);
+    r = this.impl.compareTo(other);
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1)));
+
+    this.impl.setConfigurationChecksum(checksum1);
+    other.setConfigurationChecksum(checksum1);
+    r = this.impl.compareTo(other);
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(0)));
+
+    this.impl.setConfigurationChecksum(stringOrg);
+    other.setConfigurationChecksum(stringOrg);
+
     /* uuid */
 
-    String stringOrg = this.impl.getUuid();
+    stringOrg = this.impl.getUuid();
 
     this.impl.setUuid(null);
     other.setUuid(gateway2);
@@ -212,19 +250,24 @@ public class TestJsonInfoBase {
     this.impl.setPid(333);
     this.impl.setSystemTime(123);
     this.impl.setTimeSinceStartup(321);
+    this.impl.setConfigurationChecksum("2e2c14b6e3562ddfd73111847d7a9d8277993ff7");
     this.impl.setUuid("d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d");
     this.impl.setError("something");
 
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1753641731)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1558552252)));
+
+    this.impl.setConfigurationChecksum(null);
+    r = this.impl.hashCode();
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-139543783)));
 
     this.impl.setUuid(null);
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-224750964)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1389346984)));
 
     this.impl.setError(null);
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(340134418)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1954232366)));
   }
 
   @Test(timeout = 8000)
@@ -232,6 +275,7 @@ public class TestJsonInfoBase {
     this.impl.setPid(333);
     this.impl.setSystemTime(123);
     this.impl.setTimeSinceStartup(321);
+    this.impl.setConfigurationChecksum("2e2c14b6e3562ddfd73111847d7a9d8277993ff7");
     this.impl.setUuid("d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d");
     this.impl.setError("something");
 

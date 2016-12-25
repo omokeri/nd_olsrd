@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @ProviderType
 public class JsonInfoConfigEntry {
+  private String                          configurationChecksum    = "";
   private String                          configurationFile        = "";
   private int                             olsrPort                 = 0;
   private int                             debugLevel               = 0;
@@ -65,6 +66,25 @@ public class JsonInfoConfigEntry {
   private JsonInfoInterfaceConfiguration  interfaceDefaults        = new JsonInfoInterfaceConfiguration();
   private String                          os                       = "";
   private long                            startTime                = 0;
+
+  /**
+   * @return the configuration checksum
+   */
+  public String getConfigurationChecksum() {
+    return this.configurationChecksum;
+  }
+
+  /**
+   * @param configurationChecksum the configuration checksum to set
+   */
+  @JsonProperty("configurationChecksum")
+  public void setConfigurationChecksum(final String configurationChecksum) {
+    if (configurationChecksum == null) {
+      this.configurationChecksum = "";
+    } else {
+      this.configurationChecksum = configurationChecksum;
+    }
+  }
 
   /**
    * @return the configuration file
@@ -893,6 +913,7 @@ public class JsonInfoConfigEntry {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
+    result = (prime * result) + this.configurationChecksum.hashCode();
     result = (prime * result) + this.configurationFile.hashCode();
     result = (prime * result) + this.olsrPort;
     result = (prime * result) + this.debugLevel;
@@ -967,6 +988,9 @@ public class JsonInfoConfigEntry {
 
     final JsonInfoConfigEntry other = (JsonInfoConfigEntry) obj;
 
+    if (!this.configurationChecksum.equals(other.configurationChecksum)) {
+      return false;
+    }
     if (!this.configurationFile.equals(other.configurationFile)) {
       return false;
     }
@@ -1126,7 +1150,9 @@ public class JsonInfoConfigEntry {
   @Override
   public String toString() {
     final StringBuilder builder = new StringBuilder();
-    builder.append("JsonInfoConfigEntry [configurationFile=");
+    builder.append("JsonInfoConfigEntry [configurationChecksum=");
+    builder.append(this.configurationChecksum);
+    builder.append(", configurationFile=");
     builder.append(this.configurationFile);
     builder.append(", olsrPort=");
     builder.append(this.olsrPort);

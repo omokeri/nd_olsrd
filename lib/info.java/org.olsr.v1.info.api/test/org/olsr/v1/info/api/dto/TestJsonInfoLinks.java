@@ -96,7 +96,7 @@ public class TestJsonInfoLinks {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503681)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810335)));
 
     final JsonInfoLinksEntry entry = new JsonInfoLinksEntry();
     entry.setCurrentLinkStatus("currentLinkStatus");
@@ -106,7 +106,7 @@ public class TestJsonInfoLinks {
     this.impl.setLinks(links);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(58530267)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(913836921)));
   }
 
   @Test(timeout = 8000)

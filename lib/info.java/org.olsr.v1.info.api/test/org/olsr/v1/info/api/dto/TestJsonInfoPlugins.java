@@ -97,7 +97,7 @@ public class TestJsonInfoPlugins {
   public void testHashCode() {
     this.impl.setPlugins(null);
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(887503682)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1742810336)));
 
     /* set */
     final List<JsonInfoPluginsEntry> plugins = new LinkedList<>();
@@ -107,7 +107,7 @@ public class TestJsonInfoPlugins {
     this.impl.setPlugins(plugins);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(411874894)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1267181548)));
   }
 
   @Test(timeout = 8000)

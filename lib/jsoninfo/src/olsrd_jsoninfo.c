@@ -49,6 +49,7 @@
 #include <ctype.h>
 #include <libgen.h>
 
+#include "cfgparser/olsrd_conf_checksum.h"
 #include "ipcalc.h"
 #include "builddata.h"
 #include "neighbor_table.h"
@@ -214,6 +215,8 @@ const char * determine_mime_type(unsigned int send_what) {
 }
 
 void output_start(struct autobuf *abuf) {
+  char *str;
+
   /* global variables for tracking when to put a comma in for JSON */
   abuf_json_reset_entry_number_and_depth(&json_session, pretty);
   abuf_json_mark_output(&json_session, true, abuf);
@@ -221,6 +224,10 @@ void output_start(struct autobuf *abuf) {
   abuf_json_int(&json_session, abuf, "pid", getpid());
   abuf_json_int(&json_session, abuf, "systemTime", time(NULL));
   abuf_json_int(&json_session, abuf, "timeSinceStartup", now_times);
+
+  (void) olsrd_config_checksum_get(NULL, &str);
+  abuf_json_string(&json_session, abuf, "configurationChecksum", str);
+
   if (*uuid) {
     abuf_json_string(&json_session, abuf, "uuid", uuid);
   }
@@ -1119,7 +1126,12 @@ void ipc_print_twohop(struct autobuf *abuf) {
 }
 
 void ipc_print_config(struct autobuf *abuf) {
+  char *str;
+
   abuf_json_mark_object(&json_session, true, false, abuf, "config");
+
+  (void) olsrd_config_checksum_get(NULL, &str);
+  abuf_json_string(&json_session, abuf, "configurationChecksum", str);
 
   abuf_json_string(&json_session, abuf, "configurationFile", olsr_cnf->configuration_file);
   abuf_json_int(&json_session, abuf, "olsrPort", olsr_cnf->olsrport);

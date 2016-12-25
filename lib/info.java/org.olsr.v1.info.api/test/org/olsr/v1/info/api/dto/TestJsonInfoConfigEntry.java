@@ -29,6 +29,7 @@ public class TestJsonInfoConfigEntry {
   @Test(timeout = 8000)
   public void testGettersAndSetters() throws UnknownHostException {
     /* initial */
+    assertThat(this.impl.getConfigurationChecksum(), equalTo(""));
     assertThat(this.impl.getConfigurationFile(), equalTo(""));
     assertThat(Integer.valueOf(this.impl.getOlsrPort()), equalTo(Integer.valueOf(0)));
     assertThat(Integer.valueOf(this.impl.getDebugLevel()), equalTo(Integer.valueOf(0)));
@@ -117,6 +118,7 @@ public class TestJsonInfoConfigEntry {
     final JsonInfoInterfaceConfiguration interfaceDefaults = new JsonInfoInterfaceConfiguration();
     interfaceDefaults.setMode("mode");
 
+    this.impl.setConfigurationChecksum("configurationChecksum");
     this.impl.setConfigurationFile("configurationFile");
     this.impl.setOlsrPort(1);
     this.impl.setDebugLevel(2);
@@ -170,6 +172,7 @@ public class TestJsonInfoConfigEntry {
     this.impl.setStartTime(21);
 
     /* get */
+    assertThat(this.impl.getConfigurationChecksum(), equalTo("configurationChecksum"));
     assertThat(this.impl.getConfigurationFile(), equalTo("configurationFile"));
     assertThat(Integer.valueOf(this.impl.getOlsrPort()), equalTo(Integer.valueOf(1)));
     assertThat(Integer.valueOf(this.impl.getDebugLevel()), equalTo(Integer.valueOf(2)));
@@ -253,9 +256,36 @@ public class TestJsonInfoConfigEntry {
     r = this.impl.equals(other);
     assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
 
+    /* configurationChecksum */
+
+    String stringOrg = this.impl.getConfigurationChecksum();
+
+    this.impl.setConfigurationChecksum(null);
+    other.setConfigurationChecksum(null);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
+
+    this.impl.setConfigurationChecksum(null);
+    other.setConfigurationChecksum("string");
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
+
+    this.impl.setConfigurationChecksum("string");
+    other.setConfigurationChecksum(null);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
+
+    this.impl.setConfigurationChecksum("string");
+    other.setConfigurationChecksum("string");
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
+
+    this.impl.setConfigurationChecksum(stringOrg);
+    other.setConfigurationChecksum(stringOrg);
+
     /* configurationFile */
 
-    String stringOrg = this.impl.getConfigurationFile();
+    stringOrg = this.impl.getConfigurationFile();
 
     this.impl.setConfigurationFile(null);
     other.setConfigurationFile(null);
@@ -1536,7 +1566,7 @@ public class TestJsonInfoConfigEntry {
   @Test(timeout = 8000)
   public void testHashCode() throws UnknownHostException {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-252478988)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1347784982)));
 
     /* set */
     final JsonInfoConfigRtTable rtTable = new JsonInfoConfigRtTable();
@@ -1572,6 +1602,7 @@ public class TestJsonInfoConfigEntry {
     final JsonInfoInterfaceConfiguration interfaceDefaults = new JsonInfoInterfaceConfiguration();
     interfaceDefaults.setMode("mode");
 
+    this.impl.setConfigurationChecksum("configurationChecksum");
     this.impl.setConfigurationFile("configurationFile");
     this.impl.setOlsrPort(1);
     this.impl.setDebugLevel(2);
@@ -1625,7 +1656,7 @@ public class TestJsonInfoConfigEntry {
     this.impl.setStartTime(21);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1268268935)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1049017438)));
   }
 
   @Test(timeout = 8000)

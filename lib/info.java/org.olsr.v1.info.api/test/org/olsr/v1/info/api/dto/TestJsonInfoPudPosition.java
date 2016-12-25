@@ -80,7 +80,7 @@ public class TestJsonInfoPudPosition {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(949971943)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1805278597)));
 
     /* set */
     final JsonInfoPudPositionEntry entry = new JsonInfoPudPositionEntry();
@@ -88,7 +88,7 @@ public class TestJsonInfoPudPosition {
     this.impl.setPudPosition(entry);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1201400004)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(2056706658)));
   }
 
   @Test(timeout = 8000)
