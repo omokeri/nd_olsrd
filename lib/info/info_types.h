@@ -111,6 +111,12 @@ typedef struct {
 /* everything */
 #define SIW_EVERYTHING                   ((SIW_NETJSON_NETWORK_COLLECTION << 1) - 1)
 
+/* command prefixes */
+#define SIW_PREFIX_HTTP                  "/http"
+#define SIW_PREFIX_HTTP_LEN              (sizeof(SIW_PREFIX_HTTP) - 1)
+#define SIW_PREFIX_PLAIN                 "/plain"
+#define SIW_PREFIX_PLAIN_LEN             (sizeof(SIW_PREFIX_PLAIN) - 1)
+
 typedef void (*init_plugin)(const char *plugin_name);
 typedef unsigned long long (*supported_commands_mask_func)(void);
 typedef bool (*command_matcher)(const char *str, unsigned long long siw);

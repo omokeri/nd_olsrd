@@ -38,6 +38,23 @@ assumed.
 Check the README of the actual info plugin to see the supported commands.
 
 
+================
+REQUEST PREFIXES
+================
+
+All info plugins support a number of request prefixes:
+- /http : forces output WITH    http headers, temporarily overriding the
+          configured "httpheaders" value.
+- /plain: forces output WITHOUT http headers, temporarily overriding the
+          configured "httpheaders" value.
+
+These prefixes have to be at the start of the request string, can occur
+only there, and can occur only once.
+
+Note that this will NOT work when there is an internal error (only occurs
+when the connection is not ready to be read, which is very unlikely).
+
+
 ====================
 PLUGIN CONFIGURATION
 ====================

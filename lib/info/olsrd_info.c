@@ -663,6 +663,56 @@ static char * parseRequest(char * req, size_t *len) {
   return req;
 }
 
+static char * checkCommandPrefixes(char * req, size_t *len, bool *add_headers) {
+  size_t l;
+
+  if (!req || !len || !*len || !add_headers) {
+    return req;
+  }
+
+  l = *len;
+
+  /* '/http/...' */
+
+  if ((l >= (SIW_PREFIX_HTTP_LEN + 1)) && !strncasecmp(req, SIW_PREFIX_HTTP "/", SIW_PREFIX_HTTP_LEN + 1)) {
+    *len = l - SIW_PREFIX_HTTP_LEN;
+    req = &req[SIW_PREFIX_HTTP_LEN];
+    *add_headers = true;
+    return req;
+  }
+
+  /* '/http' */
+
+  if ((l == SIW_PREFIX_HTTP_LEN) && !strcasecmp(req, SIW_PREFIX_HTTP)) {
+    *len = 0;
+    *req = '\0';
+    *add_headers = true;
+    return req;
+  }
+
+  /* '/plain/...' */
+
+  if ((l >= (SIW_PREFIX_PLAIN_LEN + 1)) && !strncasecmp(req, SIW_PREFIX_PLAIN "/", SIW_PREFIX_PLAIN_LEN + 1)) {
+    *len = l - SIW_PREFIX_PLAIN_LEN;
+    req = &req[SIW_PREFIX_PLAIN_LEN];
+    *add_headers = false;
+    return req;
+  }
+
+  /* '/plain' */
+
+  if ((l == SIW_PREFIX_PLAIN_LEN) && !strcasecmp(req, SIW_PREFIX_PLAIN)) {
+    *len = 0;
+    *req = '\0';
+    *add_headers = false;
+    return req;
+  }
+
+  /* no prefixes */
+
+  return req;
+}
+
 static void drain_request(int ipc_connection) {
   static char drain_buffer[AUTOBUFCHUNK];
 
@@ -762,6 +812,10 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     req = stripTrailingWhitespace(req, (size_t*) &rx_count);
     req = stripTrailingSlashes(req, (size_t*) &rx_count);
     req = skipLeadingWhitespace(req, (size_t*) &rx_count);
+    req = skipMultipleSlashes(req, (size_t*) &rx_count);
+
+    req = checkCommandPrefixes(req, (size_t*) &rx_count, &add_headers);
+
     req = skipMultipleSlashes(req, (size_t*) &rx_count);
   }
 
