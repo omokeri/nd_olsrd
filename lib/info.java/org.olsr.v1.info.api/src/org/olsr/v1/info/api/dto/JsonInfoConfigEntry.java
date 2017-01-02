@@ -1,6 +1,8 @@
 package org.olsr.v1.info.api.dto;
 
 import java.net.InetAddress;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @ProviderType
 public class JsonInfoConfigEntry {
   private String                          configurationChecksum    = "";
+  private final List<String>              cli                      = new LinkedList<>();
   private String                          configurationFile        = "";
   private int                             olsrPort                 = 0;
   private int                             debugLevel               = 0;
@@ -83,6 +86,24 @@ public class JsonInfoConfigEntry {
       this.configurationChecksum = "";
     } else {
       this.configurationChecksum = configurationChecksum;
+    }
+  }
+
+  /**
+   * @return the CLI
+   */
+  public List<String> getCli() {
+    return this.cli;
+  }
+
+  /**
+   * @param cli the CLI to set
+   */
+  @JsonProperty("cli")
+  public void setCli(final List<String> cli) {
+    this.cli.clear();
+    if (cli != null) {
+      this.cli.addAll(cli);
     }
   }
 
@@ -914,6 +935,7 @@ public class JsonInfoConfigEntry {
     final int prime = 31;
     int result = 1;
     result = (prime * result) + this.configurationChecksum.hashCode();
+    result = (prime * result) + this.cli.hashCode();
     result = (prime * result) + this.configurationFile.hashCode();
     result = (prime * result) + this.olsrPort;
     result = (prime * result) + this.debugLevel;
@@ -989,6 +1011,9 @@ public class JsonInfoConfigEntry {
     final JsonInfoConfigEntry other = (JsonInfoConfigEntry) obj;
 
     if (!this.configurationChecksum.equals(other.configurationChecksum)) {
+      return false;
+    }
+    if (!this.cli.equals(other.cli)) {
       return false;
     }
     if (!this.configurationFile.equals(other.configurationFile)) {
@@ -1152,6 +1177,8 @@ public class JsonInfoConfigEntry {
     final StringBuilder builder = new StringBuilder();
     builder.append("JsonInfoConfigEntry [configurationChecksum=");
     builder.append(this.configurationChecksum);
+    builder.append(", cli=");
+    builder.append(this.cli);
     builder.append(", configurationFile=");
     builder.append(this.configurationFile);
     builder.append(", olsrPort=");

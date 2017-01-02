@@ -1912,6 +1912,11 @@
   ],
   "config": {
     "configurationChecksum": "2e2c14b6e3562ddfd73111847d7a9d8277993ff7",
+    "cli": [
+      "/usr/bin/olsrd",
+      "-f",
+      "/etc/olsrd/olsrd.conf"
+    ],
     "configurationFile": "/etc/olsrd/olsrd.conf",
     "olsrPort": 698,
     "debugLevel": 0,

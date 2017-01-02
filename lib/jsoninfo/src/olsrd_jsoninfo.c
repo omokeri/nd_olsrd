@@ -1133,6 +1133,19 @@ void ipc_print_config(struct autobuf *abuf) {
   (void) olsrd_config_checksum_get(NULL, &str);
   abuf_json_string(&json_session, abuf, "configurationChecksum", str);
 
+  {
+    size_t i = 0;
+    int argc = 0;
+    char **argv = NULL;
+    get_argc_argv(&argc, &argv);
+
+    abuf_json_mark_object(&json_session, true, true, abuf, "cli");
+    for (i = 0; i < (size_t) argc; i++) {
+      abuf_json_string(&json_session, abuf, NULL, argv[i]);
+    }
+    abuf_json_mark_object(&json_session, false, true, abuf, NULL);
+  }
+
   abuf_json_string(&json_session, abuf, "configurationFile", olsr_cnf->configuration_file);
   abuf_json_int(&json_session, abuf, "olsrPort", olsr_cnf->olsrport);
   abuf_json_int(&json_session, abuf, "debugLevel", olsr_cnf->debug_level);

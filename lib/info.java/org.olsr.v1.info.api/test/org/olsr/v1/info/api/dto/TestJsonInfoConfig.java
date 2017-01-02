@@ -80,7 +80,7 @@ public class TestJsonInfoConfig {
   @Test(timeout = 8000)
   public void testHashCode() {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1204371979)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1928340850)));
 
     /* set */
     final JsonInfoConfigEntry config = new JsonInfoConfigEntry();
@@ -88,7 +88,7 @@ public class TestJsonInfoConfig {
     this.impl.setConfig(config);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-491755257)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1654009724)));
   }
 
   @Test(timeout = 8000)

@@ -6,6 +6,8 @@ import static org.junit.Assert.assertThat;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -30,6 +32,8 @@ public class TestJsonInfoConfigEntry {
   public void testGettersAndSetters() throws UnknownHostException {
     /* initial */
     assertThat(this.impl.getConfigurationChecksum(), equalTo(""));
+    assertThat(this.impl.getCli(), notNullValue());
+    assertThat(Integer.valueOf(this.impl.getCli().size()), equalTo(Integer.valueOf(0)));
     assertThat(this.impl.getConfigurationFile(), equalTo(""));
     assertThat(Integer.valueOf(this.impl.getOlsrPort()), equalTo(Integer.valueOf(0)));
     assertThat(Integer.valueOf(this.impl.getDebugLevel()), equalTo(Integer.valueOf(0)));
@@ -85,6 +89,10 @@ public class TestJsonInfoConfigEntry {
     assertThat(Long.valueOf(this.impl.getStartTime()), equalTo(Long.valueOf(0)));
 
     /* set */
+    final List<String> cli = new LinkedList<>();
+    cli.add("-f");
+    cli.add("/etc/olsrd/olsrd.conf");
+
     final JsonInfoConfigRtTable rtTable = new JsonInfoConfigRtTable();
     rtTable.setDefault(11);
 
@@ -119,6 +127,7 @@ public class TestJsonInfoConfigEntry {
     interfaceDefaults.setMode("mode");
 
     this.impl.setConfigurationChecksum("configurationChecksum");
+    this.impl.setCli(cli);
     this.impl.setConfigurationFile("configurationFile");
     this.impl.setOlsrPort(1);
     this.impl.setDebugLevel(2);
@@ -173,6 +182,8 @@ public class TestJsonInfoConfigEntry {
 
     /* get */
     assertThat(this.impl.getConfigurationChecksum(), equalTo("configurationChecksum"));
+    assertThat(this.impl.getCli(), equalTo(cli));
+    assertThat(Integer.valueOf(this.impl.getCli().size()), equalTo(Integer.valueOf(2)));
     assertThat(this.impl.getConfigurationFile(), equalTo("configurationFile"));
     assertThat(Integer.valueOf(this.impl.getOlsrPort()), equalTo(Integer.valueOf(1)));
     assertThat(Integer.valueOf(this.impl.getDebugLevel()), equalTo(Integer.valueOf(2)));
@@ -227,9 +238,12 @@ public class TestJsonInfoConfigEntry {
     assertThat(this.impl.getOs(), equalTo("Linux"));
     assertThat(Long.valueOf(this.impl.getStartTime()), equalTo(Long.valueOf(21)));
 
+    this.impl.setCli(null);
     this.impl.setHna(null);
     this.impl.setIpcConnectAllowed(null);
 
+    assertThat(this.impl.getCli(), notNullValue());
+    assertThat(Integer.valueOf(this.impl.getCli().size()), equalTo(Integer.valueOf(0)));
     assertThat(this.impl.getHna(), notNullValue());
     assertThat(Integer.valueOf(this.impl.getHna().size()), equalTo(Integer.valueOf(0)));
     assertThat(this.impl.getIpcConnectAllowed(), notNullValue());
@@ -282,6 +296,37 @@ public class TestJsonInfoConfigEntry {
 
     this.impl.setConfigurationChecksum(stringOrg);
     other.setConfigurationChecksum(stringOrg);
+
+    /* cli */
+
+    final List<String> cli = new LinkedList<>();
+    cli.add("-f");
+    cli.add("/etc/olsrd/olsrd.conf");
+
+    final List<String> cliOrg = this.impl.getCli();
+
+    this.impl.setCli(null);
+    other.setCli(null);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
+
+    this.impl.setCli(null);
+    other.setCli(cli);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
+
+    this.impl.setCli(cli);
+    other.setCli(null);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.FALSE));
+
+    this.impl.setCli(cli);
+    other.setCli(cli);
+    r = this.impl.equals(other);
+    assertThat(Boolean.valueOf(r), equalTo(Boolean.TRUE));
+
+    this.impl.setCli(cliOrg);
+    other.setCli(cliOrg);
 
     /* configurationFile */
 
@@ -1566,9 +1611,13 @@ public class TestJsonInfoConfigEntry {
   @Test(timeout = 8000)
   public void testHashCode() throws UnknownHostException {
     int r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1347784982)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(185530515)));
 
     /* set */
+    final List<String> cli = new LinkedList<>();
+    cli.add("-f");
+    cli.add("/etc/olsrd/olsrd.conf");
+
     final JsonInfoConfigRtTable rtTable = new JsonInfoConfigRtTable();
     rtTable.setDefault(11);
 
@@ -1603,6 +1652,7 @@ public class TestJsonInfoConfigEntry {
     interfaceDefaults.setMode("mode");
 
     this.impl.setConfigurationChecksum("configurationChecksum");
+    this.impl.setCli(cli);
     this.impl.setConfigurationFile("configurationFile");
     this.impl.setOlsrPort(1);
     this.impl.setDebugLevel(2);
@@ -1656,7 +1706,7 @@ public class TestJsonInfoConfigEntry {
     this.impl.setStartTime(21);
 
     r = this.impl.hashCode();
-    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(-1049017438)));
+    assertThat(Integer.valueOf(r), equalTo(Integer.valueOf(1824937455)));
   }
 
   @Test(timeout = 8000)
