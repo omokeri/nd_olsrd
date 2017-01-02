@@ -51,6 +51,7 @@
 #include <fcntl.h>
 
 #include "cfgparser/olsrd_conf.h"
+#include "cfgparser/olsrd_conf_checksum.h"
 #include "ipcalc.h"
 #include "defs.h"
 #include "builddata.h"
@@ -409,6 +410,18 @@ int main(int argc, char *argv[]) {
   /* Open syslog */
   olsr_openlog("olsrd");
 
+  if (!olsrd_config_checksum_init()) {
+    olsr_exit("Could not initialise the configuration checksum", EXIT_FAILURE);
+  }
+
+  if (!olsrd_config_checksum_add_cli(argc, argv)) {
+    olsr_exit("Could not checksum the commandline arguments", EXIT_FAILURE);
+  }
+
+  if (!olsrd_config_checksum_add(OLSRD_CONFIG_START, OLSRD_CONFIG_START_LEN)) {
+    olsr_exit("Could not start the configuration file checksum", EXIT_FAILURE);
+  }
+
   /*
    * Initialisation
    */
@@ -493,6 +506,14 @@ int main(int argc, char *argv[]) {
 
     /* free the default ifcnf */
     free(default_ifcnf);
+  }
+
+  if (!olsrd_config_checksum_add(OLSRD_CONFIG_END, OLSRD_CONFIG_END_LEN)) {
+    olsr_exit("Could not finish the configuration file checksum", EXIT_FAILURE);
+  }
+
+  if (!olsrd_config_checksum_final()) {
+    olsr_exit("Could not finalise the configuration checksum", EXIT_FAILURE);
   }
 
   /* Sanity check configuration */

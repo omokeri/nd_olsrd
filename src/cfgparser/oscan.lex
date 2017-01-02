@@ -56,6 +56,7 @@
 #include <arpa/inet.h>
 
 #include "olsrd_conf.h"
+#include "olsrd_conf_checksum.h"
 
 #include "oparse.h"
  
@@ -171,21 +172,25 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
 }
 
 \/ {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SLASH;
 }
 
 \{ {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_OPEN;
 }
 
 \} {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_CLOSE;
 }
 
 \"[^\"]*\" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_string_token(yytext + 1, yyleng - 2);
     if (yylval == NULL) {
         yyterminate();
@@ -194,16 +199,19 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
 }
 
 0x{HEX8}+ {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_integer_token(yytext);
     return TOK_INTEGER;
 }
 
 {FLOAT} {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_floating_token(yytext);
     return TOK_FLOAT;
 }
 
 {IPV4ADDR} {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_string_token(yytext, yyleng + 1);
     if (yylval == NULL) {
         yyterminate();
@@ -211,6 +219,7 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
     return TOK_IPV4_ADDR;
 }
 {IPV6ADDR} {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_string_token(yytext, yyleng + 1);
     if (yylval == NULL) {
         yyterminate();
@@ -219,459 +228,554 @@ IPV6ADDR {IPV6PAT1}|{IPV6PAT2}|{IPV6PAT3}|{IPV6PAT4}|{IPV6PAT5}|{IPV6PAT6}|{IPV6
 }
 
 "default" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_DEFAULT;
 }
 
 "auto" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_AUTO;
 }
 
 "none" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_NONE;
 }
 
 {DECDIGIT}+ {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_integer_token(yytext);
     return TOK_INTEGER;
 }
 
 
 "yes" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_boolean_token(true);
     return TOK_BOOLEAN;
 }
 
 "no" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = get_boolean_token(false);
     return TOK_BOOLEAN;
 }
 
 "Host" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HOSTLABEL;
 }
 
 "Net" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_NETLABEL;
 }
 
 "MaxConnections" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MAXIPC;
 }
 
 "DebugLevel" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_DEBUGLEVEL;
 }
 
 "IpVersion" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IPVERSION;
 }
 
 "NicChgsPollInt" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_NICCHGSPOLLRT;
 }
 
 "Hna4" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HNA4;
 }
 
 "Hna6" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HNA6;
 }
 
 "LoadPlugin" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_PLUGIN;
 }
 
 "PlParam" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_PLPARAM;
 }
 
 "Interface" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_INTERFACE;
 }
 "InterfaceDefaults" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_INTERFACE_DEFAULTS;
 }
 
 "AllowNoInt" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_NOINT;
 }
 
 "TosValue" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_TOS;
 }
 
 
 "OlsrPort" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_OLSRPORT;
 }
 
 "RtProto" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTPROTO;
 }
 
 "RtTable" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE;
 }
 
 "RtTableDefault" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_DEFAULT;
 }
 
 "RtTableTunnel" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_TUNNEL;
 }
 
 "RtTablePriority" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_PRIORITY;
 }
 
 "RtTableDefaultOlsrPriority" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_DEFAULTOLSR_PRIORITY;
 }
 
 "RtTableTunnelPriority" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_TUNNEL_PRIORITY;
 }
 
 "RtTableDefaultPriority" {
+  olsrd_config_checksum_add(yytext, yyleng);
   yylval = NULL;
   return TOK_RTTABLE_DEFAULT_PRIORITY;
 }
 
 "Willingness" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_WILLINGNESS;
 }
 
 "IpcConnect" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IPCCON;
 }
 
 "FIBMetric" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_FIBMETRIC;
 }
 
 "FIBMetricDefault" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_FIBMETRICDEFAULT;
 }
 
 "UseHysteresis" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_USEHYST;
 }
 
 "HystScaling" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HYSTSCALE;
 }
 
 "HystThrHigh" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HYSTUPPER;
 }
 
 "HystThrLow" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HYSTLOWER;
 }
 
 "Pollrate" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_POLLRATE;
 }
 
 
 "TcRedundancy" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_TCREDUNDANCY;
 }
 
 "MprCoverage" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MPRCOVERAGE;
 }
 
 "LinkQualityLevel" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_LEVEL;
 }
 
 "LinkQualityFishEye" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_FISH;
 }
 
 "LinkQualityAging" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_AGING;
 }
 
 "LinkQualityAlgorithm" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_PLUGIN;
 }
 
 "NatThreshold" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_NAT_THRESH;
 }
 
 "LinkQualityMult" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LQ_MULT;
 }
 
 "MinTCVTime" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MIN_TC_VTIME;
 }
 
 "LockFile" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_LOCK_FILE;
 }
 
 "ClearScreen" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_CLEAR_SCREEN;
 }
 
 "UseNiit" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_USE_NIIT;
 }
 
 "SmartGateway" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW;
 }
 
 "SmartGatewayAlwaysRemoveServerTunnel" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_ALWAYS_REMOVE_SERVER_TUNNEL;
 }
 
 "SmartGatewayUseCount" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_USE_COUNT;
 }
 
 "SmartGatewayTakeDownPercentage" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_TAKEDOWN_PERCENTAGE;
 }
 
 "SmartGatewayInstanceId" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_INSTANCE_ID;
 }
 
 "SmartGatewayPolicyRoutingScript" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_POLICYROUTING_SCRIPT;
 }
 
 "SmartGatewayEgressInterfaces" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_EGRESS_IFS;
 }
 
 "SmartGatewayEgressFile" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_EGRESS_FILE;
 }
 
 "SmartGatewayEgressFilePeriod" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_EGRESS_FILE_PERIOD;
 }
 
 "SmartGatewayStatusFile" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_STATUS_FILE;
 }
 
 "SmartGatewayTablesOffset" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_OFFSET_TABLES;
 }
 
 "SmartGatewayRulesOffset" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_OFFSET_RULES;
 }
 
 "SmartGatewayAllowNAT" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_ALLOW_NAT;
 }
 
 "SmartGatewayPeriod" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_PERIOD;
 }
 
 "SmartGatewayStableCount" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_STABLECOUNT;
 }
 
 "SmartGatewayThreshold" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_THRESH;
 }
 
 "SmartGatewayWeightExitLinkUp" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_WEIGHT_EXITLINK_UP;
 }
 
 "SmartGatewayWeightExitLinkDown" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_WEIGHT_EXITLINK_DOWN;
 }
 
 "SmartGatewayWeightEtx" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_WEIGHT_ETX;
 }
 
 "SmartGatewayDividerEtx" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_DIVIDER_ETX;
 }
 
 "SmartGatewayMaxCostMaxEtx" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_MAX_COST_MAX_ETX;
 }
 
 "SmartGatewayUplink" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_UPLINK;
 }
  
 "SmartGatewayUplinkNAT" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_UPLINK_NAT;
 }
  
 "SmartGatewaySpeed" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_SPEED;
 }
 
 "SmartGatewayPrefix" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SMART_GW_PREFIX;
 }
 
 "SrcIpRoutes" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SRC_IP_ROUTES;
 }
 "Weight" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IFWEIGHT;
 }
 "MainIp" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MAIN_IP;
 }
 "SetIpForward" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_SET_IPFORWARD;
 }
 "Ip4Broadcast" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IP4BROADCAST;
 }
 "IPv4Broadcast" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IPV4BROADCAST;
 }
 "IPv4Multicast" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IPV4MULTICAST;
 }
 "Mode" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IFMODE;
 }
 "IPv6Multicast" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_IPV6MULTICAST;
 }
 "IPv4Src" {
+        olsrd_config_checksum_add(yytext, yyleng);
 		yylval = NULL;
 		return TOK_IPV4SRC;
 }
 "IPv6Src" {
+        olsrd_config_checksum_add(yytext, yyleng);
 		yylval = NULL;
 		return TOK_IPV6SRC;
 }
 "HelloInterval" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HELLOINT;
 }
 "HelloValidityTime" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HELLOVAL;
 }
 "TcInterval" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_TCINT;
 }
 "TcValidityTime" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_TCVAL;
 }
 "MidInterval" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MIDINT;
 }
 "MidValidityTime" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_MIDVAL;
 }
 "HnaInterval" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HNAINT;
 }
 "HnaValidityTime" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_HNAVAL;
 }
 "AutoDetectChanges" {
+    olsrd_config_checksum_add(yytext, yyleng);
     yylval = NULL;
     return TOK_AUTODETCHG;
 }

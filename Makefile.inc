@@ -334,6 +334,20 @@ ifeq ($(NO_DEBUG_MESSAGES),1)
 CPPFLAGS +=	-DNODEBUG
 endif
 
+ifeq ($(OS),win32)
+NOCONFIGCHECKSUM = 1
+endif
+
+ifeq ($(OS),android)
+NOCONFIGCHECKSUM = 1
+endif
+
+ifdef NOCONFIGCHECKSUM
+CPPFLAGS += -DNOCONFIGCHECKSUM
+else
+LDFLAGS  += -lcrypto
+endif
+
 # preserve debugging info when NOSTRIP is set
 ifneq ($(NOSTRIP),0)
 CFLAGS +=	-ggdb
