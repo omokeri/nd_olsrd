@@ -730,7 +730,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   bool hostDenied = false;
   struct timeval timeout;
   fd_set read_fds;
-  char req_buffer[1024];
+  char req_buffer[1024]; /* maximum size is the size of an IP packet */
   char * req = req_buffer;
   ssize_t rx_count = 0;
   unsigned int send_what = 0;
