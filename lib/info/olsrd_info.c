@@ -716,10 +716,6 @@ static char * checkCommandPrefixes(char * req, size_t *len, bool *add_headers) {
 static void drain_request(int ipc_connection) {
   static char drain_buffer[AUTOBUFCHUNK];
 
-  /* input was much too long: read until the end for graceful connection termination
-   * because wget can't handle the premature connection termination that is allowed
-   * by the INFO_HTTP_REQUEST_ENTITY_TOO_LARGE HTTP status code
-   */
   while (recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), 0) == sizeof(drain_buffer)) {}
 }
 
@@ -889,6 +885,11 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 #ifndef NODEBUG
     olsr_printf(1, "(%s) rx_count > %ld\n", name, (long int) sizeof(req_buffer));
 #endif /* NODEBUG */
+
+    /* input was much too long: read until the end for graceful connection termination
+     * because wget can't handle the premature connection termination that is allowed
+     * by the INFO_HTTP_REQUEST_ENTITY_TOO_LARGE HTTP status code
+     */
     drain_request(ipc_connection);
     send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_REQUEST_ENTITY_TOO_LARGE);
     return;
