@@ -96,6 +96,7 @@ public class OlsrdInfoReader {
                 case HttpURLConnection.HTTP_NO_CONTENT:
                 case HttpURLConnection.HTTP_FORBIDDEN:
                 case HttpURLConnection.HTTP_NOT_FOUND:
+                case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
                 case HttpURLConnection.HTTP_REQ_TOO_LONG:
                 case HttpURLConnection.HTTP_INTERNAL_ERROR:
                 default:

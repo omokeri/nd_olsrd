@@ -55,6 +55,7 @@
 #define INFO_HTTP_NOCONTENT                (204)
 #define INFO_HTTP_FORBIDDEN                (403)
 #define INFO_HTTP_NOTFOUND                 (404)
+#define INFO_HTTP_REQUEST_TIMEOUT          (408)
 #define INFO_HTTP_REQUEST_ENTITY_TOO_LARGE (413)
 #define INFO_HTTP_INTERNAL_SERVER_ERROR    (500)
 #define INFO_HTTP_SERVICE_UNAVAILABLE      (503)
@@ -75,6 +76,9 @@ static INLINE const char * httpStatusToReply(unsigned int status) {
 
     case INFO_HTTP_NOTFOUND:
       return "404 Not Found";
+
+    case INFO_HTTP_REQUEST_TIMEOUT:
+      return "408 Request Timeout";
 
     case INFO_HTTP_REQUEST_ENTITY_TOO_LARGE:
       return "413 Request Entity Too Large";

@@ -746,6 +746,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   unsigned int send_what = 0;
   unsigned int http_status = INFO_HTTP_OK;
   bool add_headers = config->http_headers;
+  int r = 0;
 
   *req = '\0';
 
@@ -776,7 +777,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
    * are unmodified, and timeout becomes undefined.
    */
 
-  if (select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout) < 0) {
+  r = select(ipc_connection + 1, &read_fds, NULL, NULL, &timeout);
+  if (r < 0) {
     /* ipc_connection is not ready for reading */
 #ifndef NODEBUG
     olsr_printf(1, "(%s) select()=%s\n", name, strerror(errno));
@@ -786,6 +788,20 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
       send_status_no_retries(req, add_headers, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
     } else {
       send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_INTERNAL_SERVER_ERROR);
+    }
+    return;
+  }
+
+  if (!r) {
+    /* ipc_connection is not ready for reading within the timeout */
+#ifndef NODEBUG
+    olsr_printf(1, "(%s) select() timeout\n", name);
+#endif /* NODEBUG */
+    drain_request(ipc_connection);
+    if (outbuffer.count >= MAX_CLIENTS) {
+      send_status_no_retries(req, add_headers, ipc_connection, INFO_HTTP_REQUEST_TIMEOUT);
+    } else {
+      send_info(req, add_headers, send_what, ipc_connection, INFO_HTTP_REQUEST_TIMEOUT);
     }
     return;
   }
