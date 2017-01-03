@@ -790,7 +790,14 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
-  rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0);
+#ifdef _WIN32
+  rx_count = recv(ipc_connection, req, sizeof(req_buffer), MSG_PEEK);
+  if (rx_count > 0) {
+    rx_count = recv(ipc_connection, req, sizeof(req_buffer), 0);
+  }
+#else
+  rx_count = recv(ipc_connection, req, sizeof(req_buffer), MSG_DONTWAIT);
+#endif
 
   /* Upon successful completion, recv() shall return the length of the message
    * in bytes. If no messages are available to be received and the peer has
