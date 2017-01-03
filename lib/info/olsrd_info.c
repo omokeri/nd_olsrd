@@ -716,7 +716,17 @@ static char * checkCommandPrefixes(char * req, size_t *len, bool *add_headers) {
 static void drain_request(int ipc_connection) {
   static char drain_buffer[AUTOBUFCHUNK];
 
-  while (recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), 0) == sizeof(drain_buffer)) {}
+  ssize_t r;
+  do {
+#ifdef _WIN32
+    r = recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), MSG_PEEK);
+    if (r > 0) {
+      r = recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), 0);
+    }
+#else
+    r = recv(ipc_connection, (void *) &drain_buffer, sizeof(drain_buffer), MSG_DONTWAIT);
+#endif
+  } while ((r > 0) && (r <= (ssize_t) sizeof(drain_buffer)));
 }
 
 static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int flags __attribute__ ((unused))) {
