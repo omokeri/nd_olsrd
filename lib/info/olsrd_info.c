@@ -860,7 +860,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   }
 
 #ifndef NODEBUG
-  olsr_printf(2, "(%s) Connect from host %s is allowed\n", name, addr);
+  olsr_printf(1, "(%s) Connect from host %s is allowed\n", name, addr);
 #endif /* NODEBUG */
 
   if (rx_count < 0) {
@@ -986,7 +986,7 @@ static int plugin_ipc_init(void) {
   add_olsr_socket(ipc_socket, &ipc_action, NULL, NULL, SP_PR_READ);
 
 #ifndef NODEBUG
-  olsr_printf(2, "(%s) listening on port %d\n", name, config->ipc_port);
+  olsr_printf(1, "(%s) listening on port %d\n", name, config->ipc_port);
 #endif /* NODEBUG */
 
   return 1;
