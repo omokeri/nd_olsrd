@@ -757,7 +757,9 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     return;
   }
 
-  timeout.tv_sec = timeout.tv_usec = 0;
+  /* Wait at most this much time for the request to arrive on the connection */
+  timeout.tv_sec = 0;
+  timeout.tv_usec = (outbuffer.count >= MAX_CLIENTS) ? 0 : (20 * 1000); /* 20 msec */
 
   FD_ZERO(&read_fds);
 #ifndef _WIN32
