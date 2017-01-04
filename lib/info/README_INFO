@@ -101,6 +101,13 @@ LoadPlugin "an_info_plugin.so.0.0"
   #       by default.
   # Default: 1000
   # PlParam "cachetimeout"       "1000"
+
+  # The maximum time (in milliseconds) to wait for a request (data) to arrive
+  # after accepting a connection. When waiting for a request to arrive olsrd
+  # will not perform any other tasks (will block), therefore do not set this
+  # to a high value.
+  # Default: 20
+  # PlParam "requesttimeout"       "20"
 }
 
 

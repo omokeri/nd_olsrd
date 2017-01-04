@@ -759,8 +759,8 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
   }
 
   /* Wait at most this much time for the request to arrive on the connection */
-  timeout.tv_sec = 0;
-  timeout.tv_usec = (outbuffer.count >= MAX_CLIENTS) ? 0 : (20 * 1000); /* 20 msec */
+  timeout.tv_sec = (outbuffer.count >= MAX_CLIENTS) ? 0 : config->request_timeout_sec;
+  timeout.tv_usec = (outbuffer.count >= MAX_CLIENTS) ? 0 : config->request_timeout_usec;
 
   FD_ZERO(&read_fds);
 #ifndef _WIN32
@@ -1039,6 +1039,13 @@ static void info_sanitise_config(info_plugin_config_t *cfg) {
   if (cfg->ipc_port < 1) {
     cfg->ipc_port = 1;
   }
+
+  if (cfg->request_timeout < 0) {
+    cfg->request_timeout = 0;
+  }
+
+  cfg->request_timeout_sec = cfg->request_timeout / 1000;
+  cfg->request_timeout_usec = (cfg->request_timeout % 1000) * 1000;
 }
 
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {

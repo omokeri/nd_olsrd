@@ -53,6 +53,7 @@
 #include "common/autobuf.h"
 
 #define CACHE_TIMEOUT_DEFAULT 1000
+#define REQUEST_TIMEOUT_DEFAULT 20
 
 typedef struct {
     union olsr_ip_addr accept_ip;
@@ -62,6 +63,9 @@ typedef struct {
     bool allow_localhost;
     bool ipv6_only;
     long cache_timeout;
+    long request_timeout;
+    long request_timeout_sec; /* derived */
+    long request_timeout_usec; /* derived */
 } info_plugin_config_t;
 
 #define INFO_PLUGIN_CONFIG_PLUGIN_PARAMETERS(config) \
@@ -71,7 +75,8 @@ typedef struct {
   { .name = "httpheaders", .set_plugin_parameter = &set_plugin_boolean, .data = &config.http_headers }, \
   { .name = "allowlocalhost", .set_plugin_parameter = &set_plugin_boolean, .data = &config.allow_localhost }, \
   { .name = "ipv6only", .set_plugin_parameter = &set_plugin_boolean, .data = &config.ipv6_only },\
-  { .name = "cachetimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.cache_timeout }
+  { .name = "cachetimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.cache_timeout },\
+  { .name = "requesttimeout", .set_plugin_parameter = &set_plugin_long, .data = &config.request_timeout }
 
 /* these provide all of the runtime status info */
 #define SIW_NEIGHBORS                    (1ULL <<  0)
@@ -297,6 +302,7 @@ static INLINE void info_plugin_config_init(info_plugin_config_t *config, unsigne
   config->allow_localhost = false;
   config->ipv6_only = false;
   config->cache_timeout = CACHE_TIMEOUT_DEFAULT;
+  config->request_timeout = REQUEST_TIMEOUT_DEFAULT;
 }
 
 #endif /* _OLSRD_LIB_INFO_INFO_TYPES_H_ */
