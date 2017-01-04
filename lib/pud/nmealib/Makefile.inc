@@ -1,4 +1,4 @@
-######################
+  ######################
 #
 # Settings
 #
@@ -63,7 +63,7 @@ COMMONCFLAGS += -Wall -Wextra -Wold-style-definition -Wdeclaration-after-stateme
                 -Wmissing-format-attribute -Wno-multichar -Wno-deprecated-declarations -Wendif-labels -Wwrite-strings \
                 -Wbad-function-cast -Wpointer-arith -Wcast-qual -Wshadow -Wformat -Wsequence-point -Wcast-align \
                 -Wnested-externs -Winline -Wdisabled-optimization -funit-at-a-time -fPIC -ggdb -Wformat=2 -Winit-self \
-                -Wmissing-include-dirs -Wswitch-default -Wswitch-enum -Wconversion -Wdouble-promotion \
+                -Wswitch-default -Wswitch-enum -Wconversion -Wdouble-promotion \
                 -Werror=format-security -Wformat-security -Wformat-y2k -Wredundant-decls -Wundef -Wunreachable-code \
                 -Wunused-parameter
 

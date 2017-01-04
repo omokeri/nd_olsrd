@@ -159,7 +159,6 @@ WARNINGS += -Winit-self
 WARNINGS += -Winline
 WARNINGS += -Wmissing-declarations
 WARNINGS += -Wmissing-format-attribute
-WARNINGS += -Wmissing-include-dirs
 WARNINGS += -Wmissing-noreturn
 WARNINGS += -Wmissing-prototypes
 WARNINGS += -Wno-deprecated-declarations
