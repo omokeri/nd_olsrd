@@ -43,9 +43,10 @@
  *
  */
 
+#include <math.h>
+
 #include "common.h"
 #include "nodes.h"
-#include <math.h>
 
 void
 init_nodes(void)

@@ -50,14 +50,35 @@
 #ifndef _OLSRD_FORNTEND_COMMON
 #define _OLSRD_FORNTEND_COMMON
 
-#include <gtk/gtk.h>
+#include "../../../src/olsr_protocol.h"
+
 #include <glib.h>
-#include <stdlib.h>
+#include <gtk/gtk.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-#include "olsr_protocol.h"
+#ifdef _WIN32
+typedef unsigned char olsr_u8_t;
+typedef unsigned short olsr_u16_t;
+typedef unsigned int olsr_u32_t;
+typedef char olsr_8_t;
+typedef short olsr_16_t;
+typedef int olsr_32_t;
+#else /* _WIN32 */
+typedef u_int8_t olsr_u8_t;
+typedef u_int16_t olsr_u16_t;
+typedef u_int32_t olsr_u32_t;
+typedef int8_t olsr_8_t;
+typedef int16_t olsr_16_t;
+typedef int32_t olsr_32_t;
+#endif /* _WIN32 */
+
+#define VTIME_SCALE_FACTOR (0.0625)
+
+/*extra: time to delete for non-wireless interfaces */
+#define NEIGHB_HOLD_TIME_NW   NEIGHB_HOLD_TIME * 2
 
 #define olsrd_version "olsr.org GUI 0.2.7"
 #define IPC_INTERVAL 500        //interval for IPC read timeout

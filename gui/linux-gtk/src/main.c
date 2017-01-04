@@ -44,8 +44,8 @@
  */
 
 #include "common.h"
-#include "main.h"
 #include "ipc.h"
+#include "main.h"
 
 struct sockaddr_in pin;
 

@@ -50,7 +50,6 @@
  */
 
 #include <sys/time.h>
-//#include <time.h>
 
 struct timeval now;
 struct timeval hold_time_nodes;        /* Timeout for all nodes */

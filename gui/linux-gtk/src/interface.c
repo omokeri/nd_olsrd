@@ -43,10 +43,11 @@
  *
  */
 
+#include <stdio.h>
+
 #include "common.h"
 #include "interface.h"
 #include "pixmaps.h"
-#include <stdio.h>
 
 /* Global widgets */
 

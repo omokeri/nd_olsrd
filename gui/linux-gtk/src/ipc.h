@@ -43,16 +43,19 @@
  *
  */
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <string.h>
+#include "../../../src/ipc_frontend.h"
+#include "../../../src/olsr_protocol.h"
+
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <errno.h>
-#include "olsr_protocol.h"
+#include <fcntl.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "packet.h"
 
 #define IPC_PORT 1212

@@ -44,17 +44,16 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif /* HAVE_CONFIG_H */
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <unistd.h>
-#include <string.h>
 
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 extern GtkWidget *net_label;
 extern GtkWidget *info_label;
