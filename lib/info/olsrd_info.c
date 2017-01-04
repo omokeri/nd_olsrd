@@ -1035,6 +1035,12 @@ static int plugin_ipc_init(void) {
   return 0;
 }
 
+static void info_sanitise_config(info_plugin_config_t *cfg) {
+  if (cfg->ipc_port < 1) {
+    cfg->ipc_port = 1;
+  }
+}
+
 int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_functions, info_plugin_config_t *plugin_config) {
   int i;
 
@@ -1045,6 +1051,8 @@ int info_plugin_init(const char * plugin_name, info_plugin_functions_t *plugin_f
   name = plugin_name;
   functions = plugin_functions;
   config = plugin_config;
+
+  info_sanitise_config(config);
 
   memset(&outbuffer, 0, sizeof(outbuffer));
   for (i = 0; i < MAX_CLIENTS; ++i) {
