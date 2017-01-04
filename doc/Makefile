@@ -99,7 +99,7 @@ clean:
 doc: $(DOX_FILE)
 	@echo "[$@] doc"
 	@echo "  Cleaning up $(OS) outputs..."
-	@rm -frv "$(HTML_OUTPUT)" "$(LATEX_OUTPUT)" "$(PDF_OUTPUT)"
+	@rm -fr "$(HTML_OUTPUT)" "$(LATEX_OUTPUT)" "$(PDF_OUTPUT)"
 	@mkdir -pv "$(HTML_OUTPUT)"
 	@mkdir -pv "$(LATEX_OUTPUT)"
 	@mkdir -pv "$(PDF_DIR)"
@@ -115,11 +115,11 @@ doc: $(DOX_FILE)
 	  "$(DOX_FILE)" > "$(TMP_DOX_FILE)"
 	@echo "  Running doxygen to create HTML..."
 	@doxygen "$(TMP_DOX_FILE)"
-	@rm -fv "$(TMP_DOX_FILE)"
+	@rm -f "$(TMP_DOX_FILE)"
 	@echo "  Running latex to create a PDF..."
 	@$(MAKE) -s -C $(LATEX_OUTPUT) all
 	@mkdir -pv "$(PDF_DIR)"
 	@mv -v "$(LATEX_OUTPUT)/refman.pdf" "$(PDF_OUTPUT)"
-	@rm -frv "$(LATEX_OUTPUT)"
+	@rm -fr "$(LATEX_OUTPUT)"
 	@rmdir -v --ignore-fail-on-non-empty "$(LATEX_DIR)"
 	@echo "  Done"
