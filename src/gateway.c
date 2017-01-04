@@ -350,7 +350,7 @@ static void set_unused_iptunnel_name(struct gateway_entry *gw) {
  *
  * @param mode the mode (see SCRIPT_MODE_* defines)
  * @param addMode true to add policy routing, false to remove it
- * @param ifname the interface name (optional)
+ * @param ifName the interface name (optional)
  * @param tableNr the routing table number (optional)
  * @param ruleNr the IP rule number/priority (optional)
  * @param bypassRuleNr the bypass IP rule number/priority (optional)
@@ -1509,7 +1509,7 @@ void olsr_trigger_gatewayloss_check(void) {
 /**
  * Sets a new internet gateway.
  *
- * @param the chosen gateway
+ * @param chosen_gw the chosen gateway
  * @param ipv4 set ipv4 gateway
  * @param ipv6 set ipv6 gateway
  * @return true if an error happened, false otherwise
@@ -2190,10 +2190,10 @@ bool isEgressSelected(struct sgw_egress_if * egress_if) {
  * <pre>
  * # multi-smart-gateway status overview, generated on October 10, 2014 at 08:27:15
  *
- * #Originator Prefix       Uplink  Downlink  PathCost  Type    Interface  Gateway      Cost
- *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  ppp0       0.0.0.0      INFINITE
- *  127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  eth1       192.168.0.1  INFINITE
- * *10.0.0.1   0.0.0.0/0    290     1500      0.000     olsr    tnl_4096   10.0.0.1     34.325
+ * # Originator Prefix       Uplink  Downlink  PathCost  Type    Interface  Gateway      Cost
+ *   127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  ppp0       0.0.0.0      INFINITE
+ *   127.0.0.1  127.0.0.0/8  0       0         INFINITE  egress  eth1       192.168.0.1  INFINITE
+ *  *10.0.0.1   0.0.0.0/0    290     1500      0.000     olsr    tnl_4096   10.0.0.1     34.325
  * </pre>
  *
  * @param phase the phase of the change (startup/runtime/shutdown)

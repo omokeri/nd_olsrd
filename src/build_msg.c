@@ -1034,7 +1034,9 @@ __attribute__((unused))
 /**
  *IP version 4
  *
+ *@param h the list of HNAs
  *@param ifp the interface to send on
+ *@param is_zero_bw true when the HNA is a 'de-announcing zero-bandwidth' HNA
  *@return nada
  */
 static bool
@@ -1196,7 +1198,9 @@ __attribute__((unused))
 /**
  *IP version 6
  *
+ *@param h the list of HNAs
  *@param ifp the interface to send on
+ *@param is_zero_bw true when the HNA is a 'de-announcing zero-bandwidth' HNA
  *@return nada
  */
 static bool

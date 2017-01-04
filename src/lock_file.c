@@ -70,7 +70,6 @@
 
 /**
  * @param cnf the olsrd configuration
- * @param ip_version the ip version
  * @return a malloc-ed string for the default lock file name
  */
 char * olsrd_get_default_lockfile(struct olsrd_config *cnf) {
