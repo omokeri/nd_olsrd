@@ -90,7 +90,7 @@ all: default_target
 
 default_target: doc
 
-.PHONY: .gitignore doc clean
+.PHONY: .gitignore doc doc-pdf clean
 
 clean:
 	@echo "[$@] doc"
@@ -99,10 +99,9 @@ clean:
 doc: $(DOX_FILE)
 	@echo "[$@] doc"
 	@echo "  Cleaning up $(OS) outputs..."
-	@rm -fr "$(HTML_OUTPUT)" "$(LATEX_OUTPUT)" "$(PDF_OUTPUT)"
+	@rm -fr "$(HTML_OUTPUT)" "$(LATEX_OUTPUT)"
 	@mkdir -pv "$(HTML_OUTPUT)"
 	@mkdir -pv "$(LATEX_OUTPUT)"
-	@mkdir -pv "$(PDF_DIR)"
 	@echo "  Generating doxygen configuration..."
 	@sed \
 	  -e "s/__OLSRD_VER__/$(OLSRD_VER)/" \
@@ -116,6 +115,13 @@ doc: $(DOX_FILE)
 	@echo "  Running doxygen to create HTML..."
 	@doxygen "$(TMP_DOX_FILE)"
 	@rm -f "$(TMP_DOX_FILE)"
+	@echo "  Done"
+
+doc-pdf: doc
+	@echo "[$@] doc"
+	@echo "  Cleaning up $(OS) outputs..."
+	@rm -fr "$(PDF_OUTPUT)"
+	@mkdir -pv "$(PDF_DIR)"
 	@echo "  Running latex to create a PDF..."
 	@$(MAKE) -s -C $(LATEX_OUTPUT) all
 	@mkdir -pv "$(PDF_DIR)"

@@ -257,6 +257,9 @@ libs_uninstall uninstall_libs:
 doc:
 		$(MAKECMDPREFIX)$(MAKECMD) -C doc OS=$(OS)
 
+doc-pdf:
+		$(MAKECMDPREFIX)$(MAKECMD) -C doc-pdf OS=$(OS)
+
 doc_clean:
 		$(MAKECMDPREFIX)$(MAKECMD) -C doc OS=$(OS) clean
 
