@@ -30,6 +30,7 @@ LoadPlugin "olsrd_httpinfo.so.0.1"
 # configuration file with the script
 LoadPlugin "olsrd_jsoninfo.so.0.0"
 {
+  PlParam "port" "56789"
 }
 
 #Trage hier deine OLSR-Interfaces (funk, lan, tunnel, etc,..) ein

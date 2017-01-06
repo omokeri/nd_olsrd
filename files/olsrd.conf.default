@@ -6,10 +6,5 @@ Interface "wlan0"
 # configuration file with the script
 LoadPlugin "olsrd_jsoninfo.so.0.0"
 {
-}
-
-# This is only here to be able to generate a
-# configuration file with the script
-LoadPlugin "olsrd_txtinfo.so.0.1"
-{
+  PlParam "port" "56789"
 }

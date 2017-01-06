@@ -179,7 +179,7 @@
 # multi-gateway mode is enabled and must be unique between the olsrd
 # instances running on the node. It may not contain whitespace and may
 # not be empty.
-# (default is not set)
+# (default is <not set>)
 
 # SmartGatewayInstanceId <not set>
 
@@ -187,7 +187,7 @@
 # shutdown of olsrd. The script is only executed when SmartGatewayUseCount
 # is set to a value larger than 1. The script must setup policy routing
 # rules such that multi-gateway mode works. A sample script is included.
-# (default is not set)
+# (default is <not set>)
 
 # SmartGatewayPolicyRoutingScript <not set>
 
@@ -344,7 +344,7 @@
 # change during the uptime of olsrd.
 # (default is 0.0.0.0, which triggers usage of the IP of the first interface)
 
-MainIp 192.168.181.102
+MainIp 10.0.0.1
 
 # The fixed willingness to use (0-7)
 # If not set willingness will be calculated
@@ -501,9 +501,6 @@ IpcConnect
 # Each plugin should have a README file in it's lib subfolder.
 
 LoadPlugin "olsrd_jsoninfo.so.0.0" {
-}
-
-LoadPlugin "olsrd_httpinfo.so.0.1" {
 }
 
 #############################################

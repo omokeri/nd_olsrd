@@ -44,6 +44,9 @@ LoadPlugin "olsrd_p2pd.so.0.1.0"
 LoadPlugin "olsrd_jsoninfo.so.0.0"
 {
     # PlParam "accept"         "0.0.0.0"
+
+    # for the configuration generation script
+    PlParam "port" "56789"
 }
 
 LoadPlugin "olsrd_txtinfo.so.0.1"

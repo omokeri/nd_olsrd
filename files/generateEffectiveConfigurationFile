@@ -185,10 +185,13 @@ echo ""
 echo "Generating effective configuration file"
 echo "  $configFile.txt"
 set +e
-echo "/olsrd.conf" | \
-  nc 127.0.0.1 9090 | \
+echo "/plain/olsrd.conf" | \
+  nc 127.0.0.1 56789 | \
   tail -n +6 | \
-  sed -r "s/$regex\"$nwif\"/\1\"wlan0\"/" \
+  sed -r \
+    -e "s/$regex\"$nwif\"/\1\"wlan0\"/" \
+    -e '/^[[:space:]]*PlParam[[:space:]]+"port"[[:space:]]+"56789"[[:space:]]*$/ d' \
+    -e 's/^[[:space:]]*MainIp[[:space:]]+.*$/MainIp 10.0.0.1/' \
   > "$configFile.txt"
 chown --reference="$configFile" "$configFile.txt"
 set -e
