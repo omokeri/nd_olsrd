@@ -107,6 +107,10 @@ PlParam "sighup-pid-file" "/path/to/pidfile.pid"
         table changes. This is useful for letting dnsmasq or bind know
         they have to reload their hosts file.
 
+PlParam "sighup-interval" "SEC"
+	(*nix systems only) Interval for sending HUP signals in seconds.
+	(default: 5 seconds)
+
 PlParam "name-change-script" "/path/to/script"
         Script to execute when there is a change in the hosts names
         table. Useful for executing a script that uses the hosts file
