@@ -52,13 +52,13 @@
 #include <string.h>
 
 #ifdef NOCONFIGCHECKSUM
-#define SHA_DIGEST_LENGTH 1
+#define SHA256_DIGEST_LENGTH 1
 #else
 #include <openssl/sha.h>
 static SHA256_CTX ctx;
 #endif /* NOCONFIGCHECKSUM */
 
-static unsigned char configuration_checksum[SHA_DIGEST_LENGTH];
+static unsigned char configuration_checksum[SHA256_DIGEST_LENGTH];
 static char configuration_checksum_str[(sizeof(configuration_checksum) * 2) + 1];
 
 #define CLI_START     "*CLI START*"
