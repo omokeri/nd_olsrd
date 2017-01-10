@@ -51,6 +51,7 @@ HDRS =
 include local.mk
 
 OBJS +=		../ipcalc.o ../builddata.o ../common/autobuf.o ../common/string_handling.o ../lock_file.o
+OBJS +=		../sha256.o ../sha256_mem_clr.o
 
 ifeq ($(OS), win32)
 

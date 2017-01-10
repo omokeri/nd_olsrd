@@ -46,17 +46,13 @@
 #include "olsrd_conf_checksum.h"
 
 #include "olsrd_conf.h"
+#include "../sha.h"
 
 #include <stdio.h>
 
 #include <string.h>
 
-#ifdef NOCONFIGCHECKSUM
-#define SHA256_DIGEST_LENGTH 1
-#else
-#include <openssl/sha.h>
 static SHA256_CTX ctx;
-#endif /* NOCONFIGCHECKSUM */
 
 static unsigned char configuration_checksum[SHA256_DIGEST_LENGTH];
 static char configuration_checksum_str[(sizeof(configuration_checksum) * 2) + 1];
@@ -70,11 +66,9 @@ bool olsrd_config_checksum_init(void) {
   memset(configuration_checksum, 0, sizeof(configuration_checksum));
   memset(configuration_checksum_str, 0, sizeof(configuration_checksum_str));
 
-#ifndef NOCONFIGCHECKSUM
   if (!SHA256_Init(&ctx)) {
     return false;
   }
-#endif /* NOCONFIGCHECKSUM */
 
   return true;
 }
@@ -83,7 +77,6 @@ bool olsrd_config_checksum_final(void) {
   memset(configuration_checksum, 0, sizeof(configuration_checksum));
   memset(configuration_checksum_str, 0, sizeof(configuration_checksum_str));
 
-#ifndef NOCONFIGCHECKSUM
   {
     size_t i;
 
@@ -96,7 +89,6 @@ bool olsrd_config_checksum_final(void) {
     }
     configuration_checksum_str[i * 2] = '\0';
   }
-#endif /* NOCONFIGCHECKSUM */
 
   return true;
 }
@@ -146,7 +138,6 @@ bool olsrd_config_checksum_add(const char *str, size_t len) {
     return true;
   }
 
-#ifndef NOCONFIGCHECKSUM
   if (!SHA256_Update(&ctx, str, len)) {
     return false;
   }
@@ -154,7 +145,6 @@ bool olsrd_config_checksum_add(const char *str, size_t len) {
   if (!SHA256_Update(&ctx, "\n", 1)) {
     return false;
   }
-#endif /* NOCONFIGCHECKSUM */
 
   return true;
 }

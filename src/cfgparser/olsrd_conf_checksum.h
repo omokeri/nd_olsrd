@@ -56,10 +56,6 @@
 #define OLSRD_CONFIG_END       "*CONFIG END*"
 #define OLSRD_CONFIG_END_LEN   (sizeof(OLSRD_CONFIG_END) - 1)
 
-#if (!defined(__linux__) || defined(__ANDROID__)) && !defined(NOCONFIGCHECKSUM)
-#define NOCONFIGCHECKSUM
-#endif /* (!defined(__linux__) || defined(__ANDROID__)) && !defined(NOCONFIGCHECKSUM) */
-
 bool olsrd_config_checksum_init(void);
 
 bool olsrd_config_checksum_add_cli(int argc, char *argv[]);
