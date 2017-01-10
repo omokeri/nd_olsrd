@@ -46,15 +46,13 @@
 #include "olsrd_conf_checksum.h"
 
 #include "olsrd_conf.h"
-#include "../sha.h"
+#include "../superfasthash.h"
 
 #include <stdio.h>
 
 #include <string.h>
 
-static SHA256_CTX ctx;
-
-static unsigned char configuration_checksum[SHA256_DIGEST_LENGTH];
+static uint32_t configuration_checksum;
 static char configuration_checksum_str[(sizeof(configuration_checksum) * 2) + 1];
 
 #define CLI_START     "*CLI START*"
@@ -62,38 +60,17 @@ static char configuration_checksum_str[(sizeof(configuration_checksum) * 2) + 1]
 #define CLI_END       "*CLI END*"
 #define CLI_END_LEN   (sizeof(CLI_END) - 1)
 
-bool olsrd_config_checksum_init(void) {
-  memset(configuration_checksum, 0, sizeof(configuration_checksum));
+void olsrd_config_checksum_init(void) {
+  configuration_checksum = 0;
   memset(configuration_checksum_str, 0, sizeof(configuration_checksum_str));
-
-  if (!SHA256_Init(&ctx)) {
-    return false;
-  }
-
-  return true;
 }
 
-bool olsrd_config_checksum_final(void) {
-  memset(configuration_checksum, 0, sizeof(configuration_checksum));
-  memset(configuration_checksum_str, 0, sizeof(configuration_checksum_str));
-
-  {
-    size_t i;
-
-    if (!SHA256_Final(configuration_checksum, &ctx)) {
-      return false;
-    }
-
-    for (i = 0; i < sizeof(configuration_checksum); i++) {
-      snprintf(&configuration_checksum_str[i * 2], 3, "%02x", configuration_checksum[i]);
-    }
-    configuration_checksum_str[i * 2] = '\0';
-  }
-
-  return true;
+void olsrd_config_checksum_final(void) {
+  snprintf(configuration_checksum_str, sizeof(configuration_checksum_str), "%08x", configuration_checksum);
+  configuration_checksum_str[sizeof(configuration_checksum_str) - 1] = '\0';
 }
 
-unsigned char *olsrd_config_checksum_get(size_t *len, char ** str) {
+void olsrd_config_checksum_get(size_t *len, char ** str) {
   if (len) {
     *len = sizeof(configuration_checksum);
   }
@@ -101,50 +78,33 @@ unsigned char *olsrd_config_checksum_get(size_t *len, char ** str) {
   if (str) {
     *str = configuration_checksum_str;
   }
-
-  return configuration_checksum;
 }
 
-bool olsrd_config_checksum_add_cli(int argc, char *argv[]) {
+void olsrd_config_checksum_add_cli(int argc, char *argv[]) {
   int i = 1;
 
   if (!argc || !argv) {
-    return true;
+    return;
   }
 
-  if (!olsrd_config_checksum_add(CLI_START, CLI_START_LEN)) {
-    return false;
-  }
+  olsrd_config_checksum_add(CLI_START, CLI_START_LEN);
 
   for (i = 0; i < argc; ++i) {
     if (!argv[i]) {
       break;
     }
 
-    if (!olsrd_config_checksum_add(argv[i], strlen(argv[i]))) {
-      return false;
-    }
+    olsrd_config_checksum_add(argv[i], strlen(argv[i]));
   }
 
-  if (!olsrd_config_checksum_add(CLI_END, CLI_END_LEN)) {
-    return false;
-  }
-
-  return true;
+  olsrd_config_checksum_add(CLI_END, CLI_END_LEN);
 }
 
-bool olsrd_config_checksum_add(const char *str, size_t len) {
+void olsrd_config_checksum_add(const char *str, size_t len) {
   if (!str || !len) {
-    return true;
+    return;
   }
 
-  if (!SHA256_Update(&ctx, str, len)) {
-    return false;
-  }
-
-  if (!SHA256_Update(&ctx, "\n", 1)) {
-    return false;
-  }
-
-  return true;
+  configuration_checksum = hash_inc(str, len, configuration_checksum);
+  configuration_checksum = hash_inc("\n", 1, configuration_checksum);
 }

@@ -225,7 +225,7 @@ void output_start(struct autobuf *abuf) {
   abuf_json_int(&json_session, abuf, "systemTime", time(NULL));
   abuf_json_int(&json_session, abuf, "timeSinceStartup", now_times);
 
-  (void) olsrd_config_checksum_get(NULL, &str);
+  olsrd_config_checksum_get(NULL, &str);
   abuf_json_string(&json_session, abuf, "configurationChecksum", str);
 
   if (*uuid) {
@@ -1130,7 +1130,7 @@ void ipc_print_config(struct autobuf *abuf) {
 
   abuf_json_mark_object(&json_session, true, false, abuf, "config");
 
-  (void) olsrd_config_checksum_get(NULL, &str);
+  olsrd_config_checksum_get(NULL, &str);
   abuf_json_string(&json_session, abuf, "configurationChecksum", str);
 
   {

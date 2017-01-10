@@ -433,17 +433,9 @@ int main(int argc, char *argv[]) {
   /* Open syslog */
   olsr_openlog("olsrd");
 
-  if (!olsrd_config_checksum_init()) {
-    olsr_exit("Could not initialise the configuration checksum", EXIT_FAILURE);
-  }
-
-  if (!olsrd_config_checksum_add_cli(argc, argv)) {
-    olsr_exit("Could not checksum the commandline arguments", EXIT_FAILURE);
-  }
-
-  if (!olsrd_config_checksum_add(OLSRD_CONFIG_START, OLSRD_CONFIG_START_LEN)) {
-    olsr_exit("Could not start the configuration file checksum", EXIT_FAILURE);
-  }
+  olsrd_config_checksum_init();
+  olsrd_config_checksum_add_cli(argc, argv);
+  olsrd_config_checksum_add(OLSRD_CONFIG_START, OLSRD_CONFIG_START_LEN);
 
   /*
    * Initialisation
@@ -531,13 +523,8 @@ int main(int argc, char *argv[]) {
     free(default_ifcnf);
   }
 
-  if (!olsrd_config_checksum_add(OLSRD_CONFIG_END, OLSRD_CONFIG_END_LEN)) {
-    olsr_exit("Could not finish the configuration file checksum", EXIT_FAILURE);
-  }
-
-  if (!olsrd_config_checksum_final()) {
-    olsr_exit("Could not finalise the configuration checksum", EXIT_FAILURE);
-  }
+  olsrd_config_checksum_add(OLSRD_CONFIG_END, OLSRD_CONFIG_END_LEN);
+  olsrd_config_checksum_final();
 
   /* Sanity check configuration */
   if (olsrd_sanity_check_cnf(olsr_cnf) < 0) {

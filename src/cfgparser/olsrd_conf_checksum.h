@@ -56,14 +56,14 @@
 #define OLSRD_CONFIG_END       "*CONFIG END*"
 #define OLSRD_CONFIG_END_LEN   (sizeof(OLSRD_CONFIG_END) - 1)
 
-bool olsrd_config_checksum_init(void);
+void olsrd_config_checksum_init(void);
 
-bool olsrd_config_checksum_add_cli(int argc, char *argv[]);
+void olsrd_config_checksum_add_cli(int argc, char *argv[]);
 
-bool olsrd_config_checksum_add(const char *str, size_t len);
+void olsrd_config_checksum_add(const char *str, size_t len);
 
-bool olsrd_config_checksum_final(void);
+void olsrd_config_checksum_final(void);
 
-unsigned char *olsrd_config_checksum_get(size_t *len, char ** str);
+void olsrd_config_checksum_get(size_t *len, char ** str);
 
 #endif /* _OLSRD_CONF_CHECKSUM_H */
