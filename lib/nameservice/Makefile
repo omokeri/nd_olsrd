@@ -43,7 +43,7 @@
 
 OLSRD_PLUGIN =	true
 PLUGIN_NAME =	olsrd_nameservice
-PLUGIN_VER =	0.3
+PLUGIN_VER =	0.4
 
 TOPDIR = ../..
 include $(TOPDIR)/Makefile.inc
