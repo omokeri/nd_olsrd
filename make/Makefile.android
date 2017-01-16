@@ -59,7 +59,7 @@
 #    to adapt the 'Interfaces' line, e.g. to use
 #    the eth0 on your android mobile. Also, the
 #    LoadPlugin lines needs adaption, e.g. you
-#    need "/data/local/lib/olsrd_txtinfo.so.0.1"
+#    need "/data/local/lib/olsrd_txtinfo.so.1.1"
 #
 # 5) Copy all file from /data to your mobile, e.g.
 #    by pushing the files with the 'adb' tool.

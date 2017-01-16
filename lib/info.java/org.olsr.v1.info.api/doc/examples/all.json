@@ -1896,7 +1896,7 @@
       }
     },
     {
-      "plugin": "olsrd_txtinfo.so.0.1",
+      "plugin": "olsrd_txtinfo.so.1.1",
       "parameters": {
         "httpheaders": "false",
         "accept": "127.0.0.1"

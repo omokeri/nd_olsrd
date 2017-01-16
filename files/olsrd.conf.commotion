@@ -49,7 +49,7 @@ LoadPlugin "olsrd_jsoninfo.so.1.1"
     PlParam "port" "56789"
 }
 
-LoadPlugin "olsrd_txtinfo.so.0.1"
+LoadPlugin "olsrd_txtinfo.so.1.1"
 {
     # PlParam "accept"         "0.0.0.0"
 }
