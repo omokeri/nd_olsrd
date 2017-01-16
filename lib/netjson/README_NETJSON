@@ -25,7 +25,7 @@ The plugin is configured with the generic info plugin configuration parameters.
 
 The port in the generic info plugin configuration is set to 2005.
 
-LoadPlugin "olsrd_netjson.so.0.0"
+LoadPlugin "olsrd_netjson.so.1.1"
 {
   # <generic info plugin configuration>
 
