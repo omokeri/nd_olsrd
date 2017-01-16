@@ -41,7 +41,7 @@ PlParam "IP.ADDR" "another-name.mesh"
 PlParam "hosts-file" "/path/to/hosts_file"
 	which file to write to (usually /etc/hosts).
 	(default: /var/run/hosts_olsr)
-	Also see option "filewrite_interval".
+	Also see option "filewrite-interval".
 
 PlParam "suffix" ".olsr"
 	local suffix which is appended to all received names.
@@ -50,7 +50,7 @@ PlParam "suffix" ".olsr"
 PlParam "add-hosts" "/path/to/file"
 	copy contents of this additional hosts file to output file.
 	this is practical if you alreay use your /etc/hosts file.
-	Also see option "filewrite_interval", how often the file
+	Also see option "filewrite-interval", how often the file
 	is read.
 
 PlParam "dns-server" "IP.ADDR"
@@ -63,7 +63,7 @@ PlParam "resolv-file" "/path/to/resolv.conf"
 	path to resolv.conf file (usually /etc/resolv.conf)
 	if set, the 3 nearest (best ETX) upstream nameservers annonced 
 	by other nodes in the network are written to this file
-	Also see option "filewrite_interval".
+	Also see option "filewrite-interval".
 
 PlParam "interval" "SEC"
 	interval for sending NAME messages in seconds.
@@ -99,7 +99,7 @@ PlParam "latlon-file" "/var/run/latlon.js"
 	/* One or more links between nodes */
 	Link('fromip','toip',lq,nlq,etx);
 
-	Also see option "filewrite_interval".
+	Also see option "filewrite-interval".
 
 PlParam "latlon-infile" "name-of-input.txt"
 	Filename to read lat/lon positions from. Meant to be used
@@ -112,27 +112,27 @@ PlParam "sighup-pid-file" "/path/to/pidfile.pid"
         by the pidfile (usually /var/run/dnsmasq.pid) when the host name
         table changes. This is useful for letting dnsmasq or bind know
         they have to reload their hosts file.
-        Also see option "filewrite_interval".
+        Also see option "filewrite-interval".
 
 PlParam "name-change-script" "/path/to/script"
         Script to execute when there is a change in the hosts names
         table. Useful for executing a script that uses the hosts file
         to keep a website or a database updated.
-        Also see option "filewrite_interval".
+        Also see option "filewrite-interval".
 
 PlParam "service" "http://me.olsr:80|tcp|my little homepage"
         Add a new service announcement to be spreaded in the mesh.
 
 PlParam "services-file" "/path/to/services_file"
 	File to write (default: /var/run/services_olsr)
-	Also see option "filewrite_interval".
+	Also see option "filewrite-interval".
 
 PlParam "services-change-script" "/path/to/script"
         Similar to the previous parameter. Script to execute when there
         is a change in the services list propagated by the nameserver
         plugin. Useful for executing a script that uses the services file
         to keep a website or a database updated.
-        Also see option "filewrite_interval".
+        Also see option "filewrite-interval".
 
 PlParam "mac" "xx:xx:xx:xx:xx:xx[,0-255]"
         Add a new MAC addr to be spreaded in the mesh. This MAC addr
@@ -141,14 +141,14 @@ PlParam "mac" "xx:xx:xx:xx:xx:xx[,0-255]"
 
 PlParam "macs-file" "/path/to/macs_file"
 	File to write (default: /var/run/macs_olsr)
-	Also see option "filewrite_interval".
+	Also see option "filewrite-interval".
 
 PlParam "macs-change-script" "/path/to/script"
         Similar to the previous parameter. Script to execute when there
         is a change in the macs list propagated by the nameserver
         plugin. Useful for executing a script that uses the services file
         to keep a website or a database updated.
-        Also see option "filewrite_interval".
+        Also see option "filewrite-interval".
 
 PlParam "filewrite-interval" "SEC"
 	Interval for writing the status-files to disk, defined in seconds.
