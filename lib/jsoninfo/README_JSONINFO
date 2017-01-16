@@ -50,7 +50,7 @@ and with 1 extra parameter.
 
 The port in the generic info plugin configuration is set to 9090.
 
-LoadPlugin "olsrd_jsoninfo.so.0.0"
+LoadPlugin "olsrd_jsoninfo.so.1.1"
 {
   # <generic info plugin configuration>
 

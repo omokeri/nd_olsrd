@@ -43,7 +43,7 @@
 
 OLSRD_PLUGIN =	true
 PLUGIN_NAME =	olsrd_jsoninfo
-PLUGIN_VER =	0.0
+PLUGIN_VER =	1.1
 
 TOPDIR =	../..
 include $(TOPDIR)/Makefile.inc

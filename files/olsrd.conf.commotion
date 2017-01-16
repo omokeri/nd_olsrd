@@ -41,7 +41,7 @@ LoadPlugin "olsrd_p2pd.so.0.1.0"
     PlParam "UdpDestPort"      "224.0.0.251 5353"
 }
 
-LoadPlugin "olsrd_jsoninfo.so.0.0"
+LoadPlugin "olsrd_jsoninfo.so.1.1"
 {
     # PlParam "accept"         "0.0.0.0"
 
