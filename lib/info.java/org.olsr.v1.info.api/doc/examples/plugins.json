@@ -6,7 +6,7 @@
   "uuid": "d13d7ee3-fcca-4f81-9bf5-bb5848b5d96d",
   "plugins": [
     {
-      "plugin": "olsrd_pud.so.2.0.0",
+      "plugin": "olsrd_pud.so.3.0.0",
       "parameters": {
         "useloopback": "true",
         "hysteresiscounttostationary": "300",

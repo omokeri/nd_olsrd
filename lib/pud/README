@@ -4,7 +4,7 @@ This plugin depends on the (included) NMEA parsing library that can be found at:
 
 See the document doc/pud.odt for a detailed specification of the module.
 
-LoadPlugin "<olsrd plugin library path>/olsrd_pud.so.2.2.0"
+LoadPlugin "<olsrd plugin library path>/olsrd_pud.so.3.0.0"
 {
     # nodeId contains the node identification. It first describes the semantics
     #        (meaning/code) of the identification and then specifies the node
