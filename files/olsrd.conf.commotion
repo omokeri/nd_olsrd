@@ -26,7 +26,7 @@ LoadPlugin "olsrd_dyn_gw.so.0.5"
 {
 }
 
-LoadPlugin "olsrd_nameservice.so.0.3"
+LoadPlugin "olsrd_nameservice.so.0.4"
 {
     # you should set this to your own node name
     PlParam "name"             "commotion-7814921"

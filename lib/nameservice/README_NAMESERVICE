@@ -160,7 +160,7 @@ SAMPLE CONFIG
 
 add in /etc/olsrd/olsrd.conf:
 
-LoadPlugin "olsrd_nameservice.so.0.2"
+LoadPlugin "olsrd_nameservice.so.0.4"
 {
 	PlParam "name" "thisismyname"
 	PlParam "hosts-file" "/etc/hosts"
