@@ -490,6 +490,7 @@ function signTextFile() {
 declare script="$(pathCanonicalPath "${0}")"
 declare scriptDir="$(dirname "${script}")"
 declare baseDir="$(dirname "${scriptDir}")"
+declare scriptDirRel="${scriptDir#$baseDir/}"
 
 cd "${baseDir}"
 
@@ -774,23 +775,25 @@ EOF
   declare tarBz2FileJava="$tarFileJava.bz2"
   declare tarBz2FileFull="$tarFileFull.bz2"
 
+  mkdir -p "$scriptDir/$relBranchVersionDigits"
+
   git archive \
       --format=tar \
       --prefix="olsrd-$relBranchVersionDigits/" \
-      --output="$scriptDir/$tarFile" \
+      --output="$scriptDir/$relBranchVersionDigits/$tarFile" \
       "$relTagVersion"
 
   git archive \
       --format=tar \
       --prefix="olsrd-$relBranchVersionDigits/" \
-      --output="$scriptDir/$tarFileJava" \
+      --output="$scriptDir/$relBranchVersionDigits/$tarFileJava" \
       "$relTagVersion" \
       "lib/info.java" \
       "lib/pud/wireformat-java"
 
-  cp "$scriptDir/$tarFile" "$scriptDir/$tarFileFull"
+  cp "$scriptDir/$relBranchVersionDigits/$tarFile" "$scriptDir/$relBranchVersionDigits/$tarFileFull"
 
-  pushd "$scriptDir" &> /dev/null
+  pushd "$scriptDir/$relBranchVersionDigits" &> /dev/null
 
   tar f "$tarFile" \
       --delete "olsrd-$relBranchVersionDigits/lib/info.java" \
@@ -842,14 +845,14 @@ if [[ "${mode}" == "${MODE_RELEASE}" ]]; then
   echo "= Generated Files ="
   echo "==================="
   cat >&1 << EOF
-$tarGzFile
-$tarGzFileJava
-$tarGzFileFull
-$tarBz2File
-$tarBz2FileJava
-$tarBz2FileFull
-$md5File
-$sha256File"
+$scriptDirRel/$relBranchVersionDigits/$tarGzFile
+$scriptDirRel/$relBranchVersionDigits/$tarGzFileJava
+$scriptDirRel/$relBranchVersionDigits/$tarGzFileFull
+$scriptDirRel/$relBranchVersionDigits/$tarBz2File
+$scriptDirRel/$relBranchVersionDigits/$tarBz2FileJava
+$scriptDirRel/$relBranchVersionDigits/$tarBz2FileFull
+$scriptDirRel/$relBranchVersionDigits/$md5File
+$scriptDirRel/$relBranchVersionDigits/$sha256File
 EOF
 fi
 
@@ -875,6 +878,7 @@ if [[ "${mode}" == "${MODE_RELEASE}" ]]; then
   echo "3. Upload the generated files to"
   echo "     http://www.olsr.org/releases/${relBranchVersionDigits}"
   echo "4. Add a release article on olsr.org."
+  echo "5. Announce the release on the olsr-dev and olsr-users mailing lists."
   echo ""
 else
   echo "1. Check that everything is in order. For example, run:"
