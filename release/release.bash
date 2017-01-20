@@ -701,15 +701,33 @@ else
   #
   echo "Generating the changelog..."
   declare src="CHANGELOG"
-  declare dst="mktemp -q -p . -t "${src}.XXXXXXXXXX""
+  declare dst="$(mktemp -q -p . -t "${src}.XXXXXXXXXX")"
+
+  declare separatorLineNr="$(
+    grep -nhE ' -------------------------------------------------------------------+$' "$src" | \
+    head -1 | \
+    awk -F ':' '{print $1}'
+    )"
+
+  if [ -z "$separatorLineNr" ]; then
+    separatorLineNr="1"
+  fi
+
   cat > "${dst}" << EOF
 ${relBranchVersionDigits} -------------------------------------------------------------------
 
 EOF
+
+  declare -i insertLineNr=$(( $separatorLineNr - 1 ))
+  head -$insertLineNr "$src" >> "$dst"
+
   git rev-list --pretty=short "${prevRelTagVersion}..HEAD" | \
     git shortlog -w80 -- >> "${dst}"
-  cat "${src}" >> "${dst}"
+
+  tail -n +$separatorLineNr "$src" >> "$dst"
+
   mv "${dst}" "${src}"
+
   set +e
   git add "${src}"
   set -e
