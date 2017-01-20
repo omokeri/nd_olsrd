@@ -1,4 +1,11 @@
-All info plugins (jsoninfo, netjson and txtinfo) now support a number of
+* The versions of the following plugins have changed:
+  * jsoninfo    :   0.0 -->   1.1
+  * nameservice :   0.3 -->   0.4
+  * netjson     :   1.0 -->   1.1
+  * pud         : 2.0.0 --> 3.0.0 (including its extra libraries)
+  * txtinfo     :   0.1 -->   1.1
+
+* All info plugins (jsoninfo, netjson and txtinfo) now support a number of
 request prefixes:
 - /http : forces output WITH    http headers, temporarily overriding the
           configured "httpheaders" value.
