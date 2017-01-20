@@ -1,19 +1,19 @@
 * The versions of the following plugins have changed:
-  * jsoninfo    :   0.0 -->   1.1
-  * nameservice :   0.3 -->   0.4
-  * netjson     :   1.0 -->   1.1
-  * pud         : 2.0.0 --> 3.0.0 (including its extra libraries)
-  * txtinfo     :   0.1 -->   1.1
+  - jsoninfo    :   0.0 -->   1.1
+  - nameservice :   0.3 -->   0.4
+  - netjson     :   1.0 -->   1.1
+  - pud         : 2.0.0 --> 3.0.0 (including its extra libraries)
+  - txtinfo     :   0.1 -->   1.1
 
 * All info plugins (jsoninfo, netjson and txtinfo) now support a number of
-request prefixes:
-- /http : forces output WITH    http headers, temporarily overriding the
-          configured "httpheaders" value.
-- /plain: forces output WITHOUT http headers, temporarily overriding the
-          configured "httpheaders" value.
+  request prefixes:
+  - /http : forces output WITH    http headers, temporarily overriding the
+            configured "httpheaders" value.
+  - /plain: forces output WITHOUT http headers, temporarily overriding the
+            configured "httpheaders" value.
 
-These prefixes have to be at the start of the request string, can occur
-only there, and can occur only once.
+  These prefixes have to be at the start of the request string, can occur
+  only there, and can occur only once.
 
 0.9.5 -------------------------------------------------------------------
 
