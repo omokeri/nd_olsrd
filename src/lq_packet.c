@@ -326,7 +326,7 @@ serialize_common(struct olsr_common *comm)
 static void
 serialize_lq_hello(struct lq_hello_message *lq_hello, struct interface_olsr *outif)
 {
-  static const int LINK_ORDER[] = { SYM_LINK, UNSPEC_LINK, ASYM_LINK, LOST_LINK };
+  static const int LINK_ORDER[] = { UNSPEC_LINK, LOST_LINK, ASYM_LINK, SYM_LINK };
   int rem, size, req, expected_size = 0;
   struct lq_hello_info_header *info_head;
   struct lq_hello_neighbor *neigh;
