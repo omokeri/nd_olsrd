@@ -1,3 +1,108 @@
+0.9.6 -------------------------------------------------------------------
+
+Bastian Bittorf (1):
+      logging: show interface name during blocked socket error
+
+Ferry Huberts (79):
+      Update version after branch of v0.9.5
+      changelog: adjust to put notes on top
+      release: adjust script to create multiple tar files
+      Merge branch 'release-0.9.5'
+      mach: add wrapper for clock_gettime
+      sgw: fix interface monitor for single-sgw mode
+      Merge branch 'release-0.9.5'
+      txtinfo: do not use http headers by default
+      info: fix json Content-Type header
+      Merge branch 'release-0.9.5'
+      main: improve EXECINFO include handling a bit
+      Merge branch 'release-0.9.5'
+      main: blacklist UCLIBC for OLSR_HAVE_EXECINFO_H
+      Merge branch 'release-0.9.5'
+      info: java: upgrade gradle wrapper
+      info: ensure the request is initially empty
+      info: rework HTTP request detection and request sanitation
+      info: send everything on empty requests
+      info: drain the request when there are too many requests in flight
+      info: trivial comment fix
+      info: trival debug output fix
+      info: improve readability of the 'empty request' check
+      info: protect stripEOLs against invalid input and zero length
+      info: protect skipMultipleSlashes against invalid input and zero length
+      info: protect skipLeadingWhitespace against invalid input and zero length
+      info: protect stripTrailingSlashes against invalid input and zero length
+      info: protect cutAtFirstEOL against invalid input and zero length
+      info: rename stripEOLs to stripTrailingWhitespace
+      info: be explicit about adding headers
+      info: fix a comment and add a comment
+      info: read the request as early as possible
+      info: sanitise the request right after it's been received
+      info: introduce command prefixes '/http' and '/plain'
+      conf: clear allocated default config before filling it.
+      conf: ensure the correct configuration file is stored in the configuration
+      conf: calculate the checksum over the effective configuration
+      main: save argc and argv for later use
+      jsoninfo: always output the configuration checksum
+      jsoninfo: add cli arguments to the config object
+      info: fix levels of a few debug messages
+      info: move a comment
+      info: add a comment about the size of the receive buffer
+      info: fix drain_request to not block
+      info: allow a small delay between connection accept and request arrival
+      info: do not block when receiving the request
+      info: return 'REQUEST TIMEOUT' when receiving the request did not work
+      info: release changed java OSGi bundles
+      info: add sanitation of the configuration
+      info: add request timeout configuration parameter
+      changelog: add a note about the '/http' and '/plain' request prefixes
+      info: update java dependency bundles
+      doc: upgrade doxygen configuration
+      doc: minor adjustment of the makefile
+      doc: fix warnings
+      doc: move pdf generation into new doc-pdf make target
+      gui: clean-ups
+      make: remove -Wmissing-include-dirs
+      files: get rid of net-tools usage
+      files: update configuration generation script
+      Merge pull request #12 from booo/sighup-interval
+      Merge pull request #14 from bittorf/master
+      cfgparser: use correct SHA256_DIGEST_LENGTH
+      cfgparser: pull in openssl sha256 code to avoid linking to it
+      cfgparser: use superfasthash for the configuration checksum
+      logging: work around bogus Coverity warning
+      Merge pull request #16 from SvenRoederer/rename_sighup-interval
+      Merge pull request #18 from SvenRoederer/olsr-nameservice-version
+      nameservice: fix plugin versions
+      nameservice: fix typos of filewrite-interval plugin parameter
+      pud: bump version
+      jsoninfo: bump version
+      netjson: bump version
+      txtinfo: bump version
+      changelog: add a remark about updated plugin versions
+      lq_packet: change link status ordering in hello messages
+      Branch v0.9.6
+      changelog: minor layout fixes
+      release: minor improvements to the release script
+      release: insert changelog just before the marker of the previous release
+
+Henning Rogge (2):
+      Update version after release of v0.9.5
+      Release v0.9.6
+
+Philipp Borgers (1):
+      nameservice: add new sighup-interval parameter
+
+Sebastian Wiedenroth (1):
+      fix timing issues on systems where RAND_MAX is not INT32_MAX
+
+Sven Roederer (2):
+      nameservice: rename parameter "sighup_interval" to "filewrite_interval"
+      nameservice: bump version to 0.4
+
+Thorsten Maerz (1):
+      make: strip CC
+
+0.9.6 -------------------------------------------------------------------
+
 * The versions of the following plugins have changed:
   - jsoninfo    :   0.0 -->   1.1
   - nameservice :   0.3 -->   0.4
@@ -14,6 +119,107 @@
 
   These prefixes have to be at the start of the request string, can occur
   only there, and can occur only once.
+
+Bastian Bittorf (1):
+      logging: show interface name during blocked socket error
+
+Ferry Huberts (79):
+      Update version after branch of v0.9.5
+      changelog: adjust to put notes on top
+      release: adjust script to create multiple tar files
+      Merge branch 'release-0.9.5'
+      mach: add wrapper for clock_gettime
+      sgw: fix interface monitor for single-sgw mode
+      Merge branch 'release-0.9.5'
+      txtinfo: do not use http headers by default
+      info: fix json Content-Type header
+      Merge branch 'release-0.9.5'
+      main: improve EXECINFO include handling a bit
+      Merge branch 'release-0.9.5'
+      main: blacklist UCLIBC for OLSR_HAVE_EXECINFO_H
+      Merge branch 'release-0.9.5'
+      info: java: upgrade gradle wrapper
+      info: ensure the request is initially empty
+      info: rework HTTP request detection and request sanitation
+      info: send everything on empty requests
+      info: drain the request when there are too many requests in flight
+      info: trivial comment fix
+      info: trival debug output fix
+      info: improve readability of the 'empty request' check
+      info: protect stripEOLs against invalid input and zero length
+      info: protect skipMultipleSlashes against invalid input and zero length
+      info: protect skipLeadingWhitespace against invalid input and zero length
+      info: protect stripTrailingSlashes against invalid input and zero length
+      info: protect cutAtFirstEOL against invalid input and zero length
+      info: rename stripEOLs to stripTrailingWhitespace
+      info: be explicit about adding headers
+      info: fix a comment and add a comment
+      info: read the request as early as possible
+      info: sanitise the request right after it's been received
+      info: introduce command prefixes '/http' and '/plain'
+      conf: clear allocated default config before filling it.
+      conf: ensure the correct configuration file is stored in the configuration
+      conf: calculate the checksum over the effective configuration
+      main: save argc and argv for later use
+      jsoninfo: always output the configuration checksum
+      jsoninfo: add cli arguments to the config object
+      info: fix levels of a few debug messages
+      info: move a comment
+      info: add a comment about the size of the receive buffer
+      info: fix drain_request to not block
+      info: allow a small delay between connection accept and request arrival
+      info: do not block when receiving the request
+      info: return 'REQUEST TIMEOUT' when receiving the request did not work
+      info: release changed java OSGi bundles
+      info: add sanitation of the configuration
+      info: add request timeout configuration parameter
+      changelog: add a note about the '/http' and '/plain' request prefixes
+      info: update java dependency bundles
+      doc: upgrade doxygen configuration
+      doc: minor adjustment of the makefile
+      doc: fix warnings
+      doc: move pdf generation into new doc-pdf make target
+      gui: clean-ups
+      make: remove -Wmissing-include-dirs
+      files: get rid of net-tools usage
+      files: update configuration generation script
+      Merge pull request #12 from booo/sighup-interval
+      Merge pull request #14 from bittorf/master
+      cfgparser: use correct SHA256_DIGEST_LENGTH
+      cfgparser: pull in openssl sha256 code to avoid linking to it
+      cfgparser: use superfasthash for the configuration checksum
+      logging: work around bogus Coverity warning
+      Merge pull request #16 from SvenRoederer/rename_sighup-interval
+      Merge pull request #18 from SvenRoederer/olsr-nameservice-version
+      nameservice: fix plugin versions
+      nameservice: fix typos of filewrite-interval plugin parameter
+      pud: bump version
+      jsoninfo: bump version
+      netjson: bump version
+      txtinfo: bump version
+      changelog: add a remark about updated plugin versions
+      lq_packet: change link status ordering in hello messages
+      Branch v0.9.6
+      changelog: minor layout fixes
+      release: minor improvements to the release script
+      release: insert changelog just before the marker of the previous release
+
+Henning Rogge (2):
+      Update version after release of v0.9.5
+      Release v0.9.6
+
+Philipp Borgers (1):
+      nameservice: add new sighup-interval parameter
+
+Sebastian Wiedenroth (1):
+      fix timing issues on systems where RAND_MAX is not INT32_MAX
+
+Sven Roederer (2):
+      nameservice: rename parameter "sighup_interval" to "filewrite_interval"
+      nameservice: bump version to 0.4
+
+Thorsten Maerz (1):
+      make: strip CC
 
 0.9.5 -------------------------------------------------------------------
 
