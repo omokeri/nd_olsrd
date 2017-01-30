@@ -317,10 +317,13 @@ lookup_mpr_status(const struct hello_message *message, const struct interface_ol
 static int
 deserialize_hello(struct hello_message *hello, const void *ser)
 {
+  static const int LINK_ORDER[] = HELLO_LINK_ORDER_ARRAY;
   const unsigned char *curr, *limit;
   uint8_t type;
   uint16_t size;
   struct ipaddr_str buf;
+  const unsigned char *curr_saved;
+  unsigned int idx;
 
   memset (hello, 0, sizeof(*hello));
 
@@ -345,29 +348,43 @@ deserialize_hello(struct hello_message *hello, const void *ser)
   hello->neighbors = NULL;
 
   limit = ((const unsigned char *)ser) + size;
-  while (curr < limit) {
-    const unsigned char *limit2 = curr;
-    uint8_t link_code;
-    uint16_t size2;
 
-    pkt_get_u8(&curr, &link_code);
-    pkt_ignore_u8(&curr);
-    pkt_get_u16(&curr, &size2);
+  curr_saved = curr;
 
-    limit2 += size2;
-    while (curr < limit2) {
-      struct hello_neighbor *neigh = olsr_malloc_hello_neighbor("HELLO deserialization");
-      pkt_get_ipaddress(&curr, &neigh->address);
-      if (type == LQ_HELLO_MESSAGE) {
-        olsr_deserialize_hello_lq_pair(&curr, neigh);
+  for (idx = 0; idx < (sizeof(LINK_ORDER) / sizeof(LINK_ORDER[0])); idx++) {
+    curr = curr_saved;
+
+    while (curr < limit) {
+      const unsigned char *limit2 = curr;
+      uint8_t link_code;
+      uint16_t size2;
+
+      pkt_get_u8(&curr, &link_code);
+      pkt_ignore_u8(&curr);
+      pkt_get_u16(&curr, &size2);
+
+      limit2 += size2;
+
+      if (EXTRACT_LINK(link_code) != LINK_ORDER[idx]) {
+        curr = limit2;
+        continue;
       }
-      neigh->link = EXTRACT_LINK(link_code);
-      neigh->status = EXTRACT_STATUS(link_code);
 
-      neigh->next = hello->neighbors;
-      hello->neighbors = neigh;
+      while (curr < limit2) {
+        struct hello_neighbor *neigh = olsr_malloc_hello_neighbor("HELLO deserialization");
+        pkt_get_ipaddress(&curr, &neigh->address);
+        if (type == LQ_HELLO_MESSAGE) {
+          olsr_deserialize_hello_lq_pair(&curr, neigh);
+        }
+        neigh->link = EXTRACT_LINK(link_code);
+        neigh->status = EXTRACT_STATUS(link_code);
+
+        neigh->next = hello->neighbors;
+        hello->neighbors = neigh;
+      }
     }
   }
+
   return 0;
 }
 
