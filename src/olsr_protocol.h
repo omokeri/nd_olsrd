@@ -111,6 +111,8 @@ struct olsr;
 #define HIDE_LINK             4
 #define MAX_LINK              4
 
+#define HELLO_LINK_ORDER_ARRAY { UNSPEC_LINK, LOST_LINK, ASYM_LINK, SYM_LINK }
+
 static INLINE const char * linkTypeToString(int type) {
   switch (type) {
     case ASYM_LINK:
