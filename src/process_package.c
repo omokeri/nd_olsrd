@@ -60,6 +60,7 @@
 #include "lq_plugin.h"
 #include "log.h"
 
+#include <assert.h>
 #include <stddef.h>
 
 static void process_message_neighbors(struct neighbor_entry *, const struct hello_message *);
@@ -324,6 +325,10 @@ deserialize_hello(struct hello_message *hello, const void *ser)
   struct ipaddr_str buf;
   const unsigned char *curr_saved;
   unsigned int idx;
+  struct hello_neighbor *neigh_unspec_first_prev = NULL;
+  struct hello_neighbor *neigh_unspec_first = NULL;
+
+  assert(LINK_ORDER[0] == UNSPEC_LINK);
 
   memset (hello, 0, sizeof(*hello));
 
@@ -381,18 +386,24 @@ deserialize_hello(struct hello_message *hello, const void *ser)
 
         neigh->next = hello->neighbors;
         hello->neighbors = neigh;
+
+        if (neigh->link == UNSPEC_LINK) {
+          neigh_unspec_first = neigh;
+        } else if (!neigh_unspec_first_prev) {
+          neigh_unspec_first_prev = neigh;
+        }
       }
     }
   }
 
-  {
+  if (neigh_unspec_first_prev && neigh_unspec_first) {
     struct hello_neighbor *neigh;
-    for (neigh = hello->neighbors; neigh; neigh = neigh->next) {
+    for (neigh = hello->neighbors; neigh && (neigh != neigh_unspec_first); neigh = neigh->next) {
       struct hello_neighbor *neigh_cull;
       struct hello_neighbor *neigh_cull_prev;
       struct hello_neighbor *neigh_cull_next;
 
-      for (neigh_cull_prev = neigh, neigh_cull = neigh->next;
+      for (neigh_cull_prev = neigh_unspec_first_prev, neigh_cull = neigh_unspec_first;
            neigh_cull;
            neigh_cull = neigh_cull_next) {
         neigh_cull_next = neigh_cull->next;
@@ -400,6 +411,10 @@ deserialize_hello(struct hello_message *hello, const void *ser)
         if (!ipequal(&neigh_cull->address, &neigh->address)) {
           neigh_cull_prev = neigh_cull;
           continue;
+        }
+
+        if (neigh_cull == neigh_unspec_first) {
+          neigh_unspec_first = neigh_cull_next;
         }
 
         neigh_cull_prev->next = neigh_cull_next;
