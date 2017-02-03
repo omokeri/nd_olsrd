@@ -385,6 +385,29 @@ deserialize_hello(struct hello_message *hello, const void *ser)
     }
   }
 
+  {
+    struct hello_neighbor *neigh;
+    for (neigh = hello->neighbors; neigh; neigh = neigh->next) {
+      struct hello_neighbor *neigh_cull;
+      struct hello_neighbor *neigh_cull_prev;
+      struct hello_neighbor *neigh_cull_next;
+
+      for (neigh_cull_prev = neigh, neigh_cull = neigh->next;
+           neigh_cull;
+           neigh_cull = neigh_cull_next) {
+        neigh_cull_next = neigh_cull->next;
+
+        if (!ipequal(&neigh_cull->address, &neigh->address)) {
+          neigh_cull_prev = neigh_cull;
+          continue;
+        }
+
+        neigh_cull_prev->next = neigh_cull_next;
+        free(neigh_cull);
+      }
+    }
+  }
+
   return 0;
 }
 
