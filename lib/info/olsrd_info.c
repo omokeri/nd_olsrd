@@ -636,7 +636,7 @@ static char * cutAtFirstEOL(char * requ, size_t *len) {
   return requ;
 }
 
-static char * parseRequest(char * req, size_t *len) {
+static char * parseRequest(char * req, size_t *len, bool *add_headers) {
   if (!req || !len || !*len) {
     return req;
   }
@@ -649,6 +649,7 @@ static char * parseRequest(char * req, size_t *len) {
       || strncasecmp(&req[*len - 8], "HTTP/1.", 7) //
       || ((req[*len - 1] != '1') && (req[*len - 1] != '0'))) {
     /* too short or does not start with 'GET ' nor ends with ' HTTP/1.[01]'*/
+    *add_headers = false;
     return req;
   }
 
@@ -659,6 +660,8 @@ static char * parseRequest(char * req, size_t *len) {
   /* strip ' HTTP/1.[01]' */
   *len = *len - 9;
   req[*len] = '\0';
+
+  *add_headers = true;
 
   return req;
 }
@@ -838,7 +841,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     req = skipLeadingWhitespace(req, (size_t*) &rx_count);
 
     /* detect http requests */
-    req = parseRequest(req, (size_t*) &rx_count);
+    req = parseRequest(req, (size_t*) &rx_count, &add_headers);
 
     req = stripTrailingWhitespace(req, (size_t*) &rx_count);
     req = stripTrailingSlashes(req, (size_t*) &rx_count);
