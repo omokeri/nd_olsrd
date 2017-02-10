@@ -1,3 +1,21 @@
+0.9.6.1 -------------------------------------------------------------------
+
+Ferry Huberts (6):
+      changelog: fixup
+      info: java: upgrade gradle wrapper
+      info: automatically detect whether the reply should have HTTP headers
+      lq_packet: make the hello link order a define
+      hello reception: use link status ordering
+      hello reception: only remove UNSPEC duplicates
+
+Henning Rogge (2):
+      Update version after release of v0.9.6
+      Release v0.9.6.1
+
+Iwan G. Flameling (2):
+      lq_packet: do not report duplicate neighbours in HELLO messages
+      hello reception: remove duplicate neighbors
+
 0.9.6 -------------------------------------------------------------------
 
 * The versions of the following plugins have changed:
