@@ -3,12 +3,11 @@ Version 1.3, 3 November 2008
 
 # Compatibility
 
-This plugin is compatible with all bndtools versions since 3.1.0.REL.
+This workspace is compatible with all bndtools versions since 3.3.0.REL.
 
 # Update Log
 
-* this: 6f9720f
-* bnd:  575c12f
+* this: -
 
 # Changes since bndtools 3.1.1 release
 

@@ -16,3 +16,4 @@ buildscript {
 
 
 apply from: new File(rootDir, "${bnd_cnf}/gradle/template/master.gradle")
+

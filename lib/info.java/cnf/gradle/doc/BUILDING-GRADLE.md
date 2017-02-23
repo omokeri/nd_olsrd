@@ -331,7 +331,8 @@ It contains:
 
     * &nbsp;```dependencies```
 
-      This directory contains libraries that are used by the build.
+      This directory contains libraries that are used by the build in the form
+      of a file repository.
 
     * &nbsp;```doc```
 

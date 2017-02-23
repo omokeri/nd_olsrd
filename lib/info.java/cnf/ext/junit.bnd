@@ -1,5 +1,6 @@
-junit:\
-	junit;version=latest,\
-	hamcrest-core;version=latest
+junit: \
+  junit;version=latest, \
+  hamcrest-core;version=latest
 
-test-reports: test-results
+test-reports: \
+  test-results
