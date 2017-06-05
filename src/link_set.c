@@ -324,7 +324,7 @@ set_loss_link_multiplier(struct link_entry *entry)
   assert(entry->if_name);
   inter = if_ifwithname(entry->if_name);
 
-  if (!inter) {
+  if (inter) {
     /* find the interface configuration for the interface */
     for (cfg_inter = olsr_cnf->interfaces; cfg_inter; cfg_inter = cfg_inter->next) {
       if (cfg_inter->interf == inter) {
