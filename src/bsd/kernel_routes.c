@@ -322,13 +322,15 @@ add_del_route6(const struct rt_entry *rt, int add)
   nexthop = olsr_get_nh(rt);
   if (0 != (rtm->rtm_flags & RTF_GATEWAY)) {
     memcpy(&sin6.sin6_addr.s6_addr, &nexthop->gateway.v6, sizeof(struct in6_addr));
-    memset(&sin6.sin6_addr.s6_addr, 0, 8);
-    sin6.sin6_addr.s6_addr[0] = 0xfe;
-    sin6.sin6_addr.s6_addr[1] = 0x80;
-    sin6.sin6_scope_id = nexthop->iif_index;
+    if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr))
+      sin6.sin6_scope_id = nexthop->iif_index;
 #ifdef __KAME__
-    *(u_int16_t *) & sin6.sin6_addr.s6_addr[2] = htons(sin6.sin6_scope_id);
-    sin6.sin6_scope_id = 0;
+  if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr))
+    {
+      uint16_t tmp16 = htons(sin6.sin6_scope_id);
+      memcpy(&sin6.sin6_addr.s6_addr[2], &tmp16, sizeof(uint16_t));
+      sin6.sin6_scope_id = 0;
+    }
 #endif /* __KAME__ */
     memcpy(walker, &sin6, sizeof(sin6));
     walker += sin_size;
@@ -336,22 +338,14 @@ add_del_route6(const struct rt_entry *rt, int add)
   }
   else {
     /*
-     * Host is directly reachable, so add
-     * the output interface MAC address.
+     * Host is directly reachable, add a cloning route.
      */
-    memcpy(&sin6.sin6_addr.s6_addr, &rt->rt_dst.prefix.v6, sizeof(struct in6_addr));
-    memset(&sin6.sin6_addr.s6_addr, 0, 8);
-    sin6.sin6_addr.s6_addr[0] = 0xfe;
-    sin6.sin6_addr.s6_addr[1] = 0x80;
-    sin6.sin6_scope_id = nexthop->iif_index;
-#ifdef __KAME__
-    *(u_int16_t *) & sin6.sin6_addr.s6_addr[2] = htons(sin6.sin6_scope_id);
-    sin6.sin6_scope_id = 0;
-#endif /* __KAME__ */
-    memcpy(walker, &sin6, sizeof(sin6));
-    walker += sin_size;
+    sdl.sdl_index = nexthop->iif_index;
+    memcpy(walker, &sdl, sizeof(sdl));
+    walker += sdl_size;
     rtm->rtm_addrs |= RTA_GATEWAY;
-    rtm->rtm_flags |= RTF_GATEWAY;
+    rtm->rtm_flags |= RTF_CLONING;
+    rtm->rtm_flags &= ~RTF_GATEWAY;
   }
 
   /**********************************************************************
