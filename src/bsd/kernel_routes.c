@@ -234,6 +234,13 @@ add_del_route(const struct rt_entry *rt, int add)
     memcpy(walker, &sin4, sizeof(sin4));
     walker += sin_size;
     drtm->rtm_addrs = RTA_DST;
+    if (0 == (drtm->rtm_flags & RTF_HOST)) {
+      olsr_prefix_to_netmask(&mask, rt->rt_dst.prefix_len);
+      sin4.sin_addr = mask.v4;
+      memcpy(walker, &sin4, sizeof(sin4));
+      walker += sin_size;
+      drtm->rtm_addrs |= RTA_NETMASK;
+    }
     drtm->rtm_msglen = (unsigned short)(walker - dbuff);
     len = write(olsr_cnf->rts, dbuff, drtm->rtm_msglen);
     if (len < 0) {
@@ -395,6 +402,12 @@ add_del_route6(const struct rt_entry *rt, int add)
     memcpy(walker, &sin6, sizeof(sin6));
     walker += sin_size;
     drtm->rtm_addrs = RTA_DST;
+    if (0 == (drtm->rtm_flags & RTF_HOST)) {
+      olsr_prefix_to_netmask((union olsr_ip_addr *)&sin6.sin6_addr, rt->rt_dst.prefix_len);
+      memcpy(walker, &sin6, sizeof(sin6));
+      walker += sin_size;
+      drtm->rtm_addrs |= RTA_NETMASK;
+    }
     drtm->rtm_msglen = (unsigned short)(walker - dbuff);
     len = write(olsr_cnf->rts, dbuff, drtm->rtm_msglen);
     if (len < 0) {
