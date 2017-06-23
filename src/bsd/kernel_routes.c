@@ -394,7 +394,7 @@ add_del_route6(const struct rt_entry *rt, int add)
     drtm->rtm_version = RTM_VERSION;
     drtm->rtm_type = RTM_DELETE;
     drtm->rtm_index = 0;
-    drtm->rtm_flags = olsr_rt_flags(rt, add);
+    drtm->rtm_flags = olsr_rt_flags(rt, 0);
     drtm->rtm_seq = ++seq;
 
     walker = dbuff + sizeof(struct rt_msghdr);
