@@ -187,8 +187,16 @@ net_os_set_global_ifoptions(void) {
 
   /* do not accept ICMP redirects */
 
-#if defined(__OpenBSD__) || defined(__NetBSD__)
-  if (olsr_cnf->ip_version == AF_INET)
+#if defined(__OpenBSD__)
+  if (olsr_cnf->ip_version == AF_INET) {
+    name = "net.inet.icmp.rediraccept";
+    ignore_redir = set_sysctl_int(name, 0);
+  } else {
+    /* OpenBSD enables icmp6 rediraccept only if IPv6 autoconf is used. */
+    ignore_redir = 1;
+  }
+#elif defined(__NetBSD__)
+  if (olsr_cnf->ip_version == AF_INET) {
     name = "net.inet.icmp.rediraccept";
   else
     name = "net.inet6.icmp6.rediraccept";
