@@ -418,6 +418,7 @@ extern "C" {
   int ip_prefix_list_remove(struct ip_prefix_list **, const union olsr_ip_addr *, uint8_t);
 
   struct ip_prefix_list *ip_prefix_list_find(struct ip_prefix_list *, const union olsr_ip_addr *net, uint8_t prefix_len);
+  struct ip_prefix_list *ip_prefix_list_match(struct ip_prefix_list *, const union olsr_ip_addr *addr);
 
 /*
  * Interface to parser
