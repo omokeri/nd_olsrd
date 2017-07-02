@@ -350,6 +350,7 @@ struct olsrd_config {
   uint32_t smart_gw_downlink;
   bool smart_gateway_bandwidth_zero;
   struct olsr_ip_prefix smart_gw_prefix;
+  struct ip_prefix_list *smart_gw_blacklist;
 
   /* Main address of this node */
   union olsr_ip_addr main_addr;
