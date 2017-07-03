@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +37,9 @@ public class MockOlsrdInfo extends Thread {
   public Map<String, List<File>> responses                        = new HashMap<>();
 
   public MockOlsrdInfo() throws IOException {
-    this.socket = new ServerSocket(0);
+    final SocketAddress sa = new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0);
+    this.socket = new ServerSocket();
+    this.socket.bind(sa);
     this.socket.setSoTimeout(100);
     this.address = this.socket.getInetAddress();
     this.port = this.socket.getLocalPort();
