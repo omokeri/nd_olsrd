@@ -344,6 +344,12 @@ getsocket(int bufspace, struct interface_olsr *ifp __attribute__ ((unused)))
     return -1;
   }
 
+  if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_IF, &ifp->int_addr.sin_addr.s_addr, sizeof(struct in_addr)) < 0) {
+    perror("IP_MULTICAST_IF failed");
+    close(sock);
+    return -1;
+  }
+
   if(bufspace > 0) {
     for (on = bufspace;; on -= 1024) {
       if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (char *)&on, sizeof(on)) == 0)
