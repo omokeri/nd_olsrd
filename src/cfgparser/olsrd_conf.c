@@ -1345,6 +1345,8 @@ olsrd_print_cnf(struct olsrd_config *cnf)
     printf("Smart Gw. prefix : %s\n", olsr_ip_prefix_to_string(&cnf->smart_gw_prefix));
   }
 
+  // FIXME smart_gw_blacklist
+
   /* Interfaces */
   if (in) {
     /*print interface default config*/

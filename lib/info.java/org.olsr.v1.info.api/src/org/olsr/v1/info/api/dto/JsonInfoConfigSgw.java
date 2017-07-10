@@ -30,6 +30,7 @@ public class JsonInfoConfigSgw {
   private String                            uplink                   = "";
   private JsonInfoConfigSgwBandwidth        bandwidth                = new JsonInfoConfigSgwBandwidth();
   private JsonInfoConfigSgwPrefix           prefix                   = new JsonInfoConfigSgwPrefix();
+  // FIXME blacklist
 
   /**
    * @return the enabled status

@@ -1286,6 +1286,21 @@ void ipc_print_config(struct autobuf *abuf) {
   abuf_json_int(&json_session, abuf, "length", olsr_cnf->smart_gw_prefix.prefix_len);
   abuf_json_mark_object(&json_session, false, false, abuf, NULL);
 
+  // FIXME
+  abuf_json_mark_object(&json_session, true, false, abuf, "blacklist");
+  // smart_gw_blacklist
+  {
+//    struct sgw_egress_if * egressif = olsr_cnf->smart_gw_blacklist;
+//
+//    abuf_json_mark_object(&json_session, true, true, abuf, "interfaces");
+//    while (egressif) {
+//      abuf_json_string(&json_session, abuf, NULL, egressif->name);
+//      egressif = egressif->next;
+//    }
+//    abuf_json_mark_object(&json_session, false, true, abuf, NULL);
+  }
+
+
   abuf_json_mark_object(&json_session, false, false, abuf, NULL);
 
 

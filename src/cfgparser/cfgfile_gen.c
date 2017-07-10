@@ -950,6 +950,9 @@ void olsrd_write_cnf_autobuf_uncached(struct autobuf *out, struct olsrd_config *
         olsr_ip_prefix_to_string(&cnf->smart_gw_prefix));
     cnf->ip_version = saved;
   }
+
+  // FIXME smart_gw_blacklist
+
   abuf_appendf(out,
     "\n"
     "##############################\n"
