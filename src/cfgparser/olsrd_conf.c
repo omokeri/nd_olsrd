@@ -1158,6 +1158,7 @@ set_default_cnf(struct olsrd_config *cnf, char * configuration_file)
   smartgw_set_downlink(cnf, DEF_DOWNLINK_SPEED);
   // cnf->smart_gateway_bandwidth_zero : derived config set by smartgw_set_(up|down)link
   memset(&cnf->smart_gw_prefix, 0, sizeof(cnf->smart_gw_prefix));
+  cnf->smart_gw_blacklist = NULL;
 
 
   memset(&cnf->main_addr, 0, sizeof(cnf->main_addr));
