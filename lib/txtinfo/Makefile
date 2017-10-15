@@ -50,7 +50,7 @@ include $(TOPDIR)/Makefile.inc
 
 LDFLAGS += -lm
 
-COMMONINFO = $(wildcard ../info/*.c)
+COMMONINFO = $(sort $(wildcard ../info/*.c))
 OBJS += $(COMMONINFO:%.c=%.o)
 
 default_target: $(PLUGIN_FULLNAME)

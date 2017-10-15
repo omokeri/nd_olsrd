@@ -62,7 +62,7 @@ endif
 SWITCHDIR =	src/olsr_switch
 CFGDIR =	src/cfgparser
 include $(CFGDIR)/local.mk
-TAG_SRCS =	$(SRCS) $(HDRS) $(wildcard $(CFGDIR)/*.[ch] $(SWITCHDIR)/*.[ch])
+TAG_SRCS =	$(SRCS) $(HDRS) $(sort $(wildcard $(CFGDIR)/*.[ch] $(SWITCHDIR)/*.[ch]))
 
 SGW_SUPPORT = 0
 ifeq ($(OS),linux)
