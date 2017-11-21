@@ -89,7 +89,7 @@ $(EXENAME):	$(OBJS) $(ANDROIDREGEX) src/builddata.o
 ifeq ($(VERBOSE),0)
 		@echo "[LD] $@"
 endif
-		$(MAKECMDPREFIX)$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
+		$(MAKECMDPREFIX)$(CC) $(LDFLAGS) -lm -o $@ $^ $(LIBS)
 
 cfgparser:	$(CFGDEPS) src/builddata.o
 		$(MAKECMDPREFIX)$(MAKECMD) -C $(CFGDIR)
