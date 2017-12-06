@@ -324,7 +324,13 @@ static void send_status_no_retries(const char * req, bool add_headers, int the_s
     }
   }
 
-  (void) send(the_socket, abuf.buf, abuf.len, MSG_DONTWAIT);
+  (void) send(the_socket, abuf.buf, abuf.len,
+#ifdef _WIN32
+    0
+#else
+    MSG_DONTWAIT
+#endif
+  );
   close(the_socket);
   abuf_free(&abuf);
 }
@@ -368,7 +374,13 @@ static void write_data(void *unused __attribute__((unused))) {
       continue;
     }
 
-    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], MSG_DONTWAIT);
+    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i],
+#ifdef _WIN32
+    0
+#else
+    MSG_DONTWAIT
+#endif
+    );
     if (result > 0) {
       outbuffer.written[i] += result;
     }
@@ -760,6 +772,14 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
     /* the caller will retry later */
     return;
   }
+
+#ifdef _WIN32
+  /* set the connection socket to non-blocking */
+  {
+    u_long iMode = 1;
+    ioctlsocket(ipc_connection, FIONBIO, &iMode);
+  }
+#endif
 
   /* Wait at most this much time for the request to arrive on the connection */
   timeout.tv_sec = (outbuffer.count >= MAX_CLIENTS) ? 0 : config->request_timeout_sec;
