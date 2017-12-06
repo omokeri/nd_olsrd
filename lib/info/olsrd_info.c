@@ -324,7 +324,7 @@ static void send_status_no_retries(const char * req, bool add_headers, int the_s
     }
   }
 
-  (void) send(the_socket, abuf.buf, abuf.len, 0);
+  (void) send(the_socket, abuf.buf, abuf.len, MSG_DONTWAIT);
   close(the_socket);
   abuf_free(&abuf);
 }
@@ -368,7 +368,7 @@ static void write_data(void *unused __attribute__((unused))) {
       continue;
     }
 
-    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], 0);
+    result = send(outbuffer.socket[i], outbuffer.buffer[i] + outbuffer.written[i], outbuffer.size[i] - outbuffer.written[i], MSG_DONTWAIT);
     if (result > 0) {
       outbuffer.written[i] += result;
     }
