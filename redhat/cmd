@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+set -u
+
+script="$0"
+scriptdir="$(dirname "$script")"
+
+rm -frv ~/rpmbuild
+rpmdev-setuptree
+
+pushd "$scriptdir"
+cd ..
+git archive build -v --prefix=olsrd-0.9.6.2/ --format tar.gz > ~/rpmbuild/SOURCES/v0.9.6.2.tar.gz
+popd
+
+cd "$scriptdir"
+rpmbuild -v -bi olsrd.spec
+
