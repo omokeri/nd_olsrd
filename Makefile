@@ -225,11 +225,9 @@ tags:
 		$(TAGCMD) -o $(TAGFILE) $(TAG_SRCS)
 
 rpm:
-		$(MAKECMDPREFIX)$(RM) olsrd-current.tar.bz2
-		$(MAKECMDPREFIX)echo "Creating olsrd-current.tar.bz2 ..."
-		$(MAKECMDPREFIX)./list-excludes.sh | tar  --exclude-from=- --exclude="olsrd-current.tar.bz2" -C .. -cjf olsrd-current.tar.bz2 olsrd-current
-		$(MAKECMDPREFIX)echo "Building RPMs..."
-		$(MAKECMDPREFIX)rpmbuild -ta olsrd-current.tar.bz2
+	$(MAKECMDPREFIX)$(MAKECMD) -C redhat
+
+
 #
 # PLUGINS
 #
