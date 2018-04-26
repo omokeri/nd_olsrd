@@ -604,6 +604,7 @@ httpinfo_write_data(void *foo __attribute__ ((unused))) {
   }
   if (outbuffer_count == 0) {
     olsr_stop_timer(writetimer_entry);
+    writetimer_entry = NULL;
   }
 }
 
