@@ -61,6 +61,7 @@ unsigned long long get_supported_commands_mask(void) {
 }
 
 bool isCommand(const char *str, unsigned long long siw) {
+  bool r;
   const char *prefix, s[2] = "=";
   char *string, *cmd, *s_timer;
   string = strdup(str);
@@ -92,7 +93,11 @@ bool isCommand(const char *str, unsigned long long siw) {
     timer = 0;
   }
 
-  return (!strcmp(cmd, prefix) && timer >= 0);
+  r = !strcmp(cmd, prefix) && (timer >= 0);
+
+  free(string);
+
+  return r;
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {
