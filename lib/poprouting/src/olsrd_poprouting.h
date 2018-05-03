@@ -60,5 +60,4 @@ void set_tc_timer(struct autobuf *abuf);
 void set_hello_timer_mult(struct autobuf *abuf);
 void set_tc_timer_mult(struct autobuf *abuf);
 
-
 #endif /* LIB_POPROUTING_SRC_OLSRD_POPROUTING_H_ */

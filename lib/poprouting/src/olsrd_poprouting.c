@@ -52,7 +52,7 @@
 #include "olsr.h"
 #include "scheduler.h"
 
-float timer=0.0f;
+float timer = 0.0f;
 float hello_mult = 10.0f;
 float tc_mult = 60.0f;
 
@@ -88,12 +88,11 @@ bool isCommand(const char *str, unsigned long long siw) {
   s_timer = strtok(NULL, s);
   if (s_timer) {
     timer = atof(s_timer);
-  }
-  else{
+  } else {
     timer = 0;
   }
 
-  return (!strcmp(cmd, prefix) && timer>=0);
+  return (!strcmp(cmd, prefix) && timer >= 0);
 }
 
 void output_error(struct autobuf *abuf, unsigned int status, const char * req __attribute__((unused)), bool http_headers) {
@@ -115,15 +114,15 @@ void set_hello_timer(struct autobuf *abuf) {
   struct olsr_if *in;
   assert(abuf);
   in = olsr_cnf->interfaces;
-  if(timer != 0.0f){
+  if (timer != 0.0f) {
     char response[20];
-    sprintf(response, "hello:%.2f\n", (double)in->cnf->hello_params.emission_interval);
+    sprintf(response, "hello:%.2f\n", (double) in->cnf->hello_params.emission_interval);
     abuf_puts(abuf, response);
     return;
   }
-  
-  while (in != NULL) {
-    olsr_printf(1, "(POPROUTING) Setting Hello Timer=%f for interface %s\n", (double)timer, in->name);
+
+  while (in != NULL ) {
+    olsr_printf(1, "(POPROUTING) Setting Hello Timer=%f for interface %s\n", (double) timer, in->name);
     //olsr_change_timer(in->interf->hello_gen_timer, timer * MSEC_PER_SEC, 0, 1);
     in->interf->hello_gen_timer->timer_period = timer * MSEC_PER_SEC;
     in->interf->hello_gen_timer->timer_jitter_pct = POPROUTING_JITTER; // Jitter to 5%
@@ -140,21 +139,21 @@ void set_hello_timer(struct autobuf *abuf) {
 void set_tc_timer(struct autobuf *abuf) {
   struct olsr_if *in;
   in = olsr_cnf->interfaces;
-  if(timer != 0.0f){
+  if (timer != 0.0f) {
     char response[20];
-    sprintf(response, "tc:%.2f\n", (double)in->cnf->tc_params.emission_interval);
+    sprintf(response, "tc:%.2f\n", (double) in->cnf->tc_params.emission_interval);
     abuf_puts(abuf, response);
     return;
   }
-  
-  while (in != NULL) {
-    olsr_printf(1, "(POPROUTING) Setting Tc Timer=%f for interface %s\n", (double)timer, in->name);
+
+  while (in != NULL ) {
+    olsr_printf(1, "(POPROUTING) Setting Tc Timer=%f for interface %s\n", (double) timer, in->name);
     //olsr_change_timer(in->interf->tc_gen_timer, timer * MSEC_PER_SEC, 0, 1);
     in->interf->tc_gen_timer->timer_period = timer * MSEC_PER_SEC;
     in->interf->tc_gen_timer->timer_jitter_pct = POPROUTING_JITTER; // Jitter to 5%
     in->cnf->tc_params.emission_interval = timer;
     in->cnf->tc_params.validity_time = timer * tc_mult;
-    in->interf->valtimes.tc=reltime_to_me(in->cnf->tc_params.validity_time * MSEC_PER_SEC);
+    in->interf->valtimes.tc = reltime_to_me(in->cnf->tc_params.validity_time * MSEC_PER_SEC);
     in = in->next;
   }
   abuf_puts(abuf, "0\n");
@@ -166,21 +165,20 @@ void set_tc_timer_mult(struct autobuf *abuf) {
   struct olsr_if *in;
   assert(abuf);
   in = olsr_cnf->interfaces;
-  if(timer != 0.0f){
+  if (timer != 0.0f) {
     char response[20];
-    sprintf(response, "tc_mult:%.2f\n", (double)tc_mult);
+    sprintf(response, "tc_mult:%.2f\n", (double) tc_mult);
     abuf_puts(abuf, response);
     return;
-  }
-  else {
+  } else {
     tc_mult = timer;
   }
-  
-  while (in != NULL) {
-    olsr_printf(1, "(POPROUTING) Setting Tc Timer Mult=%f for interface %s\n", (double)tc_mult, in->name);
+
+  while (in != NULL ) {
+    olsr_printf(1, "(POPROUTING) Setting Tc Timer Mult=%f for interface %s\n", (double) tc_mult, in->name);
     current_timer = in->cnf->tc_params.emission_interval;
     in->cnf->tc_params.validity_time = current_timer * tc_mult;
-    in->interf->valtimes.tc=reltime_to_me(in->cnf->tc_params.validity_time * MSEC_PER_SEC);
+    in->interf->valtimes.tc = reltime_to_me(in->cnf->tc_params.validity_time * MSEC_PER_SEC);
     in = in->next;
   }
   abuf_puts(abuf, "0\n");
@@ -192,18 +190,17 @@ void set_hello_timer_mult(struct autobuf *abuf) {
   struct olsr_if *in;
   assert(abuf);
   in = olsr_cnf->interfaces;
-  if(timer != 0.0f){
+  if (timer != 0.0f) {
     char response[20];
-    sprintf(response, "hello_mult:%.2f\n", (double)hello_mult);
+    sprintf(response, "hello_mult:%.2f\n", (double) hello_mult);
     abuf_puts(abuf, response);
     return;
-  }
-  else {
+  } else {
     hello_mult = timer;
   }
-  
-  while (in != NULL) {
-    olsr_printf(1, "(POPROUTING) Setting Hello Timer Mult=%f for interface %s\n", (double)hello_mult, in->name);
+
+  while (in != NULL ) {
+    olsr_printf(1, "(POPROUTING) Setting Hello Timer Mult=%f for interface %s\n", (double) hello_mult, in->name);
     current_timer = in->cnf->hello_params.emission_interval;
     in->cnf->hello_params.validity_time = current_timer * hello_mult;
     in->interf->valtimes.hello = reltime_to_me(in->cnf->hello_params.validity_time * MSEC_PER_SEC);
