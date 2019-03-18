@@ -64,9 +64,6 @@ allprojects { project ->
     project.apply from: settingsFile
   }
 
-  /* Add index tasks to the project */
-  project.apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/index.gradle")
-
   /* Add clean tasks to the project */
   project.apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/clean.gradle")
 
