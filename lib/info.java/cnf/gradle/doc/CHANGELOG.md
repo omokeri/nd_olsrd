@@ -7,9 +7,15 @@ This workspace is compatible with all bndtools versions since 3.3.0.REL.
 
 # Update Log
 
-# Changes since bndtools 4.1.0 release
+# Changes since bndtools 4.2.0 release
 
 * this: -
+
+# Changes since bndtools 4.1.0 release
+
+* Fix the clean task
+* Update the jacoco version to 0.8.3
+* Most bundle versions were updated
 
 # Changes since bndtools 4.0.0 release
 
