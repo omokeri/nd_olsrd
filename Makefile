@@ -357,6 +357,12 @@ info_java:
 info_java_clean:
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/info.java DESTDIR=$(DESTDIR) clean
 
+info_java_install:
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/info.java DESTDIR=$(DESTDIR) install
+
+info_java_uninstall:
+		$(MAKECMDPREFIX)$(MAKECMD) -C lib/info.java DESTDIR=$(DESTDIR) uninstall
+
 jsoninfo: info
 		$(MAKECMDPREFIX)$(MAKECMD) -C lib/jsoninfo
 
