@@ -102,13 +102,13 @@ INC_DIR_WIREFORMAT_FULL = $(INC_DIR_WIREFORMAT)/$(WIREFORMAT_PROJECT)
 
 
 JAVAHOMEREGEX = ^[[:space:]]*java\.home[[:space:]]*=[[:space:]]*(.+)[[:space:]]*$$
-JAVAHOME = $(shell java -XshowSettings 2>&1 | grep -E '$(JAVAHOMEREGEX)' | sed -r 's/$(JAVAHOMEREGEX)/\1/')
+JAVAHOME = $(shell java -XshowSettings 2>&1 | grep -E '$(JAVAHOMEREGEX)' | sed -r 's/$(JAVAHOMEREGEX)/\1/' | sed -r 's|/jre$$||')
 
 ifeq ($(JAVAHOME),)
   $(error No java detected)
 endif
 
-INC_DIR_JVM = $(JAVAHOME)/../include
+INC_DIR_JVM = $(JAVAHOME)/include
 
 ifeq ($(wildcard $(INC_DIR_JVM)),)
   $(error No java include directory detected at $(INC_DIR_JVM))
