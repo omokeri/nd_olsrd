@@ -17,8 +17,8 @@ assert(            hasProperty('sourceSets'))
 /* Setup javadoc options */
 apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/javaDoc.gradle")
 
-/* Add findbugs to the project */
-apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/findbugs.gradle")
+/* Add spotbugs to the project */
+apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/spotbugs.gradle")
 
 /* Add jacoco to the project */
 apply from: rootProject.file("${rootProject.bnd_cnf}/gradle/template/jacoco.gradle")

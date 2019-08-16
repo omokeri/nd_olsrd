@@ -101,8 +101,8 @@ digraph GradleSetup {
     subgraph cluster110 {
       label="";
       style=invis;
-      findbugsMain         [shape=box, style=filled, fillcolor=orange   , label="findbugsMain"        ]
-      findbugsTest         [shape=box, style=filled, fillcolor=orange   , label="findbugsTest"        ]
+      spotbugsMain         [shape=box, style=filled, fillcolor=orange   , label="spotbugsMain"        ]
+      spotbugsTest         [shape=box, style=filled, fillcolor=orange   , label="spotbugsTest"        ]
     }
 
     javadoc                [shape=box, style=filled, fillcolor=orange   , label="javadoc"             ]
@@ -150,10 +150,10 @@ digraph GradleSetup {
     clean                  -> cleanNeeded
     cleanNeeded            -> cleanNeeded        [color=red   ]
 
-    assemble               -> findbugsMain
-    test                   -> findbugsTest
-    findbugsMain           -> check              [color=green ]
-    findbugsTest           -> check              [color=green ]
+    assemble               -> spotbugsMain
+    test                   -> spotbugsTest
+    spotbugsMain           -> check              [color=green ]
+    spotbugsTest           -> check              [color=green ]
     test                   -> jacocoTestReport   [color=magenta]
     check                  -> jacocoTestReport   [color=magenta]
   }

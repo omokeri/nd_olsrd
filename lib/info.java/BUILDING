@@ -45,4 +45,4 @@ Building on a build server
       -PCI -Djsse.enableSNIExtension=false \
       build \
       release \
-      findbugs
+      spotbugs

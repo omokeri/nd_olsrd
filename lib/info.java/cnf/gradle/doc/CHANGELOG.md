@@ -9,7 +9,9 @@ This workspace is compatible with all bndtools versions since 3.3.0.REL.
 
 # Changes since bndtools 4.2.0 release
 
-* this: -
+* Replace findbugs by spotbugs.
+  Everything 'findbugs' is renamed to 'spotbugs', except for the
+  XML tags in the ```<cnf>/spotbugs/spotbugs.*.xml``` files.
 
 # Changes since bndtools 4.1.0 release
 
@@ -36,7 +38,7 @@ This workspace is compatible with all bndtools versions since 3.3.0.REL.
 
 # Changes since bndtools 3.3.0 release
 
-* Fix typos in cnf/ext/repositories.bnd
+* Fix typos in ```<cnf>/ext/repositories.bnd```
 
 * update build.bnd
   Main update is to compile with debug information for non-batch builds.
@@ -163,8 +165,8 @@ Below the changes that affect users are detailed.
   when they're invoked and the scope they affect.
 * Default tasks are no longer set up.
 * The build dependencies cache directory is no longer configurable and is fixed
-  to ```cnf/cache```.
-* The build properties in ```cnf/build.gradle.properties``` were moved
+  to ```<cnf>/cache```.
+* The build properties in ```<cnf>/build.gradle.properties``` were moved
   to ```gradle.properties```.
 * Build dependencies now only support '*.uri' properties (configured
   in ```gradle.properties```), support for the '*.location' properties was
@@ -172,7 +174,7 @@ Below the changes that affect users are detailed.
   name-change. It is also no longer needed to list the bnd jar in these
   properties because it is defined in the ```gradle.properties``` file.
 * The template now automatically applies the
-  buildscript ```cnf/gradle/template/javaProject.gradle``` to projects that
+  buildscript ```<cnf>/gradle/template/javaProject.gradle``` to projects that
   hava applied the Gradle Java plugin.
 * The bindex and repoindex properties for the jar and the main class are no
   longer configurable.
@@ -203,8 +205,8 @@ Below the changes that affect users are detailed.
     to ```javadoc...```.
   * The ```gradleBuildFindbugs...``` properties were renamed
     to ```findbugs...```.
-* The findbugs include and exclude files were moved from ```cnf```
-  to ```cnf/findbugs```.
+* The findbugs include and exclude files were moved from ```<cnf>```
+  to ```<cnf>/findbugs```.
 * The official bnd plugin as delivered by the bnd project is now used. This adds
   support for all features that it implements, like setting the Java 8 compiler
   profile (through ```javac.profile``` in a bnd file).
@@ -236,7 +238,7 @@ bndTestSrcBinDir
 bndTargetDir
 ```
 
-* The file ```cnf/gradle/bndLayout.gradle``` was removed. Projects usings it
+* The file ```<cnf>/gradle/bndLayout.gradle``` was removed. Projects usings it
   should manually setup their source sets
   (as described [here](BUILDING-GRADLE.md#AddingJavaProjectsToTheBuild)).
 * The property ```in.ant``` is no longer set to indicate a headless build.
@@ -244,8 +246,8 @@ bndTargetDir
   For example: setting a different release repository in the gradle build can
   be accomplished by
   setting ```-releaserepo:${if;${driver;gradle};ReleaseCI;Release}``` in the
-  file ```cnf/ext/repositories.bnd```.
+  file ```<cnf>/ext/repositories.bnd```.
 * The ```jsr14``` compiler target is no longer directly supported.
   Refer to the official bnd plugin for details.
 * Some task dependencies were adjusted, see
-  the ```cnf/gradle/doc/template.svg``` diagram for details.
+  the ```<cnf>/gradle/doc/template.svg``` diagram for details.

@@ -67,7 +67,7 @@ java:
       build \
       javadoc \
       release \
-      findbugs
+      spotbugs
 
 clean:
 	@./gradlew \
