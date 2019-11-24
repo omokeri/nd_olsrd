@@ -83,6 +83,7 @@ bool isCommand(const char *str, unsigned long long siw) {
       break;
 
     default:
+      free(string);
       return false;
   }
   cmd = strtok(string, s);
