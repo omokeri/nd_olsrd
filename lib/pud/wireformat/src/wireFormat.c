@@ -802,7 +802,7 @@ void setPositionUpdateNodeId(
 		PudOlsrPositionUpdate * olsrGpsMessage, unsigned char * nodeId,
 		unsigned int nodeIdSize, bool padWithNullByte) {
 	memcpy(&olsrGpsMessage->nodeInfo.nodeId, nodeId, nodeIdSize);
-	if (unlikely(padWithNullByte)) {
+	if (padWithNullByte) {
 		(&olsrGpsMessage->nodeInfo.nodeId)[nodeIdSize] = '\0';
 	}
 }
