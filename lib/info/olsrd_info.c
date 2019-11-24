@@ -780,7 +780,7 @@ static void ipc_action(int fd, void *data __attribute__ ((unused)), unsigned int
 
   *req = '\0';
 
-  if ((ipc_connection = accept(fd, &sock_addr.in, &sock_addr_len)) < 0) {
+  if ((ipc_connection = accept(fd, (struct sockaddr *)&sock_addr, &sock_addr_len)) < 0) {
 #ifndef NODEBUG
     olsr_printf(1, "(%s) accept()=%s\n", name, strerror(errno));
 #endif /* NODEBUG */
