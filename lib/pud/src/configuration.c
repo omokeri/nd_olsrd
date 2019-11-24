@@ -823,7 +823,7 @@ int setTxNmeaMessagePrefix(const char *value, void *data __attribute__ ((unused)
 		return true;
 	}
 
-	strcpy((char *) &txNmeaMessagePrefix[0], value);
+	strncpy((char *) &txNmeaMessagePrefix[0], value, sizeof(txNmeaMessagePrefix));
 	txNmeaMessagePrefixSet = true;
 	return false;
 }
