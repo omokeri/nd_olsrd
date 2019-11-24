@@ -368,7 +368,7 @@ unsigned int gpsToOlsr(NmeaInfo *nmeaInfo, union olsr_message *olsrMessage,
 
 	/* pad with zeroes */
 	if (aligned_size_remainder != 0) {
-		memset(&(((char *) &olsrGpsMessage->nodeInfo.nodeIdType)[nodeLength]),
+		memset(&(((char *) &olsrGpsMessage->nodeInfo.nodeId)[nodeLength]),
 				0, (4 - aligned_size_remainder));
 	}
 
