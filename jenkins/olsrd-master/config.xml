@@ -1,0 +1,254 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<matrix-project plugin="matrix-project@1.14">
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <jenkins.model.BuildDiscarderProperty>
+      <strategy class="hudson.tasks.LogRotator">
+        <daysToKeep>-1</daysToKeep>
+        <numToKeep>10</numToKeep>
+        <artifactDaysToKeep>-1</artifactDaysToKeep>
+        <artifactNumToKeep>-1</artifactNumToKeep>
+      </strategy>
+    </jenkins.model.BuildDiscarderProperty>
+    <hudson.plugins.disk__usage.DiskUsageProperty plugin="disk-usage@0.28"/>
+    <com.coravy.hudson.plugins.github.GithubProjectProperty plugin="github@1.29.5">
+      <projectUrl>https://github.com/OLSR/olsrd/</projectUrl>
+      <displayName></displayName>
+    </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.13">
+      <gitLabConnection></gitLabConnection>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
+    <org.jenkinsci.plugins.gitlablogo.GitlabLogoProperty plugin="gitlab-logo@1.0.5">
+      <repositoryName></repositoryName>
+    </org.jenkinsci.plugins.gitlablogo.GitlabLogoProperty>
+    <hudson.plugins.libvirt.BeforeJobSnapshotJobProperty plugin="libvirt-slave@1.8.5"/>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@4.0.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <url>https://github.com/OLSR/olsrd.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>origin/master</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+      <hudson.plugins.git.extensions.impl.PruneStaleBranch/>
+      <hudson.plugins.git.extensions.impl.CleanCheckout/>
+    </extensions>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>true</disabled>
+  <blockBuildWhenDownstreamBuilding>true</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>true</blockBuildWhenUpstreamBuilding>
+  <triggers>
+    <hudson.triggers.SCMTrigger>
+      <spec>H/5 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <hudson.matrix.TextAxis>
+      <name>BUILD_OS</name>
+      <values>
+        <string>linux</string>
+        <string>android</string>
+        <string>windows</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>BUILD_DEBUG</name>
+      <values>
+        <string>0</string>
+        <string>1</string>
+      </values>
+    </hudson.matrix.TextAxis>
+    <hudson.matrix.TextAxis>
+      <name>BUILD_ARCH</name>
+      <values>
+        <string>32</string>
+        <string>64</string>
+      </values>
+    </hudson.matrix.TextAxis>
+  </axes>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+
+set -e
+set -u
+
+
+if [ &quot;$BUILD_OS&quot; != &quot;linux&quot;   ] &amp;&amp; \
+   [ &quot;$BUILD_OS&quot; != &quot;android&quot; ] &amp;&amp; \
+   [ &quot;$BUILD_OS&quot; != &quot;windows&quot; ]; then
+  echo &quot;ERROR: unknown BUILD_OS &apos;$BUILD_OS&apos;&quot;
+  exit 1
+fi
+
+if [ $BUILD_DEBUG -ne 0 ] &amp;&amp; \
+   [ $BUILD_DEBUG -ne 1 ]; then
+  echo &quot;ERROR: unknown BUILD_DEBUG &apos;$BUILD_DEBUG&apos;&quot;
+  exit 1
+fi
+
+if [ $BUILD_ARCH -ne 32 ] &amp;&amp; \
+   [ $BUILD_ARCH -ne 64 ]; then
+  echo &quot;ERROR: unknown BUILD_ARCH &apos;$BUILD_ARCH&apos;&quot;
+  exit 1
+fi
+
+
+NDK_BASE=&quot;/usr/local/lib/android-ndk&quot;
+MINGW32_GCC=&quot;/usr/bin/i686-w64-mingw32-gcc&quot;
+MINGW64_GCC=&quot;/usr/bin/x86_64-w64-mingw32-gcc&quot;
+
+extra=&quot;VERBOSE=0 SANITIZE_ADDRESS=0 SANITIZE_LEAK=0 SANITIZE_UNDEFINED=0&quot;
+
+# set to &quot;doc&quot; to also build doc
+DOC=&quot;&quot;
+
+
+prefix=&quot;&quot;
+buildos=&quot;INVALID_BUILD_OS&quot;
+cross=&quot;INVALID_CROSS&quot;
+extraplugins=&quot;INVALID_EXTRA_PLUGINS&quot;
+extrainstallers=&quot;INVALID_EXTRA_INSTALLERS&quot;
+makecfgparser=1
+tarwireformat=0
+cc=&quot;&quot;
+
+
+if [ &quot;$BUILD_OS&quot; = &quot;linux&quot; ]; then
+
+  prefix=&quot;prefix=/usr&quot;
+  buildos=&quot;linux&quot;
+  extrainstallers=&quot;pud_java pud_java_install info_java&quot;
+  makecfgparser=1
+  tarwireformat=1
+
+  if [ $BUILD_ARCH -eq 32 ]; then
+    cross=&quot;M32=1&quot;
+    extraplugins=&quot;&quot;
+  else
+    cross=&quot;M64=1&quot;
+    extraplugins=&quot;gui&quot;
+  fi
+
+elif [ &quot;$BUILD_OS&quot; = &quot;android&quot; ]; then
+
+  prefix=&quot;&quot;
+  buildos=&quot;android&quot;
+  cross=&quot;&quot;
+  extraplugins=&quot;&quot;
+  extrainstallers=&quot;&quot;
+  makecfgparser=1
+  cc=&quot;NDK_BASE=$NDK_BASE&quot;
+
+  if [ $BUILD_ARCH -eq 64 ]; then
+    echo &quot;WARNING: skipping this build&quot;
+    exit 0
+  fi
+
+else
+
+  prefix=&quot;&quot;
+  buildos=&quot;win32&quot;
+  cross=&quot;&quot;
+  extraplugins=&quot;&quot;
+  extrainstallers=&quot;&quot;
+  makecfgparser=0
+
+  if [ $BUILD_ARCH -eq 32 ]; then
+    cc=&quot;CC=$MINGW32_GCC&quot;
+  else
+    cc=&quot;CC=$MINGW64_GCC&quot;
+  fi
+fi
+
+
+if [ $BUILD_DEBUG -eq 0 ]; then
+  BUILD_DEBUG=&quot;DEBUG=0&quot;
+  distDir=&quot;release&quot;
+else
+  BUILD_DEBUG=&quot;DEBUG=1&quot;
+  distDir=&quot;debug&quot;
+fi
+
+
+if [ $makecfgparser -ne 0 ]; then
+  make $prefix $cc DESTDIR=&quot;$(pwd)/dist/$distDir&quot; OS=&quot;$buildos&quot; $cross $BUILD_DEBUG $extra MAKEBIN=1 cfgparser_install cfgparser_clean
+  make uberclean
+fi
+make   $prefix $cc DESTDIR=&quot;$(pwd)/dist/$distDir&quot; OS=&quot;$buildos&quot; $cross $BUILD_DEBUG $extra build_all $extraplugins install_all $extrainstallers $DOC
+
+if [ $tarwireformat -ne 0 ]; then
+  echo &quot;&quot;
+  echo &quot;===================&quot;
+  echo &quot;=== Creating pud wireformat tar file&quot;
+  echo &quot;===================&quot;
+  tar jcvf &quot;$(pwd)/dist/pud-wireformat.tar.bz2&quot; lib/pud/wireformat/lib lib/pud/wireformat-java/lib
+fi
+
+echo &quot;&quot;
+echo &quot;===================&quot;
+echo &quot;=== Installed files&quot;
+echo &quot;===================&quot;
+find &quot;$(pwd)/dist&quot; -type f | sort</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.plugins.chucknorris.CordellWalkerRecorder plugin="chucknorris@1.2">
+      <factGenerator/>
+    </hudson.plugins.chucknorris.CordellWalkerRecorder>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>dist/**, doc/html/**, doc/pdf/**</artifacts>
+      <allowEmptyArchive>true</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.BuildTrigger>
+      <childProjects>pudUplinkServer-master</childProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+        <completeBuild>true</completeBuild>
+      </threshold>
+    </hudson.tasks.BuildTrigger>
+    <hudson.tasks.Mailer plugin="mailer@1.29">
+      <recipients>hrogge@gmail.com</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.build__timeout.BuildTimeoutWrapper plugin="build-timeout@1.19">
+      <strategy class="hudson.plugins.build_timeout.impl.AbsoluteTimeOutStrategy">
+        <timeoutMinutes>60</timeoutMinutes>
+      </strategy>
+      <operationList>
+        <hudson.plugins.build__timeout.operations.FailOperation/>
+      </operationList>
+    </hudson.plugins.build__timeout.BuildTimeoutWrapper>
+    <org.jenkinsci.plugins.buildnamesetter.BuildNameSetter plugin="build-name-setter@2.0.4">
+      <template>#${BUILD_NUMBER} - ${GIT_BRANCH} - ${GIT_REVISION,length=&quot;7&quot;}</template>
+      <runAtStart>true</runAtStart>
+      <runAtEnd>true</runAtEnd>
+    </org.jenkinsci.plugins.buildnamesetter.BuildNameSetter>
+  </buildWrappers>
+  <executionStrategy class="hudson.matrix.DefaultMatrixExecutionStrategyImpl">
+    <runSequentially>false</runSequentially>
+  </executionStrategy>
+</matrix-project>
