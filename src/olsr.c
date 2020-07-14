@@ -436,16 +436,25 @@ set_buffer_timer(struct interface_olsr *ifn)
 */
 
 int
-olsr_node_count(union olsr_ip_addr *neighbor_addr) /*add this to the header file olsr.h*/
+node_count(union olsr_ip_addr *from_addr) /*add this to the header file olsr.h*/
 
 {
-union olsr_ip_addr *neighbor_addr;
+union olsr_ip_addr *src;
+struct neighbor_entry *neighbor;
 int   node_count;
 char  tmp_str [256];
 
-  /*get IP address*/
+  /*lookup sender address*/
   
-olsr_ip_to_string(const union olsr_ip_addr *neighbor_addr tmp_str);
+  src = mid_lookup_main_addr(from_addr)
+  if(!src)
+	  src=from_addr
+  
+  neighbor=olsr_lookup_neighbor_table(src);
+  if (neighbor)
+	  return union 
+  
+olsr_ip_to_string(struct ipaddr_str *const buf, const union olsr_ip_addr *neighbor);
 OLSR_PRINTF(2, "Processing HELLO received from: %s \n", tmp_str);
 	strcpy (IP_ADDRESS[node_count],tmp_str);
 
@@ -502,10 +511,6 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
 uint8_t
 olsr_calculate_willingness(void)
 
-struct olsr_apm_info apm_info; /*former ainfo*/
-  int node_count;
-  int threshold;  /*set threshold arbitarily*/
-  threshold= 6
 {
   struct olsr_apm_info ainfo;
 
@@ -516,16 +521,11 @@ struct olsr_apm_info apm_info; /*former ainfo*/
   if (apm_read(&ainfo) < 1)
     return WILL_DEFAULT;
  
-   /*Improved part*/
-  if node_count >= threshold
-	return 7;  
-  else 
-	return 0;
 
   apm_printinfo(&ainfo);
 
   /* If AC powered */
- /* if (ainfo.ac_line_status == OLSR_AC_POWERED)&& (int node_count > threshold);
+ /if (ainfo.ac_line_status == OLSR_AC_POWERED)&& (int node_count > threshold);
     return 7;
 	
 	else return 6;
