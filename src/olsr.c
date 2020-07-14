@@ -525,10 +525,9 @@ olsr_calculate_willingness(void)
   apm_printinfo(&ainfo);
 
   /* If AC powered */
- /if (ainfo.ac_line_status == OLSR_AC_POWERED)&& (int node_count > threshold);
+ /if (ainfo.ac_line_status == OLSR_AC_POWERED)
     return 7;
 	
-	else return 6;
 
   /* If battery powered
    *
