@@ -157,6 +157,13 @@ static INLINE const char * linkTypeToString(int type) {
 #define HYST_THRESHOLD_LOW    0.3
 #define HYST_SCALING          0.5
 
+
+/*
+*nd_olsr parameters
+*/
+
+#define node_count			6
+#define threshold             3
 /*
  *Willingness
  */

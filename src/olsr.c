@@ -424,6 +424,43 @@ set_buffer_timer(struct interface_olsr *ifn)
   ifn->fwdtimer = GET_TIMESTAMP(olsr_random() * olsr_cnf->max_jitter * MSEC_PER_SEC / OLSR_RANDOM_MAX);
 }
 
+
+
+/**********************************************************************
+*            IMPROVED ALGORITHM    part 1                                   *
+***********************************************************************
+* Omuwa Oyakhire: From the HELLO messages received,
+* Count the HELLO messages from the IP address
+* get the number. Update every time hello message is sent.
+* in the neighbor table and return an integer representing the node count.
+*/
+
+int
+olsr_node_count(union olsr_ip_addr *neighbor_addr) /*add this to the header file olsr.h*/
+
+{
+union olsr_ip_addr *neighbor_addr;
+int   node_count;
+char  tmp_str [256];
+
+  /*get IP address*/
+  
+olsr_ip_to_string(const union olsr_ip_addr *neighbor_addr tmp_str);
+OLSR_PRINTF(2, "Processing HELLO received from: %s \n", tmp_str);
+	strcpy (IP_ADDRESS[node_count],tmp_str);
+
+
+	{ for (i=1;i<=node_count; i++)
+		{if(strcmp(IP_ADDRESS[i-1],tmp_str)==0)
+			{
+				node_count--;
+			}
+		}
+
+
+}
+
+
 void
 olsr_init_willingness(void)
 {
@@ -449,6 +486,11 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
   }
 }
 
+/*******************************************************************
+/*                     Improvement part 2 
+/*****************************************************************
+*/
+
 /**
  *Calculate this nodes willingness to act as a MPR
  *based on either a fixed value or the power status
@@ -459,6 +501,11 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
 
 uint8_t
 olsr_calculate_willingness(void)
+
+struct olsr_apm_info apm_info; /*former ainfo*/
+  int node_count;
+  int threshold;  /*set threshold arbitarily*/
+  threshold= 6
 {
   struct olsr_apm_info ainfo;
 
@@ -468,12 +515,20 @@ olsr_calculate_willingness(void)
 
   if (apm_read(&ainfo) < 1)
     return WILL_DEFAULT;
+ 
+   /*Improved part*/
+  if node_count >= threshold
+	return 7;  
+  else 
+	return 0;
 
   apm_printinfo(&ainfo);
 
   /* If AC powered */
-  if (ainfo.ac_line_status == OLSR_AC_POWERED)
-    return 6;
+ /* if (ainfo.ac_line_status == OLSR_AC_POWERED)&& (int node_count > threshold);
+    return 7;
+	
+	else return 6;
 
   /* If battery powered
    *
