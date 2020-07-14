@@ -81,7 +81,7 @@ void olsr_init_willingness(void);
 
 void olsr_update_willingness(void *);
 
-int olsr_node_count(union olsr_ip_addr *);/*added for nd_olsr*/
+int node_count(union olsr_ip_addr *);/*added for nd_olsr*/
 
 uint8_t olsr_calculate_willingness(void);
 

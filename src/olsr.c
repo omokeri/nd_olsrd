@@ -439,32 +439,18 @@ int
 node_count(union olsr_ip_addr *from_addr) /*add this to the header file olsr.h*/
 
 {
-union olsr_ip_addr *src;
+union olsr_ip_addr *tmp_ip;
 struct neighbor_entry *neighbor;
-int   node_count;
-char  tmp_str [256];
+int   nodecount;
+
 
   /*lookup sender address*/
-  
-  src = mid_lookup_main_addr(from_addr)
-  if(!src)
-	  src=from_addr
-  
-  neighbor=olsr_lookup_neighbor_table(src);
-  if (neighbor)
-	  return union 
-  
-olsr_ip_to_string(struct ipaddr_str *const buf, const union olsr_ip_addr *neighbor);
-OLSR_PRINTF(2, "Processing HELLO received from: %s \n", tmp_str);
-	strcpy (IP_ADDRESS[node_count],tmp_str);
+  for ( nodecount=0; nodecount < HASHSIZE; nodecount ++){
+	  union olsr_ip_addr *tmp_ip = olsr_lookup_neighbor_table(from_addr);
+		if (tmp_ip != NULL)
+    dst = tmp_ip;
+  }
 
-
-	{ for (i=1;i<=node_count; i++)
-		{if(strcmp(IP_ADDRESS[i-1],tmp_str)==0)
-			{
-				node_count--;
-			}
-		}
 
 
 }
@@ -496,21 +482,18 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
 }
 
 /*******************************************************************
-/*                     Improvement part 2 
-/*****************************************************************
+*                     Improvement part 2 
+*****************************************************************
+*
+*Calculate this nodes willingness to act as a MPR
+*based on either a fixed value or the power status
+*of the node using APM
+*
+*@return a 8bit value from 0-7 representing the willingness
 */
-
-/**
- *Calculate this nodes willingness to act as a MPR
- *based on either a fixed value or the power status
- *of the node using APM
- *
- *@return a 8bit value from 0-7 representing the willingness
- */
 
 uint8_t
 olsr_calculate_willingness(void)
-
 {
   struct olsr_apm_info ainfo;
 
