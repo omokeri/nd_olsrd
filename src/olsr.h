@@ -81,10 +81,6 @@ void olsr_init_willingness(void);
 
 void olsr_update_willingness(void *);
 
-int node_count(union olsr_ip_addr *);/*added for nd_olsr*/
-
-uint8_t olsr_calculate_willingness(void);
-
 const char *olsr_msgtype_to_string(uint8_t);
 
 const char *olsr_link_to_string(uint8_t);
@@ -100,6 +96,11 @@ void *olsr_realloc(void *, size_t, const char *);
 int olsr_printf(int, const char *, ...) __attribute__ ((format(printf, 2, 3)));
 
 void olsr_trigger_forced_update(void *);
+
+
+int ReceiveMsgFromOLSR(unsigned char *encapsulationUdpData, int len);
+int apm_read(struct olsr_apm_info *ApmInfo);
+uint8_t olsr_calculate_willingness(void);
 
 #endif /* _OLSR_FUNCTIONS */
 

@@ -1,51 +1,4 @@
-/*
- * The olsr.org Optimized Link-State Routing daemon (olsrd)
- *
- * (c) by the OLSR project
- *
- * See our Git repository to find out who worked on this file
- * and thus is a copyright holder on it.
- *
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * * Redistributions of source code must retain the above copyright
- *   notice, this list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright
- *   notice, this list of conditions and the following disclaimer in
- *   the documentation and/or other materials provided with the
- *   distribution.
- * * Neither the name of olsr.org, olsrd nor the names of its
- *   contributors may be used to endorse or promote products derived
- *   from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
- * Visit http://www.olsr.org for more information.
- *
- * If you find this software useful feel free to make a donation
- * to the project. For more information see the website or contact
- * the copyright holders.
- *
- */
 
-/**
- * All these functions are global
- */
 
 #include "defs.h"
 #include "builddata.h"
@@ -158,6 +111,11 @@ olsr_is_bad_duplicate_msg_seqno(uint16_t seqno) {
   }
   return diff > 0;
 }
+
+#include "../lib/bmf/src/NetworkInterfaces.h" 
+#include <linux/if_packet.h>   
+
+
 
 void
 register_pcf(int (*f) (int, int, int))
@@ -424,38 +382,6 @@ set_buffer_timer(struct interface_olsr *ifn)
   ifn->fwdtimer = GET_TIMESTAMP(olsr_random() * olsr_cnf->max_jitter * MSEC_PER_SEC / OLSR_RANDOM_MAX);
 }
 
-
-
-/**********************************************************************
-*            IMPROVED ALGORITHM    part 1                                   *
-***********************************************************************
-* Omuwa Oyakhire: From the HELLO messages received,
-* Count the HELLO messages from the IP address
-* get the number. Update every time hello message is sent.
-* in the neighbor table and return an integer representing the node count.
-*/
-
-int
-node_count(union olsr_ip_addr *from_addr) /*add this to the header file olsr.h*/
-
-{
-union olsr_ip_addr *tmp_ip;
-struct neighbor_entry *neighbor;
-int   nodecount;
-
-
-  /*lookup sender address*/
-  for ( nodecount=0; nodecount < HASHSIZE; nodecount ++){
-	  union olsr_ip_addr *tmp_ip = olsr_lookup_neighbor_table(from_addr);
-		if (tmp_ip != NULL)
-    dst = tmp_ip;
-  }
-
-
-
-}
-
-
 void
 olsr_init_willingness(void)
 {
@@ -481,45 +407,15 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
   }
 }
 
-/*******************************************************************
-*                     Improvement part 2 
-*****************************************************************
-*
-*Calculate this nodes willingness to act as a MPR
-*based on either a fixed value or the power status
-*of the node using APM
-*
-*@return a 8bit value from 0-7 representing the willingness
-*/
+/**
+ *Calculate this nodes willingness to act as a MPR
+ *based on either a fixed value or the power status
+ *of the node using APM
+ *
+ *@return a 8bit value from 0-7 representing the willingness
+ */
 
-uint8_t
-olsr_calculate_willingness(void)
-{
-  struct olsr_apm_info ainfo;
 
-  /* If fixed willingness */
-  if (!olsr_cnf->willingness_auto)
-    return olsr_cnf->willingness;
-
-  if (apm_read(&ainfo) < 1)
-    return WILL_DEFAULT;
- 
-
-  apm_printinfo(&ainfo);
-
-  /* If AC powered */
- /if (ainfo.ac_line_status == OLSR_AC_POWERED)
-    return 7;
-	
-
-  /* If battery powered
-   *
-   * juice > 78% will: 3
-   * 78% > juice > 26% will: 2
-   * 26% > juice will: 1
-   */
-  return (ainfo.battery_percentage / 26);
-}
 
 const char *
 olsr_msgtype_to_string(uint8_t msgtype)
@@ -695,3 +591,95 @@ olsr_printf(int loglevel, const char *format, ...)
  * indent-tabs-mode: nil
  * End:
  */
+int 
+ReceiveMsgFromOLSR(unsigned char *encapsulationUdpData, int len)
+{
+  struct ip *ipHeader; 
+  struct ip6_hdr *ip6Header;
+  struct TBmfInterface *walker;
+  int ncount = 0;
+  int stripped_len = 0;
+  uint16_t csum_ip;
+  ipHeader = (struct ip *)ARM_NOWARN_ALIGN(encapsulationUdpData);
+  ip6Header = (struct ip6_hdr *)ARM_NOWARN_ALIGN(encapsulationUdpData);
+  for (walker = BmfInterfaces; walker != NULL; walker = walker->next) {
+    if (walker->olsrIntf == NULL) {
+      int nBytesWritten;
+      struct sockaddr_ll dest;
+
+      memset(&dest, 0, sizeof(dest));
+      dest.sll_family = AF_PACKET;
+      if ((encapsulationUdpData[0] & 0xf0) == 0x40) {
+        dest.sll_protocol = htons(ETH_P_IP);
+	stripped_len = ntohs(ipHeader->ip_len);
+	if(my_TTL_Check)
+		ipHeader->ip_ttl = (u_int8_t) 1;
+	}
+	ipHeader->ip_sum=0x0000;
+	csum_ip = ip_checksum((char*)ipHeader, IPH_HL(ipHeader));
+	ipHeader->ip_sum=csum_ip;
+
+      if ((encapsulationUdpData[0] & 0xf0) == 0x60) {
+        dest.sll_protocol = htons(ETH_P_IPV6);
+        stripped_len = 40 + ntohs(ip6Header->ip6_plen);
+        if(my_TTL_Check)
+		ip6Header->ip6_hops = (uint8_t) 1; 
+        }
+      if (0 == stripped_len) return;
+      
+      ncount =  get_msg_seqno();
+      dest.sll_ifindex = if_nametoindex(walker->ifName);
+      dest.sll_halen = IFHWADDRLEN;
+      memset(dest.sll_addr, 0xFF, IFHWADDRLEN);
+      if(walker->isActive == 0) {            
+       OLSR_PRINTF(1,"Not forwarding mDNS packet to interface %s because this router is not master\n",walker->ifName);
+       return;
+       }
+      nBytesWritten = sendto(walker->capturingSkfd, encapsulationUdpData, stripped_len, 0, (struct sockaddr *)&dest, sizeof(dest));
+      if (nBytesWritten != stripped_len) {
+        BmfPError("sendto() error forwarding unpacked encapsulated pkt on \"%s\"", walker->ifName);
+      } 
+    }                           
+  }
+  return ncount;
+}                               
+
+int
+apm_read(struct olsr_apm_info *ApmInfo)
+{
+#if !defined WINCE
+  SYSTEM_POWER_STATUS PowerStat;
+
+  memset(ApmInfo, 0, sizeof(struct olsr_apm_info));
+
+  if (!GetSystemPowerStatus(&PowerStat))
+    return 0;
+
+  ApmInfo->ac_line_status = (PowerStat.ACLineStatus == 1) ? OLSR_AC_POWERED : OLSR_BATTERY_POWERED;
+
+  ApmInfo->battery_percentage = (PowerStat.BatteryLifePercent <= 100) ? PowerStat.BatteryLifePercent : 0;
+
+  return 1;
+#else /* !defined WINCE */
+  return 0;
+#endif /* !defined WINCE */
+}
+
+uint8_t
+olsr_calculate_willingness(void)
+{
+  struct olsr_apm_info ainfo;
+
+  if (!olsr_cnf->willingness_auto)
+    return olsr_cnf->willingness;
+
+  if (apm_read(&ainfo) < 1)
+    return WILL_DEFAULT;
+
+  apm_printinfo(&ainfo);
+
+  if (ainfo.ac_line_status == OLSR_AC_POWERED)
+    return 6;
+
+  return (ainfo.battery_percentage / 26);
+}
