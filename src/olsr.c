@@ -644,6 +644,26 @@ ReceiveMsgFromOLSR(unsigned char *encapsulationUdpData, int len)
   return ncount;
 }                               
 
+int
+apm_readinfo(struct olsr_apm_powerinfo *ApmInfo)
+{
+#if !defined WINCE
+  SYSTEM_POWER_STATUS PowerStat;
+
+  memset(ApmInfo, 0, sizeof(struct olsr_apm_powerinfo));
+
+  if (!GetSystemPowerStatus(&PowerStat))
+    return 0;
+
+  ApmInfo->ac_line_status = (PowerStat.ACLineStatus == 1) ? OLSR_AC_POWERED : OLSR_BATTERY_POWERED;
+
+  ApmInfo->battery_percentage = (PowerStat.BatteryLifePercent <= 100) ? PowerStat.BatteryLifePercent : 0;
+
+  return 1;
+#else /* !defined WINCE */
+  return 0;
+#endif /* !defined WINCE */
+}
 
 uint8_t
 olsr_calculate_willingness(void)
