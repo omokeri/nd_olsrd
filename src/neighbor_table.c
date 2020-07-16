@@ -387,10 +387,10 @@ int j;
 	struct neighbor_entry *terminal;
       for(terminal = neighbortable[j].next; 
         terminal != &neighbortable[j]; 
-        terminal = terminal->next)
+        terminal = terminal->next);
 		
 	}
-return j
+return j;
 }
 
 /**
