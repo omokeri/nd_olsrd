@@ -436,29 +436,6 @@ olsr_init_willingness(void)
   }
 }
 
-
-/**Improvemnt Part 1
-*for every neighbor entry in the neighbor table
-*@param IP address of the neighbor node 
-*
-*@return an integer after counting the neighbor node. 
-*/
-
-int
-node_count(struct neighbor_entry *neighbor)
-{
-	struct neighbor_entry *neighbor;
-	/*lookup sender IP address*/
-	for (ncx = 0; ncx < HASHSIZE; ncx++){
-		/*checks if the entry exists*/
-		struct neighbor_entry *neighbor;
-			(for neighbor = neighbortable[ncx].next; neighbor != &neighbortable[ncx]; 
-			neighbor = neighbor -> next);
-		}
-	}	
-return ncx 
-}
-
 void
 olsr_update_willingness(void *foo __attribute__ ((unused)))
 {
