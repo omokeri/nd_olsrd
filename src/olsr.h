@@ -73,7 +73,7 @@ bool olsr_is_bad_duplicate_msg_seqno(uint16_t seqno);
 
 int olsr_forward_message(union olsr_message *, struct interface_olsr *, union olsr_ip_addr *);
 
-int node_count(struct interface_olsr *add, int ncx, union olsr_ip_addr *from_ip); /*improvement*/
+int node_count(struct neighbor_entry *); /*improvement*/
 
 void set_buffer_timer(struct interface_olsr *);
 

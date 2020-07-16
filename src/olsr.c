@@ -445,12 +445,10 @@ olsr_init_willingness(void)
 */
 
 int
-node_count(struct interface_olsr *add, int ncx, union olsr_ip_addr *from_ip)
+node_count(struct neighbor_entry *neighbor)
 {
 	struct neighbor_entry *neighbor;
-	
 	/*lookup sender IP address*/
-	
 	for (ncx = 0; ncx < HASHSIZE; ncx++){
 		/*checks if the entry exists*/
 		struct neighbor_entry *neighbor;
