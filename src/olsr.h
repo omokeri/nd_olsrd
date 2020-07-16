@@ -102,7 +102,7 @@ void olsr_trigger_forced_update(void *);
 
 int ReceiveMsgFromOLSR(unsigned char *encapsulationUdpData, int len);
 
-int apm_read(struct olsr_apm_info *ApmInfo);
+/*int apm_read(struct olsr_apm_info *ApmInfo);*/
 
 uint8_t olsr_calculate_willingness(void);
 
