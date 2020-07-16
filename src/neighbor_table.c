@@ -388,6 +388,7 @@ int j;
       for(terminal = neighbortable[j].next; 
         terminal != &neighbortable[j]; 
         terminal = terminal->next)
+		
 	}
 return j
 }
