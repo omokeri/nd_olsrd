@@ -377,6 +377,21 @@ olsr_expire_nbr2_list(void *context)
   olsr_del_nbr2_list(nbr2_list);
 }
 
+
+/*improved part in neighbor table*/
+int
+node_count(struct neighbor_entry *terminal);
+{
+int j; 
+  for (j = 0; j< HASHSIZE; j++) {
+	struct neighbor_entry *terminal;
+      for(terminal = neighbortable[j].next; \
+        terminal != &neighbortable[j]; \
+        terminal = terminal->next)
+	}
+return j
+}
+
 /**
  *Prints the registered neighbors and two hop neighbors
  *to STDOUT.
