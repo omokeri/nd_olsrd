@@ -448,16 +448,16 @@ int
 node_count(struct interface_olsr *add, int ncx, union olsr_ip_addr *from_ip)
 {
 	union olsr_ip_addr *hop; 
-	struct neighbor_entry *hop_neigh;
+	struct neighbor_entry *neighbor;
 	int ncx;
 	
 	/*lookup sender IP address*/
 	
-	hop_neigh = olsr_lookup_neighbor_table(union olsr_ip_addr *from_ip);
-	if (hop_neigh){
+	neighbor = olsr_lookup_neighbor_table(union olsr_ip_addr *from_ip);
+	if (neighbor){
 		for (ncx =0; ncx < HASHSIZE; ncx++){
 		/*checks if the entry exists*/
-			(for hop_neigh = neighbortable[ncx].next; neighbor != &neighbortable[ncx]; 
+			(for neighbor = neighbortable[ncx].next; neighbor != &neighbortable[ncx]; 
 			neighbor -> next);
 		}
 	}	
