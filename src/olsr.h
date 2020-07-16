@@ -93,6 +93,8 @@ void *olsr_malloc(size_t, const char *);
 
 void *olsr_realloc(void *, size_t, const char *);
 
+int node_count(struct neighbor_entry *, int , union olsr_ip_addr *);
+
 int olsr_printf(int, const char *, ...) __attribute__ ((format(printf, 2, 3)));
 
 void olsr_trigger_forced_update(void *);
