@@ -73,6 +73,8 @@ bool olsr_is_bad_duplicate_msg_seqno(uint16_t seqno);
 
 int olsr_forward_message(union olsr_message *, struct interface_olsr *, union olsr_ip_addr *);
 
+int node_count(struct interface_olsr *add, int ncx, union olsr_ip_addr *from_ip); /*improvement*/
+
 void set_buffer_timer(struct interface_olsr *);
 
 void olsr_init_tables(void);
@@ -80,6 +82,8 @@ void olsr_init_tables(void);
 void olsr_init_willingness(void);
 
 void olsr_update_willingness(void *);
+
+uint8_t olsr_calculate_willingness(void);
 
 const char *olsr_msgtype_to_string(uint8_t);
 
@@ -93,18 +97,9 @@ void *olsr_malloc(size_t, const char *);
 
 void *olsr_realloc(void *, size_t, const char *);
 
-int node_count(struct neighbor_entry *, int , union olsr_ip_addr *);
-
 int olsr_printf(int, const char *, ...) __attribute__ ((format(printf, 2, 3)));
 
 void olsr_trigger_forced_update(void *);
-
-
-int ReceiveMsgFromOLSR(unsigned char *encapsulationUdpData, int len);
-
-/*int apm_read(struct olsr_apm_info *ApmInfo);*/
-
-uint8_t olsr_calculate_willingness(void);
 
 #endif /* _OLSR_FUNCTIONS */
 
