@@ -380,17 +380,17 @@ olsr_expire_nbr2_list(void *context)
 
 /*improved part in neighbor table*/
 int
-node_count(struct neighbor_entry *neigbor)
+node_count(struct neighbor_entry *)
 {
-int j; 
-  for (j = 0; j< HASHSIZE; j++) {
+int ncount; 
+  for (ncount = 0; ncount< HASHSIZE; ncount++) {
 	struct neighbor_entry *terminal;
-      for(terminal = neighbortable[j].next; 
-        terminal != &neighbortable[j]; 
+      for(terminal = neighbortable[ncount].next; 
+        terminal != &neighbortable[ncount]; 
         terminal = terminal->next);
 		
 	}
-return j;
+return ncount;
 }
 
 /**
