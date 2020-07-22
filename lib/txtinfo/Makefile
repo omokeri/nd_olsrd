@@ -1,4 +1,4 @@
-# The olsr.org Optimized Link-State Routing daemon (olsrd)
+ # The olsr.org Optimized Link-State Routing daemon (olsrd)
 #
 # (c) by the OLSR project
 #
