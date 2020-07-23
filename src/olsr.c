@@ -507,10 +507,11 @@ struct olsr_apm_info apm_info; /*former ainfo*/
   int threshold;  /*set threshold arbitarily*/
   threshold= 6
 {
-  struct olsr_apm_info ainfo;
+  /*struct olsr_apm_info ainfo;*/
+  int node_count ncount;
 
   /* If fixed willingness */
-  if (!olsr_cnf->willingness_auto)
+ /* if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness;
 
   if (apm_read(&ainfo) < 1)
@@ -522,13 +523,24 @@ struct olsr_apm_info apm_info; /*former ainfo*/
   else 
 	return 0;
 
-  apm_printinfo(&ainfo);
+  apm_printinfo(&ainfo);*/
 
+	if (ncount > THRESHOLD)
+		return WILL_DEFAULT;
+	
+	else 
+		return WILL_NEVER;
+	
   /* If AC powered */
+<<<<<<< Updated upstream
  /* if (ainfo.ac_line_status == OLSR_AC_POWERED)&& (int node_count > threshold);
     return 7;
 	
 	else return 6;
+=======
+  /*if (ainfo.ac_line_status == OLSR_AC_POWERED)
+    return 6;
+>>>>>>> Stashed changes
 
   /* If battery powered
    *
@@ -536,7 +548,7 @@ struct olsr_apm_info apm_info; /*former ainfo*/
    * 78% > juice > 26% will: 2
    * 26% > juice will: 1
    */
-  return (ainfo.battery_percentage / 26);
+  /*return (ainfo.battery_percentage / 26);*/
 }
 
 const char *
