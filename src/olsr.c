@@ -461,13 +461,13 @@ uint8_t
 olsr_calculate_willingness(void)
 {
  /* struct olsr_apm_info ainfo;*/
-  int node_count ncount;
+  int node_count j;
 
   /* If fixed willingness */
   if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness;
 
-  if (ncount > THRESHOLD)
+  if (j > THRESHOLD)
 	return 7;
 
   else
