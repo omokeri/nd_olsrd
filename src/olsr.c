@@ -467,7 +467,7 @@ olsr_calculate_willingness(void)
   if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness;
 
-  if (ncount > threshold)
+  if (ncount > THRESHOLD)
 	return 7;
 
   else
@@ -478,8 +478,8 @@ olsr_calculate_willingness(void)
 
   apm_printinfo(&ainfo);
 
-  /* If AC powered */
- /* if (ainfo.ac_line_status == OLSR_AC_POWERED)
+  /* If AC powered 
+ * if (ainfo.ac_line_status == OLSR_AC_POWERED)
     return 6;*/
 
   /* If battery powered
