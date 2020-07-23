@@ -460,20 +460,27 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
 uint8_t
 olsr_calculate_willingness(void)
 {
-  struct olsr_apm_info ainfo;
+ /* struct olsr_apm_info ainfo;*/
+  int node_count ncount;
 
   /* If fixed willingness */
   if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness;
 
-  if (apm_read(&ainfo) < 1)
+  if (ncount > threshold)
+	return 7;
+
+  else
+	return 0;
+
+ /* if (apm_read(&ainfo) < 1)
     return WILL_DEFAULT;
 
   apm_printinfo(&ainfo);
 
   /* If AC powered */
-  if (ainfo.ac_line_status == OLSR_AC_POWERED)
-    return 6;
+ /* if (ainfo.ac_line_status == OLSR_AC_POWERED)
+    return 6;*/
 
   /* If battery powered
    *
@@ -481,7 +488,7 @@ olsr_calculate_willingness(void)
    * 78% > juice > 26% will: 2
    * 26% > juice will: 1
    */
-  return (ainfo.battery_percentage / 26);
+  /*return (ainfo.battery_percentage / 26);*/
 }
 
 const char *

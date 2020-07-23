@@ -157,7 +157,12 @@ static INLINE const char * linkTypeToString(int type) {
 #define HYST_THRESHOLD_LOW    0.3
 #define HYST_SCALING          0.5
 
+/***********************************************************************************************
+*                    IMproved Part (Threshold)
+************************************************************************************************
+*/
 
+#define THRESHOLD           3
 
 /*
  *Willingness
