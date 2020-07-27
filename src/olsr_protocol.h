@@ -224,7 +224,7 @@ static INLINE const char * linkTypeToString(int type) {
  */
 struct hellinfo {
   uint8_t link_code;
-  uint8_t reserved;
+  uint8_t node_count;					/*node_count at a certain time */
   uint16_t size;
   uint32_t neigh_addr[1];              /* neighbor IP address(es) */
 } __attribute__ ((packed));
@@ -242,7 +242,7 @@ struct hellomsg {
 
 struct hellinfo6 {
   uint8_t link_code;
-  uint8_t reserved;
+  uint8_t node_count;					/*node_count at a certain time */
   uint16_t size;
   struct in6_addr neigh_addr[1];       /* neighbor IP address(es) */
 } __attribute__ ((packed));
