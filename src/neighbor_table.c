@@ -382,17 +382,17 @@ olsr_expire_nbr2_list(void *context)
 ****************************************************************************************
 */
 int
-node_count(struct neighbor_entry *termina)
+node_count(struct neighbor_entry *next)
 {
-int j; 
-  for (j = 0; j< HASHSIZE; j++) {
+int ncount; 
+  for (ncount= 0; ncount< HASHSIZE; ncount++) {
 	struct neighbor_entry *terminal;
-      for(terminal = neighbortable[j].next; 
-        terminal != &neighbortable[j]; 
+      for(terminal = neighbortable[ncount].next; 
+        terminal != &neighbortable[ncount]; 
         terminal = terminal->next);
 		
 	}
-return j;
+return ncount;
 }
 
 /**
@@ -408,6 +408,7 @@ olsr_print_neighbor_table(void)
   /* The whole function doesn't do anything else. */
   const int iplen = olsr_cnf->ip_version == AF_INET ? (INET_ADDRSTRLEN - 1) : (INET6_ADDRSTRLEN - 1);
   int idx;
+  int ncount;
 
   OLSR_PRINTF(1,
               "\n--- %s ------------------------------------------------ NEIGHBORS\n\n"
@@ -430,7 +431,7 @@ olsr_print_neighbor_table(void)
                     neigh->is_mpr ? "YES " : "NO  ",
                     olsr_lookup_mprs_set(&neigh->neighbor_main_addr) == NULL ? "NO  " : "YES ",
                     neigh->willingness,
-					);
+					neigh ->ncount);
       }
     }
   }
