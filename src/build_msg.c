@@ -373,7 +373,7 @@ serialize_hello4(struct hello_message *message, struct interface_olsr *ifp)
         }
 
         if (first_entry) {
-          memset(&hinfo->reserved, 0, sizeof(uint8_t));
+          memset(&hinfo->node_count, 0, sizeof(uint8_t));
           /* Set link and status for this group of neighbors (this is the first) */
           hinfo->link_code = CREATE_LINK_CODE(i, j);
           curr_size += 4;       /* HELLO type section header */
@@ -529,7 +529,7 @@ serialize_hello6(struct hello_message *message, struct interface_olsr *ifp)
         }
 
         if (first_entry) {
-          memset(&hinfo6->reserved, 0, sizeof(uint8_t));
+          memset(&hinfo6->node_count, 0, sizeof(uint8_t));
           /* Set link and status for this group of neighbors (this is the first) */
           hinfo6->link_code = CREATE_LINK_CODE(i, j);
           curr_size += 4;       /* HELLO type section header */
