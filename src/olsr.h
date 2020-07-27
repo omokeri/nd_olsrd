@@ -49,12 +49,6 @@
 #include "olsr_protocol.h"
 #include "interfaces.h"
 
-struct olsr_apm_powerinfo {
-  int ac_line_status;
-  int battery_percentage;
-  int battery_time_left;               /* Time left in minutes */
-};
-
 extern bool changes_topology;
 extern bool changes_neighborhood;
 extern bool changes_hna;
@@ -87,6 +81,8 @@ void olsr_init_willingness(void);
 
 void olsr_update_willingness(void *);
 
+uint8_t olsr_calculate_willingness(void);
+
 const char *olsr_msgtype_to_string(uint8_t);
 
 const char *olsr_link_to_string(uint8_t);
@@ -102,12 +98,6 @@ void *olsr_realloc(void *, size_t, const char *);
 int olsr_printf(int, const char *, ...) __attribute__ ((format(printf, 2, 3)));
 
 void olsr_trigger_forced_update(void *);
-
-
-int ReceiveMsgFromOLSR(unsigned char *, int );
-int apm_readinfo(struct olsr_apm_powerinfo *);
-uint8_t olsr_calculate_willingness(void);
-int node_count(struct interface_olsr *, int ncx, union olsr_ip_addr *)
 
 #endif /* _OLSR_FUNCTIONS */
 
