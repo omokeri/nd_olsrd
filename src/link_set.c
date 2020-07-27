@@ -816,7 +816,7 @@ olsr_print_link_set(void)
   const int addrsize = olsr_cnf->ip_version == AF_INET ? (INET_ADDRSTRLEN - 1) : (INET6_ADDRSTRLEN - 1);
 
   OLSR_PRINTF(0, "\n--- %s ---------------------------------------------------- LINKS\n\n", olsr_wallclock_string());
-  OLSR_PRINTF(1, "%-*s  %-6s %-14s %s\n", addrsize, "IP address", "hyst", "      LQ      ", "ETX     ", "node_count");
+  OLSR_PRINTF(1, "%-*s  %-6s %-14s %s\n", addrsize, "IP address", "hyst", "      LQ      ", "ETX     ");
 
   OLSR_FOR_ALL_LINK_ENTRIES(walker) {
 

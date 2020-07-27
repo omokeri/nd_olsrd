@@ -408,7 +408,6 @@ olsr_print_neighbor_table(void)
   /* The whole function doesn't do anything else. */
   const int iplen = olsr_cnf->ip_version == AF_INET ? (INET_ADDRSTRLEN - 1) : (INET6_ADDRSTRLEN - 1);
   int idx;
-  int ncount;
 
   OLSR_PRINTF(1,
               "\n--- %s ------------------------------------------------ NEIGHBORS\n\n"
@@ -423,15 +422,14 @@ olsr_print_neighbor_table(void)
         struct ipaddr_str buf;
         struct lqtextbuffer lqbuffer1, lqbuffer2;
 
-        OLSR_PRINTF(1, "%-*s\t%5.3f\t%s\t%s\t%s  %s  %s  %d  %d\n", iplen, olsr_ip_to_string(&buf, &neigh->neighbor_main_addr),
+        OLSR_PRINTF(1, "%-*s\t%5.3f\t%s\t%s\t%s  %s  %s  %d\n", iplen, olsr_ip_to_string(&buf, &neigh->neighbor_main_addr),
                     (double)lnk->L_link_quality,
                     get_link_entry_text(lnk, '/', &lqbuffer1),
                     get_linkcost_text(lnk->linkcost,false, &lqbuffer2),
                     neigh->status == SYM ? "YES " : "NO  ",
                     neigh->is_mpr ? "YES " : "NO  ",
                     olsr_lookup_mprs_set(&neigh->neighbor_main_addr) == NULL ? "NO  " : "YES ",
-                    neigh->willingness,
-					neigh ->ncount);
+                    neigh->willingness);
       }
     }
   }
