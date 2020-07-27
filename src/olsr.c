@@ -461,7 +461,7 @@ uint8_t
 olsr_calculate_willingness(void)
 {
  /* struct olsr_apm_info ainfo;
-  int node_count ncount;
+  int node_count ncount;*/
 
   /* If fixed willingness */
  /* if (!olsr_cnf->willingness_auto)
