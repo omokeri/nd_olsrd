@@ -461,7 +461,7 @@ uint8_t
 olsr_calculate_willingness(void)
 {
  /* struct olsr_apm_info ainfo;*/
-  struct neighbor_entry *terminal;
+ /* struct neighbor_entry *terminal;*/
   int ncount;
   
    for (ncount= 0; ncount< HASHSIZE; ncount++) {
@@ -469,8 +469,7 @@ olsr_calculate_willingness(void)
       for(terminal = neighbortable[ncount].next; 
         terminal != &neighbortable[ncount]; 
         terminal = terminal->next);
-	OLSR_PRINTF(5, "Node count of this node is ")
-		
+	OLSR_PRINTF(5, "Node count of this node is ");	
 	}
 return ncount;
 }
