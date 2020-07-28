@@ -498,8 +498,8 @@ return ncount;
 
   apm_printinfo(&ainfo);
 
-  /*If AC powered 
- *if (ainfo.ac_line_status == OLSR_AC_POWERED)
+/*  If AC powered 
+*  if (ainfo.ac_line_status == OLSR_AC_POWERED)
     return 6;
 */
 
