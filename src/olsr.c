@@ -458,7 +458,7 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
  */
 
 uint8_t
-olsr_calculate_willingness(int node_count)
+olsr_calculate_willingness(void)
 {
  /* struct olsr_apm_info ainfo;*/
 
