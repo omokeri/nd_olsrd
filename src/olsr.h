@@ -83,7 +83,7 @@ void olsr_update_willingness(void *);
 
 uint8_t olsr_calculate_willingness(void);
 
-int node_count(struct neighbor_entry *);	 /*addition by Omuwa Oyakhire */
+int node_count(struct interface_olsr *, union olsr_ip_addr *);	 /*addition by Omuwa Oyakhire */
 
 const char *olsr_msgtype_to_string(uint8_t);
 

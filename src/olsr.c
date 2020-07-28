@@ -494,9 +494,11 @@ olsr_calculate_willingness(int node_count)
 }
 
 int
-node_count(struct neighbor_entry *next)
+node_count(struct interface_olsr *, union olsr_ip_addr *)
 {
-int ncount; 
+  struct neighbor_entry *terminal;
+  int ncount;
+   
   for (ncount= 0; ncount< HASHSIZE; ncount++) {
 	struct neighbor_entry *terminal;
       for(terminal = neighbortable[ncount].next; 
