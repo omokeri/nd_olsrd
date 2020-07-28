@@ -472,9 +472,17 @@ olsr_calculate_willingness(void)
 	OLSR_PRINTF(5, "Node count of this node is ");	
 	}
 return ncount;
+
+
+/*calculate the node willingness */
+
+	if (ncount > 3)	
+		return WILL_DEFAULT;
+	
+	else
+		return WILL_NEVER;
+
 }
-
-
   /* If fixed willingness */
  /* if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness; */
