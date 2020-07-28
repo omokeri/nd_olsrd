@@ -503,7 +503,7 @@ return ncount;
    */
    
  /*return (ainfo.battery_percentage / 26);*/  
-}
+
 
 
 const char *
