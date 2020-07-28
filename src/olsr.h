@@ -83,6 +83,8 @@ void olsr_update_willingness(void *);
 
 uint8_t olsr_calculate_willingness(void);
 
+uint8_t olsr_node_count(void);					 /*addition by Omuwa Oyakhire */
+
 const char *olsr_msgtype_to_string(uint8_t);
 
 const char *olsr_link_to_string(uint8_t);

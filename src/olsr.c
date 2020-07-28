@@ -460,14 +460,14 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
 uint8_t
 olsr_calculate_willingness(void)
 {
- /* struct olsr_apm_info ainfo;
-  int node_count ncount;*/
+ /* struct olsr_apm_info ainfo;*/
+  int node_count ncount;
 
   /* If fixed willingness */
  /* if (!olsr_cnf->willingness_auto)
-    return olsr_cnf->willingness;
+    return olsr_cnf->willingness; */
 
-  if (j > THRESHOLD)
+  if (ncount > 3)
 	return 7;
 
   else
