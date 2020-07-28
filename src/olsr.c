@@ -494,7 +494,7 @@ olsr_calculate_willingness(void)
 }
 
 int
-node_count(struct interface_olsr *, union olsr_ip_addr *)
+node_count(struct interface_olsr *in)
 {
   struct neighbor_entry *terminal;
   int ncount;
