@@ -461,6 +461,19 @@ uint8_t
 olsr_calculate_willingness(void)
 {
  /* struct olsr_apm_info ainfo;*/
+  struct neighbor_entry *terminal;
+  int ncount;
+  
+   for (ncount= 0; ncount< HASHSIZE; ncount++) {
+	struct neighbor_entry *terminal;
+      for(terminal = neighbortable[ncount].next; 
+        terminal != &neighbortable[ncount]; 
+        terminal = terminal->next);
+	OLSR_PRINTF(5, "Node count of this node is ")
+		
+	}
+return ncount;
+}
 
 
   /* If fixed willingness */
@@ -490,24 +503,9 @@ olsr_calculate_willingness(void)
    * 26% > juice will: 1
    */
    
- /*return (ainfo.battery_percentage / 26);*/
+ /*return (ainfo.battery_percentage / 26);*/  
 }
 
-int
-node_count(struct interface_olsr *in)
-{
-  struct neighbor_entry *terminal;
-  int ncount;
-   
-  for (ncount= 0; ncount< HASHSIZE; ncount++) {
-	struct neighbor_entry *terminal;
-      for(terminal = neighbortable[ncount].next; 
-        terminal != &neighbortable[ncount]; 
-        terminal = terminal->next);
-		
-	}
-return ncount;
-}
 
 const char *
 olsr_msgtype_to_string(uint8_t msgtype)
