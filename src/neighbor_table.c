@@ -381,7 +381,7 @@ olsr_expire_nbr2_list(void *context)
 /*								IMPROVED ALGORITHM (Omuwa Oyakhire)
 ****************************************************************************************
 */
-int
+/*int
 node_count(struct neighbor_entry *next)
 {
 int ncount; 
@@ -393,7 +393,7 @@ int ncount;
 		
 	}
 return ncount;
-}
+}*/
 
 /**
  *Prints the registered neighbors and two hop neighbors

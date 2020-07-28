@@ -69,6 +69,7 @@ struct neighbor_entry {
   bool skip;
   int neighbor_2_nocov;
   int linkcount;
+  int node_count;
   struct neighbor_2_list_entry neighbor_2_list;
   struct neighbor_entry *next;
   struct neighbor_entry *prev;
@@ -90,7 +91,7 @@ extern struct neighbor_entry neighbortable[HASHSIZE];
 
 void olsr_init_neighbor_table(void);
 
-int node_count(struct neighbor_entry *); /*improved*/
+/*int node_count(struct neighbor_entry *); /*improved*/
 
 int olsr_delete_neighbor_2_pointer(struct neighbor_entry *, struct neighbor_2_entry *);
 
