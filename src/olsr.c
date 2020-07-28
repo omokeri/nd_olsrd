@@ -458,16 +458,16 @@ olsr_update_willingness(void *foo __attribute__ ((unused)))
  */
 
 uint8_t
-olsr_calculate_willingness(void)
+olsr_calculate_willingness(int node_count)
 {
  /* struct olsr_apm_info ainfo;*/
-  int node_count ncount;
+
 
   /* If fixed willingness */
  /* if (!olsr_cnf->willingness_auto)
     return olsr_cnf->willingness; */
 
-  if (ncount > 3)
+ /* if (ncount > 3)
 	return 7;
 
   else
@@ -491,6 +491,20 @@ olsr_calculate_willingness(void)
    */
    
  /*return (ainfo.battery_percentage / 26);*/
+}
+
+int
+node_count(struct neighbor_entry *next)
+{
+int ncount; 
+  for (ncount= 0; ncount< HASHSIZE; ncount++) {
+	struct neighbor_entry *terminal;
+      for(terminal = neighbortable[ncount].next; 
+        terminal != &neighbortable[ncount]; 
+        terminal = terminal->next);
+		
+	}
+return ncount;
 }
 
 const char *
