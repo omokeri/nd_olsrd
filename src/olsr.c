@@ -476,6 +476,10 @@ return ncount;
 
 /*calculate the node willingness */
 
+	/* If fixed willingness */
+ * if (!olsr_cnf->willingness_auto)
+    return olsr_cnf->willingness;
+
 	if (ncount > 3)	
 		return WILL_DEFAULT;
 	
