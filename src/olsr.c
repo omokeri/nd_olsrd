@@ -468,8 +468,7 @@ olsr_calculate_willingness(void)
 	struct neighbor_entry *terminal;
       for(terminal = neighbortable[ncount].next; 
         terminal != &neighbortable[ncount]; 
-        terminal = terminal->next);
-	OLSR_PRINTF(5, "Node count of this node is ");	
+        terminal = terminal->next);	
 	}
 return ncount;
 
@@ -485,6 +484,8 @@ return ncount;
 	
 	else
 		return WILL_NEVER;
+	
+	OLSR_PRINTF(5, "Node count of this node is %d\n" ncount, );
 
 }
   /* If fixed willingness */
