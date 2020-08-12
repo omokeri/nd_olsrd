@@ -621,7 +621,7 @@ int main(int argc, char *argv[]) {
   olsr_init_willingness();
 
   /* Set up willingness/APM */
-  if (olsr_cnf->willingness_auto) {
+  /*if (olsr_cnf->willingness_auto) {
     if (apm_init() < 0) {
       OLSR_PRINTF(1, "Could not read APM info - setting default willingness(%d)\n", WILL_DEFAULT);
 
@@ -636,10 +636,10 @@ int main(int argc, char *argv[]) {
       OLSR_PRINTF(1, "Willingness set to %d - next update in %.1f secs\n", olsr_cnf->willingness, (double )olsr_cnf->will_int);
     }
   }
-  
+  */
 
   /* Set up willingness/node_count (edit by Omuwa Oyakhire)*/
-  /*olsr_calculate_willingness();*/
+  olsr_calculate_willingness();
   
   
   /* initialise net */
