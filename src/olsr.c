@@ -485,7 +485,7 @@ return ncount;
 	else
 		return WILL_NEVER;
 	
-OLSR_PRINTF(5, "Node count of this node is %d\n", ncount);
+	OLSR_PRINTF(5, "Node count of this node is %d\n" ncount);
 
 }
   /* If fixed willingness */
