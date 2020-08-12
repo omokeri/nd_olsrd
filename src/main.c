@@ -635,7 +635,7 @@ int main(int argc, char *argv[]) {
 
       OLSR_PRINTF(1, "Willingness set to %d - next update in %.1f secs\n", olsr_cnf->willingness, (double )olsr_cnf->will_int);
     }
-  }*/
+  }*
 
   /* Set up willingness/node_count (edit by Omuwa Oyakhire)*/
  /* olsr_calculate_willingness();*/
