@@ -414,7 +414,7 @@ olsr_print_neighbor_table(void)
 
               "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will     node_count\n", olsr_wallclock_string(),
 
-              "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will \n", olsr_wallclock_string(),
+          
 
               iplen, "IP address");
 
