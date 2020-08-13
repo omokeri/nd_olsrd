@@ -411,11 +411,11 @@ olsr_print_neighbor_table(void)
 
   OLSR_PRINTF(1,
               "\n--- %s ------------------------------------------------ NEIGHBORS\n\n"
-<<<<<<< HEAD
+
               "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will     node_count\n", olsr_wallclock_string(),
-=======
+
               "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will \n", olsr_wallclock_string(),
->>>>>>> parent of 97a1ad18... Update neighbor_table.c
+
               iplen, "IP address");
 
   for (idx = 0; idx < HASHSIZE; idx++) {
