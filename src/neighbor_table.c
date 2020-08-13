@@ -411,11 +411,7 @@ olsr_print_neighbor_table(void)
 
   OLSR_PRINTF(1,
               "\n--- %s ------------------------------------------------ NEIGHBORS\n\n"
-
-              "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will     node_count\n", olsr_wallclock_string(),
-
-          
-
+              "%*s\tHyst\tLQ\tETX\tSYM   MPR   MPRS  will node_count\n", olsr_wallclock_string(),
               iplen, "IP address");
 
   for (idx = 0; idx < HASHSIZE; idx++) {
