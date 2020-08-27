@@ -480,10 +480,10 @@ return ncount;
 		return olsr_cnf->willingness;
 
 	if (ncount > 3)	
-		return WILL_DEFAULT;
+		return 7;
 	
 	else
-		return WILL_NEVER;
+		return 1;
 	
 	OLSR_PRINTF(5, "Node count of this node is %d\n",ncount);
 
